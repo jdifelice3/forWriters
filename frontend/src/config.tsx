@@ -22,7 +22,7 @@ export function getWebsiteDomain() {
 
 export const SuperTokensConfig = {
     appInfo: {
-        appName: "SuperTokens Demo App",
+        appName: "forWriters",
         apiDomain: getApiDomain(),
         websiteDomain: getWebsiteDomain(),
         apiBasePath: "/auth",
@@ -35,7 +35,7 @@ export const SuperTokensConfig = {
     ],
     getRedirectionURL: async (context: any) => {
         if (context.action === "SUCCESS") {
-            return "/loginSuccess";
+            return "/dashboard";
         }
         return undefined;
     },

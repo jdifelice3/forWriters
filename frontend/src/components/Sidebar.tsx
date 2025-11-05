@@ -1,15 +1,27 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme, GlobalStyles } from "@mui/material";
 import { ProSidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import AccessAlarmsIcon from "@mui/icons-material/AccessAlarms";
-import CottageOutlinedIcon from "@mui/icons-material/CottageOutlined";
+import { useSessionContext, signOut } from "supertokens-auth-react/recipe/session";
+//import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import KeyboardIcon from '@mui/icons-material/Keyboard';
+import GroupIcon from '@mui/icons-material/Group';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import LogoutIcon from '@mui/icons-material/Logout';
+import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 
 function Sidebar() {
+  const session = useSessionContext();
   const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname;
+
+  const logoutClicked = async() => {
+      await signOut();
+      navigate("/auth");
+  }
 
   return (
     <>
@@ -35,42 +47,83 @@ function Sidebar() {
       <ProSidebar>
         <Menu iconShape="square">
           {/* Home */}
-          <MenuItem
+          {/* <MenuItem
             icon={<HomeOutlinedIcon />}
             active={pathname === "/"}
             onClick={() => navigate("/")}
           >
             Home
-          </MenuItem>
-
-          {/* Dashboard */}
+          </MenuItem> */}
+           {/* Dashboard */}
           <MenuItem
-            icon={<AccessAlarmsIcon />}
+            icon={<DashboardIcon />}
             active={pathname.startsWith("/dashboard")}
             onClick={() => navigate("/dashboard")}
           >
             Dashboard
           </MenuItem>
-
-          {/* Components group */}
-          <SubMenu
-            title="Components"
-            icon={<CottageOutlinedIcon />}
-            defaultOpen={pathname.startsWith("/component")}
-          >
-            <MenuItem
-              active={pathname === "/component1"}
-              onClick={() => navigate("/component1")}
+          {/* Writing Groups */}
+            <SubMenu
+              title="Writing Groups"
+              icon={<GroupIcon />}
+              defaultOpen={pathname.startsWith("/component")}
             >
-              Component 1
+            <MenuItem
+              active={pathname === "/writersgroup"}
+              onClick={() => navigate("/writersgroup")}
+            >
+              Bucks County Writers Group
+            </MenuItem>
+            <img className="separator-line" src="/assets/images/separator-line.svg" alt="separator" />
+            <MenuItem
+              active={pathname === "/searchgroups"}
+              onClick={() => navigate("/searchgroups")}
+            >
+              Search Groups
             </MenuItem>
             <MenuItem
-              active={pathname === "/component2"}
-              onClick={() => navigate("/component2")}
+              active={pathname === "/managegroup"}
+              onClick={() => navigate("/managegroup")}
             >
-              Component 2
+              Manage a Group
             </MenuItem>
           </SubMenu>
+          <MenuItem
+            icon={<KeyboardIcon />}
+            active={pathname.startsWith("/writers")}
+            onClick={() => navigate("/writers")}
+          >
+            Writers
+          </MenuItem>
+          <MenuItem
+            icon={<MenuBookIcon />}
+            active={pathname.startsWith("/readers")}
+            onClick={() => navigate("/readers")}
+          >
+            Readers
+          </MenuItem>
+          <img className="separator-line" src="/assets/images/separator-line.svg" alt="separator" />
+          <MenuItem
+            icon={<AccountBoxIcon />}
+            active={pathname.startsWith("/profile")}
+            onClick={() => navigate("/profile")}
+          >  
+            Profile
+          </MenuItem>
+          <MenuItem
+            icon={<CollectionsBookmarkIcon />}
+            active={pathname.startsWith("/works")}
+            onClick={() => navigate("/works")}
+          >  
+            Your Work
+          </MenuItem>
+          <MenuItem
+            icon={<LogoutIcon />}
+            active={pathname.startsWith("/signout")}
+            onClick={() => logoutClicked()}
+          >  
+            Sign Out
+          </MenuItem>
         </Menu>
       </ProSidebar>
     </>

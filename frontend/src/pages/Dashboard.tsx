@@ -1,30 +1,47 @@
 // import { useSessionContext, signOut } from "supertokens-auth-react/recipe/session";
 // import { getApiDomain } from "../config";
 // import { useNavigate } from "react-router-dom";
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import GroupIcon from '@mui/icons-material/Group';
+
 
 export default function Dashboard() {
-    // const navigate = useNavigate();
-    // const sessionContext = useSessionContext();
-
-    // async function callAPIClicked() {
-    //     try {
-    //         const response = await fetch(getApiDomain() + "/sessioninfo");
-    //         const data = await response.json();
-    //         window.alert("Session Information:\n" + JSON.stringify(data, null, 2));
-    //     } catch (err: unknown) {
-    //         window.alert("Error calling API: " + err);
-    //     }
-    // }
-
-    // async function logoutClicked() {
-    //     await signOut();
-    //     navigate("/");
-    // }
 
     return (
         <>
-            <div id="main-container" className="main-container"  style={{width: 300}}>
-            </div>
+            <section className="main-container-fw">
+                <div className="inner-content-fw">
+                    <strong>Your Writing Groups</strong>
+                {/* </div>
+                <div> */}
+                    <List dense={false}>
+                        <ListItem component="a" href="/writersgroup">
+                            <ListItemIcon>
+                                <GroupIcon />
+                            </ListItemIcon>
+                                <ListItemText
+                                    primary="Bucks County Writers Group"
+                                    secondary='Doylestown, PA'
+                                />
+                        </ListItem>
+                    </List> 
+                </div>
+            </section>
+            <div>&nbsp;</div>
+            <section className="main-container-fw">
+                <div className="inner-content-fw">
+                    <strong>Writers You Like</strong>
+                </div>
+            </section>
+            <div>&nbsp;</div>
+            <section className="main-container-fw">
+                <div className="inner-content-fw">
+                    <strong>Readers You Like</strong>
+                </div>
+            </section>
         </>
     );
 }

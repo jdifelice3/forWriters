@@ -9,21 +9,21 @@ export default function Home() {
         return null;
     }
 
-    // if (session.doesSessionExist){
-    //     console.log('session exists');
-    //     navigate("/dashboard");
-    // }
+    if(!session.doesSessionExist){
+        navigate("/auth");
+    }
     async function logoutClicked() {
         await signOut();
         navigate("/");
     }
     return (
         <>
-            <section className="main-container">
-                <div className="inner-content">
-                    <h1>
+            <section className="main-container"  style={{ flex: 1, padding: "1rem" }}>
+                <div className="inner-content" style={{ width: "400px", margin: "0 auto" }}>
+                    {/* <h1 style={{fontFamily: "Thebarstaindemo"}}>
                         <strong>forWriters</strong>
-                    </h1>
+                    </h1> */}
+                    <h2>Welcome to forWriters</h2>
                     <div>
                         {session.doesSessionExist ? (
                             <p>

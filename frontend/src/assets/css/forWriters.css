@@ -1,0 +1,37 @@
+@font-face {
+  font-family: 'Fredericka';
+  src: url("/assets/fonts/FrederickatheGreat-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Flowmery-Regular';
+  src: url("/assets/fonts/Flowmery-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Thebarstaindemo';
+  src: url("/assets/fonts/ThebarstaindemoExtrude-j9aY7.otf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.inner-content-fw {
+  padding-bottom: 48px;
+  padding-right: 48px;
+  padding-left:48px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-container-fw {
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.16);
+    width: min(435px, calc(100% - 24px));
+    border-radius: 16px;
+    background-color: white;
+}
