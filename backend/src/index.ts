@@ -1,18 +1,22 @@
+import "dotenv/config";
+import { PrismaClient } from "@prisma/client";
 import express from "express";
 import cors from "cors";
 import supertokens from "supertokens-node";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
 import { middleware, errorHandler, SessionRequest } from "supertokens-node/framework/express";
-import { getWebsiteDomain, SuperTokensConfig } from "./config.js";
+import { SuperTokensConfig } from "../config.js";
 import Multitenancy from "supertokens-node/recipe/multitenancy";
+import { getUsers } from "./db.js";
 
 supertokens.init(SuperTokensConfig);
 
 const app = express();
 
+console.log('DATABASE_URL=',process.env.DATABASE_URL);
 app.use(
     cors({
-        origin: getWebsiteDomain(),
+        origin: `${process.env.WEB_HOST}:${process.env.WEB_PORT}`,
         allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
         methods: ["GET", "PUT", "POST", "DELETE"],
         credentials: true,
@@ -26,6 +30,20 @@ app.use(middleware());
 // having a session with SuperTokens
 app.get("/hello", async (_req, res) => {
     res.send("hello");
+});
+
+app.get("/users", async (_req, res) => {
+    try{
+        const prisma = new PrismaClient();
+        const users = await prisma.users.findMany();
+        //let users = await getUsers();
+        res.json(users);
+    } catch (err) {
+        console.error("DB error:", err);
+        res.status(500).json({ error: "Database error",
+                               stack: JSON.stringify(err)
+         });
+    }
 });
 
 // An example API that requires session verification
@@ -49,4 +67,4 @@ app.get("/tenants", async (_req, res) => {
 // returns 401 to the client.
 app.use(errorHandler());
 
-app.listen(3001, () => console.log(`API Server listening on port 3001`));
+app.listen(process.env.API_PORT, () => console.log(`API Server listening on port ${process.env.API_PORT}`));

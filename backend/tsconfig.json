@@ -25,6 +25,6 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true
     },
-    "include": ["./*.ts"],
+    "include": ["./*.ts", "src/index.ts"],
     "exclude": ["node_modules"]
 }

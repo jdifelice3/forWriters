@@ -1,0 +1,173 @@
+/* CONNECTIVITY */
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+/* Enums */
+
+
+enum EventType {
+  READING
+}
+
+enum Genre {
+  FANTASY
+  HISTORICAL
+  HORROR
+  LITERARY
+  MYSTERY
+  POEM
+  ROMANCE
+  SCIENCEFICTION
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  READER
+}
+
+enum UrlOwnerType {
+  USER
+  WRITINGGROUP
+}
+
+enum UrlType {
+  AUDIO
+  IMAGE
+  LINKEDIN
+  MEETUP
+  SUBSTACK
+  WEBSITE
+  YOUTUBE
+}
+
+enum WorkType {
+  FLASHFICTION
+  NOVEL
+  NOVELLA
+  NOVELETTE
+  PLAY
+  SCREENPLAY
+  SERIALIZEDFICTION
+  SHORTSTORY
+}
+
+
+/* MODELS */
+
+
+model Events {
+  id              String                  @id @default(cuid())
+  name            String
+  eventType       EventType               @default(READING)
+  createdAt       DateTime                @default(now())
+  createdUserId   String
+  eventDate       String
+  eventTime       String
+  eventLocation   String
+  description     String
+
+  createdUser     Users                   @relation(fields: [createdUserId], references: [id])
+  eventsUsers     EventsUsers[]
+}
+
+model EventsUsers {
+  id              String                  @id @default(cuid())
+  eventId         String  
+  userId          String
+  isAdmin         Boolean                 @default(false)
+  joinedAt        DateTime                @default(now())
+
+  events          Events                  @relation(fields:[eventId], references:[id])
+  users           Users                   @relation(fields:[userId], references:[id])
+  @@unique([eventId, userId])
+}
+
+model User {
+  id        String                        @id @default(cuid())
+  email     String                        @unique
+  role      Role                          @default(READER)
+  stUserId  String                        @unique
+  createdAt DateTime                      @default(now())
+}
+
+model Users {
+  id             String                   @id @default(cuid())
+  authtoken      String
+  email          String                   @unique
+  role           Role                     @default(EDITOR)
+  username       String                   @unique
+  createdAt      DateTime                 @default(now())
+
+  writingGroups  WritingGroupsUsers[]
+  works          Works[]
+  events         Events[]
+  eventsUsers    EventsUsers[]
+  userProfiles   UserProfiles?
+}
+
+model UserProfiles {
+  id              String                  @id @default(cuid())
+  userId          String                  @unique
+  firstName       String
+  lastName        String
+  phone           String?
+  
+  user            Users                   @relation(fields:[userId], references:[id])
+}
+
+model Urls {
+  id               String                 @id @default(cuid())
+  url              String
+  urlOwnerId       String                 
+  urlOwnerType     UrlOwnerType           @default(USER)
+  urlType          UrlType                @default(WEBSITE)
+  createdAt DateTime                      @default(now())
+}
+
+model Works {
+  id                   String             @id @default(cuid())
+  createdAt            DateTime           @default(now())
+  userId               String        
+  workType             WorkType
+  title                String
+  description          String?
+  wordCount            Int?
+  pageCount            Int?
+  genre                Genre
+  fileName             String?
+  manuscriptIsVisible  Boolean          @default(false)
+
+  user                 Users            @relation(fields: [userId], references: [id])
+}
+
+model WritingGroups {
+  id              String                  @id @default(cuid())
+  name            String  
+  city            String
+  state           String
+
+  createdAt DateTime @default(now())
+  writingGroupsUsers WritingGroupsUsers[]
+}
+
+model WritingGroupsUsers {
+  id              String                  @id @default(cuid())
+  writingGroupId  String  
+  userId          String
+  isAdmin         Boolean                 @default(false)
+  joinedAt        DateTime                @default(now())
+  
+  writingGroup    WritingGroups           @relation(fields:[writingGroupId], references:[id])
+  user            Users                   @relation(fields:[userId], references:[id])
+  @@unique([writingGroupId, userId])
+}

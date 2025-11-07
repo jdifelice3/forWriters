@@ -6,15 +6,19 @@
     "description": "",
     "main": "dist/index.js",
     "scripts": {
-        "start": "npx vite-node ./index.ts",
+        "start": "npx vite-node ./src/index.ts",
         "lint": "eslint .",
         "build": "tsc"
     },
     "dependencies": {
+        "@prisma/client": "^6.19.0",
+        "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
+        "dotenv": "^17.2.3",
         "express": "^4.21.2",
-        "supertokens-node": "latest",
-        "typescript": "^4.7.2"
+        "helmet": "^8.1.0",
+        "prisma": "^6.19.0",
+        "supertokens-node": "latest"
     },
     "devDependencies": {
         "@eslint/js": "^9.16.0",
@@ -23,6 +27,7 @@
         "@types/node": "^16.11.38",
         "eslint": "^9.16.0",
         "globals": "^15.13.0",
+        "typescript": "^5.9.3",
         "typescript-eslint": "^8.18.0",
         "vite-node": "^2.1.8"
     },

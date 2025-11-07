@@ -18,8 +18,6 @@ export function getWebsiteDomain() {
     return websiteUrl;
 }
 
-
-
 export const SuperTokensConfig = {
     appInfo: {
         appName: "forWriters",
@@ -35,7 +33,11 @@ export const SuperTokensConfig = {
     ],
     getRedirectionURL: async (context: any) => {
         if (context.action === "SUCCESS") {
+            console.log(await Session.getUserId());
             return "/dashboard";
+        }
+        if (context.createdNewUser){
+            // store userId in database
         }
         return undefined;
     },

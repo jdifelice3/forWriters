@@ -2,7 +2,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme, GlobalStyles } from "@mui/material";
 import { ProSidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { useSessionContext, signOut } from "supertokens-auth-react/recipe/session";
-//import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import GroupIcon from '@mui/icons-material/Group';
@@ -46,14 +45,6 @@ function Sidebar() {
 
       <ProSidebar>
         <Menu iconShape="square">
-          {/* Home */}
-          {/* <MenuItem
-            icon={<HomeOutlinedIcon />}
-            active={pathname === "/"}
-            onClick={() => navigate("/")}
-          >
-            Home
-          </MenuItem> */}
            {/* Dashboard */}
           <MenuItem
             icon={<DashboardIcon />}
