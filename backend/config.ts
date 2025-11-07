@@ -4,6 +4,8 @@ import Session from "supertokens-node/recipe/session";
 import Dashboard from "supertokens-node/recipe/dashboard";
 import UserRoles from "supertokens-node/recipe/userroles";
 import type { TypeInput } from "supertokens-node/types";
+import { createUser } from "./src/db";
+import { Role } from "@prisma/client";
 
 export const SuperTokensConfig: TypeInput = {
     supertokens: {
@@ -18,7 +20,36 @@ export const SuperTokensConfig: TypeInput = {
         websiteBasePath: "/auth",
     },
     recipeList: [
-        EmailPassword.init(),
+        EmailPassword.init({
+            override: {
+                apis: (originalImplementation) => ({
+                ...originalImplementation,
+
+                    // Override the default signUpPOST
+                    async signUpPOST(input) {
+                        if (!originalImplementation.signUpPOST) {
+                            console.log("signUpPOST not implemented");
+                            throw new Error("signUpPOST not implemented");
+                        }
+
+                        const response = await originalImplementation.signUpPOST(input);
+
+                        if (response.status === "OK") {
+                            const { user } = response;
+                            console.log("New user signed up:", user);
+                            await createUser(user.id, user.emails[0],Role.ADMIN );
+                            // Create DB record here
+                            //   await createUserProfileInDB({
+                            //     supertokensId: user.id,
+                            //     email: user.email,
+                            //   });
+                        }
+
+                        return response;
+                    },
+                }),
+            },
+        }),
         Dashboard.init(),
         UserRoles.init(),
         Session.init()

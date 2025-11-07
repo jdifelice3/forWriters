@@ -6,9 +6,18 @@ import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import GroupIcon from '@mui/icons-material/Group';
-
+import { useEffect } from 'react';
+import Session from "supertokens-auth-react/recipe/session";
 
 export default function Dashboard() {
+    useEffect(() => {
+        const fetchUserId = async() => {
+            const userId = await Session.getUserId();
+            //create the user in the db
+            console.log("Logged in as user:", userId);
+        }
+        fetchUserId();
+    }, []);
 
     return (
         <>

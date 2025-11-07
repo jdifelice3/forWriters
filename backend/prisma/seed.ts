@@ -10,7 +10,7 @@ const main = async() => {
   john = await prisma.users.create({
     data: {
       email: 'johndifelice@protonmail.com',
-      authtoken: 'ac0222c1-4a99-4991-a167-f5f4b2c203fa',
+      superTokensId: 'ac0222c1-4a99-4991-a167-f5f4b2c203fa',
       role: Role.ADMIN,
       username: 'johndifelice'
     }
@@ -27,7 +27,7 @@ const main = async() => {
   adam = await prisma.users.create({
     data: {
       email: 'newyoutopia@gmail.com',
-      authtoken: 'none',
+      superTokensId: 'none',
       role: Role.EDITOR,
       username: 'adamnewton'
     }

@@ -7,7 +7,12 @@ import { verifySession } from "supertokens-node/recipe/session/framework/express
 import { middleware, errorHandler, SessionRequest } from "supertokens-node/framework/express";
 import { SuperTokensConfig } from "../config.js";
 import Multitenancy from "supertokens-node/recipe/multitenancy";
-import { getUsers } from "./db.js";
+import {deleteUser} from "supertokens-node";
+
+async function deleteUserForId() {
+    let userId = "..." // get the user ID
+    await deleteUser(userId); // this will succeed even if the userId didn't exist.
+}
 
 supertokens.init(SuperTokensConfig);
 
@@ -62,6 +67,18 @@ app.get("/tenants", async (_req, res) => {
     const tenants = await Multitenancy.listAllTenants();
     res.send(tenants);
 });
+
+app.post("/user", async (_req, res) => {
+
+});
+
+app.delete("/user/:id", async(_req, res) => {
+    let userId = _req.params.id;
+    await deleteUser(userId); // this will succeed even if the userId didn't exist.
+
+    res.json({"message": `deleted userId ${userId}`});
+});
+
 
 // In case of session related errors, this error handler
 // returns 401 to the client.

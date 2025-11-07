@@ -1,4 +1,3 @@
-
 "use client";
 
 import EmailPassword from "supertokens-auth-react/recipe/emailpassword";
@@ -33,7 +32,6 @@ export const SuperTokensConfig = {
     ],
     getRedirectionURL: async (context: any) => {
         if (context.action === "SUCCESS") {
-            console.log(await Session.getUserId());
             return "/dashboard";
         }
         if (context.createdNewUser){

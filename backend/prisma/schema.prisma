@@ -102,11 +102,12 @@ model User {
 
 model Users {
   id             String                   @id @default(cuid())
-  authtoken      String
+  superTokensId  String
   email          String                   @unique
   role           Role                     @default(EDITOR)
   username       String                   @unique
   createdAt      DateTime                 @default(now())
+  bio            String?
 
   writingGroups  WritingGroupsUsers[]
   works          Works[]
