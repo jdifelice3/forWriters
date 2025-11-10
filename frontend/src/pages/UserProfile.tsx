@@ -14,6 +14,9 @@ import FileUploadField from "./FileUploadField";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { updateUserProfile, getUserProfile } from "../services/srvUserProfiles";
+import { useEffect } from 'react';
+import Session from "supertokens-auth-react/recipe/session";
 
 // ----------------------
 // 🔒 Zod Schema
@@ -22,7 +25,7 @@ const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  bio: z.string().max(250, "Bio must be under 250 characters").optional(),
+  bio: z.string().max(500, "Bio must be under 500 characters").optional(),
   title: z.string().optional(),
   description: z.string().optional(),
   avatar: z
@@ -33,13 +36,32 @@ const profileSchema = z.object({
 
 type ProfileFormInputs = z.infer<typeof profileSchema>;
 
-const Profile = () => {
+const UserProfile = () => {
+
+  useEffect(() => {
+          const fetchUserId = async() => {
+              const authId = await Session.getUserId();
+              console.log('authId', authId);
+              const user = await getUserProfile(authId);
+              console.log('user', user);
+              console.log('user profile', user.userProfiles);
+              console.log('user properties:', user.userProfiles.firstName, user.userProfiles.lastName);
+              reset({ 
+                firstName: user.userProfiles.firstName, 
+                lastName: user.userProfiles.lastName,
+                email: user.email,
+                bio: user.userProfiles.bio
+              });
+          }
+          fetchUserId();
+      }, []);
+
   const [preview, setPreview] = useState<string | null>(null);
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }, reset,
   } = useForm<ProfileFormInputs>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -53,9 +75,19 @@ const Profile = () => {
     },
   });
 
-  const onSubmit = (data: ProfileFormInputs) => {
-    console.log("✅ Profile updated:", data);
-    alert("Profile saved successfully!");
+  const onSubmit = async(data: ProfileFormInputs) => {
+    console.log('in UserProfile.onSubmit')
+    const userId: string = 'cmhpr8n1v0003a8ukzsqxed6e';
+    const firstName: string = data.firstName;
+    const lastName: string = data.lastName;
+    const bio: string = data.bio ? data.bio : '';
+    const results: Response = await updateUserProfile(userId, firstName, lastName, bio);
+    if(results.status === 200){
+      console.log("✅ Profile updated:", data);
+      alert("Profile saved successfully!");
+    } else if (results.status === 500){
+      alert(results.json);
+    }
   };
 
   return (
@@ -128,6 +160,7 @@ const Profile = () => {
               error={!!errors.email}
               helperText={errors.email?.message}
               fullWidth
+              disabled
             />
           )}
         />
@@ -143,7 +176,7 @@ const Profile = () => {
               helperText={errors.bio?.message}
               fullWidth
               multiline
-              rows={3}
+              rows={7}
             />
           )}
         />
@@ -190,4 +223,4 @@ const Profile = () => {
   );
 }
 
-export default Profile;
+export default UserProfile;

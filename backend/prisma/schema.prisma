@@ -29,6 +29,11 @@ enum Genre {
   SCIENCEFICTION
 }
 
+enum FileType {
+  DOCX
+  PDF
+}
+
 enum Role {
   ADMIN
   EDITOR
@@ -65,6 +70,19 @@ enum WorkType {
 /* MODELS */
 
 
+model AppFiles {
+  id          String    @id @default(cuid())
+  userId      String    
+  title       String
+  description String?
+  filename    String
+  mimetype    FileType  @default(PDF)   
+  url         String
+  uploadedAt  DateTime  @default(now())
+
+  user        Users     @relation(fields: [userId], references: [id])
+}
+
 model Events {
   id              String                  @id @default(cuid())
   name            String
@@ -92,36 +110,29 @@ model EventsUsers {
   @@unique([eventId, userId])
 }
 
-model User {
-  id        String                        @id @default(cuid())
-  email     String                        @unique
-  role      Role                          @default(READER)
-  stUserId  String                        @unique
-  createdAt DateTime                      @default(now())
-}
-
 model Users {
   id             String                   @id @default(cuid())
-  superTokensId  String
+  superTokensId  String                   @unique
   email          String                   @unique
   role           Role                     @default(EDITOR)
   username       String                   @unique
   createdAt      DateTime                 @default(now())
-  bio            String?
 
   writingGroups  WritingGroupsUsers[]
   works          Works[]
   events         Events[]
   eventsUsers    EventsUsers[]
   userProfiles   UserProfiles?
+  appFiles        AppFiles[]
 }
 
 model UserProfiles {
   id              String                  @id @default(cuid())
   userId          String                  @unique
-  firstName       String
-  lastName        String
+  firstName       String?
+  lastName        String?
   phone           String?
+  bio             String?
   
   user            Users                   @relation(fields:[userId], references:[id])
 }

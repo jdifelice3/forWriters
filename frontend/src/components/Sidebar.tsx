@@ -96,18 +96,29 @@ function Sidebar() {
           <img className="separator-line" src="/assets/images/separator-line.svg" alt="separator" />
           <MenuItem
             icon={<AccountBoxIcon />}
-            active={pathname.startsWith("/profile")}
-            onClick={() => navigate("/profile")}
+            active={pathname.startsWith("/userprofile")}
+            onClick={() => navigate("/userprofile")}
           >  
             Profile
           </MenuItem>
-          <MenuItem
-            icon={<CollectionsBookmarkIcon />}
-            active={pathname.startsWith("/works")}
-            onClick={() => navigate("/works")}
-          >  
-            Your Work
-          </MenuItem>
+          <SubMenu
+              title="Documents"
+              icon={<GroupIcon />}
+              defaultOpen={pathname.startsWith("/component")}
+            >
+            <MenuItem
+              active={pathname === "/filemanager"}
+              onClick={() => navigate("/filemanager")}
+            >
+              Manuscripts
+            </MenuItem>
+            <MenuItem
+              active={pathname === "/filemanager"}
+              onClick={() => navigate("/filemanager")}
+            >
+              Feedback
+            </MenuItem>
+          </SubMenu>
           <MenuItem
             icon={<LogoutIcon />}
             active={pathname.startsWith("/signout")}

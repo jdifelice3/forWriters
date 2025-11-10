@@ -4,7 +4,8 @@ import { useSessionContext } from "supertokens-auth-react/recipe/session";
 import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
 import { PreBuiltUIList, ComponentWrapper } from "../config";
 import Dashboard from "../pages/Dashboard";
-import Profile from "../pages/Profile";
+import UserProfile from "../pages/UserProfile";
+import FileManager from "../pages/FileManager";
 import Sidebar from "../components/Sidebar";
 
 const Layout = () => {
@@ -86,7 +87,8 @@ const Layout = () => {
               <Route path="/writers" element={<div>Writers</div>} />
               <Route path="/signout" element={<div><h1>Sign Out</h1></div>} />
               <Route path="/works" element={<div><h1>Your Work</h1></div>} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/userprofile" element={<UserProfile />} />
+              <Route path="/filemanager" element={<FileManager />} />
             </Routes>
           </ComponentWrapper>
         </main>

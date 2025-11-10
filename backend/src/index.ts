@@ -1,24 +1,23 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { verifySession } from "supertokens-node/recipe/session/framework/express";
+import { SessionRequest } from "supertokens-node/framework/express";
 import express from "express";
 import cors from "cors";
 import supertokens from "supertokens-node";
-import { verifySession } from "supertokens-node/recipe/session/framework/express";
-import { middleware, errorHandler, SessionRequest } from "supertokens-node/framework/express";
+import { middleware, errorHandler } from "supertokens-node/framework/express";
 import { SuperTokensConfig } from "../config.js";
-import Multitenancy from "supertokens-node/recipe/multitenancy";
-import {deleteUser} from "supertokens-node";
-
-async function deleteUserForId() {
-    let userId = "..." // get the user ID
-    await deleteUser(userId); // this will succeed even if the userId didn't exist.
-}
+import bodyParser from "body-parser";
+import userRoutes from './routes/userRoutes.js';
+import userProfileRoutes from './routes/userProfileRoutes.js';
+import fileRoutes from './routes/fileRoutes.js';
 
 supertokens.init(SuperTokensConfig);
 
 const app = express();
+console.log(`${process.env.WEB_HOST}:${process.env.WEB_PORT}`);
 
-console.log('DATABASE_URL=',process.env.DATABASE_URL);
+app.use(bodyParser.json());
+
 app.use(
     cors({
         origin: `${process.env.WEB_HOST}:${process.env.WEB_PORT}`,
@@ -28,8 +27,17 @@ app.use(
     })
 );
 
-// This exposes all the APIs from SuperTokens to the client.
+app.use('/api/users', userRoutes); 
+app.use('/api/userProfile', userProfileRoutes);
+app.use('/api/files', fileRoutes);
+
 app.use(middleware());
+
+// app.use((req, res, next) => {
+//     console.log(`Received request: ${req.method} ${req.url}`);
+//     console.log('Origin:', req.headers.origin);
+//     next();
+// });
 
 // This endpoint can be accessed regardless of
 // having a session with SuperTokens
@@ -37,22 +45,7 @@ app.get("/hello", async (_req, res) => {
     res.send("hello");
 });
 
-app.get("/users", async (_req, res) => {
-    try{
-        const prisma = new PrismaClient();
-        const users = await prisma.users.findMany();
-        //let users = await getUsers();
-        res.json(users);
-    } catch (err) {
-        console.error("DB error:", err);
-        res.status(500).json({ error: "Database error",
-                               stack: JSON.stringify(err)
-         });
-    }
-});
-
-// An example API that requires session verification
-app.get("/sessioninfo", verifySession(), async (req: SessionRequest, res) => {
+app.get("/api/sessioninfo", verifySession(), async (req: SessionRequest, res) => {
     const session = req.session;
     res.send({
         sessionHandle: session!.getHandle(),
@@ -61,23 +54,17 @@ app.get("/sessioninfo", verifySession(), async (req: SessionRequest, res) => {
     });
 });
 
-// This API is used by the frontend to create the tenants drop down when the app loads.
-// Depending on your UX, you can remove this API.
-app.get("/tenants", async (_req, res) => {
-    const tenants = await Multitenancy.listAllTenants();
-    res.send(tenants);
-});
+// backend: /api/me
+// app.get("/api/me", async (req, res) => {
+//   const session = await Session.getSession(req, res);
+//   const authId: string = session.getUserId();
+//   const user: any = await prisma.users.findUnique({ 
+//         where: { superTokensId: authId } 
+//     });
+//   res.json({ id: user.id, email: user.email });
+// });
 
-app.post("/user", async (_req, res) => {
 
-});
-
-app.delete("/user/:id", async(_req, res) => {
-    let userId = _req.params.id;
-    await deleteUser(userId); // this will succeed even if the userId didn't exist.
-
-    res.json({"message": `deleted userId ${userId}`});
-});
 
 
 // In case of session related errors, this error handler
