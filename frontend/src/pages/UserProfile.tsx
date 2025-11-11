@@ -37,26 +37,24 @@ const profileSchema = z.object({
 type ProfileFormInputs = z.infer<typeof profileSchema>;
 
 const UserProfile = () => {
+  const [userId, setUserId] = useState<string>("");
+  const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-          const fetchUserId = async() => {
-              const authId = await Session.getUserId();
-              console.log('authId', authId);
-              const user = await getUserProfile(authId);
-              console.log('user', user);
-              console.log('user profile', user.userProfiles);
-              console.log('user properties:', user.userProfiles.firstName, user.userProfiles.lastName);
-              reset({ 
-                firstName: user.userProfiles.firstName, 
-                lastName: user.userProfiles.lastName,
-                email: user.email,
-                bio: user.userProfiles.bio
-              });
-          }
-          fetchUserId();
-      }, []);
-
-  const [preview, setPreview] = useState<string | null>(null);
+    const fetchUserId = async() => {
+      const authId = await Session.getUserId();
+      console.log('authId', authId);
+      const user = await getUserProfile(authId);
+      setUserId(user.id);
+      reset({ 
+        firstName: user.userProfiles.firstName, 
+        lastName: user.userProfiles.lastName,
+        email: user.email,
+        bio: user.userProfiles.bio
+      });
+    }
+    fetchUserId();
+  }, []);
 
   const {
     control,
@@ -77,7 +75,7 @@ const UserProfile = () => {
 
   const onSubmit = async(data: ProfileFormInputs) => {
     console.log('in UserProfile.onSubmit')
-    const userId: string = 'cmhpr8n1v0003a8ukzsqxed6e';
+    //const userId: string = userId;
     const firstName: string = data.firstName;
     const lastName: string = data.lastName;
     const bio: string = data.bio ? data.bio : '';

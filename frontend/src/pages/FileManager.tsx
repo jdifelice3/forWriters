@@ -29,6 +29,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import PreviewIcon from "@mui/icons-material/Preview";
+import pdfIcon from '../assets/icons/icons8-pdf-48.png';
+import wordIcon from '../assets/icons/icons8-word-file-48.png';
 
 interface AppFile {
   id: string;
@@ -52,6 +54,7 @@ export default function FileManager() {
   const [previewFile, setPreviewFile] = useState<AppFile | null>(null);
 
   const filesUrl = `${process.env.VITE_API_HOST}:${process.env.VITE_API_PORT}/api/files`;
+  const pdfsUrl = `${process.env.VITE_API_HOST}:${process.env.VITE_API_PORT}/api/pdfs`;
   // 🧩 Fetch uploaded files
   useEffect(() => {
     (async () => {
@@ -107,12 +110,13 @@ export default function FileManager() {
         console.error(err);
         alert("Failed to upload file");
     } finally {
-          setLoading(false);
+        setLoading(false);
     }
   };
 
   // 🧩 Edit metadata
   const handleEdit = (file: AppFile) => {
+    console.log(file.id);
     setEditFile(file);
     setEditTitle(file.title);
     setEditDescription(file.description || "");
@@ -121,11 +125,13 @@ export default function FileManager() {
   const handleSaveEdit = async () => {
     if (!editFile) return;
     try {
-      const res = await fetch(`${filesUrl}/${editFile.id}`, {
+      console.log(`In handleSaveEdit. editFile.id: ${editFile.id}`);
+      const res = await fetch(`${filesUrl}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
+          id: editFile.id,
           title: editTitle,
           description: editDescription,
         }),
@@ -147,8 +153,10 @@ export default function FileManager() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this file?")) return;
     try {
-      const res = await fetch(`${filesUrl}/${id}`, {
+      console.log(`In handleDete. filesUrl: ${filesUrl}`);
+      const res = await fetch(`${filesUrl}?id=${id}`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to delete file");
@@ -164,7 +172,9 @@ export default function FileManager() {
     if (f.mimetype.startsWith("image/")) {
       return <Avatar src={f.url} variant="rounded" sx={{ width: 40, height: 40 }} />;
     }
-    if (f.mimetype === "application/pdf") return <DescriptionIcon color="error" />;
+    //if (f.mimetype === "application/pdf") return <DescriptionIcon color="error" />;
+    if (f.mimetype === "PDF") return <img src={pdfIcon} className='icon' alt="PDF" />;
+    if (f.mimetype === "DOCX") return <img src={wordIcon} className='icon' alt="DOCX" />;
     if (f.mimetype.startsWith("text/")) return <InsertDriveFileIcon color="primary" />;
     return <InsertDriveFileIcon color="action" />;
   };
@@ -188,7 +198,7 @@ export default function FileManager() {
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              <Grid size={{xs:12, md:6}}>
+              <Grid size={12}>
                 <Button
                   variant="outlined"
                   component="label"
@@ -198,7 +208,7 @@ export default function FileManager() {
                   <input type="file" hidden onChange={handleFileChange} />
                 </Button>
               </Grid>
-              <Grid size={{xs:12, md:6}}>
+              <Grid size={5}>
                 <TextField
                   label="Title"
                   value={title}
@@ -207,7 +217,7 @@ export default function FileManager() {
                   required
                 />
               </Grid>
-              <Grid size={{xs:12, md:6}}>
+              <Grid size={7}>
                 <TextField
                   label="Description"
                   value={description}
@@ -215,7 +225,7 @@ export default function FileManager() {
                   fullWidth
                 />
               </Grid>
-              <Grid size={{xs:12, md:6}}>
+              <Grid size={12}>
                 <Button
                   type="submit"
                   variant="contained"
@@ -257,7 +267,7 @@ export default function FileManager() {
                   <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ mb: 1 }}
+                    sx={{ mb: 5 }}
                   >
                     {f.description || "No description"}
                   </Typography>
@@ -360,9 +370,9 @@ export default function FileManager() {
                 alt={previewFile.title}
                 style={{ maxWidth: "100%", maxHeight: "100%" }}
               />
-            ) : previewFile.mimetype === "application/pdf" ? (
+            ) : previewFile.mimetype === "application/pdf" || "PDF" ? (
               <iframe
-                src={previewFile.url}
+                src={`${pdfsUrl}?url=${previewFile.url}`}
                 title="PDF Preview"
                 width="100%"
                 height="100%"

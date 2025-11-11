@@ -36,6 +36,11 @@
     background-color: white;
 }
 
+.icon {
+  width: 30px;
+  height: auto;
+}
+
 /* .placeholder {
   font-family: 'Arial, sans-serif';
   font-size:xx-large;

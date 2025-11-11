@@ -10,6 +10,7 @@ import bodyParser from "body-parser";
 import userRoutes from './routes/userRoutes.js';
 import userProfileRoutes from './routes/userProfileRoutes.js';
 import fileRoutes from './routes/fileRoutes.js';
+import pdfRoutes from './routes/pdfRoutes.js';
 
 supertokens.init(SuperTokensConfig);
 
@@ -30,6 +31,11 @@ app.use(
 app.use('/api/users', userRoutes); 
 app.use('/api/userProfile', userProfileRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/pdfs', pdfRoutes);
+// app.get("/something", async (_req, res) => {
+//     res.send("nothing");
+// });
+
 
 app.use(middleware());
 

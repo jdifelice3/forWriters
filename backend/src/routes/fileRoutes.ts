@@ -4,7 +4,8 @@ import path from "path";
 import fs from "fs";
 import { FileType } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
-import { getFileRecords, createFileRecord } from "../database/fileDb";
+import { getFileRecords, createFileRecord, updateFileRecord, deleteFileRecord } from "../database/dbFiles";
+import { deleteFile } from "src/services/srvFiles";
 
 const router = express.Router();
 
@@ -39,6 +40,27 @@ router.post("/", upload.single("file"), async (req, res) => {
   const file = await createFileRecord(authId, mimeType, filename, req.body.title, req.body.description);
 
   res.json(file);
+});
+
+router.put("/", async(_req, res) => {
+  const { id, title, description } = _req.body;
+
+  const file = await updateFileRecord(id, title, description);
+
+  res.json(file);
+});
+
+router.delete("/", async(_req, res) => {
+  let id: string = "";
+  if(typeof _req.query.id === "string"){
+    id = _req.query.id;
+    console.log(`delete file id: ${id}`);
+    const fileUrl = await deleteFileRecord(id);
+    const deleteResult = await deleteFile(fileUrl);
+    res.json({status: deleteResult});
+  } else {
+    throw new Error("file id was not a string");
+  }
 });
 
 const mapMimeToEnum = (mime: string | undefined): FileType => {

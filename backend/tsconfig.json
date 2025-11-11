@@ -27,8 +27,9 @@
     },
     "include": [
         "./*.ts", 
-        "src/index.ts",
-        ],
+        "./src/**/*.ts", // This line will include all TypeScript files in the src directory and its subdirectories
+        "./src/services/**/*.ts" // This line is optional, as it’s covered by the previous line
+    ],
     "exclude": [
         "node_modules"
     ]

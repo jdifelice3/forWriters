@@ -43,6 +43,49 @@ export const createFileRecord = async(authId: string, mimeType: FileType, filena
   return file;
 }
 
+export const updateFileRecord = async(id: string, title: string, description: string) => {
+  const file = await prisma.appFiles.update({
+    where: {
+      id: id, 
+    },
+    data: {
+      title: title,
+      description: description
+    },
+  });
+
+  return file;
+}
+
+export const deleteFileRecord = async(id: string) => {
+  let file = null;
+  let fileUrl: string = "";
+
+  //get file url to return the file path so it can be deleted
+  try{
+    const fileMetaData = await prisma.appFiles.findUnique({
+      where: {
+        id: id
+      }
+    });
+
+    fileUrl = (typeof fileMetaData?.url === "string") ? fileMetaData.url : "";
+
+    //delete the record of the file
+    file = await prisma.appFiles.delete({
+      where: {
+        id: id
+      }
+    });
+  } catch (err) {
+    throw err;
+  }
+
+  console.log(`File record has been deleted. file id: ${id}`);
+  console.log(`fileUrl: ${fileUrl}`);
+  return fileUrl;
+}
+
 // Worked
 // SELECT 
 //     u.id AS userId,

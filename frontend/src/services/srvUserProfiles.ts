@@ -1,10 +1,10 @@
 export const getUserProfile = async(authId: string) => {
   try {
       const res: Response = await fetch(`${process.env.VITE_API_HOST}:${process.env.VITE_API_PORT}/api/userProfile?authId=${authId}`, {
-      method: 'GET',
-      credentials: "include",
-      headers: { 'Content-Type': 'application/json' },
-    });
+        method: 'GET',
+        credentials: "include",
+        headers: { 'Content-Type': 'application/json' },
+      });
 
       return await res.json();
   } catch (err: unknown) {
