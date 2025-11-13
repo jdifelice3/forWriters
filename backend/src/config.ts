@@ -4,7 +4,7 @@ import Session from "supertokens-node/recipe/session";
 import Dashboard from "supertokens-node/recipe/dashboard";
 import UserRoles from "supertokens-node/recipe/userroles";
 import type { TypeInput } from "supertokens-node/types";
-import { createUser, createUserProfile } from "./src/database/dbUsers";
+import { createUser, createUserProfile } from "../src/database/dbUsers";
 import { Role } from "@prisma/client";
 
 export const SuperTokensConfig: TypeInput = {

@@ -5,7 +5,7 @@ import fs from "fs";
 import { FileType } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
 import { getFileRecords, createFileRecord, updateFileRecord, deleteFileRecord } from "../database/dbFiles";
-import { deleteFile } from "src/services/srvFiles";
+import { deleteFile } from "../services/srvFiles";
 
 const router = express.Router();
 

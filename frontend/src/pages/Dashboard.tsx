@@ -23,7 +23,7 @@ export default function Dashboard() {
         <>
             <section className="main-container-fw">
                 <div className="inner-content-fw">
-                    <strong>Your Writing Groups</strong>
+                    <strong>Your Writing Group Memberships</strong>
                 {/* </div>
                 <div> */}
                     <List dense={false}>

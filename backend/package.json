@@ -1,14 +1,14 @@
 {
     "name": "supertokens-node",
-    "type": "module",
+    "type": "commonjs",
     "version": "0.0.2",
     "private": true,
     "description": "",
     "main": "dist/index.js",
     "scripts": {
-        "start": "npx vite-node ./src/index.ts",
-        "lint": "eslint .",
-        "build": "tsc"
+        "dev": "nodemon --exec ts-node src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js"
     },
     "dependencies": {
         "@prisma/client": "^6.19.0",
@@ -24,7 +24,8 @@
         "multer": "^2.0.2",
         "npm": "^11.6.2",
         "prisma": "^6.19.0",
-        "supertokens-node": "latest"
+        "supertokens-node": "latest",
+        "zod": "^4.1.12"
     },
     "devDependencies": {
         "@eslint/js": "^9.16.0",
@@ -35,6 +36,8 @@
         "@types/node-fetch": "^2.6.13",
         "eslint": "^9.16.0",
         "globals": "^15.13.0",
+        "ts-node": "^10.9.2",
+        "ts-node-dev": "^2.0.0",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.18.0",
         "vite-node": "^2.1.8"

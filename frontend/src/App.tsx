@@ -6,6 +6,7 @@ import { SuperTokensConfig } from "./config";
 import Layout from "./components/Layout";
 import "react-pro-sidebar/dist/css/styles.css";
 import "./assets/css/forWriters.css";
+import { UserProvider } from "./context/UserContext";
 
 SuperTokens.init(SuperTokensConfig);
 
@@ -24,7 +25,9 @@ export default function App() {
       <SuperTokensWrapper>
         <BrowserRouter>
           <SessionAuth requireAuth={false}>
-            <Layout/>
+            <UserProvider>
+              <Layout/>
+            </UserProvider>
           </SessionAuth>
         </BrowserRouter>
       </SuperTokensWrapper>

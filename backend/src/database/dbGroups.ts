@@ -1,0 +1,117 @@
+import { PrismaClient, GroupType } from "@prisma/client";
+import { z } from 'zod';
+
+const prisma = new PrismaClient();
+
+const addressSchema = z.object({
+  street: z.string().min(1, "Street is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(2, "State is required").max(2, "Use 2-letter code"),
+  zip: z.string().min(5, "ZIP is required").max(10, "Invalid ZIP"),
+});
+
+type Address = z.infer<typeof addressSchema>;
+
+
+export const getGroup = async(groupId: string) => {
+  try {
+    const group: any = await prisma.groups.findUnique({
+      where: {
+        id: groupId,
+      },
+      include: {
+        groupsAddresses: true,
+      }
+    });
+
+    return group;
+  } catch (err) {
+      console.error('Error creating group:', err);
+      throw err; 
+  }
+}
+
+export const getGroupByUserId = async(userId: string) => {
+try {
+    const groupsUsers: any = await prisma.groupsUsers.findMany({
+      where: {
+        userId: userId
+      },
+      include: {
+        groups: true
+      },
+    });
+
+    let groups:any = [];
+
+    for (let i = 0; i < groupsUsers.length; i++){
+      groups.push({
+        id: groupsUsers[i].groups.id,
+        userId: groupsUsers[i].groups.userId,
+        groupType: groupsUsers[i].groups.groupType,
+        name: groupsUsers[i].groups.name,
+        description: groupsUsers[i].groups.description,
+        imageUrl: groupsUsers[i].groups.imageUrl,
+        createdAt: groupsUsers[i].groups.createdAt,
+        updatedAt: groupsUsers[i].groups.updatedAt
+      });
+    }
+
+    return groups;
+  } catch (err) {
+      console.error('Error creating group:', err);
+      throw err; 
+  }
+}
+
+export const createGroup = async (
+      authId: string, 
+      name: string, 
+      address: Address, 
+      description: string, 
+      groupType: GroupType,
+      imgUrl?: string) => {
+  //add groupType 
+  try {
+    // Get userId from authId
+    const user: any = await prisma.users.findUnique({
+      where: {
+        superTokensId: authId,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const group = await prisma.groups.create({
+      data: {
+        name: name,
+        description: description,
+        creatorUserId: user.id, 
+        imageUrl: (imgUrl !== undefined) ? imgUrl : "",
+        groupType: groupType,
+        groupsAddresses: {
+          create: {
+            street: address.street,
+            city: address.city,
+            state: address.state,
+            zip: address.zip,            
+          }
+        },
+        groupsUsers: {
+          create: {
+            userId: user.id,
+            isAdmin: true,
+          }
+        }
+      }
+    });
+
+    console.log('Group created successfully:', group);
+    return group;
+  } catch (error) {
+    console.error('Error creating group:', error);
+    throw error; 
+  }
+};

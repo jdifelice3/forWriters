@@ -16,6 +16,7 @@ datasource db {
 
 enum EventType {
   READING
+  RETREAT
 }
 
 enum Genre {
@@ -27,6 +28,10 @@ enum Genre {
   POEM
   ROMANCE
   SCIENCEFICTION
+}
+
+enum GroupType {
+  WRITING
 }
 
 enum FileType {
@@ -80,7 +85,8 @@ model AppFiles {
   url         String
   uploadedAt  DateTime  @default(now())
 
-  user        Users     @relation(fields: [userId], references: [id])
+  eventSignups   EventSignups[]
+  users        Users     @relation(fields: [userId], references: [id])
 }
 
 model Events {
@@ -98,6 +104,19 @@ model Events {
   eventsUsers     EventsUsers[]
 }
 
+model EventSignups {
+  id          String   @id @default(cuid())
+  eventId     String
+  userId      String
+  appFileId   String?
+  signedAt    DateTime @default(now())
+
+  groupEvents       GroupsEvents        @relation(fields: [eventId], references: [id])
+  users        Users              @relation(fields: [userId], references: [id])
+  manuscript  AppFiles?          @relation(fields: [appFileId], references: [id])
+  @@unique([eventId, userId, appFileId])
+}
+
 model EventsUsers {
   id              String                  @id @default(cuid())
   eventId         String  
@@ -110,6 +129,73 @@ model EventsUsers {
   @@unique([eventId, userId])
 }
 
+model Groups {
+  id              String        @id @default(cuid())
+  creatorUserId   String  
+  groupType       GroupType     @default(WRITING)
+  name            String        @unique
+  description     String?
+  imageUrl        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  groupsAddresses         GroupsAddresses[]
+  groupsUsers     GroupsUsers[]
+  newsItems       GroupsNews[]
+  events          GroupsEvents[]
+  users           Users      @relation(fields: [creatorUserId], references: [id])
+  
+}
+
+model GroupsAddresses {
+  id          String   @id @default(cuid())
+  street      String
+  city        String
+  state       String
+  zip         String
+
+  groupId     String   
+  groups      Groups?   @relation(fields: [groupId], references: [id])
+}
+
+model GroupsEvents {
+  id                  String   @id @default(cuid())
+  groupId             String
+  eventType           EventType   @default(READING)
+  eventDate           DateTime
+  submissionDeadline  DateTime
+  minDaysBetweenReads Int      @default(20) // configurable
+  maxConsecutiveReads Int      @default(1)  // e.g., can't sign up twice in a row
+  createdAt           DateTime @default(now())
+
+  groups               Groups @relation(fields: [groupId], references: [id])
+  signups             EventSignups[]
+}
+
+model GroupsNews {
+  id          String   @id @default(cuid())
+  groupId     String
+  title       String
+  content     String?
+  postedAt    DateTime @default(now())
+  archived    Boolean  @default(false)  
+
+  groups       Groups @relation(fields: [groupId], references: [id])
+}
+
+model GroupsUsers {
+  id            String   @id @default(cuid())
+  userId        String
+  groupId       String
+  isAdmin       Boolean  @default(false)
+  invitedBy     String?
+  createdAt     DateTime @default(now())
+
+  users          Users    @relation(fields: [userId], references: [id])
+  groups         Groups   @relation(fields: [groupId], references: [id])
+  @@unique([groupId, userId])
+}
+
 model Users {
   id             String                   @id @default(cuid())
   superTokensId  String                   @unique
@@ -117,8 +203,11 @@ model Users {
   role           Role                     @default(EDITOR)
   username       String                   @unique
   createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
 
-  writingGroups  WritingGroupsUsers[]
+  groupsUsers  GroupsUsers[]
+  groups        Groups[]
+  eventSignups   EventSignups[]
   works          Works[]
   events         Events[]
   eventsUsers    EventsUsers[]
@@ -134,7 +223,7 @@ model UserProfiles {
   phone           String?
   bio             String?
   
-  user            Users                   @relation(fields:[userId], references:[id])
+  users            Users                   @relation(fields:[userId], references:[id])
 }
 
 model Urls {
@@ -159,27 +248,5 @@ model Works {
   fileName             String?
   manuscriptIsVisible  Boolean          @default(false)
 
-  user                 Users            @relation(fields: [userId], references: [id])
-}
-
-model WritingGroups {
-  id              String                  @id @default(cuid())
-  name            String  
-  city            String
-  state           String
-
-  createdAt DateTime @default(now())
-  writingGroupsUsers WritingGroupsUsers[]
-}
-
-model WritingGroupsUsers {
-  id              String                  @id @default(cuid())
-  writingGroupId  String  
-  userId          String
-  isAdmin         Boolean                 @default(false)
-  joinedAt        DateTime                @default(now())
-  
-  writingGroup    WritingGroups           @relation(fields:[writingGroupId], references:[id])
-  user            Users                   @relation(fields:[userId], references:[id])
-  @@unique([writingGroupId, userId])
+  users                 Users            @relation(fields: [userId], references: [id])
 }

@@ -85,19 +85,3 @@ export const deleteFileRecord = async(id: string) => {
   console.log(`fileUrl: ${fileUrl}`);
   return fileUrl;
 }
-
-// Worked
-// SELECT 
-//     u.id AS userId,
-//     u.email,
-//     u.username,
-//     af.id AS appFileId,
-//     af.title,
-//     af.description,
-//     af.filename,
-//     af.url,
-//     af."uploadedAt"
-// FROM 
-//     "Users" AS u
-// INNER JOIN 
-//     "AppFiles" AS af ON af."userId" = u.id;

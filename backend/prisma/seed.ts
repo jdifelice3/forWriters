@@ -33,29 +33,29 @@ const main = async() => {
     }
   }); 
 
-  BucksCounty = await prisma.writingGroups.create({
-    data: {
-      name: 'Bucks Country Writers Group',
-      city: 'Doylestown',
-      state: 'PA',
-    }
-  }); 
+  // BucksCounty = await prisma.groups.create({
+  //   data: {
+  //     name: 'Bucks Country Writers Group',
+  //     city: 'Doylestown',
+  //     state: 'PA',
+  //   }
+  // }); 
 
-  await prisma.writingGroupsUsers.create({
-    data: {
-      writingGroupId: BucksCounty.id, 
-      userId: john.id,
-      isAdmin: true
-    }
-  }); 
+  // await prisma.writingGroupsUsers.create({
+  //   data: {
+  //     writingGroupId: BucksCounty.id, 
+  //     userId: john.id,
+  //     isAdmin: true
+  //   }
+  // }); 
 
-  await prisma.writingGroupsUsers.create({
-    data: {
-      writingGroupId: BucksCounty.id, 
-      userId: adam.id,
-      isAdmin: true
-    }
-  }); 
+  // await prisma.writingGroupsUsers.create({
+  //   data: {
+  //     writingGroupId: BucksCounty.id, 
+  //     userId: adam.id,
+  //     isAdmin: true
+  //   }
+  // }); 
 
   console.log(`✔ Seeding completed`);
 }

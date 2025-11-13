@@ -42,7 +42,7 @@ interface AppFile {
   uploadedAt: string;
 }
 
-export default function FileManager() {
+const FileManager = () => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -53,8 +53,8 @@ export default function FileManager() {
   const [editDescription, setEditDescription] = useState("");
   const [previewFile, setPreviewFile] = useState<AppFile | null>(null);
 
-  const filesUrl = `${process.env.VITE_API_HOST}:${process.env.VITE_API_PORT}/api/files`;
-  const pdfsUrl = `${process.env.VITE_API_HOST}:${process.env.VITE_API_PORT}/api/pdfs`;
+  const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
+  const pdfsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/pdfs`;
   // 🧩 Fetch uploaded files
   useEffect(() => {
     (async () => {
@@ -68,8 +68,6 @@ export default function FileManager() {
       if (res.ok) {
         const data = await res.json();
         setFiles(data);
-        console.log('data in FileManager.tsx: get files');
-        console.log(data);
       }
     })();
   }, []);
@@ -116,7 +114,6 @@ export default function FileManager() {
 
   // 🧩 Edit metadata
   const handleEdit = (file: AppFile) => {
-    console.log(file.id);
     setEditFile(file);
     setEditTitle(file.title);
     setEditDescription(file.description || "");
@@ -125,7 +122,6 @@ export default function FileManager() {
   const handleSaveEdit = async () => {
     if (!editFile) return;
     try {
-      console.log(`In handleSaveEdit. editFile.id: ${editFile.id}`);
       const res = await fetch(`${filesUrl}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -153,7 +149,6 @@ export default function FileManager() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this file?")) return;
     try {
-      console.log(`In handleDete. filesUrl: ${filesUrl}`);
       const res = await fetch(`${filesUrl}?id=${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -388,3 +383,5 @@ export default function FileManager() {
     </Box>
   );
 }
+
+export default FileManager;

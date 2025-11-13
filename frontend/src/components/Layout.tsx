@@ -7,7 +7,8 @@ import Dashboard from "../pages/Dashboard";
 import UserProfile from "../pages/UserProfile";
 import FileManager from "../pages/FileManager";
 import Sidebar from "../components/Sidebar";
-
+import Groups from "../pages/Groups";
+import GroupsCreate from "../pages/GroupsCreate";
 
 const Layout = () => {
   const session = useSessionContext();
@@ -81,9 +82,9 @@ const Layout = () => {
 
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/writersgroup" element={<div><h1>Bucks County Writers Group</h1></div>}/>
               <Route path="/searchgroups" element={<div><h1>Search Groups</h1></div>} />
-              <Route path="/managegroup" element={<div>Manage a Group</div>} />
+              <Route path="/groups/:groupId" element={ <Groups /> } />
+              <Route path="/creategroup" element={ <GroupsCreate /> } />
               <Route path="/readers" element={<div>Readers</div>} />
               <Route path="/writers" element={<div>Writers</div>} />
               <Route path="/signout" element={<div><h1>Sign Out</h1></div>} />

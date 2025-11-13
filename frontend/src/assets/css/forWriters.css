@@ -41,7 +41,30 @@
   height: auto;
 }
 
-/* .placeholder {
-  font-family: 'Arial, sans-serif';
-  font-size:xx-large;
-} */
+.boldText {
+  font-weight: bold;
+}
+
+.line-with-text {
+  display: block;           /* Allow text to take its own line */
+  position: relative;       /* Allow positioning of the line */
+  padding-left: 10px;      /* Space before the text */
+  text-align: left;         /* Left alignment */
+}
+
+.line-with-text::before {
+  content: '';
+  position: absolute;      /* Position the line */
+  left: 0;                /* Align it to the left */
+  top: 50%;               /* Center it vertically */
+  width: 100%;            /* Full width for the line */
+  height: 1px;            /* Define height */
+  border-top: 1px solid gray ; /* Customize line style */
+  z-index: -1;            /* Move behind the text */
+}
+
+.line-with-text span {
+  position: relative;      /* Ensure text is above the line */
+  background-color: rgb(29,29,29);   /*Background covers part of the line*/
+  padding: 0 12px; 
+}

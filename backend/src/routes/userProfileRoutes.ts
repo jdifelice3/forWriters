@@ -1,5 +1,5 @@
 import express from "express";
-import { updateUserProfile, getUserProfile } from "../database/dbUsers.js";
+import { updateUserProfile, getUserProfile } from "../database/dbUsers";
 
 const router = express.Router();
 

@@ -15,7 +15,7 @@ export const createUser = async(superTokensId: string, email: string, role: Role
       email: email,
       superTokensId: superTokensId,
       role: role,
-      username: email
+      username: email,
     }
   });
   
@@ -40,7 +40,7 @@ export const getUserProfile = async(authId: string) => {
             superTokensId: authId,
         },
         include: {
-            userProfiles: true,  // This includes the related posts 
+            userProfiles: true,
         }
   });
   console.log('user', user);
