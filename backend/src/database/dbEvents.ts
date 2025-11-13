@@ -16,7 +16,7 @@ export const getEvents = async(groupId: string) => {
         eventDate: 'asc',
       },
     });
-    //console.log('in getEvents. events:', events);
+    console.log('in getEvents. events:', events);
     console.log('in getEvents. events:', events);
     return events;
   } catch (err) {

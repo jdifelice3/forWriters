@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -31,15 +31,11 @@ interface EventItem {
 
 export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin }) => {
   const { user, isLoading, error } = useUserContext();
-  // if(!user){
-  //   throw new Error("Failed to retrive user");
-  // }
-  //const [userId, setUserId] = useState(user.id);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState("");
   const [deadline, setDeadline] = useState("");
-  
+  const [buttonEventId, setButtonEventId] = useState("");
   
   useEffect(() => {
     if (!user || isLoading) return;
@@ -51,12 +47,11 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
           .then((r) => r.json())
           .then((data) => setEvents(data))
           .catch(console.error);
-        //console.log('events', events);
       } catch (err) {
         console.error("Error isLoading events:", err);
       }
     })();
-  }, [groupId]);
+  }, [groupId, buttonEventId]);
 
   const handleAddEvent = async () => {
     const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
@@ -73,16 +68,42 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
     }
   };
 
-  const handleSignup = async (eventId: string) => {
-    const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/signup`;
-    const res = await fetch(eventsUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId: eventId, userId: user ? user.id : "" }),
-      credentials: "include",
-    });
-    if (res.ok) alert("You are signed up for this reading!");
+  const handleSignup = async (event: React.MouseEvent<HTMLButtonElement>, eventId: string) => {
+      const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/signup`;
+      const res = await fetch(eventsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId: eventId, userId: user ? user.id : "" }),
+        credentials: "include",
+      });
+      if (res.ok){
+        alert("You are signed up for this reading!");
+        setButtonEventId(eventId);
+      }
   };
+
+  const disableSignInButton = (eventId: string): boolean => {
+      let result: boolean = false;
+      const eventsIndex: any = events.findIndex(event =>
+        event.id === eventId);
+      if(eventsIndex === -1){
+        result = false;
+      }
+      
+      if(events[eventsIndex].signups.length === 0){
+        result = false;
+      }
+      const signupsIndex: any = events[eventsIndex].signups.findIndex(
+          signup => signup.userId === user.id);
+
+      if(signupsIndex === -1){
+        result = false;
+      } else {
+        result = true;
+      }
+
+      return result;
+  }
 
   if (isLoading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -126,15 +147,22 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
                 <Typography variant="body2" color="text.secondary">
                   Submit manuscripts by <b>{new Date(e.submissionDeadline).toLocaleDateString()}</b>
                 </Typography>
-
+                {e.signups.length > 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  Authors:<br/>
+                  {/* {JSON.stringify(e.signups)} */}
+                </Typography>
+                )}
                 {!isAdmin && (
                   <Button
+                    id={e.id}
                     size="small"
                     variant="contained"
                     startIcon={<EventAvailableIcon />}
-                    onClick={() => handleSignup(e.id)}
-                    sx={{ mt: 1 }}
-                    disabled={new Date(e.submissionDeadline) < new Date()}
+                    onClick={(event) => handleSignup(event, e.id)}
+                    sx={{ mt: 1 }}         
+                    //Check if the current user has already signed-in to the event
+                    disabled={disableSignInButton(e.id)}
                   >
                     Sign Up
                   </Button>
