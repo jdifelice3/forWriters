@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -17,18 +17,20 @@ import { GroupDetails } from "../components/GroupDetails";
 import { NewsFeed } from "../components/NewsFeed";
 import { EventsCalendar } from "../components/EventsCalendar";
 import { useUserContext } from "../context/UserContext";
+import AddIcon from "@mui/icons-material/Add";
 
 const styles = {
     marginLeft: '100px' // or a responsive value
 };
 
 const Groups = () => {
-
   const { groupId } = useParams<{ groupId: string }>();
   const { isLoading } = useUserContext();
   const [group, setGroup] = useState<any | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+
+  const navigate = useNavigate();
 
   const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups`;
 
@@ -73,14 +75,45 @@ const Groups = () => {
         <Grid size={12}>
           <GroupDetails group={group} isAdmin={isAdmin} />
         </Grid>
+      </Grid>
+
+      <Divider sx={{ my: 4 }} />
+      <Card>
+        <CardContent>
+          <Typography variant="h6" mb={2}>
+            Sign Up For a Reading
+          </Typography>
+          <Typography >
+            Want to have your manuscript read and critiqued by other writers?
+          </Typography>
+          <Typography >
+            It's a great way to get valuable feedback on your manuscript.👍
+          </Typography>
+          <Typography>&nbsp;</Typography>
+          <Button
+              startIcon={<AddIcon />}
+              variant="outlined"
+              sx={{ mb: 2 }}
+              onClick={() => navigate(`/readingsignup/${groupId}`)}
+          >
+              SignUp!
+          </Button>
+
+           <Divider sx={{ mb: 3 }} />
+           
+           <Typography variant="h6" mb={2}>
+            Review Manuscripts for the Current Reading
+          </Typography>
+        </CardContent>
+      </Card>
+      {/* <EventsCalendar groupId={group.id} isAdmin={isAdmin} /> */}
+
+      <Divider sx={{ my: 4 }} />
+      <Grid container spacing={3}>
         <Grid size={12}>
           <NewsFeed groupId={group.id} isAdmin={isAdmin} />
         </Grid>
       </Grid>
-
-      <Divider sx={{ my: 4 }} />
-
-      <EventsCalendar groupId={group.id} isAdmin={isAdmin} />
     </Box>
   );
 }

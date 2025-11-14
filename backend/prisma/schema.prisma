@@ -113,7 +113,7 @@ model EventSignups {
 
   groupEvents       GroupsEvents        @relation(fields: [eventId], references: [id])
   users        Users              @relation(fields: [userId], references: [id])
-  manuscript  AppFiles?          @relation(fields: [appFileId], references: [id])
+  appFiles  AppFiles?          @relation(fields: [appFileId], references: [id])
   @@unique([eventId, userId, appFileId])
 }
 

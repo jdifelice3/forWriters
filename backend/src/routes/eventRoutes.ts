@@ -2,7 +2,7 @@ import express from "express";
 import Session from "supertokens-node/recipe/session";
 import { createGroup, getGroup, getGroupByUserId, } from "../database/dbGroups";
 import { createNewsItem, getNews } from '../database/dbNews';
-import { getEvents, createEvent, eventAddUser } from '../database/dbEvents';
+import { getEvents, createEvent, eventAddUser, getEventSignups } from '../database/dbEvents';
 
 interface EventItem {
   eventId: string;
@@ -15,7 +15,6 @@ const router = express.Router();
 router.get("/:groupId", async(_req, res) => {
   const groupId = _req.params.groupId;
     try {
-      console.log('in eventRoutes; groupId:', groupId);
       const group = await getEvents(groupId);
 
       res.json(group);
@@ -36,15 +35,27 @@ router.post("/:groupId", async (req, res) => {
   }
 });
 
-router.post("/:id/signup", async (_req, res) => {
+router.post("/:id/signup", async (req, res) => {
   try {
-    const { userId, eventType } = _req.body;
-    const eventId = _req.params.id;
+    const { userId, eventType } = req.body;
+    const eventId = req.params.id;
     console.log('in groupRoutes.ts signup');
-    console.log('Request.Body', _req.body);
-    const { title, content } = _req.body;
+    console.log('Request.Body', req.body);
+    const { title, content } = req.body;
     const signup = await eventAddUser(eventId, userId, eventType);
     res.json(signup);
+  } catch (error) {
+    console.error('Error signing up for event:', error);
+    res.status(500).json({ error: 'Error signing up for event' });
+  }
+});
+
+router.get("/:id/signups", async(req, res) => {
+  console.log('in eventRoutes.get/id/signups');
+  const eventId:string = req.params.id;
+  try {
+    const events = await getEventSignups(eventId);
+    res.status(200).json(events);
   } catch (error) {
     console.error('Error signing up for event:', error);
     res.status(500).json({ error: 'Error signing up for event' });

@@ -116,7 +116,9 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
         {news.map((n) => (
           <Box key={n.id} mb={2} p={1} sx={{ borderBottom: "1px solid #ccc" }}>
             <Stack direction="row" justifyContent="space-between">
-              <Typography variant="subtitle1" style={{fontWeight: "bold"}}>{n.title}</Typography>
+              <Typography variant="subtitle1" style={{fontWeight: "bold"}}>
+                {n.title}
+              </Typography>
               {isAdmin && (
                 <IconButton size="small" onClick={() => handleArchive(n.id)}>
                   <ArchiveIcon fontSize="small" />

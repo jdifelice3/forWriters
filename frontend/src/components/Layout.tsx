@@ -9,6 +9,8 @@ import FileManager from "../pages/FileManager";
 import Sidebar from "../components/Sidebar";
 import Groups from "../pages/Groups";
 import GroupsCreate from "../pages/GroupsCreate";
+import ReadingSignup from "../pages/ReadingSignup";
+import ReadingFeedback from "../pages/ReadingFeedback";
 
 const Layout = () => {
   const session = useSessionContext();
@@ -91,6 +93,9 @@ const Layout = () => {
               <Route path="/works" element={<div><h1>Your Work</h1></div>} />
               <Route path="/userprofile" element={<UserProfile />} />
               <Route path="/filemanager" element={<FileManager />} />
+              <Route path="/joingroup" element={<div><h1>Join a Group</h1></div>} />
+              <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
+              <Route path="/readingfeedback/:eventId" element={<ReadingFeedback />} />
             </Routes>
           </ComponentWrapper>
         </main>

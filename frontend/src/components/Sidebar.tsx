@@ -15,7 +15,10 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import KeyIcon from '@mui/icons-material/Key';
 import { useUserContext } from "../context/UserContext";
+import GradientDivider from "./GradientDivider";
 
 
 interface Group {
@@ -93,7 +96,6 @@ const Sidebar = () => {
 
       <ProSidebar>
         <Menu iconShape="square">
-          {/* Dashboard */}
           <MenuItem
             key="dashboard"
             icon={<DashboardIcon />}
@@ -102,48 +104,29 @@ const Sidebar = () => {
           >
             Dashboard
           </MenuItem>
-          {/* Writing Groups */}
-            <SubMenu
-              key="submenu"
-              title="Writing Groups"
-              icon={<GroupIcon />}
-              defaultOpen={pathname.startsWith("/component")}
-            >
-            {groups.length === 0 ? (
-              <Typography variant="body1" color="text.primary">
-                Join a Group
-              </Typography>
-            ) : (
-                  <div>
-                  {groups.map((g) => (
-                    <MenuItem
-                      key={g.id}
-                      active={pathname === `/groups/${g.id}`}
-                      onClick={() => navigate(`/groups/${g.id}`)}
-                    >
-                      {g.name}
-                    </MenuItem>
-                  ))}
-                  </div>
-            )}
-            
+                  
+          <GradientDivider text="Groups"/>
 
-            <img className="separator-line" src="/assets/images/separator-line.svg" alt="separator" />
-            <MenuItem
-              key="creategroup"
-              active={pathname === "/creategroup"}
-              onClick={() => navigate("/creategroup")}
-            >
-              Start a Group
-            </MenuItem>
-            <MenuItem
-              key="managegroup"
-              active={pathname === "/managegroup"}
-              onClick={() => navigate("/managegroup")}
-            >
-              Manage a Group
-            </MenuItem>
-          </SubMenu>
+          <MenuItem
+            key="joingroup"
+            icon={<CheckBoxIcon/>}
+            active={pathname === "/joingroup"}
+            onClick={() => navigate("/joingroup")}
+          >
+            Join a Group
+          </MenuItem>
+
+          <MenuItem
+            key="creategroup"
+            icon={<KeyIcon/>}
+            active={pathname === "/creategroup"}
+            onClick={() => navigate("/creategroup")}
+          >
+            Start a Group
+          </MenuItem>
+
+          <GradientDivider text="Find Collaborators"/>
+
           <MenuItem
             key="writers"
             icon={<KeyboardIcon />}
@@ -152,6 +135,7 @@ const Sidebar = () => {
           >
             Writers
           </MenuItem>
+        
           <MenuItem
             key="readers"
             icon={<MenuBookIcon />}
@@ -160,10 +144,9 @@ const Sidebar = () => {
           >
             Readers
           </MenuItem>
-          <div className="line-with-text">
-            <span>Your Stuff</span>
-          </div>
-          {/* <img className="separator-line" src="/assets/images/separator-line.svg" alt="separator" /> */}
+
+          <GradientDivider text="Your Stuff"/>
+
           <MenuItem
             key="userprofile"
             icon={<AccountBoxIcon />}
@@ -172,10 +155,31 @@ const Sidebar = () => {
           >  
             Profile
           </MenuItem>
+
+          {/* YOUR GROUPS */}
+          <SubMenu
+            key="submenu"
+            title="Your Groups"
+            icon={<GroupIcon />}
+            defaultOpen={pathname.startsWith("/component")}
+          >
+            <div>
+            {groups.map((g) => (
+              <MenuItem
+                key={g.id}
+                active={pathname === `/groups/${g.id}`}
+                onClick={() => navigate(`/groups/${g.id}`)}
+              >
+                {g.name}
+              </MenuItem>
+            ))}
+            </div>
+          </SubMenu>
+
           <SubMenu
               key="documents"
               title="Documents"
-              icon={<GroupIcon />}
+              icon={<CollectionsBookmarkIcon />}
               defaultOpen={pathname.startsWith("/component")}
             >
             <MenuItem
@@ -193,7 +197,9 @@ const Sidebar = () => {
               Feedback
             </MenuItem>
           </SubMenu>
+          
           <img className="separator-line" src="/assets/images/separator-line.svg" alt="separator" />
+
           <MenuItem
             key="logout"
             icon={<LogoutIcon />}
