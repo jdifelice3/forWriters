@@ -145,7 +145,7 @@ const Sidebar = () => {
             Readers
           </MenuItem>
 
-          <GradientDivider text="Your Stuff"/>
+          <GradientDivider text="My Stuff"/>
 
           <MenuItem
             key="userprofile"

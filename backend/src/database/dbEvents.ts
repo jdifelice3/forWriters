@@ -25,32 +25,34 @@ export const getEvents = async(groupId: string) => {
 }
 
 export const getEventSignups = async(eventId: string) => {
-  console.log('in getEventSignups');
-  console.log('eventId', eventId);
+
   try {
     
-    const events: any = await prisma.eventSignups.findMany({
+    const events: any = await prisma.groupsEvents.findMany({
       where: {
-        eventId: eventId
+        id: eventId
       },
       include: {
-        appFiles: {
+        signups: {
           include: {
-            users: {
+            appFiles: {
               include: {
-                userProfiles: true
-              }
-            }
+                users: {
+                  include: {
+                    userProfiles: true
+                  }
+                }
+              },
+            },
           },
-      },
+        }
+      }
+    });
+      return events[0];
+    } catch (err) {
+        console.error('Error getting events:', err);
+        throw err; 
     }
-  });
-    console.log('events',events);
-    return events;
-  } catch (err) {
-      console.error('Error getting events:', err);
-      throw err; 
-  }
 }
 
 export const createEvent = async(groupId: string, eventDate: Date, submissionDeadline: Date) => {

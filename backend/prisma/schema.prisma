@@ -13,6 +13,15 @@ datasource db {
 
 /* Enums */
 
+enum DocumentType {
+  MANUSCRIPT
+  FEEDBACK
+}
+
+enum EventUserType {
+  AUTHOR
+  REVIEWER
+}
 
 enum EventType {
   READING
@@ -81,6 +90,7 @@ model AppFiles {
   title       String
   description String?
   filename    String
+  documentType DocumentType  @default(MANUSCRIPT)
   mimetype    FileType  @default(PDF)   
   url         String
   uploadedAt  DateTime  @default(now())
@@ -93,6 +103,7 @@ model Events {
   id              String                  @id @default(cuid())
   name            String
   eventType       EventType               @default(READING)
+  EventUserType   EventUserType           @default(AUTHOR)
   createdAt       DateTime                @default(now())
   createdUserId   String
   eventDate       String
@@ -161,7 +172,7 @@ model GroupsAddresses {
 model GroupsEvents {
   id                  String   @id @default(cuid())
   groupId             String
-  eventType           EventType   @default(READING)
+  eventUserType       EventUserType           @default(AUTHOR)
   eventDate           DateTime
   submissionDeadline  DateTime
   minDaysBetweenReads Int      @default(20) // configurable

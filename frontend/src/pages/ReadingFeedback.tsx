@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useUserContext } from "../context/UserContext";
 import {
   Box,
   Button,
@@ -17,32 +16,24 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Stack,
-  Avatar,
-  Table,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
-import DescriptionIcon from "@mui/icons-material/Description";
-//import ImageIcon from "@mui/icons-material/Image";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
-import PreviewIcon from "@mui/icons-material/Preview";
 import pdfIcon from '../assets/icons/icons8-pdf-48.png';
 import wordIcon from '../assets/icons/icons8-word-file-48.png';
+import DownloadIcon from '@mui/icons-material/Download';
 
-interface File {
-  appFileId: string;
-  appFiles: AppFile;
-  eventId: string;
-  id: string;
-  signedAt: string;
-  userId: string;
-}
+// interface File {
+//   appFileId: string;
+//   appFiles: AppFile;
+//   eventId: string;
+//   id: string;
+//   signedAt: string;
+//   userId: string;
+// }
 
 interface User {
   id: string;
@@ -76,23 +67,48 @@ interface AppFile {
   users: User
 }
 
+interface Events {
+  id: string;
+  groupId: string;
+  eventType: string;
+  eventDate: Date;
+  submissionDeadline: string;
+  minDaysBetweenReads: string;
+  maxConsecutiveReads: string;
+  createdAt: Date;
+  signups: Signups[]; 
+}
+
+interface Signups {
+  id: string;
+  eventId: string;
+  userId: string;
+  appFileId: string;
+  signedAt: string;
+  appFiles: AppFile;
+
+}
+
 const ReadingFeedback = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const [file, setFile] = useState<any | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<AppFile[]>([]);
+  const [events, setEvents] = useState<Events>();
   const [loading, setLoading] = useState(false);
   const [editFile, setEditFile] = useState<AppFile | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [previewFile, setPreviewFile] = useState<AppFile | null>(null);
-  const [event, setEvent] = useState<any | null>(null);
-  
+  const [eventTitle, setEventTitle] = useState("");
+    
   const eventSignupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/signups`;
   const pdfsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/pdfs`;
-  console.log(eventSignupsUrl);
-  // 🧩 Fetch uploaded files
+  const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
+  const fileUploadsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/uploads`;
+  
+  // Fetch uploaded files
   useEffect(() => {
 
     (async () => {
@@ -105,14 +121,20 @@ const ReadingFeedback = () => {
       });
       
       if (res.ok) {
-        const data: File[] = await res.json();
-        setFiles(data);
+        const data: Events = await res.json();
+        const _eventDate = new Date(data.eventDate).toLocaleDateString('en-US');
+
+        let t = `Current Reading - ${_eventDate}`;
+        console.log('title:', t);
+        setEventTitle(data.signups.length > 0 ? t : 'Reading')
+        if(data.signups.length)
+        setEvents(data);
         console.log('event',data)
       }
     })();
   }, []);
 
-  // 🧩 File upload
+  // File upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (selected) {
@@ -123,7 +145,7 @@ const ReadingFeedback = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!file || !title) return alert("Please choose a file and add a title.");
+    //if (!file || !title) return alert("Please choose a file and add a title.");
 
     setLoading(true);
     const formData = new FormData();
@@ -132,7 +154,7 @@ const ReadingFeedback = () => {
     formData.append("description", description);
 
     try {
-      const res = await fetch(eventSignupsUrl, {
+      const res = await fetch(filesUrl, {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -152,7 +174,6 @@ const ReadingFeedback = () => {
     }
   };
 
-
   // 🧠 Choose icon/thumbnail
   const getFileIcon = (f: AppFile) => {
     if (f.mimetype === "PDF") return <img src={pdfIcon} className='icon' alt="PDF" />;
@@ -168,70 +189,28 @@ const ReadingFeedback = () => {
         p: 4,
         marginLeft: "100px",
       }}>
-      <Typography variant="h4" mb={3} textAlign="center">
-        Reading
+      <Typography variant="h4" mb={3} textAlign="left">
+        {eventTitle}
       </Typography>
 
       {/* Upload form */}
-      <Card sx={{ mb: 4, p: 2 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Upload the manuscript Word Doc with inline comments
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-              <Grid size={12}>
-                <Button
-                  variant="outlined"
-                  component="label"
-                  startIcon={<UploadIcon />}
-                >
-                  {file ? file.name : "Choose File"}
-                  <input type="file" hidden onChange={handleFileChange} />
-                </Button>
-              </Grid>
-              <Grid size={12} columns={5}>
-                <TextField
-                  label="Additional Comments"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={12} sx={{height: "100px"}}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  disabled={loading}
-                  startIcon={<UploadIcon />}
-                >
-                  {loading ? <CircularProgress size={24} /> : "Upload"}
-                </Button>
-              </Grid>
-            </Grid>
-          </Box>
-        </CardContent>
-      </Card>
-
-      <Divider sx={{ mb: 3 }} />
 
       {/* File list */}
       <Typography variant="h6" mb={2}>
         Manuscripts to Review
       </Typography>
 
-      {files.length === 0 ? (
+      {!events ? (
         <Typography variant="body1" color="text.secondary">
           No files uploaded yet.
         </Typography>
       ) : (
-        <Grid container spacing={2}>
-          {files.map((f:File) => (
+        <Stack direction="column" alignItems="left" gap={1} my={1}>
+          {events.signups.map((f:Signups) => (
             <Grid size={{xs:12, md:6}} key={f.id}>
               <Card>
                 <CardContent>
-                  <Stack direction="column" alignItems="center" gap={1} my={1}>         
+                  <Stack direction="column" alignItems="left" gap={1} my={1}>         
                       <Stack direction="row" alignItems="center" gap={1} mb={1}>
                         {getFileIcon(f.appFiles)}
                         <Typography variant="subtitle1" fontWeight="bold">
@@ -245,28 +224,68 @@ const ReadingFeedback = () => {
                   <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ mb: 5 }}
+                    sx={{ mb: 2 }}
                   >
                     {f.appFiles.description || "No description"}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     Uploaded on {new Date(f.appFiles.uploadedAt).toLocaleDateString()}
                   </Typography>
-                </CardContent>
                 <CardActions>
-               <Button 
-                    href={f.appFiles.url} download={f.appFiles.filename} 
-                    size="small"
-                    sx={{borderColor: "primary.main"}}
+                  <Button 
+                      href={`${fileUploadsUrl}/${f.appFiles.filename}` } download={f.appFiles.filename} 
+                      size="small"
+                      sx={{borderColor: "primary.main"}}
+                      startIcon={<DownloadIcon />}
                   >
-                    Download
+                    Download Manuscript
                   </Button>
                   
                 </CardActions>
-              </Card>
+
+                  <Divider sx={{ mb: 3 }} />
+                  <Typography variant="h6" gutterBottom>
+                    Upload the Word Doc for <span className="boldText">{f.appFiles.title}</span> with inline comments
+                  </Typography>
+                  <Box component="form" onSubmit={handleSubmit}>
+                    <Grid container spacing={2}>
+                      <Grid size={12}>
+                        <Button
+                          variant="outlined"
+                          component="label"
+                          startIcon={<UploadIcon />}
+                        >
+                          {file ? file.name : "Choose File"}
+                          <input type="file" hidden onChange={handleFileChange} />
+                        </Button>
+                      </Grid>
+                      <Grid size={12} columns={5}>
+                        <TextField
+                          label="Additional Comments (Optional)"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          fullWidth
+                        />
+                      </Grid>
+                      <Grid size={12}>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          disabled={loading}
+                          startIcon={<UploadIcon />}
+                        >
+                          {loading ? <CircularProgress size={24} /> : "Upload"}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </CardContent>
+      </Card>
+
             </Grid>
           ))}
-        </Grid>
+        </Stack>
       )}
 
       {/* Edit dialog */}

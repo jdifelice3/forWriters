@@ -1,4 +1,5 @@
 import "dotenv/config";
+import path from 'path';
 import Session from "supertokens-node/recipe/session";
 import { SessionRequest } from "supertokens-node/framework/express";
 import express from "express";
@@ -40,6 +41,9 @@ app.use('/api/pdfs', pdfRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/me', meRoute);
 app.use('/api/events', eventRoutes);
+const uploadDir = path.join(process.cwd(), "uploads");
+app.use("/uploads", express.static(uploadDir));
+
 
 // This endpoint can be accessed regardless of
 // having a session with SuperTokens

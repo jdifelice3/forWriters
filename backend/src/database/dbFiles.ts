@@ -27,8 +27,6 @@ export const createFileRecord = async(authId: string, mimeType: FileType, filena
  ) => {
   const user = await prisma.users.findUnique({ where: { superTokensId: authId } });
 
-  console.log('in createFileRecord');
-  console.log('user', user);
   const file = await prisma.appFiles.create({
     data: {
       title: title,

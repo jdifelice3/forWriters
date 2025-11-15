@@ -109,6 +109,7 @@ const FileManager = () => {
         alert("Failed to upload file");
     } finally {
         setLoading(false);
+        alert("Your feedback has been uploaded")
     }
   };
 
