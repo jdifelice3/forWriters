@@ -10,14 +10,13 @@ import {
   Divider,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-//import EditIcon from "@mui/icons-material/Edit";
 import { useParams } from "react-router-dom";
-//import { useSessionContext } from "supertokens-auth-react/recipe/session";
-import { GroupDetails } from "../components/GroupDetails";
+
 import { NewsFeed } from "../components/NewsFeed";
-import { EventsCalendar } from "../components/EventsCalendar";
 import { useUserContext } from "../context/UserContext";
 import AddIcon from "@mui/icons-material/Add";
+import { GroupDetailsAdmin } from "../components/GroupDetailsAdmin";
+import { GroupDetails } from "../components/GroupDetails";
 
 const styles = {
     marginLeft: '100px' // or a responsive value
@@ -73,11 +72,15 @@ const Groups = () => {
 
       <Grid container spacing={3}>
         <Grid size={12}>
-          <GroupDetails group={group} isAdmin={isAdmin} />
+           {isAdmin ? (
+              <GroupDetailsAdmin group={group} />
+           ) : (<GroupDetails isAdmin={isAdmin} group={group}/>
+           )}
         </Grid>
       </Grid>
 
       <Divider sx={{ my: 4 }} />
+
       <Card>
         <CardContent>
           <Typography variant="h6" mb={2}>
@@ -106,9 +109,9 @@ const Groups = () => {
           </Typography>
         </CardContent>
       </Card>
-      {/* <EventsCalendar groupId={group.id} isAdmin={isAdmin} /> */}
 
       <Divider sx={{ my: 4 }} />
+
       <Grid container spacing={3}>
         <Grid size={12}>
           <NewsFeed groupId={group.id} isAdmin={isAdmin} />
