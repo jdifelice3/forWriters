@@ -17,6 +17,7 @@ import { useUserContext } from "../context/UserContext";
 import AddIcon from "@mui/icons-material/Add";
 import { GroupDetailsAdmin } from "../components/GroupDetailsAdmin";
 import { GroupDetails } from "../components/GroupDetails";
+import { EventsCalendar } from "../components/EventsCalendar";
 
 const styles = {
     marginLeft: '100px' // or a responsive value
@@ -39,7 +40,7 @@ const Groups = () => {
     (async () => {
       const res = await fetch(`${groupsUrl}/${groupId}`, {
         credentials: "include",
-      });
+      }); 
       if (res.ok) {
         const data = await res.json();
         
@@ -80,35 +81,39 @@ const Groups = () => {
       </Grid>
 
       <Divider sx={{ my: 4 }} />
+      {isAdmin ? (
+        <EventsCalendar groupId={group.id} isAdmin={isAdmin} />
+      ) : (
+        <Card>
+          <CardContent>
+            <Typography variant="h6" mb={2}>
+              Sign Up For a Reading
+            </Typography>
+            <Typography >
+              Want to have your manuscript read and critiqued by other writers?
+            </Typography>
+            <Typography >
+              It's a great way to get valuable feedback on your manuscript.👍
+            </Typography>
+            <Typography>&nbsp;</Typography>
+            <Button
+                startIcon={<AddIcon />}
+                variant="outlined"
+                sx={{ mb: 2 }}
+                onClick={() => navigate(`/readingsignup/${groupId}`)}
+            >
+                SignUp!
+            </Button>
 
-      <Card>
-        <CardContent>
-          <Typography variant="h6" mb={2}>
-            Sign Up For a Reading
-          </Typography>
-          <Typography >
-            Want to have your manuscript read and critiqued by other writers?
-          </Typography>
-          <Typography >
-            It's a great way to get valuable feedback on your manuscript.👍
-          </Typography>
-          <Typography>&nbsp;</Typography>
-          <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              sx={{ mb: 2 }}
-              onClick={() => navigate(`/readingsignup/${groupId}`)}
-          >
-              SignUp!
-          </Button>
-
-           <Divider sx={{ mb: 3 }} />
-           
-           <Typography variant="h6" mb={2}>
-            Review Manuscripts for the Current Reading
-          </Typography>
-        </CardContent>
-      </Card>
+            <Divider sx={{ mb: 3 }} />
+            
+            <Typography variant="h6" mb={2}>
+              Review Manuscripts for the Current Reading
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
+      
 
       <Divider sx={{ my: 4 }} />
 
