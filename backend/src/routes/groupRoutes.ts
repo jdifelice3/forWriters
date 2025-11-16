@@ -1,7 +1,7 @@
 import express from "express";
 //import { GroupType } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
-import { createGroup, getGroup, getGroupByUserId, } from "../database/dbGroups";
+import { createGroup, getGroup, getGroupByUserId, updateGroup } from "../database/dbGroups";
 import { createNewsItem, getNews } from '../database/dbNews';
 import { getEvents, createEvent, eventAddUser } from '../database/dbEvents';
 
@@ -40,15 +40,47 @@ router.post("/", async( _req, res) => {
             defaultMinDaysBetweenReads,
             defaultMaxConsecutiveReads,
             inviteEmailsCsv,
+            websiteUrl
       } = _req.body;
-    const group = await createGroup(authId, name, address, description, imageUrl);
+    const group = await createGroup(authId, name, address, description, imageUrl, websiteUrl);
 
     res.json(group);
   } catch (err) {
     console.error('Error creating group:', err);
     res.status(500).json({ err: 'Error creating group' });
   }
-})
+});
+ 
+router.put("/", async(_req, res) => {
+  
+  try{
+    const {
+      groupId,
+      addressId,
+      authId, 
+      name, 
+      address, 
+      description, 
+      imgUrl,
+      websiteUrl
+    } = _req.body;
+
+    const group = await updateGroup(
+      groupId,
+      addressId,
+      name, 
+      address, 
+      description, 
+      imgUrl,
+      websiteUrl
+    );
+    
+    return res.json(group);
+  } catch (err) {
+    console.error('Error updating group:', err);
+    res.status(500).json({ err: 'Error updating group' });
+  }
+});
 
 /******* News */
 

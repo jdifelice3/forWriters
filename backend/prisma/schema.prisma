@@ -61,6 +61,7 @@ enum UrlOwnerType {
 
 enum UrlType {
   AUDIO
+  FACEBOOK
   IMAGE
   LINKEDIN
   MEETUP
@@ -147,6 +148,7 @@ model Groups {
   name            String        @unique
   description     String?
   imageUrl        String?
+  websiteUrl      String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -154,13 +156,13 @@ model Groups {
   groupsUsers     GroupsUsers[]
   newsItems       GroupsNews[]
   events          GroupsEvents[]
+  groupsUrls            GroupsUrls[]          
   users           Users      @relation(fields: [creatorUserId], references: [id])
-  
 }
 
 model GroupsAddresses {
   id          String   @id @default(cuid())
-  street      String
+  street      String  
   city        String
   state       String
   zip         String
@@ -172,6 +174,7 @@ model GroupsAddresses {
 model GroupsEvents {
   id                  String   @id @default(cuid())
   groupId             String
+  eventType           EventType       @default(READING)
   eventUserType       EventUserType           @default(AUTHOR)
   eventDate           DateTime
   submissionDeadline  DateTime
@@ -207,6 +210,16 @@ model GroupsUsers {
   @@unique([groupId, userId])
 }
 
+model GroupsUrls {
+  id               String                 @id @default(cuid())
+  url              String
+  groupId          String                 
+  urlType          UrlType                @default(WEBSITE)
+  createdAt DateTime                      @default(now())
+
+  groups      Groups?   @relation(fields: [groupId], references: [id])
+}
+
 model Users {
   id             String                   @id @default(cuid())
   superTokensId  String                   @unique
@@ -224,6 +237,7 @@ model Users {
   eventsUsers    EventsUsers[]
   userProfiles   UserProfiles?
   appFiles        AppFiles[]
+  urls            UsersUrls[]  
 }
 
 model UserProfiles {
@@ -237,13 +251,14 @@ model UserProfiles {
   users            Users                   @relation(fields:[userId], references:[id])
 }
 
-model Urls {
+model UsersUrls {
   id               String                 @id @default(cuid())
   url              String
-  urlOwnerId       String                 
-  urlOwnerType     UrlOwnerType           @default(USER)
+  userId           String                 
   urlType          UrlType                @default(WEBSITE)
   createdAt DateTime                      @default(now())
+
+  users            Users?                 @relation(fields: [userId], references: [id])
 }
 
 model Works {

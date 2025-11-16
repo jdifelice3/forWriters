@@ -21,7 +21,8 @@ export const getGroup = async(groupId: string) => {
       },
       include: {
         groupsAddresses: true,
-      }
+        groupsUrls: true
+      },
     });
 
     return group;
@@ -65,13 +66,16 @@ try {
 }
 
 export const createGroup = async (
+      groupId: string,
       authId: string, 
       name: string, 
       address: Address, 
       description: string, 
       groupType: GroupType,
-      imgUrl?: string) => {
-  //add groupType 
+      imgUrl?: string,
+      websiteUrl?: string
+  ) => {
+  
   try {
     // Get userId from authId
     const user: any = await prisma.users.findUnique({
@@ -115,3 +119,41 @@ export const createGroup = async (
     throw error; 
   }
 };
+
+export const updateGroup = async(
+    groupId: string,
+    addressId: string,
+    name: string, 
+    address: Address, 
+    description: string, 
+    imgUrl?: string,
+    websiteUrl?: string
+  ) => {
+
+    console.log('in updateGroup');
+  const group = await prisma.groups.update({
+    where: {
+      id: groupId,
+    },
+    data: {
+      name: name,
+      description: description,
+      imageUrl: imgUrl !== undefined ? imgUrl : "",
+      websiteUrl: websiteUrl,
+      groupsAddresses: {
+        update: {
+          where: {
+            id: addressId, // Specify the ID of the address to update
+          },
+          data: { // Use 'data' instead of 'update'
+            street: address.street,
+            city: address.city,
+            state: address.state,
+            zip: address.zip,
+          },
+        },
+      },
+    },
+  });
+return group;
+}

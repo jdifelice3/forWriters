@@ -45,6 +45,7 @@ const Groups = () => {
         const data = await res.json();
         
         setGroup(data);
+        console.log(data);
 
         //setIsAdmin(data.isAdmin);
         setIsAdmin(false);
@@ -75,7 +76,7 @@ const Groups = () => {
         <Grid size={12}>
            {isAdmin ? (
               <GroupDetailsAdmin group={group} />
-           ) : (<GroupDetails isAdmin={isAdmin} group={group}/>
+           ) : (<GroupDetails group={group}/>
            )}
         </Grid>
       </Grid>

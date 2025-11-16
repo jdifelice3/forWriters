@@ -23,6 +23,7 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
   const [form, setForm] = useState({
     name: group.name || "",
     imageUrl: group.imageUrl || "",
+    websiteUrl: group.websiteUrl || "",
     street: group.groupsAddresses[0].street || "",
     city: group.groupsAddresses[0].city || "",
     state: group.groupsAddresses[0].state || "",
@@ -106,6 +107,15 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
                 sx={{ mb: 2 }}
               />
             ))}
+              <TextField
+                label="Website"
+                name={"websiteUrl"}
+                value={form.websiteUrl}
+                onChange={handleChange}
+                fullWidth
+                disabled={!editing}
+                sx={{ mb: 2 }}
+              />
 
             {editing && (
               <div>

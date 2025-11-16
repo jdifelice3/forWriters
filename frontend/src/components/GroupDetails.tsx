@@ -1,61 +1,35 @@
 import React, { useState } from "react";
+import { Group } from '../types/GroupTypes';
+import { Url, getUrlLabel } from '../types/UrlTypes';
 import {
   Box,
   Typography,
-  TextField,
-  Button,
   Card,
   CardContent,
   Avatar,
   Link,
-  CircularProgress,
+  ListItem,
+  Stack,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import EditIcon from "@mui/icons-material/Edit";
-import SaveIcon from "@mui/icons-material/Save";
 
 interface GroupDetailsProps {
-  group: any;
-  isAdmin: boolean;
+  group: Group;
 }
 
-export const GroupDetails: React.FC<GroupDetailsProps> = ({ group, isAdmin }) => {
-  
-  const [editing, setEditing] = useState(false);
+export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
+  console.log();
   const [form, setForm] = useState({
     name: group.name || "",
+    websiteUrl: group.websiteUrl || "",
     imageUrl: group.imageUrl || "",
-    street: group.groupsAddresses[0].street || "",
-    city: group.groupsAddresses[0].city || "",
-    state: group.groupsAddresses[0].state || "",
-    zip: group.groupsAddresses[0].zip || "",
+    street: (group.groupsAddresses) ?  group.groupsAddresses[0].street : "",
+    city: (group.groupsAddresses) ?  group.groupsAddresses[0].city : "",
+    state: (group.groupsAddresses) ?  group.groupsAddresses[0].state : "",
+    zip: (group.groupsAddresses) ?  group.groupsAddresses[0].zip : "",
+    urls: (group.groupsUrls) ? group.groupsUrls : []  
+    //urls: group.urls
   });
-
-
-  const [saving, setSaving] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await fetch(`/api/groups/${group.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to save");
-      setEditing(false);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to save group details");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${form.street}, ${form.city}, ${form.state} ${form.zip}`
@@ -68,70 +42,53 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group, isAdmin }) =>
           Group Details
         </Typography>
 
-        {isAdmin && !editing && (
-          <Button
-            variant="outlined"
-            startIcon={<EditIcon />}
-            onClick={() => setEditing(true)}
-            sx={{ mb: 2 }}
-          >
-            Edit
-          </Button>
-        )}
-
         <Grid container spacing={2}>
-          <Grid size={12}>
+
+          <Grid size={2}>  
             <Avatar
               src={form.imageUrl}
               alt={form.name}
               sx={{ width: 120, height: 120 }}
             />
           </Grid>
-
-          <Grid size={12}>
-            <TextField
-              label="Group Name"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              fullWidth
-              disabled={!isAdmin || !editing}
-              sx={{ mb: 2 }}
-            />
-
-            {["street","city", "state", "zip"].map((field) => (
-              <TextField
-                key={field}
-                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                name={field}
-                value={(form as any)[field]}
-                onChange={handleChange}
-                fullWidth
-                disabled={!isAdmin || !editing}
-                sx={{ mb: 2 }}
-              />
-            ))}
-
-            {isAdmin && editing && (
-              <Button
-                variant="contained"
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? <CircularProgress size={20} /> : "Save"}
-              </Button>
-            )}
+          <Grid size={4}>
+            <Stack >
+                <ListItem>
+                    <Typography sx={{fontWeight: "bold"}}>Address:</Typography>
+                </ListItem>
+                <ListItem>
+                    <Typography>{form.street}<br/>{`${form.city}, ${form.state} ${form.zip}`}</Typography>
+                </ListItem>
+                <ListItem>
+                    <Typography><a href={form.websiteUrl} target='_blank' rel='noopener noreferrer'>{form.websiteUrl}</a></Typography>
+                </ListItem>
+            </Stack>
           </Grid>
+          <Grid size={6}>
+            <Stack >
+                <ListItem>
+                    <Typography sx={{fontWeight: "bold"}}>Social Media:</Typography>
+                </ListItem>
+                <ListItem>
+                    <Stack>
+                    {form.urls.map((u) => (
+                      <ListItem sx={{p:0}}>
+                        <Typography><a href={u.url} target='_blank' rel='noopener noreferrer'>{getUrlLabel(u.urlType)}</a></Typography>
+                      </ListItem>
+                    ))}
+                    </Stack>
+                </ListItem>
+            </Stack>
+
+          </Grid>
+
         </Grid>
 
-        {!isAdmin && (
-          <Box mt={2}>
-            <Link href={mapUrl} target="_blank" rel="noopener">
-              View on Google Maps
-            </Link>
-          </Box>
-        )}
+        <Box mt={2}>
+          <Link href={mapUrl} target="_blank" rel="noopener">
+            View on Google Maps
+          </Link>
+        </Box>
       </CardContent>
     </Card>
   );
