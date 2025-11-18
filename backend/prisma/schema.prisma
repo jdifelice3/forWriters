@@ -86,58 +86,71 @@ enum WorkType {
 
 
 model AppFiles {
-  id          String    @id @default(cuid())
-  userId      String    
-  title       String
-  description String?
-  filename    String
-  documentType DocumentType  @default(MANUSCRIPT)
-  mimetype    FileType  @default(PDF)   
-  url         String
-  uploadedAt  DateTime  @default(now())
+  id                            String                    @id @default(cuid())
+  userId                        String    
+  title                         String
+  description                   String?
+  filename                      String
+  documentType                  DocumentType              @default(MANUSCRIPT)
+  mimetype                      FileType                  @default(PDF)   
+  url                           String
+  uploadedAt                    DateTime                  @default(now())
 
-  eventSignups   EventSignups[]
-  users        Users     @relation(fields: [userId], references: [id])
+  eventSubmission               EventSubmission[]
+  users                         Users                     @relation(fields: [userId], references: [id])
+  submissionFeedback            SubmissionFeedback[] 
 }
 
 model Events {
-  id              String                  @id @default(cuid())
-  name            String
-  eventType       EventType               @default(READING)
-  EventUserType   EventUserType           @default(AUTHOR)
-  createdAt       DateTime                @default(now())
-  createdUserId   String
-  eventDate       String
-  eventTime       String
-  eventLocation   String
-  description     String
+  id                            String                    @id @default(cuid())
+  name                          String
+  eventType                     EventType                 @default(READING)
+  EventUserType                 EventUserType             @default(AUTHOR)
+  createdAt                     DateTime                  @default(now())
+  createdUserId                 String
+  eventDate                     String
+  eventTime                     String
+  eventLocation                 String
+  description                   String
 
-  createdUser     Users                   @relation(fields: [createdUserId], references: [id])
-  eventsUsers     EventsUsers[]
+  createdUser                   Users                     @relation(fields: [createdUserId], references: [id])
+  eventsUsers                   EventsUsers[]
 }
 
-model EventSignups {
-  id          String   @id @default(cuid())
-  eventId     String
-  userId      String
-  appFileId   String?
-  signedAt    DateTime @default(now())
+model EventSubmission {
+  id                          String                      @id @default(cuid())
+  eventId                     String
+  userId                      String
+  appFileId                   String?
+  signedAt                    DateTime @default(now())
 
-  groupEvents       GroupsEvents        @relation(fields: [eventId], references: [id])
-  users        Users              @relation(fields: [userId], references: [id])
-  appFiles  AppFiles?          @relation(fields: [appFileId], references: [id])
+  groupEvents                 GroupsEvents                @relation(fields: [eventId], references: [id])
+  users                       Users                       @relation(fields: [userId], references: [id])
+  appFiles                    AppFiles?                   @relation(fields: [appFileId], references: [id])
+  submissionFeedback          SubmissionFeedback[]
+  @@unique([eventId, userId, appFileId])
+}
+
+model EventFeedback {
+  id                          String                      @id @default(cuid())
+  eventId                     String    
+  appFileId                   String
+  userId                      String
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+
   @@unique([eventId, userId, appFileId])
 }
 
 model EventsUsers {
-  id              String                  @id @default(cuid())
-  eventId         String  
-  userId          String
-  isAdmin         Boolean                 @default(false)
-  joinedAt        DateTime                @default(now())
+  id                          String                      @id @default(cuid())
+  eventId                     String  
+  userId                      String
+  isAdmin                     Boolean                     @default(false)
+  joinedAt                    DateTime                    @default(now())
 
-  events          Events                  @relation(fields:[eventId], references:[id])
-  users           Users                   @relation(fields:[userId], references:[id])
+  events                      Events                      @relation(fields:[eventId], references:[id])
+  users                       Users                       @relation(fields:[userId], references:[id])
   @@unique([eventId, userId])
 }
 
@@ -183,7 +196,7 @@ model GroupsEvents {
   createdAt           DateTime @default(now())
 
   groups               Groups @relation(fields: [groupId], references: [id])
-  signups             EventSignups[]
+  eventSubmission      EventSubmission[]
 }
 
 model GroupsNews {
@@ -220,6 +233,20 @@ model GroupsUrls {
   groups      Groups?   @relation(fields: [groupId], references: [id])
 }
 
+model SubmissionFeedback {
+  id              String                  @id @default(cuid())
+  submissionId    String                  
+  reviewerId      String                  
+  appFileId       String                  
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+
+  users            Users                @relation(fields:[reviewerId], references:[id])
+  eventSubmission  EventSubmission        @relation(fields:[submissionId], references:[id])
+  appFiles         AppFiles               @relation(fields:[appFileId], references:[id])
+  @@unique([submissionId, reviewerId, appFileId])
+}
+
 model Users {
   id             String                   @id @default(cuid())
   superTokensId  String                   @unique
@@ -231,13 +258,14 @@ model Users {
 
   groupsUsers  GroupsUsers[]
   groups        Groups[]
-  eventSignups   EventSignups[]
+  eventSubmission   EventSubmission[]
   works          Works[]
   events         Events[]
   eventsUsers    EventsUsers[]
   userProfiles   UserProfiles?
   appFiles        AppFiles[]
   urls            UsersUrls[]  
+  submissionFeedback  SubmissionFeedback[]  
 }
 
 model UserProfiles {

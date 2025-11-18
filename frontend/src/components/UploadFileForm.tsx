@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { UploadFileFormProperties } from "../types/FileTypes";
+import { AppFile, UploadFileFormProperties } from "../types/FileTypes";
 import {
   Box,
   Button,
@@ -11,15 +11,18 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
+//import folderOpen from "../assets/images/";
 import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
 
 interface UploadFileProps {
-  onSendData: (data: string) => void;
+  onSendData: (data: AppFile, eventId?: string) => void;
   formProperties: UploadFileFormProperties;
+  eventId?: string;
+  isUserDisabled?: boolean;
 }
 
-const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties}) => {
+const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, eventId, isUserDisabled=true}) => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -54,11 +57,15 @@ const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties})
         });
   
         if (!res.ok) throw new Error("Upload failed");
-          const newFile = await res.json();
+          const file: AppFile = await res.json();
           setFile(null);
           setTitle("");
           setDescription("");
-          onSendData("reload");
+          if(eventId){
+            onSendData(file, eventId);
+          } else {
+            onSendData(file);
+          }
       } catch (err) {
           console.error(err);
           alert("Failed to upload file");
@@ -70,53 +77,67 @@ const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties})
 
   return (
     <div>
-    <Typography variant="h4" mb={3} textAlign="center">
-            📂 {formProperties.title}
+    <Typography variant={formProperties.titleVariant} mb={1} textAlign="center">
+        {/* <img src="/src/assets/images/folder.png" alt="folder"/> */}
+         {(() => {
+                if (formProperties.title.length > 0) {
+                    return formProperties.title;
+                }
+            })()}
     </Typography>
     <Card sx={{ mb: 4, p: 2 }}>
         <CardContent>
+         {(function test() {
+            if (1 === 1) {
+              return "";
+            }
+          })()}
+
             <Typography variant="h6" gutterBottom>
             {formProperties.subtitle}
             </Typography>
             <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={2}>
                 <Grid size={12}>
-                <Button
-                    variant="outlined"
-                    component="label"
-                    startIcon={<UploadIcon />}
-                >
-                    {file ? file.name : formProperties.buttonChooseFileText}
-                    <input type="file" hidden onChange={handleFileChange} />
-                </Button>
+                  <Button
+                      variant="outlined"
+                      component="label"
+                      startIcon={<UploadIcon />}
+                  >
+                      {file ? file.name : formProperties.buttonChooseFileText}
+                      <input type="file" hidden onChange={handleFileChange} />
+                  </Button>
                 </Grid>
                 <Grid size={5}>
-                <TextField
-                    label="Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    fullWidth
-                    required
-                />
+                  <TextField
+                      label="Title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      fullWidth
+                      required
+                  />
                 </Grid>
                 <Grid size={7}>
-                <TextField
-                    label="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    fullWidth
-                />
+                  <TextField
+                      label="Description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      fullWidth
+                  />
                 </Grid>
-                <Grid size={12}>
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={loading}
-                    startIcon={<UploadIcon />}
-                >
-                    {loading ? <CircularProgress size={24} /> : formProperties.buttonUploadText}
-                </Button>
+                <Grid size={3}>
+                  <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      disabled={loading}
+                      startIcon={<UploadIcon />}
+                  >
+                      {loading ? <CircularProgress size={24} /> : formProperties.buttonUploadText}
+                  </Button>
+                </Grid>
+                <Grid size={9}>
+                  <Typography sx={{color: "green", fontWeight: "bold"}}>You have submitted feedback for this story</Typography>
                 </Grid>
             </Grid>
             </Box>

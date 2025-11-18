@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
-
 import {
   Box,
   Typography,
   CircularProgress,
-  Divider,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
 import { useParams } from "react-router-dom";
-import { GroupDetails } from "../components/GroupDetails";
-import { NewsFeed } from "../components/NewsFeed";
 import { EventsCalendar } from "../components/EventsCalendar";
 import { useUserContext } from "../context/UserContext";
 

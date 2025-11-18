@@ -1,4 +1,5 @@
 import { PrismaClient, GroupType } from "@prisma/client";
+import { AppFile } from "../types/FileTypes";
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
@@ -9,11 +10,19 @@ export const getEvents = async(groupId: string) => {
       where: {
         groupId: groupId,
       },
-      include: {
-        signups: true
-      },
       orderBy: {
         eventDate: 'asc',
+      },
+      include: {
+        eventSubmission: {
+          include: {
+            users: {
+              include: {
+                userProfiles: true
+              }
+            }
+          },
+        },
       },
     });
 
@@ -24,7 +33,7 @@ export const getEvents = async(groupId: string) => {
   }
 }
 
-export const getEventSignups = async(eventId: string) => {
+export const getEventSubmissions = async(eventId: string) => {
 
   try {
     
@@ -33,7 +42,7 @@ export const getEventSignups = async(eventId: string) => {
         id: eventId
       },
       include: {
-        signups: {
+        eventSubmission: {
           include: {
             appFiles: {
               include: {
@@ -75,7 +84,7 @@ export const createEvent = async(groupId: string, eventDate: Date, submissionDea
 
 export const eventAddUser = async(eventId: string, userId: string, eventType: string) => {
   try {
-      const eventItem = await prisma.eventSignups.create({
+      const eventItem = await prisma.eventSubmission.create({
       data: {
         eventId: eventId,
         userId: userId
@@ -86,5 +95,22 @@ export const eventAddUser = async(eventId: string, userId: string, eventType: st
   } catch (error) {
     console.error('Error creating event:', error);
     throw error; 
+  }
+}
+
+export const createEventFeedback = async(eventId: string, userId: string, appFileId: string) => {
+  try {
+    const result = await prisma.eventFeedback.create({
+      data: {
+        eventId: eventId,
+        userId: userId,
+        appFileId: appFileId
+      },
+    });
+    console.log('dbEvents.createEventFeedback', result);
+    return result;
+  } catch (err) {
+    console.error('Error adding a file to an event:', err);
+    throw err;
   }
 }

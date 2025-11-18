@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AppFile, UploadFileFormProperties } from "../types/FileTypes";
+import { AppFile, FileListProperties, UploadFileFormProperties } from "../types/FileTypes";
 import { generateRandomString } from "../util/Math";
 import FileList from "../components/FileList";
 import UploadFileForm from "../components/UploadFileForm";
@@ -17,7 +17,17 @@ const uploadFormProperties: UploadFileFormProperties =
     title: "Upload and Manage Your Manuscripts",
     subtitle: "Upload a new manuscript",
     buttonChooseFileText: "CHOOSE FILE",
-    buttonUploadText: "UPLOAD"
+    buttonUploadText: "UPLOAD",
+    titleVariant: "h4",
+    showUploadIcon: true
+  }
+
+const fileListProperties: FileListProperties =
+  {
+    showPreviewButton: true,
+    buttonDownloadText: "DOWNLOAD",
+    showDeleteButton: true,
+    showEditButton: true 
   }
 
 const FileManager = () => {
@@ -44,12 +54,12 @@ const FileManager = () => {
     })();
   }, [reload]);
 
-  const handleReload = (data: AppFile[]) => {
-    setFiles(data);
+  const handleReload = (file: AppFile[]) => {
+    setFiles(file);
     setReload(generateRandomString(8)); //change the reload variable to something unique. This will rerun useEffect
   };
 
-  const reloadFromUploadForm = (data: string) => {
+  const reloadFromUploadForm = (file: AppFile) => {
     setReload(generateRandomString(8));
   }
 
@@ -71,7 +81,7 @@ const FileManager = () => {
       {isLoading ? (
           <Box display="flex" justifyContent="center" p={6} ><CircularProgress /></Box>
         ) : (
-          <FileList files={files} onSendData={handleReload}/>
+          <FileList files={files} onSendData={handleReload} fileListProperties={fileListProperties}/>
       )}
 
     </Box>

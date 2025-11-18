@@ -45,7 +45,6 @@ const Groups = () => {
         const data = await res.json();
         
         setGroup(data);
-        console.log(data);
 
         //setIsAdmin(data.isAdmin);
         setIsAdmin(false);

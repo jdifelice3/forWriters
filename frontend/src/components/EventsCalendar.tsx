@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { EventType, Submission } from "../types/EventTypes";
 import {
   Box,
   Typography,
@@ -22,16 +23,9 @@ interface EventsCalendarProps {
   isAdmin: boolean;
 }
 
-interface EventItem {
-  id: string;
-  eventDate: string;
-  submissionDeadline: string;
-  signups: any[];
-}
-
 export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin }) => {
   const { user, isLoading, error } = useUserContext();
-  const [events, setEvents] = useState<EventItem[]>([]);
+  const [events, setEvents] = useState<EventType[]>([]);
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState("");
   const [deadline, setDeadline] = useState("");
@@ -47,7 +41,8 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
           .then((r) => r.json())
           .then((data) => setEvents(data))
           .catch(console.error);
-      } catch (err) {
+
+        } catch (err) {
         console.error("Error isLoading events:", err);
       }
     })();
@@ -82,28 +77,27 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
       }
   };
 
-  const disableSignInButton = (eventId: string): boolean => {
-      let result: boolean = false;
-      const eventsIndex: any = events.findIndex(event =>
-        event.id === eventId);
-      if(eventsIndex === -1){
-        result = false;
-      }
-      
-      if(events[eventsIndex].signups.length === 0){
-        result = false;
-      }
-      const signupsIndex: any = events[eventsIndex].signups.findIndex(
-          signup => signup.userId === user.id);
+const disableSignInButton = (eventId: string): boolean => {
+  //console.log('events', events);
 
-      if(signupsIndex === -1){
-        result = false;
-      } else {
-        result = true;
+  try {
+    let isMatched = false;
+    
+    events.forEach((e: EventType) => {
+      if (e.id === eventId && e.eventSubmission.length > 0) {
+        e.eventSubmission.forEach((s: Submission) => {
+          if (s.userId === user.id) {
+            isMatched = true; // Set flag to true
+          }
+        });
       }
-
-      return result;
+    });
+    
+    return isMatched; // Return the flag value
+  } catch (err) {
+    return false;
   }
+};
 
   if (isLoading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -147,12 +141,11 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
                 <Typography variant="body2" color="text.secondary">
                   Submit manuscripts by <b>{new Date(e.submissionDeadline).toLocaleDateString()}</b>
                 </Typography>
-                {e.signups.length > 0 && (
+                {/* {e.eventSubmission && e.eventSubmission.length > 0 && (
                 <Typography variant="body2" color="text.secondary">
                   Authors:<br/>
-                  {/* {JSON.stringify(e.signups)} */}
                 </Typography>
-                )}
+                )} */}
                 {!isAdmin && (
                   <Button
                     id={e.id}

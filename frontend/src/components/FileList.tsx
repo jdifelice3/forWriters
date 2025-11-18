@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AppFile } from '../types/FileTypes';
+import { AppFile, FileListProperties } from '../types/FileTypes';
 import {
   Button,
   Card,
@@ -27,9 +27,10 @@ import PreviewIcon from "@mui/icons-material/Preview";
 interface FileListProps {
   files: AppFile[];
   onSendData: (data: AppFile[]) => void;
+  fileListProperties: FileListProperties;
 }
 
-const FileList: React.FC<FileListProps> = ({files, onSendData}) => {
+const FileList: React.FC<FileListProps> = ({files, onSendData, fileListProperties}) => {
   
   const [editFile, setEditFile] = useState<AppFile | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -107,7 +108,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData}) => {
                   <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ mb: 5 }}
+                    sx={{ mb: 1 }}
                   >
                     {f.description || "No description"}
                   </Typography>
@@ -116,6 +117,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData}) => {
                   </Typography>
                 </CardContent>
                 <CardActions>
+                  {fileListProperties.showPreviewButton ? (
                   <Button
                     size="small"
                     startIcon={<PreviewIcon />}
@@ -124,12 +126,20 @@ const FileList: React.FC<FileListProps> = ({files, onSendData}) => {
                   >
                     Preview
                   </Button>
+                  ) : (
+                    <div></div>   
+                  )}
                   <Button href={f.url} download={f.filename} size="small">
-                    Download
+                    {fileListProperties.buttonDownloadText}
                   </Button>
+                  {fileListProperties.showEditButton ? (
                   <IconButton onClick={() => handleEdit(f)} size="small">
                     <EditIcon fontSize="small" />
                   </IconButton>
+                  ) : (
+                    <div></div>
+                  )}
+                  {fileListProperties.showDeleteButton ? (
                   <IconButton
                     onClick={() => handleDelete(f.id)}
                     size="small"
@@ -137,6 +147,9 @@ const FileList: React.FC<FileListProps> = ({files, onSendData}) => {
                   >
                     <DeleteIcon fontSize="small" />
                   </IconButton>
+                  ) : (
+                    <div></div>
+                  )}
                 </CardActions>
               </Card>
             </Grid>
