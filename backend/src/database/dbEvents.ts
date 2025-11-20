@@ -1,26 +1,25 @@
-import { PrismaClient, GroupType } from "@prisma/client";
-import { AppFile } from "../types/FileTypes";
-import { z } from 'zod';
+import { PrismaClient } from "@prisma/client";
+import { Reading } from "../domain-types";
 
 const prisma = new PrismaClient();
 
-export const getEvents = async(groupId: string) => {
+export const getReadings = async(groupId: string) => {
   try {
-    const events: any = await prisma.groupsEvents.findMany({
+    const events: any = await prisma.reading.findMany({
       where: {
         groupId: groupId,
       },
       orderBy: {
-        eventDate: 'asc',
+        readingDate: 'asc',
       },
       include: {
-        eventSubmission: {
+        readingAuthor: {
           include: {
-            users: {
+            user: {
               include: {
-                userProfiles: true
-              }
-            }
+                userProfile: true
+              },
+            },
           },
         },
       },
@@ -33,22 +32,56 @@ export const getEvents = async(groupId: string) => {
   }
 }
 
-export const getEventSubmissions = async(eventId: string) => {
+export const getReading = async(readingId: string) => {
+  try {
+      const reading: any = await prisma.reading.findUnique({
+      where: {
+        id: readingId,
+      },
+      include: {
+        readingAuthor: {
+          include: {
+            readingManuscript: {
+              include: {
+                appFile: {
+                  include: {
+                    user: {
+                      include: {
+                        userProfile: true
+                      },
+                    },
+                  },
+                }
+              }
+            }
+          },
+        },
+      },
+    });
+
+    return reading;
+  } catch (err) {
+    console.error('Error getting reading:', err);
+    throw err;
+  }
+}
+
+export const getReadingAuthors = async(readingId: string) => {
 
   try {
     
-    const events: any = await prisma.groupsEvents.findMany({
+    const events: any = await prisma.readingAuthor.findMany({
       where: {
-        id: eventId
+        id: readingId
       },
       include: {
-        eventSubmission: {
+        readingManuscript: {
           include: {
-            appFiles: {
+            appFile: {
               include: {
-                users: {
+                user: {
                   include: {
-                    userProfiles: true
+                    userProfile: true
                   }
                 }
               },
@@ -64,53 +97,70 @@ export const getEventSubmissions = async(eventId: string) => {
     }
 }
 
-export const createEvent = async(groupId: string, eventDate: Date, submissionDeadline: Date) => {
+export const createReading = async(
+    groupId: string, 
+    name: string, 
+    createdUserId: string,
+    readingDate: string,
+    readingStartTime: string,
+    readingEndTime: string,
+    submissionDeadline: string,
+    description: string    
+  ) => {
   try {
+  console.log('in create reading');
 
-    const eventItem = await prisma.groupsEvents.create({
+    const reading = await prisma.reading.create({
       data: {
         groupId: groupId,
-        eventDate: new Date(eventDate),
-        submissionDeadline: new Date(submissionDeadline)
+        readingDate: new Date(readingDate),
+        submissionDeadline: new Date(submissionDeadline),
+        name: name,
+        createdUserId: createdUserId,
+        readingStartTime: readingStartTime, 
+        readingEndTime: readingEndTime, 
+        description: description,
       }
     });
 
-    return eventItem;
+    return reading;
   } catch (error) {
-    console.error('Error creating event:', error);
+    console.error('Error creating reading:', error);
     throw error; 
   }
 } 
 
-export const eventAddUser = async(eventId: string, userId: string, eventType: string) => {
+export const createReadingAuthor = async(readingId: string, userId: string) => {
+  console.log('readingId', readingId, 'userId', userId);
   try {
-      const eventItem = await prisma.eventSubmission.create({
-      data: {
-        eventId: eventId,
-        userId: userId
-      }
-    });
+      const readingAuthor = await prisma.readingAuthor.create({
+        data: {
+          readingId: readingId,
+          authorId: userId,
+        }
+      });
 
-    return eventItem;
+    return readingAuthor;
+
   } catch (error) {
-    console.error('Error creating event:', error);
+    console.error('Error adding a user to a Reading:', error);
     throw error; 
   }
 }
 
-export const createEventFeedback = async(eventId: string, userId: string, appFileId: string) => {
+export const createReadingFeedback = async(readingManuscriptId: string, feedbackFileId: string, userId: string) => {
   try {
-    const result = await prisma.eventFeedback.create({
+    const result = await prisma.readingFeedback.create({
       data: {
-        eventId: eventId,
-        userId: userId,
-        appFileId: appFileId
+        readingManuscriptId: readingManuscriptId,
+        feedbackFileId: feedbackFileId,
+        userId: userId
       },
     });
-    console.log('dbEvents.createEventFeedback', result);
+    console.log('dbEvents.createReadingFeedback', result);
     return result;
   } catch (err) {
-    console.error('Error adding a file to an event:', err);
+    console.error('Error adding a feedback file to readingFeedback:', err);
     throw err;
   }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { EventType, Submission } from "../types/EventTypes";
+import { Reading } from "../../../backend/src/domain-types";
 import {
   Box,
   Typography,
@@ -11,90 +11,148 @@ import {
   DialogContent,
   TextField,
   DialogActions,
-  CircularProgress
+  CircularProgress,
+  Select, 
+  MenuItem
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { useUserContext } from "../context/UserContext";
+import { useForm } from "react-hook-form";
 
 interface EventsCalendarProps {
   groupId: string;
-  isAdmin: boolean;
 }
 
-export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin }) => {
+type FormInput = {
+  name: string,
+  readingDate: Date,
+  readingStartTime: string,
+  readingEndTime: string,
+  submissionDeadline: Date,
+  description: string
+}
+
+export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId }) => {
   const { user, isLoading, error } = useUserContext();
-  const [events, setEvents] = useState<EventType[]>([]);
+  const [reading, setReading] = useState<Reading[]>([]);
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState("");
-  const [deadline, setDeadline] = useState("");
+  const [readingDate, setReadingDate] = useState("");
+  const [name, setName] = useState("");
+  //const [addressId, setAddressId] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [description, setDescription] = useState("");
   const [buttonEventId, setButtonEventId] = useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [err, setErr] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<string | null>(null);
+  const [submissionDeadline, setSubmissionDeadline] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   
+  const {
+      register,
+      handleSubmit,
+      formState: { errors },
+    } = useForm<FormInput>({
+      defaultValues: {
+        name: "", 
+        readingDate: new Date(),
+        readingStartTime: "",
+        readingEndTime: "",
+        submissionDeadline: new Date(),
+        description: ""
+      },
+    });
   useEffect(() => {
     if (!user || isLoading) return;
 
-    const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
+    const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events`;
+    console.log('eventsUrl', eventsUrl);
     (async () => {
       try {
-        const events = await fetch(eventsUrl, { credentials: "include" })
-          .then((r) => r.json())
-          .then((data) => setEvents(data))
-          .catch(console.error);
-
-        } catch (err) {
+        const res = await fetch(`${eventsUrl}/${groupId}`, {
+        credentials: "include",
+        }); 
+        if (res.ok) {
+          const data = await res.json();
+          console.log('events', data);
+          setReading(data);
+        }
+        //setIsAdmin(data.isAdmin);
+        setIsAdmin(false);
+         
+      } catch (err) {
         console.error("Error isLoading events:", err);
       }
     })();
   }, [groupId, buttonEventId]);
 
-  const handleAddEvent = async () => {
-    const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
-    const res = await fetch(eventsUrl, {
+  const handleAddReading = async (values: FormInput ) => {
+    console.log('in handleAddReading');
+    setSubmitting(true);
+    setErr(null);
+    setSuccess(null);
+    try{
+    const eventsURrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
+    const res = await fetch(eventsURrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventDate: date, userId: deadline }),
+      body: JSON.stringify({ 
+        name: values.name, 
+        createdUserId: user.id,
+        readingDate: values.readingDate,
+        readingStartTime: values.readingStartTime,
+        readingEndTime: values.readingEndTime,
+        //readingAddressId: addressId,
+        submissionDeadline: values.submissionDeadline,
+        description: values.description
+      }),
       credentials: "include",
     });
     if (res.ok) {
       const newEvent = await res.json();
-      setEvents((prev) => [newEvent, ...prev]);
+      setReading((prev) => [newEvent, ...prev]);
       setOpen(false);
     }
+    setSuccess("Reading created successfully.");
+  } catch (err) {
+    setErr("Failed to create reading");
+  } finally {
+    setSubmitting(false);
+  }
+
   };
 
-  const handleSignup = async (event: React.MouseEvent<HTMLButtonElement>, eventId: string) => {
-      const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/signup`;
+  const handleSignup = async (event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+      const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/signup`;
       const res = await fetch(eventsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId: eventId, userId: user ? user.id : "" }),
+        body: JSON.stringify({ userId: user ? user.id : "" }),
         credentials: "include",
       });
       if (res.ok){
         alert("You are signed up for this reading!");
-        setButtonEventId(eventId);
+        setButtonEventId(readingId);
       }
   };
 
 const disableSignInButton = (eventId: string): boolean => {
-  //console.log('events', events);
-
+  console.log('events in disableSignInButton', reading);
   try {
-    let isMatched = false;
-    
-    events.forEach((e: EventType) => {
-      if (e.id === eventId && e.eventSubmission.length > 0) {
-        e.eventSubmission.forEach((s: Submission) => {
-          if (s.userId === user.id) {
-            isMatched = true; // Set flag to true
+      for(let i=0; i < reading.length; i++){
+        for(let k=0; k < reading[i].readingAuthor.length; k++){
+          if(reading[i].id === eventId && reading[i].readingAuthor[k].authorId === user.id){
+            return true;
           }
-        });
+        }
       }
-    });
     
-    return isMatched; // Return the flag value
+    return false; // Return the flag value
   } catch (err) {
+
     return false;
   }
 };
@@ -117,14 +175,14 @@ const disableSignInButton = (eventId: string): boolean => {
             onClick={() => setOpen(true)}
             sx={{ mb: 2 }}
           >
-            Create Event
+            Create Reading
           </Button>
         )}
 
         <Grid container spacing={2}>
-          {events.map((e) => (
+          {reading.map((e) => (
             <Grid size={12} key={e.id}>
-              <Box
+              <Box 
                 sx={{
                   border: "1px solid #ddd",
                   p: 2,
@@ -135,8 +193,11 @@ const disableSignInButton = (eventId: string): boolean => {
                       : "#f3e5f5",
                 }}
               >
+                <Typography variant="h6" fontWeight="bold">
+                  {e.name}
+                </Typography>
                 <Typography variant="subtitle1" fontWeight="bold">
-                  {new Date(e.eventDate).toLocaleDateString()}
+                  {new Date(e.readingDate).toLocaleDateString()}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Submit manuscripts by <b>{new Date(e.submissionDeadline).toLocaleDateString()}</b>
@@ -166,28 +227,111 @@ const disableSignInButton = (eventId: string): boolean => {
         </Grid>
 
         <Dialog open={open} onClose={() => setOpen(false)}>
-          <DialogTitle>Create Reading Event</DialogTitle>
+          <DialogTitle>Create a Reading</DialogTitle>
+            <Box  component="form" onSubmit={handleSubmit(handleAddReading)} noValidate>
+
           <DialogContent>
             <TextField
-              label="Event Date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              label="Reading Name"
+              type="string"
+              value={name}
               fullWidth
               sx={{ my: 2 }}
+              required
+              {...register("name", {
+                onChange: (e) => setName(e.target.value) // Update React Hook Form's value
+              })}
+              error={!!errors.name}
+              helperText={errors.name?.message}            
             />
+            <TextField
+              label="Description"
+              type="string"
+              value={description}
+              fullWidth
+              sx={{ my: 2 }}
+              required
+              {...register("description", {
+                onChange: (e) => setDescription(e.target.value) // Update React Hook Form's value
+              })}
+              error={!!errors.name}
+              helperText={errors.name?.message}            
+            />
+            <TextField
+              label="Reading Date"
+              type="date"
+              value={readingDate}
+              fullWidth
+              sx={{ my: 2 }}
+              required
+              {...register("readingDate", {
+                onChange: (e) => setReadingDate(e.target.value) // Update React Hook Form's value
+              })}
+              error={!!errors.name}
+              helperText={errors.name?.message}            />
+            <TextField
+              label="Start Time"
+              type="string"
+              value={startTime}
+              fullWidth
+              sx={{ my: 2 }}
+              required
+              {...register("readingStartTime", {
+                onChange: (e) => setStartTime(e.target.value) // Update React Hook Form's value
+              })}
+              error={!!errors.name}
+              helperText={errors.name?.message}            />
+            <TextField
+              label="End Time"
+              type="string"
+              value={endTime}
+              fullWidth
+              sx={{ my: 2 }}
+              required
+              {...register("readingEndTime", {
+                onChange: (e) => setEndTime(e.target.value) // Update React Hook Form's value
+              })}
+              error={!!errors.name}
+              helperText={errors.name?.message}            />
+            {/* <Select
+              label=""
+              type="string"
+              // labelId="demo-simple-select-label"
+              // id="demo-simple-select"
+              value={addressId}
+              onChange={(e) => setAddressId(e.target.value)}
+              required
+            >
+              <MenuItem value={10}>Ten</MenuItem>
+              <MenuItem value={20}>Twenty</MenuItem>
+              <MenuItem value={30}>Thirty</MenuItem>
+          </Select> */}
             <TextField
               label="Submission Deadline"
               type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
+              value={submissionDeadline}
               fullWidth
+              required
+              {...register("submissionDeadline", {
+                onChange: (e) => setSubmissionDeadline(e.target.value) // Update React Hook Form's value
+              })}
+              error={!!errors.name}
+              helperText={errors.name?.message}           
             />
+            
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleAddEvent}>Save</Button>
+            <Button
+              type="submit"
+              variant="contained"
+              startIcon={<AddIcon />}
+              disabled={submitting}
+            >
+            {submitting ? <CircularProgress size={22} /> : "Create Reading"}
+          </Button>
             <Button onClick={() => setOpen(false)}>Cancel</Button>
           </DialogActions>
+          </Box>
         </Dialog>
       </CardContent>
     </Card>

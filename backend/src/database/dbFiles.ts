@@ -1,9 +1,10 @@
-import { PrismaClient, FileType } from "@prisma/client";
-
+import { PrismaClient } from "@prisma/client";
+import { FileType, AppFile } from "../domain-types";
 const prisma = new PrismaClient();
 
 export const getFileRecords = async(authId: string) => {
-  const user: any = await prisma.users.findUnique({
+  
+  const user: any = await prisma.user.findUnique({
     where: 
         {
             superTokensId: authId,
@@ -17,17 +18,16 @@ export const getFileRecords = async(authId: string) => {
         },
     });
 
-  const files = user.appFiles;
-  console.log('in getFileRecords, appFiles', files);
+  const files: AppFile[] = user.appFiles;
   return files;
 }
 
 export const createFileRecord = async(authId: string, mimeType: FileType, filename: string,
         title: string, description: string
  ) => {
-  const user = await prisma.users.findUnique({ where: { superTokensId: authId } });
+  const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
-  const file = await prisma.appFiles.create({
+  const file = await prisma.appFile.create({
     data: {
       title: title,
       description: description,
@@ -42,7 +42,7 @@ export const createFileRecord = async(authId: string, mimeType: FileType, filena
 }
 
 export const updateFileRecord = async(id: string, title: string, description: string) => {
-  const file = await prisma.appFiles.update({
+  const file = await prisma.appFile.update({
     where: {
       id: id, 
     },
@@ -61,7 +61,7 @@ export const deleteFileRecord = async(id: string) => {
 
   //get file url to return the file path so it can be deleted
   try{
-    const fileMetaData = await prisma.appFiles.findUnique({
+    const fileMetaData = await prisma.appFile.findUnique({
       where: {
         id: id
       }
@@ -70,7 +70,7 @@ export const deleteFileRecord = async(id: string) => {
     fileUrl = (typeof fileMetaData?.url === "string") ? fileMetaData.url : "";
 
     //delete the record of the file
-    file = await prisma.appFiles.delete({
+    file = await prisma.appFile.delete({
       where: {
         id: id
       }

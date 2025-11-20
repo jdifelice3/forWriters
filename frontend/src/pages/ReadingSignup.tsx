@@ -35,7 +35,7 @@ const ReadingSignup = () => {
         setGroup(data);
 
         //setIsAdmin(data.isAdmin);
-        setIsAdmin(false);
+        setIsAdmin(true);
       }
       setLoadingData(false);
     })();
@@ -59,10 +59,10 @@ const ReadingSignup = () => {
         {group.name}
       </Typography>
       <Typography variant="h5" mb={3} textAlign="center">
-        Sign Up For a Reading
+        {isAdmin ? ("Create Readings") : ("Sign Up For a Reading")} 
       </Typography>
 
-      <EventsCalendar groupId={group.id} isAdmin={isAdmin} />
+      <EventsCalendar groupId={group.id}/>
 
     </Box>
   );

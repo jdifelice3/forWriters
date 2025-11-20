@@ -11,6 +11,8 @@ import Groups from "../pages/Groups";
 import GroupsCreate from "../pages/GroupsCreate";
 import ReadingSignup from "../pages/ReadingSignup";
 import ReadingFeedback from "../pages/ReadingFeedback";
+import GroupJoinRequestsAdminPage from "../pages/GroupJoinRequestsAdminPage";
+import GroupSearch from "../pages/GroupSearchPage";
 
 const Layout = () => {
   const session = useSessionContext();
@@ -96,6 +98,8 @@ const Layout = () => {
               <Route path="/joingroup" element={<div><h1>Join a Group</h1></div>} />
               <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
               <Route path="/readingfeedback/:eventId" element={<ReadingFeedback />} />
+              <Route path="/joinadminpage" element={<GroupJoinRequestsAdminPage />} />
+              <Route path="/groupsearch" element={<GroupSearch />} /> 
             </Routes>
           </ComponentWrapper>
         </main>

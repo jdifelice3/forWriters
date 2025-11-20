@@ -1,12 +1,23 @@
 import express from "express";
-//import { GroupType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
-import { createGroup, getGroup, getGroupByUserId, updateGroup } from "../database/dbGroups";
-import { createNewsItem, getNews } from '../database/dbNews';
-import { getEvents, createEvent, eventAddUser } from '../database/dbEvents';
+import { GroupCreate } from "../domain-types";
+import { 
+  createGroup, 
+  getGroup, 
+  getGroupByUserId, 
+  updateGroup,
+  getGroupSearch 
+} from "../database/dbGroups";
+import { 
+  createNewsItem, 
+  getNews 
+} from '../database/dbNews';
 
 const router = express.Router();
+const prisma = new PrismaClient();
 
+//#region GET
 router.get("/:id", async(_req, res) => {
     try {
       const group = await getGroup(_req.params.id);
@@ -15,6 +26,23 @@ router.get("/:id", async(_req, res) => {
       console.error('Error retrieving group:', err);
       res.status(500).json({ err: 'Error retrieving group' });
     }
+});
+
+router.get("/search/search", async (_req, res) => {
+  console.log('in eventRoutes /search');
+  const query:string = (_req.query.query as string) || "";
+  console.log('query', query);
+  try {
+    if (!query.trim()) {
+      return res.json([]);
+    }
+    const groups = await getGroupSearch(query);
+    
+    res.json(groups);
+  } catch (err) {
+    console.error("Error searching groups:", err);
+    res.status(500).json({ error: "Failed to search groups." });
+  }
 });
 
 router.get("/user/:id", async(_req, res) => {
@@ -26,6 +54,22 @@ router.get("/user/:id", async(_req, res) => {
       res.status(500).json({ err: 'Error retrieving group' });
     }
 });
+
+router.get("/:id/news", async(_req, res) => {
+  const groupId = _req.params.id;
+    try {
+      const group = await getNews(groupId);
+
+      res.json(group);
+    } catch (err) {
+      console.error(`Error retrieving news for groupid ${groupId}`, err);
+      res.status(500).json({ err: `Error retrieving news for groupid ${groupId}` });
+    }
+});
+
+//#endregion
+
+//#region POST
 
 router.post("/", async( _req, res) => {
   const session = await Session.getSession(_req, res);
@@ -40,9 +84,10 @@ router.post("/", async( _req, res) => {
             defaultMinDaysBetweenReads,
             defaultMaxConsecutiveReads,
             inviteEmailsCsv,
-            websiteUrl
+            websiteUrl,
+            groupType
       } = _req.body;
-    const group = await createGroup(authId, name, address, description, imageUrl, websiteUrl);
+    const group: GroupCreate  = await createGroup(authId, name, address, description, groupType, imageUrl, websiteUrl);
 
     res.json(group);
   } catch (err) {
@@ -50,7 +95,21 @@ router.post("/", async( _req, res) => {
     res.status(500).json({ err: 'Error creating group' });
   }
 });
- 
+
+router.post("/:id/news", async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const newsItem = await createNewsItem(req.params.id, title, content);
+    res.json(newsItem);
+  } catch (error) {
+    console.error('Error creating group:', error);
+    res.status(500).json({ error: 'Error creating group' });
+  }
+});
+
+//#endregion
+
+//#region PUT
 router.put("/", async(_req, res) => {
   
   try{
@@ -81,34 +140,6 @@ router.put("/", async(_req, res) => {
     res.status(500).json({ err: 'Error updating group' });
   }
 });
-
-/******* News */
-
-router.post("/:id/news", async (req, res) => {
-  try {
-    console.log('in groupRoutes.ts');
-    console.log('Request.Body', req.body);
-    const { title, content } = req.body;
-    const newsItem = await createNewsItem(req.params.id, title, content);
-    res.json(newsItem);
-  } catch (error) {
-    console.error('Error creating group:', error);
-    res.status(500).json({ error: 'Error creating group' });
-  }
-});
-
-router.get("/:id/news", async(_req, res) => {
-  const groupId = _req.params.id;
-    try {
-      const group = await getNews(groupId);
-
-      res.json(group);
-    } catch (err) {
-      console.error(`Error retrieving news for groupid ${groupId}`, err);
-      res.status(500).json({ err: `Error retrieving news for groupid ${groupId}` });
-    }
-});
-
-
+//#endregion
 
 export default router;

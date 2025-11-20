@@ -34,6 +34,23 @@ app.use(
 
 app.use(middleware());
 
+// Logging Middleware
+app.use((req, res, next) => {
+    console.log(`Received request: ${req.method} ${req.url}`);
+
+    // Store original response send method
+    const originalSend = res.send.bind(res); // Bind the res context to originalSend
+
+    // Override the response send method
+    res.send = function (body) {
+        console.log(`Response body: ${body}`);
+        return originalSend(body); // Call the original send method
+    };
+
+    // Continue to the next middleware or route handler
+    next();
+});
+
 app.use('/api/users', userRoutes); 
 app.use('/api/userProfile', userProfileRoutes);
 app.use('/api/files', fileRoutes);

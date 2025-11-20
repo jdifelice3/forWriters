@@ -1,3 +1,4 @@
+import { UrlType } from "../../../backend/src/domain-types";
 export enum Url {
     AUDIO = "AUDIO",
     FACEBOOK = 'FACEBOOK',
@@ -20,7 +21,7 @@ export const UrlTypeLabels: Record<Url, string> = {
     [Url.YOUTUBE]: "Youtube"
 };
 
-export const getUrlLabel = (urlType: Url): string => {
+export const getUrlLabel = (urlType: UrlType): string => {
   switch(urlType) {
     case Url.AUDIO:
       return 'Audio';

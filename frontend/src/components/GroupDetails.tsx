@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Group } from '../types/GroupTypes';
-import { Url, getUrlLabel } from '../types/UrlTypes';
+import { GroupGetBasic, GroupUrl } from "../../../backend/src/domain-types";
+import { getUrlLabel } from "../types/Url";
 import {
   Box,
   Typography,
@@ -14,20 +14,20 @@ import {
 import Grid from "@mui/material/Grid";
 
 interface GroupDetailsProps {
-  group: Group;
+  group: GroupGetBasic;
 }
 
 export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
-  console.log();
+
   const [form, setForm] = useState({
     name: group.name || "",
     websiteUrl: group.websiteUrl || "",
     imageUrl: group.imageUrl || "",
-    street: (group.groupsAddresses) ?  group.groupsAddresses[0].street : "",
-    city: (group.groupsAddresses) ?  group.groupsAddresses[0].city : "",
-    state: (group.groupsAddresses) ?  group.groupsAddresses[0].state : "",
-    zip: (group.groupsAddresses) ?  group.groupsAddresses[0].zip : "",
-    urls: (group.groupsUrls) ? group.groupsUrls : []  
+    street: (group.groupAddress) ?  group.groupAddress[0].street : "",
+    city: (group.groupAddress) ?  group.groupAddress[0].city : "",
+    state: (group.groupAddress) ?  group.groupAddress[0].state : "",
+    zip: (group.groupAddress) ?  group.groupAddress[0].zip : "",
+    urls: (group.groupUrl) ? group.groupUrl : []  
     //urls: group.urls
   });
 

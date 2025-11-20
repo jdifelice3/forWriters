@@ -1,5 +1,5 @@
-import { User } from '../types/UserTypes';
-import { Variant } from '../types/StyleTypes';
+import { User } from './User';
+import { Variant } from './Style';
 
 export interface AppFile {
   id: string;
@@ -10,7 +10,7 @@ export interface AppFile {
   mimetype: string;
   url: string;
   uploadedAt: string;
-  users: User
+  user: User
 }
 
 export interface UploadFileFormProperties {

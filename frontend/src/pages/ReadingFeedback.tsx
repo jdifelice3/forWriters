@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AppFile, UploadFileFormProperties } from "../types/FileTypes";
-import { EventType, Submission } from "../types/EventTypes";
-import { Variant } from "../types/StyleTypes";
+import { UploadFileFormProperties } from "../types/File";
+//import { ReadingType, Submission } from "../types/Reading";
+import { AppFile, Reading, ReadingAuthor } from "../../../backend/src/domain-types";
+import { Variant } from "../types/Style";
 import { useParams } from "react-router-dom";
 import { generateRandomString } from "../util/Math";
 import UploadFileForm from "../components/UploadFileForm";
@@ -43,15 +44,17 @@ const ReadingFeedback = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const [feedbackEventId, setFeedbackEventId] = useState("");
   const [files, setFiles] = useState<AppFile[]>([]);
-  const [events, setEvents] = useState<EventType>();
+  const [events, setEvents] = useState<Reading>();
   const [editFile, setEditFile] = useState<AppFile | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [previewFile, setPreviewFile] = useState<AppFile | null>(null);
   const [eventTitle, setEventTitle] = useState("");
+  const [readingId, setReadingId] = useState(eventId);
     
-  const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/submissions`;
+  const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/readingauthors`;
   const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/feedback`;
+  const readingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/reading`;
   
   const pdfsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/pdfs`;
   
@@ -61,7 +64,7 @@ const ReadingFeedback = () => {
   // Fetch uploaded files
   useEffect(() => {
     (async () => {
-      const res = await fetch(eventSubmissionUrl, 
+      const res = await fetch(readingUrl, 
       { 
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -69,16 +72,19 @@ const ReadingFeedback = () => {
       });
       
       if (res.ok) {
-        const data: EventType = await res.json();
-        const _eventDate = new Date(data.eventDate).toLocaleDateString('en-US');
+        const data: Reading = await res.json();
+        const _eventDate = new Date(data.readingDate).toLocaleDateString('en-US');
         let t = `Current Reading - ${_eventDate}`;
-        setEventTitle(data.eventSubmission.length > 0 ? t : 'Reading')
-        if(data.eventSubmission && data.eventSubmission.length > 0){
+        setEventTitle(data.readingAuthor.length > 0 ? t : 'Reading')
+        if(data.readingAuthor && data.readingAuthor.length > 0){
           setEvents(data);
           let files: AppFile[] = [];
-          data.eventSubmission.forEach((s: Submission) => {
-            files.push(s.appFiles); // Correctly accessing 'files' array
-            setFiles(files);
+          data.readingAuthor.forEach((s) => {
+            // s.readingManuscript.forEach((rm) => {
+            //     files.push(rm.ap)
+            // });
+            // files.push(s.appFiles); // Correctly accessing 'files' array
+            // setFiles(files);
           });
         }
       }
@@ -99,10 +105,10 @@ const ReadingFeedback = () => {
     }    
   }
 
-  const userHasSubmitted = (events: EventType, signUpId: string, userId: string) => {
+  const userHasSubmitted = (events: Reading, signUpId: string, userId: string) => {
       let result = false;
-      events.eventSubmission.forEach((s, index) => {
-        if (signUpId === s.id && s.userId === userId) {
+      events.readingAuthor.forEach((s, index) => {
+        if (signUpId === s.id && s.authorId === userId) {
           result = true;
         }
       });
@@ -130,8 +136,8 @@ const ReadingFeedback = () => {
         </Typography>
       ) : (
         <div>
-        <Stack direction="column" alignItems="left" gap={1} my={1}>
-          {events.eventSubmission.map((s:Submission) => (
+        {/* <Stack direction="column" alignItems="left" gap={1} my={1}>
+          {events.submissions.map((s:Submission) => (
             <Grid size={{xs:12, md:6}} key={s.id}>
               <Card>
                 <CardContent>
@@ -143,7 +149,7 @@ const ReadingFeedback = () => {
                         </Typography>
                       </Stack>
                     <Typography sx={{verticalAlign: "top"}} variant="body2">
-                      by {s.appFiles.users.userProfiles.firstName} {s.appFiles.users.userProfiles.lastName}
+                      by {s.appFiles.user.userProfile.firstName} {s.appFiles.user.userProfile.lastName}
                     </Typography>
                   </Stack>
                   <Typography
@@ -181,7 +187,7 @@ const ReadingFeedback = () => {
               </Card>
             </Grid>
           ))}
-        </Stack>
+        </Stack> */}
         </div>
       )}
 
@@ -247,7 +253,7 @@ const ReadingFeedback = () => {
                 alt={previewFile.title}
                 style={{ maxWidth: "100%", maxHeight: "100%" }}
               />
-            ) : previewFile.mimetype === "application/pdf" || "PDF" ? (
+            ) : previewFile.mimetype.startsWith("application/pdf") || previewFile.mimetype.startsWith("PDF") ? (
               <iframe
                 src={`${pdfsUrl}?url=${previewFile.url}`}
                 title="PDF Preview"

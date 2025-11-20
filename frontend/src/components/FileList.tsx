@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AppFile, FileListProperties } from '../types/FileTypes';
+import { FileListProperties } from '../types/File';
+import { AppFile } from "../../../backend/src/domain-types";
 import {
   Button,
   Card,
@@ -224,7 +225,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
                 alt={previewFile.title}
                 style={{ maxWidth: "100%", maxHeight: "100%" }}
               />
-            ) : previewFile.mimetype === "application/pdf" || "PDF" ? (
+            ) : previewFile.mimetype.startsWith("application/pdf") || previewFile.mimetype.startsWith("PDF") ? (
               <iframe
                 src={`${pdfsUrl}?url=${previewFile.url}`}
                 title="PDF Preview"

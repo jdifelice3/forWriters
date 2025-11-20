@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AppFile, FileListProperties, UploadFileFormProperties } from "../types/FileTypes";
+import { AppFile } from "../../../backend/src/domain-types";
+import { FileListProperties, UploadFileFormProperties } from "../types/File";
 import { generateRandomString } from "../util/Math";
 import FileList from "../components/FileList";
 import UploadFileForm from "../components/UploadFileForm";

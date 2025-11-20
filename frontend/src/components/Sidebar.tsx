@@ -19,6 +19,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import KeyIcon from '@mui/icons-material/Key';
 import { useUserContext } from "../context/UserContext";
 import GradientDivider from "./GradientDivider";
+import GroupSearch from "../pages/GroupSearchPage";
 
 
 interface Group {
@@ -51,7 +52,7 @@ const Sidebar = () => {
   if (!user || isLoading) return;
 
   const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/user/${user.id}`;
-  
+  console.log(groupsUrl);
   (async () => {
     try {
       const res = await fetch(groupsUrl, { credentials: "include" });
@@ -110,8 +111,8 @@ const Sidebar = () => {
           <MenuItem
             key="joingroup"
             icon={<CheckBoxIcon/>}
-            active={pathname === "/joingroup"}
-            onClick={() => navigate("/joingroup")}
+            active={pathname === "/groupsearch"}
+            onClick={() => navigate("/groupsearch")}
           >
             Join a Group
           </MenuItem>
@@ -164,7 +165,7 @@ const Sidebar = () => {
             defaultOpen={pathname.startsWith("/component")}
           >
             <div>
-            {groups.map((g) => (
+            {groups ? groups.map((g) => (
               <MenuItem
                 key={g.id}
                 active={pathname === `/groups/${g.id}`}
@@ -172,7 +173,9 @@ const Sidebar = () => {
               >
                 {g.name}
               </MenuItem>
-            ))}
+            )) : (
+              <MenuItem>Join a Group</MenuItem>
+            )}
             </div>
           </SubMenu>
 

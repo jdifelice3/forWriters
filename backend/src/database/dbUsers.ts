@@ -4,13 +4,13 @@ const prisma = new PrismaClient();
 
 export const getUsers = async() => {
     const prisma2 = new PrismaClient();
-    const users = await prisma2.users.findMany();
+    const users = await prisma2.user.findMany();
     
     return users;
 }
 
 export const createUser = async(superTokensId: string, email: string, role: Role) => {
-    const newUser: any = await prisma.users.create({
+    const newUser: any = await prisma.user.create({
     data: {
       email: email,
       superTokensId: superTokensId,
@@ -23,7 +23,7 @@ export const createUser = async(superTokensId: string, email: string, role: Role
 }
 
 export const createUserProfile = async(userId: string) => {
-  const newUserProfile: any = await prisma.userProfiles.create({
+  const newUserProfile: any = await prisma.userProfile.create({
     data: {
       userId: userId
     }
@@ -34,13 +34,13 @@ export const createUserProfile = async(userId: string) => {
 
 export const getUserProfile = async(authId: string) => {
   console.log('in getUserPfrofile');
-  const user: any = await prisma.users.findUnique({
+  const user: any = await prisma.user.findUnique({
     where: 
         {
             superTokensId: authId,
         },
         include: {
-            userProfiles: true,
+            userProfile: true,
         }
   });
   console.log('user', user);
@@ -49,7 +49,7 @@ export const getUserProfile = async(authId: string) => {
 
 export const updateUserProfile = async(userId: string, firstName: string, lastName: string, bio: string) => {
   try{
-    const updatedUser: any = await prisma.userProfiles.update({
+    const updatedUser: any = await prisma.userProfile.update({
       where: {
         userId: userId
       },

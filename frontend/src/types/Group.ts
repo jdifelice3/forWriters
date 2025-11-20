@@ -1,5 +1,6 @@
-import { User } from './UserTypes';
-import { Url } from './UrlTypes';
+import { User } from './User';
+import { Url } from './Url';
+import { Reading } from './Reading';
 
 enum GroupType {
   WRITING
@@ -15,14 +16,14 @@ export interface Group {
   websiteUrl?: string;
   createdAt: string;
   updatedAt: string;
-  groupsAddresses?: GroupAddresses[];
-  groupsUsers?: GroupUsers[];
+  groupAddress?: GroupAddress[];
+  groupUsers: GroupUser[];
   newsItems?: GroupNews[];
-  events?: GroupEvents[];
-  groupsUrls?: GroupUrls[];          
+  reading?: Reading[];
+  groupUrl?: GroupUrl[];          
 }
 
-export interface GroupAddresses {
+export interface GroupAddress {
   id: string;
   street: string;
   city: string;
@@ -30,20 +31,6 @@ export interface GroupAddresses {
   zip: string;
   groupId: string;  
   group: Group;
-}
-
-export interface GroupEvents {
-  id: string;
-  groupId: string;
-  eventType: string;
-  eventUserType: string;
-  eventDate: string;
-  submissionDeadline: string;
-  minDaysBetweenReads: number;
-  maxConsecutiveReads: number;
-  createdAt: string;
-  group: Group;
-  submissions: string;
 }
 
 export interface GroupNews {
@@ -56,7 +43,7 @@ export interface GroupNews {
   group: Group;
 }
 
-export interface GroupUsers {
+export interface GroupUser {
   id: string;
   userId: string;
   groupId: string;
@@ -67,7 +54,7 @@ export interface GroupUsers {
   group:Group;
 }
 
-export interface GroupUrls {
+export interface GroupUrl {
   id: string;
   url: string;
   groupId: string;

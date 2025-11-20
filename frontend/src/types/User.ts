@@ -4,10 +4,10 @@ export interface User {
     username: string;
     createdAt: string;
     updatedAt: string;
-    userProfiles: UserProfiles;
+    userProfile: UserProfile;
 }
 
-export interface UserProfiles {
+export interface UserProfile {
   id: string;
   userId: string;
   firstName: string;

@@ -1,4 +1,5 @@
-import { PrismaClient, GroupType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { Group, GroupGetBasic, GroupType, GroupCreate } from "../domain-types";
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
@@ -12,16 +13,16 @@ const addressSchema = z.object({
 
 type Address = z.infer<typeof addressSchema>;
 
-
+//#region GET
 export const getGroup = async(groupId: string) => {
   try {
-    const group: any = await prisma.groups.findUnique({
+    const group: GroupGetBasic | null = await prisma.group.findUnique({
       where: {
         id: groupId,
       },
       include: {
-        groupsAddresses: true,
-        groupsUrls: true
+        groupAddress: true,
+        groupUrl: true
       },
     });
 
@@ -33,30 +34,18 @@ export const getGroup = async(groupId: string) => {
 }
 
 export const getGroupByUserId = async(userId: string) => {
-try {
-    const groupsUsers: any = await prisma.groupsUsers.findMany({
-      where: {
-        userId: userId
-      },
+  try {
+    const groups: any = await prisma.group.findMany({
       include: {
-        groups: true
+        groupAddress: true,
+        groupUrl: true,
+        groupUser: {
+          where: {
+            userId: userId
+          }
+        },
       },
     });
-
-    let groups:any = [];
-
-    for (let i = 0; i < groupsUsers.length; i++){
-      groups.push({
-        id: groupsUsers[i].groups.id,
-        userId: groupsUsers[i].groups.userId,
-        groupType: groupsUsers[i].groups.groupType,
-        name: groupsUsers[i].groups.name,
-        description: groupsUsers[i].groups.description,
-        imageUrl: groupsUsers[i].groups.imageUrl,
-        createdAt: groupsUsers[i].groups.createdAt,
-        updatedAt: groupsUsers[i].groups.updatedAt
-      });
-    }
 
     return groups;
   } catch (err) {
@@ -65,8 +54,31 @@ try {
   }
 }
 
+export const getGroupSearch = async(query: string) => {
+  console.log('in getGroupSearch', 'query', query);
+  const groups = await prisma.group.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      take: 10,
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        // add any other fields you want to show
+      },
+   }); 
+
+   return groups;
+}
+
+//#endregion
+
+//#region CREATE
 export const createGroup = async (
-      groupId: string,
       authId: string, 
       name: string, 
       address: Address, 
@@ -78,7 +90,7 @@ export const createGroup = async (
   
   try {
     // Get userId from authId
-    const user: any = await prisma.users.findUnique({
+    const user: any = await prisma.user.findUnique({
       where: {
         superTokensId: authId,
       },
@@ -88,14 +100,14 @@ export const createGroup = async (
       throw new Error('User not found');
     }
 
-    const group = await prisma.groups.create({
+    const group: GroupCreate | null = await prisma.group.create({
       data: {
         name: name,
         description: description,
         creatorUserId: user.id, 
         imageUrl: (imgUrl !== undefined) ? imgUrl : "",
         groupType: groupType,
-        groupsAddresses: {
+        groupAddress: {
           create: {
             street: address.street,
             city: address.city,
@@ -103,23 +115,33 @@ export const createGroup = async (
             zip: address.zip,            
           }
         },
-        groupsUsers: {
+        groupUser: {
           create: {
             userId: user.id,
             isAdmin: true,
           }
         }
-      }
+      },
+      include: {
+        groupUser: true,       // REQUIRED
+        groupAddress: true,    // REQUIRED if you include it in the type
+      },
     });
 
     console.log('Group created successfully:', group);
-    return group;
+    if(group){
+      return group;
+    } else {
+      throw new Error("Create group failed.");
+    }
   } catch (error) {
     console.error('Error creating group:', error);
     throw error; 
   }
 };
+//#endregion
 
+//#region UPDATE
 export const updateGroup = async(
     groupId: string,
     addressId: string,
@@ -131,7 +153,7 @@ export const updateGroup = async(
   ) => {
 
     console.log('in updateGroup');
-  const group = await prisma.groups.update({
+  const group = await prisma.group.update({
     where: {
       id: groupId,
     },
@@ -140,7 +162,7 @@ export const updateGroup = async(
       description: description,
       imageUrl: imgUrl !== undefined ? imgUrl : "",
       websiteUrl: websiteUrl,
-      groupsAddresses: {
+      groupAddress: {
         update: {
           where: {
             id: addressId, // Specify the ID of the address to update
@@ -157,3 +179,4 @@ export const updateGroup = async(
   });
 return group;
 }
+//#endregion

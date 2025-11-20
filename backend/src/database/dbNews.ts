@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export const getNews = async(groupId: string) => {
   try {
-    const news: any = await prisma.groupsNews.findMany({
+    const news: any = await prisma.groupNews.findMany({
       where: {
         groupId: groupId,
       },
@@ -26,7 +26,7 @@ export const getNews = async(groupId: string) => {
 export const createNewsItem = async (groupId: string, title: string, content: string) => {
   try {
 
-    const newsItem = await prisma.groupsNews.create({
+    const newsItem = await prisma.groupNews.create({
       data: {
         groupId: groupId,
         title: title,

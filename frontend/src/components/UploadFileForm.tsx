@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { AppFile, UploadFileFormProperties } from "../types/FileTypes";
+import { UploadFileFormProperties } from "../types/File";
+import { AppFile } from "../../../backend/src/domain-types";
 import {
   Box,
   Button,

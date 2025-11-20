@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GroupGetBasic } from "../../../backend/src/domain-types";
 import {
   Box,
   Typography,
@@ -26,7 +27,7 @@ const styles = {
 const Groups = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const { isLoading } = useUserContext();
-  const [group, setGroup] = useState<any | null>(null);
+  const [group, setGroup] = useState<GroupGetBasic | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -42,7 +43,7 @@ const Groups = () => {
         credentials: "include",
       }); 
       if (res.ok) {
-        const data = await res.json();
+        const data: GroupGetBasic = await res.json();
         
         setGroup(data);
 
@@ -82,7 +83,7 @@ const Groups = () => {
 
       <Divider sx={{ my: 4 }} />
       {isAdmin ? (
-        <EventsCalendar groupId={group.id} isAdmin={isAdmin} />
+        <EventsCalendar groupId={group.id} />
       ) : (
         <Card>
           <CardContent>

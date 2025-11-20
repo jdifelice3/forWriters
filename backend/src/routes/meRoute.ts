@@ -10,8 +10,8 @@ router.get("/", async (req, res) => {
   try {
     const session = await Session.getSession(req, res);
     const authId = session.getUserId();
-
-    const user = await prisma.users.findUnique({
+    
+    const user = await prisma.user.findUnique({
       where: { superTokensId: authId },
       select: { id: true, email: true, username: true, createdAt: true, updatedAt: true },
     });

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { User } from "../types/User";
 import {
   Box,
   Button,
@@ -44,13 +45,13 @@ const UserProfile = () => {
     const fetchUserId = async() => {
       const authId = await Session.getUserId();
       console.log('authId', authId);
-      const user = await getUserProfile(authId);
+      const user: User = await getUserProfile(authId);
       setUserId(user.id);
       reset({ 
-        firstName: user.userProfiles.firstName, 
-        lastName: user.userProfiles.lastName,
+        firstName: user.userProfile.firstName, 
+        lastName: user.userProfile.lastName,
         email: user.email,
-        bio: user.userProfiles.bio
+        bio: user.userProfile.bio
       });
     }
     fetchUserId();

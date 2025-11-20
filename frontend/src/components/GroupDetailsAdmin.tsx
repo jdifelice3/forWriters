@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { GroupGetBasic } from "../../../backend/src/domain-types";
 import {
   Typography,
   TextField,
@@ -14,7 +15,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 interface GroupDetailsProps {
-  group: any;
+  group: GroupGetBasic;
 }
 
 export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
@@ -24,10 +25,10 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
     name: group.name || "",
     imageUrl: group.imageUrl || "",
     websiteUrl: group.websiteUrl || "",
-    street: group.groupsAddresses[0].street || "",
-    city: group.groupsAddresses[0].city || "",
-    state: group.groupsAddresses[0].state || "",
-    zip: group.groupsAddresses[0].zip || "",
+    street: group.groupAddress[0].street || "",
+    city: group.groupAddress[0].city || "",
+    state: group.groupAddress[0].state || "",
+    zip: group.groupAddress[0].zip || "",
   });
 
 
