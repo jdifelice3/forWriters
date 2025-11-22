@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { UploadFileFormProperties } from "../types/File";
-//import { ReadingType, Submission } from "../types/Reading";
 import { AppFile, Reading, ReadingAuthor } from "../../../backend/src/domain-types";
 import { Variant } from "../types/Style";
 import { useParams } from "react-router-dom";
@@ -44,7 +43,7 @@ const ReadingFeedback = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const [feedbackEventId, setFeedbackEventId] = useState("");
   const [files, setFiles] = useState<AppFile[]>([]);
-  const [events, setEvents] = useState<Reading>();
+  const [reading, setReading] = useState<Reading>();
   const [editFile, setEditFile] = useState<AppFile | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -60,7 +59,7 @@ const ReadingFeedback = () => {
   
   const fileUploadsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/uploads`;
   const [reload, setReload] = useState("");
-  console.log(eventSubmissionUrl);
+
   // Fetch uploaded files
   useEffect(() => {
     (async () => {
@@ -73,18 +72,19 @@ const ReadingFeedback = () => {
       
       if (res.ok) {
         const data: Reading = await res.json();
+        console.log('reading', data);
+        console.log('readings', data);
         const _eventDate = new Date(data.readingDate).toLocaleDateString('en-US');
         let t = `Current Reading - ${_eventDate}`;
         setEventTitle(data.readingAuthor.length > 0 ? t : 'Reading')
         if(data.readingAuthor && data.readingAuthor.length > 0){
-          setEvents(data);
+          setReading(data);
           let files: AppFile[] = [];
-          data.readingAuthor.forEach((s) => {
-            // s.readingManuscript.forEach((rm) => {
-            //     files.push(rm.ap)
-            // });
-            // files.push(s.appFiles); // Correctly accessing 'files' array
-            // setFiles(files);
+          data.readingAuthor.forEach((a: ReadingAuthor) => {
+            if(a.authorAppFile){
+                files.push(a.authorAppFile.appFile);
+            }
+            setFiles(files);
           });
         }
       }
@@ -130,41 +130,48 @@ const ReadingFeedback = () => {
         Manuscripts to Review
       </Typography>
 
-      {!events ? (
+      {!reading ? (
         <Typography variant="body1" color="text.secondary">
           No files uploaded yet.
         </Typography>
       ) : (
         <div>
-        {/* <Stack direction="column" alignItems="left" gap={1} my={1}>
-          {events.submissions.map((s:Submission) => (
+        <Stack direction="column" alignItems="left" gap={1} my={1}>
+          {reading.readingAuthor.map((s: ReadingAuthor) => (
+
             <Grid size={{xs:12, md:6}} key={s.id}>
               <Card>
                 <CardContent>
                   <Stack direction="column" alignItems="left" gap={1} my={1}>         
                       <Stack direction="row" alignItems="center" gap={1} mb={1}>
-                        <FileIcon file={s.appFiles} />
+                        <FileIcon file={(s.authorAppFile) ? s.authorAppFile?.appFile : undefined} />
                         <Typography variant="subtitle1" fontWeight="bold">
-                          {s.appFiles ? s.appFiles.title : ""}
+                          {s.authorAppFile?.appFile ? s.authorAppFile?.appFile.title : ""}
                         </Typography>
                       </Stack>
-                    <Typography sx={{verticalAlign: "top"}} variant="body2">
-                      by {s.appFiles.user.userProfile.firstName} {s.appFiles.user.userProfile.lastName}
-                    </Typography>
+                    {s.authorAppFile && s.authorAppFile?.appFile.user.userProfile ? (
+                      <Typography sx={{verticalAlign: "top"}} variant="body2">
+                        by {s.authorAppFile?.appFile.user.userProfile.firstName} {s.authorAppFile?.appFile.user.userProfile.lastName}
+                      </Typography>
+                    ) : (
+                      <div></div>
+                    )}
+                      
+                   
                   </Stack>
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     sx={{ mb: 2 }}
                   >
-                    {s.appFiles ? s.appFiles.description : "No description"}
+                    {s.authorAppFile?.appFile ? s.authorAppFile?.appFile.description : "No description"}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Uploaded on {s.appFiles ? new Date(s.appFiles.uploadedAt).toLocaleDateString() : ""}
+                    Uploaded on {s.authorAppFile?.appFile ? new Date(s.authorAppFile?.appFile.uploadedAt).toLocaleDateString() : ""}
                   </Typography>
                 <CardActions>
                   <Button 
-                      href={`${fileUploadsUrl}/${s.appFiles.filename}` } download={s.appFiles.filename} 
+                      href={`${fileUploadsUrl}/${s.authorAppFile?.appFile.filename}` } download={s.authorAppFile?.appFile.filename} 
                       size="small"
                       sx={{borderColor: "primary.main"}}
                       startIcon={<DownloadIcon />}
@@ -177,20 +184,25 @@ const ReadingFeedback = () => {
                 // to disable Cards
                     elevation={2}
                     style={{
-                      opacity: (userHasSubmitted(events, s.id, s.userId) ? 0.5 : 1),
-                      pointerEvents: (userHasSubmitted(events, s.id, s.userId) ? 'none' : 'auto')
+                      opacity: (userHasSubmitted(reading, s.id, s.authorId) ? 0.5 : 1),
+                      pointerEvents: (userHasSubmitted(reading, s.id, s.authorId) ? 'none' : 'auto')
                     }}
                 >
-                  <UploadFileForm onSendData={reloadFromUploadForm} eventId={s.eventId} formProperties={uploadFormProperties} isUserDisabled={false} />
+                  <UploadFileForm 
+                    onSendData={reloadFromUploadForm} 
+                    eventId={s.id} 
+                    formProperties={uploadFormProperties} 
+                    isUserDisabled={false}
+                    hasUserSubmitted={userHasSubmitted(reading, s.id, s.authorId)} 
+                  />
                 </Paper>
                 </CardContent>
               </Card>
             </Grid>
           ))}
-        </Stack> */}
+        </Stack>
         </div>
       )}
-
       {/* Edit dialog */}
       <Dialog open={!!editFile} onClose={() => setEditFile(null)} fullWidth maxWidth="sm">
         <DialogTitle>

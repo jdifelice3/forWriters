@@ -16,26 +16,6 @@ export {
 /**
  * USER
  */
-export type User = Prisma.UserGetPayload<{
-  include: {
-    userProfile: true;
-    urls: true;
-    appFiles: true;
-    groupUser: {
-      include: { group: true };
-    };
-    readingAuthor: {
-      include: {
-        reading: true;
-      };
-    };
-    readingFeedback: {
-      include: {
-        readingManuscript: true;
-      };
-    };
-  };
-}>;
 
 /**
  * USER PROFILE
@@ -135,8 +115,6 @@ export type GroupUrl = Prisma.GroupUrlGetPayload<{
 export type AppFile = Prisma.AppFileGetPayload<{
   include: {
     user: true;
-    readingManuscripts: true;
-    readingFeedback: true;
   };
 }>;
 
@@ -145,29 +123,59 @@ export type AppFile = Prisma.AppFileGetPayload<{
  */
 export type Reading = Prisma.ReadingGetPayload<{
   include: {
-    user: true; // createdBy user
     readingAuthor: {
       include: {
-        user: true;
-        readingManuscript: true;
+        userProfile: true,
+        authorAppFile: {
+          include: {
+            appFile: {
+              include: {
+                user: {
+                  include: {
+                    userProfile: true;
+                  };
+                };
+              };
+            };
+          };
+        };
       };
     };
-    group: true;
-    groupAddress: true;
   };
 }>;
 
-/**
- * READING AUTHOR
- */
 export type ReadingAuthor = Prisma.ReadingAuthorGetPayload<{
-  include: {
-    reading: true;
-    user: true;
-    readingManuscript: true;
-  };
+      include: {
+        userProfile: true,
+        authorAppFile: {
+          include: {
+            appFile: {
+              include: {
+                user: {
+                  include: {
+                    userProfile: true
+                  }
+                }
+              },
+            },
+          },
+        }
+      }
 }>;
 
+export type AuthorAppFile = Prisma.AuthorAppFileGetPayload<{
+  include: {
+    appFile: {
+      include: {
+        user: {
+          include: {
+            userProfile: true
+          }
+        }
+      },
+    },
+  },
+}>;
 /**
  * READING FEEDBACK
  */
@@ -175,17 +183,6 @@ export type ReadingFeedback = Prisma.ReadingFeedbackGetPayload<{
   include: {
     appFile: true;
     user: true;
-    readingManuscript: true;
   };
 }>;
 
-/**
- * READING MANUSCRIPT
- */
-export type ReadingManuscript = Prisma.ReadingManuscriptGetPayload<{
-  include: {
-    readingFeedback: true;
-    readingAuthor: true;
-    appFile: true;
-  };
-}>;

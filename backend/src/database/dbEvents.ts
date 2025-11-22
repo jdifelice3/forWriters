@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
-import { Reading } from "../domain-types";
+import { Reading, ReadingAuthor } from "../domain-types";
 
 const prisma = new PrismaClient();
 
-export const getReadings = async(groupId: string) => {
+//#region GET
+export const getReadings = async(groupId: string): Promise<Reading[]> => {
   try {
     const events: any = await prisma.reading.findMany({
       where: {
@@ -15,11 +16,7 @@ export const getReadings = async(groupId: string) => {
       include: {
         readingAuthor: {
           include: {
-            user: {
-              include: {
-                userProfile: true
-              },
-            },
+            userProfile: true
           },
         },
       },
@@ -32,7 +29,7 @@ export const getReadings = async(groupId: string) => {
   }
 }
 
-export const getReading = async(readingId: string) => {
+export const getReading = async(readingId: string): Promise<Reading> => {
   try {
       const reading: any = await prisma.reading.findUnique({
       where: {
@@ -41,7 +38,8 @@ export const getReading = async(readingId: string) => {
       include: {
         readingAuthor: {
           include: {
-            readingManuscript: {
+            userProfile: true,
+            authorAppFile: {
               include: {
                 appFile: {
                   include: {
@@ -66,16 +64,14 @@ export const getReading = async(readingId: string) => {
   }
 }
 
-export const getReadingAuthors = async(readingId: string) => {
-
+export const getReadingAuthors = async(readingId: string): Promise<ReadingAuthor> => {
   try {
-    
-    const events: any = await prisma.readingAuthor.findMany({
+    const readings: any = await prisma.readingAuthor.findMany({
       where: {
         id: readingId
       },
       include: {
-        readingManuscript: {
+        authorAppFile: {
           include: {
             appFile: {
               include: {
@@ -90,12 +86,13 @@ export const getReadingAuthors = async(readingId: string) => {
         }
       }
     });
-      return events[0];
+      return readings[0];
     } catch (err) {
         console.error('Error getting events:', err);
         throw err; 
     }
 }
+//#endregion
 
 export const createReading = async(
     groupId: string, 
@@ -148,16 +145,16 @@ export const createReadingAuthor = async(readingId: string, userId: string) => {
   }
 }
 
-export const createReadingFeedback = async(readingManuscriptId: string, feedbackFileId: string, userId: string) => {
+export const createReadingFeedback = async(readingAuthorId: string, feedbackFileId: string) => {
   try {
     const result = await prisma.readingFeedback.create({
       data: {
-        readingManuscriptId: readingManuscriptId,
-        feedbackFileId: feedbackFileId,
-        userId: userId
+        readingAuthorId: readingAuthorId,
+        feedbackFileId: feedbackFileId
       },
     });
     console.log('dbEvents.createReadingFeedback', result);
+
     return result;
   } catch (err) {
     console.error('Error adding a feedback file to readingFeedback:', err);

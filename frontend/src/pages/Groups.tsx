@@ -26,10 +26,10 @@ const styles = {
 
 const Groups = () => {
   const { groupId } = useParams<{ groupId: string }>();
-  const { isLoading } = useUserContext();
+  const { user, isLoading } = useUserContext();
   const [group, setGroup] = useState<GroupGetBasic | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const navigate = useNavigate();
 
@@ -46,9 +46,7 @@ const Groups = () => {
         const data: GroupGetBasic = await res.json();
         
         setGroup(data);
-
-        //setIsAdmin(data.isAdmin);
-        setIsAdmin(false);
+        setIsAdmin(group?.creatorUserId === user.id)
       }
       setLoadingData(false);
     })();
@@ -83,7 +81,7 @@ const Groups = () => {
 
       <Divider sx={{ my: 4 }} />
       {isAdmin ? (
-        <EventsCalendar groupId={group.id} />
+        <EventsCalendar groupId={group.id} isAdmin={isAdmin} />
       ) : (
         <Card>
           <CardContent>
@@ -109,7 +107,7 @@ const Groups = () => {
             <Divider sx={{ mb: 3 }} />
             
             <Typography variant="h6" mb={2}>
-              Review Manuscripts for the Current Reading
+              Review Manuscripts for the Next Reading
             </Typography>
           </CardContent>
         </Card>

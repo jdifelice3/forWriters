@@ -20,13 +20,13 @@ const prisma = new PrismaClient();
 
 */
 const main = async() => {
-
-  const user = await createUser('ac0222c1-4a99-4991-a167-f5f4b2c203fa','johndifelice@protonmail.com', Role.ADMIN);
+  const authId = 'f4843bc5-33a3-4f21-8364-b354f0714b97';
+  const user = await createUser(authId,'johndifelice@protonmail.com', Role.ADMIN);
   const userProfile = await createUserProfile(user.id);
   const updatedProfile = await updateUserProfile(user.id, "John", "DiFelice", `My name is John, and I'm a semi-professional writer of fiction. Semi-professional means that I'm occasionally paid for my writing. It means I'm good enough for sporadic publication and a nominal fee, but either not good enough or not ambitious enough to earn a living with it. This site contains many of my published and unpublished works, so have a read and you be the judge.`);
 
   const group = await createGroup(
-    'ac0222c1-4a99-4991-a167-f5f4b2c203fa',
+    authId,
     'Bucks Country Writers Group',
     {
       street: '590 North Broad Street',

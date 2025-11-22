@@ -21,16 +21,17 @@ interface UploadFileProps {
   formProperties: UploadFileFormProperties;
   eventId?: string;
   isUserDisabled?: boolean;
+  hasUserSubmitted?: boolean;
 }
 
-const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, eventId, isUserDisabled=true}) => {
+const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, eventId, isUserDisabled=false, hasUserSubmitted=false}) => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
   const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
-
+  
     // File upload
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const selected = e.target.files?.[0];
@@ -88,12 +89,6 @@ const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, 
     </Typography>
     <Card sx={{ mb: 4, p: 2 }}>
         <CardContent>
-         {(function test() {
-            if (1 === 1) {
-              return "";
-            }
-          })()}
-
             <Typography variant="h6" gutterBottom>
             {formProperties.subtitle}
             </Typography>
@@ -138,7 +133,11 @@ const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, 
                   </Button>
                 </Grid>
                 <Grid size={9}>
+                  {hasUserSubmitted ? (
                   <Typography sx={{color: "green", fontWeight: "bold"}}>You have submitted feedback for this story</Typography>
+                  ) : (
+                    <div></div>
+                  )}
                 </Grid>
             </Grid>
             </Box>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Reading } from "../../../backend/src/domain-types";
+import { Reading, ReadingAuthor } from "../../../backend/src/domain-types";
 import {
   Box,
   Typography,
@@ -23,6 +23,11 @@ import { useForm } from "react-hook-form";
 
 interface EventsCalendarProps {
   groupId: string;
+  isAdmin: boolean;
+}
+
+interface AuthorListProps {
+  reading: Reading;
 }
 
 type FormInput = {
@@ -34,7 +39,7 @@ type FormInput = {
   description: string
 }
 
-export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId }) => {
+export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin }) => {
   const { user, isLoading, error } = useUserContext();
   const [reading, setReading] = useState<Reading[]>([]);
   const [open, setOpen] = useState(false);
@@ -49,7 +54,6 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId }) => {
   const [err, setErr] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [submissionDeadline, setSubmissionDeadline] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
   
   const {
       register,
@@ -80,8 +84,6 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId }) => {
           console.log('events', data);
           setReading(data);
         }
-        //setIsAdmin(data.isAdmin);
-        setIsAdmin(false);
          
       } catch (err) {
         console.error("Error isLoading events:", err);
@@ -202,12 +204,26 @@ const disableSignInButton = (eventId: string): boolean => {
                 <Typography variant="body2" color="text.secondary">
                   Submit manuscripts by <b>{new Date(e.submissionDeadline).toLocaleDateString()}</b>
                 </Typography>
-                {/* {e.eventSubmission && e.eventSubmission.length > 0 && (
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  sx={{
+                    fontWeight: "bold", 
+                    color:(e.readingAuthor.length === 0 ? "green" : "red")
+                    }}>
+                  {e.spotsOpen - e.readingAuthor.length} of {e.spotsOpen} spots open
+                </Typography>
+                {e.readingAuthor && e.readingAuthor.length > 0 && (
                 <Typography variant="body2" color="text.secondary">
                   Authors:<br/>
+                  <AuthorList reading={e} />
+
                 </Typography>
-                )} */}
+
+                
+                )}
                 {!isAdmin && (
+                <Box>
                   <Button
                     id={e.id}
                     size="small"
@@ -219,7 +235,20 @@ const disableSignInButton = (eventId: string): boolean => {
                     disabled={disableSignInButton(e.id)}
                   >
                     Sign Up
+                  </Button>&nbsp;
+                  <Button
+                    id={e.id}
+                    size="small"
+                    variant="contained"
+                    startIcon={<EventAvailableIcon />}
+                    onClick={(event) => handleSignup(event, e.id)}
+                    sx={{ mt: 1 }}         
+                    //Check if the current user has already signed-in to the event
+                    disabled={!disableSignInButton(e.id)}
+                  >
+                    Withdraw
                   </Button>
+                  </Box>
                 )}
               </Box>
             </Grid>
@@ -337,3 +366,13 @@ const disableSignInButton = (eventId: string): boolean => {
     </Card>
   );
 };
+
+const AuthorList: React.FC<AuthorListProps> = ({ reading }) => {
+  return (
+    reading.readingAuthor.map((ra: ReadingAuthor) => (
+      <Typography variant="body2" color="text.secondary">
+        {ra.userProfile.firstName} {ra.userProfile.lastName}
+      </Typography>
+    ))
+  );
+}

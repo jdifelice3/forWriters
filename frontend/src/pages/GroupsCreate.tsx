@@ -93,7 +93,7 @@ const GroupsCreate = () => {
       const group: GroupCreate = await res.json();
       setSuccess("Group created successfully.");
       // Navigate to the new group's page (adjust route as needed)
-      setTimeout(() => navigate(`/managegroup/${group.id}`), 600);
+      setTimeout(() => navigate(`/groups/${group.id}`), 600);
     } catch (e: any) {
       setError(e?.message ?? "Failed to create group");
     } finally {

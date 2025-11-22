@@ -1,5 +1,5 @@
 import express from "express";
-
+import { Reading } from "../domain-types";
 import Session from "supertokens-node/recipe/session";
 import { createGroup, getGroup, getGroupByUserId, } from "../database/dbGroups";
 import { createNewsItem, getNews } from '../database/dbNews';
@@ -36,7 +36,7 @@ router.get("/:readingId/reading", async(_req, res) => {
   const readingId = _req.params.readingId;
 
   try {
-    const reading = await getReading(readingId);
+    const reading: Reading = await getReading(readingId);
 
     res.json(reading);
   } catch (err) {
@@ -88,8 +88,8 @@ router.post("/:id/signup", async (req, res) => {
 
 router.post("/:id/feedback", async(_req, res) => {
   try {
-    const {readingId, userId, appFileId} = _req.body;
-    const eventAppFileId = await createReadingFeedback(readingId, userId, appFileId);
+    const {readingAuthorId, feedbackFileId } = _req.body;
+    const eventAppFileId = await createReadingFeedback(readingAuthorId, feedbackFileId);
     res.json(eventAppFileId)    
   } catch (err) {
     console.error('Error adding an event feedback file:', err);

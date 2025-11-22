@@ -92,8 +92,18 @@ model AppFile {
   manuscriptIsVisible Boolean      @default(false)
 
   user               User                @relation(fields: [userId], references: [id])
-  readingManuscripts ReadingManuscript[]
   readingFeedback   ReadingFeedback[]
+  authorAppFile     AuthorAppFile[]
+
+}
+
+model AuthorAppFile {
+  id                  String       @id @default(cuid())
+  readingAuthorId    String   @unique
+  appFileId           String
+
+  readingAuthor              ReadingAuthor      @relation(fields: [readingAuthorId], references:[id])
+  appFile AppFile @relation(fields: [appFileId], references: [id])
 }
 
 model Reading {
@@ -105,8 +115,9 @@ model Reading {
   readingDate         DateTime
   readingStartTime    String
   readingEndTime      String
-  readingAddressId    String?  @unique
+  readingAddressId    String?   @unique 
   submissionDeadline  DateTime
+  spotsOpen           Int      @default(2)
   description         String
   minDaysBetweenReads Int      @default(20) // configurable
   maxConsecutiveReads Int      @default(1) // e.g., can't sign up twice in a row
@@ -120,40 +131,28 @@ model Reading {
 model ReadingAuthor {
   id              String          @id @default(cuid())
   readingId       String
-  authorId   String
+  authorId   String           @unique
+  appFileId       String?
   joinedAt        DateTime        @default(now())
 
   reading Reading @relation(fields: [readingId], references: [id])
-  user    User    @relation(fields: [authorId], references: [id])
-  readingManuscript  ReadingManuscript[]
-
-  @@unique([readingId, authorId])
+  userProfile    UserProfile    @relation(fields: [authorId], references: [userId])
+  authorAppFile     AuthorAppFile? 
+  readingFeedback     ReadingFeedback[]
 }
 
 model ReadingFeedback {
   id                  String   @id @default(cuid())
-  readingManuscriptId String
+  readingAuthorId     String
   feedbackFileId      String
-  userId          String
+  //userId          String
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
+  readingAuthor       ReadingAuthor   @relation(fields: [readingAuthorId], references:[id])
   appFile             AppFile         @relation(fields: [feedbackFileId], references: [id])
-  user           User       @relation(fields: [userId], references: [id])  
-  readingManuscript ReadingManuscript @relation(fields: [readingManuscriptId], references: [id])
+  //user           User       @relation(fields: [userId], references: [id])  
 
-  @@unique([readingManuscriptId, userId])
-}
-
-model ReadingManuscript {
-  id              String @id @default(cuid())
-  readingId       String
-  readingAuthorId String @unique
-  appFileId       String
-
-  readingFeedback ReadingFeedback[]
-  readingAuthor         ReadingAuthor           @relation(fields: [readingId], references: [id])
-  appFile         AppFile           @relation(fields: [appFileId], references: [id])
 }
 
 model Group {
@@ -235,11 +234,8 @@ model User {
   group              Group[]
   reading            Reading[]
   userProfile        UserProfile?
-  appFiles           AppFile[]
+  appFiles           AppFile[]   
   urls               UserUrl[]
-  readingAuthor     ReadingAuthor[]
-  readingFeedback   ReadingFeedback[]     
-
 }
 
 model UserProfile {
@@ -251,6 +247,7 @@ model UserProfile {
   bio       String?
 
   user User @relation(fields: [userId], references: [id])
+  readingAuthor     ReadingAuthor[]
 }
 
 model UserUrl {

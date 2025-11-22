@@ -17,7 +17,6 @@ const ReadingSignup = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const { isLoading } = useUserContext();
   const [group, setGroup] = useState<any | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
   const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups`;
@@ -33,14 +32,11 @@ const ReadingSignup = () => {
         const data = await res.json();
         
         setGroup(data);
-
-        //setIsAdmin(data.isAdmin);
-        setIsAdmin(true);
+        
       }
       setLoadingData(false);
     })();
   }, [groupId]);
-
   if (isLoading || loadingData) {
     return (
       <Box display="flex" justifyContent="center" p={6} >
@@ -59,10 +55,10 @@ const ReadingSignup = () => {
         {group.name}
       </Typography>
       <Typography variant="h5" mb={3} textAlign="center">
-        {isAdmin ? ("Create Readings") : ("Sign Up For a Reading")} 
+        {group.isAdmin ? ("Create Readings") : ("Sign Up For a Reading")} 
       </Typography>
 
-      <EventsCalendar groupId={group.id}/>
+      <EventsCalendar groupId={group.id} isAdmin={group.isAdmin}/>
 
     </Box>
   );

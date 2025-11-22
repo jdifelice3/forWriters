@@ -1,5 +1,4 @@
-//import { AppFile } from '../types/File';
-import { AppFile } from "../../../backend/src/prisma-types";
+import { AppFile } from "../../../backend/src/domain-types";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import pdfIcon from '../assets/icons/icons8-pdf-48.png';
 import wordIcon from '../assets/icons/icons8-word-file-48.png';
@@ -7,10 +6,13 @@ import { Avatar } from "@mui/material";
   
 
 interface FileIconProps {
-  file: AppFile;
+  file: AppFile | undefined;
 }
 
 const FileIcon: React.FC<FileIconProps> = ({file}) => {
+    if(!file){
+      return <InsertDriveFileIcon color="primary" />;
+    }
     if (file.mimetype.startsWith("image/")) {
       return <Avatar src={file.url} variant="rounded" sx={{ width: 40, height: 40 }} />;
     }
