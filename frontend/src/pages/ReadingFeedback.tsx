@@ -75,7 +75,6 @@ const ReadingFeedback = () => {
         setEventTitle(data.name);
         if(data.readingAuthor && data.readingAuthor.length > 0){
           setReading(data);
-          console.log('findIndex appFileId',data && data.readingAuthor.findIndex(item => item.appFileId !== null) === -1);
           let files: AppFile[] = [];
           data.readingAuthor.forEach((a: any) => {
             if(a.authorAppFile){
@@ -104,10 +103,10 @@ const ReadingFeedback = () => {
 
   const userHasSubmittedFeedback = (readingAuthor: ReadingAuthor, userId: string) => {
     /*
-    if a user has submitted feedback:
+      if a user has submitted feedback:
       readingAuthor.readingFeedback.AppFile.userid = current user id
     */
-   let findIndex = -1;
+    let findIndex = -1;
     for(let i = 0; i < readingAuthor.readingFeedback.length; i++){
       findIndex = readingAuthor.readingFeedback.findIndex(item => item.feedbackUserId = userId);
     }
@@ -134,7 +133,7 @@ const ReadingFeedback = () => {
           No files uploaded yet.
         </Typography>
       ) : (
-        <div>
+        
         <Stack direction="column" alignItems="left" gap={1} my={1}>
           {reading && reading.readingAuthor.map((ra: any) => (
             <Grid size={{xs:12, md:6}} key={ra.id}>
@@ -154,20 +153,30 @@ const ReadingFeedback = () => {
                     ) : (
                       <div></div>
                     )}
-                      
-                   
                   </Stack>
+                  {ra.authorAppFile?.appFile ? (
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     sx={{ mb: 2 }}
                   >
-                    {ra.authorAppFile?.appFile ? ra.authorAppFile?.appFile.description : "No description"}
+                    {ra.authorAppFile?.appFile.description}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Uploaded on {ra.authorAppFile?.appFile ? new Date(ra.authorAppFile?.appFile.uploadedAt).toLocaleDateString() : ""}
-                  </Typography>
-                <CardActions>
+
+                    ) : (
+                        <div></div>
+                    )}
+                  {ra.authorAppFile?.appFile ? (
+                      <Typography variant="caption" color="text.secondary">
+                        Uploaded on {ra.authorAppFile?.appFile ? new Date(ra.authorAppFile?.appFile.uploadedAt).toLocaleDateString() : ""}
+                      </Typography>
+                    ) : (
+                      <Typography>
+                        The author has not yet uploaded a manuscript
+                      </Typography>
+                    )}
+                  <CardActions>
+                  {ra.authorAppFile?.appFile ? (
                   <Button 
                       href={`${fileUploadsUrl}/${ra.authorAppFile?.appFile.filename}` } download={ra.authorAppFile?.appFile.filename} 
                       size="small"
@@ -176,31 +185,31 @@ const ReadingFeedback = () => {
                   >
                     Download Manuscript
                   </Button>
-                  
+                  ) : (<div></div>)
+                }
                 </CardActions>
-                <Paper className={userHasSubmittedFeedback(ra, user.id) ? "disabled" : ""}
-                // to disable Cards
+                <Paper className={userHasSubmittedFeedback(ra, user.id) || ra.authorId === user.id ? "disabled" : ""}
+                    // to disable CardsF
                     elevation={2}
-                    // style={{
-                    //   opacity: (userHasSubmittedFeedback(readingAuthor, user.id) ? 0.5 : 1),
-                    //   pointerEvents: (userHasSubmittedFeedback(readingAuthor, user.id) ? 'none' : 'auto')
-                    // }}
                 >
+                  {ra.authorAppFile?.appFile ? (
                   <UploadFileForm 
                     onSendData={reloadFromUploadForm} 
-                    readingId={ra.id} 
+                    readingId={reading.id} 
                     formProperties={uploadFormProperties} 
                     isUserDisabled={false}
                     hasUserSubmitted={userHasSubmittedFeedback(ra, user.id)} 
                     readingAuthorId={ra.id}
                   />
+                  ) : (<div></div>)
+                }
                 </Paper>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Stack>
-        </div>
+        
       )}
       {/* Edit dialog */}
       <Dialog open={!!editFile} onClose={() => setEditFile(null)} fullWidth maxWidth="sm">

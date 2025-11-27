@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import { useUserContext } from "../context/UserContext";
 import { UploadFileFormProperties } from "../types/File";
-import { AppFile, DocumentType } from "../../../backend/src/domain-types";
+import { AppFile } from "../../../backend/src/domain-types";
 import {
   Box,
   Button,
@@ -12,10 +13,8 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-//import folderOpen from "../assets/images/";
 import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
-import { getDocumentTypeString } from "../util/Enum";
 
 interface UploadFileProps {
   onSendData: (data: AppFile, readingId?: string) => void;
@@ -34,6 +33,8 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
     hasUserSubmitted=false,
     readingAuthorId,
   }) => {
+  const { user } = useUserContext();
+
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -92,68 +93,68 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
 
   return (
     <div>
-    <Typography variant={formProperties.titleVariant} mb={1} textAlign="center">
-           {(() => {
-            if (formProperties.title.length > 0) {
-                return formProperties.title;
-            }
-          })()}
-    </Typography>
-    <Card sx={{ mb: 4, p: 2 }}>
-        <CardContent>
-            <Typography variant="h6" gutterBottom>
-            {formProperties.subtitle}
-            </Typography>
-            <Box component="form" onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-                <Grid size={12}>
-                  <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<UploadIcon />}
-                  >
-                      {file ? file.name : formProperties.buttonChooseFileText}
-                      <input type="file" hidden onChange={handleFileChange} />
-                  </Button>
-                </Grid>
-                <Grid size={5}>
-                  <TextField
-                      label="Title"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      fullWidth
-                      required
-                  />
-                </Grid>
-                <Grid size={7}>
-                  <TextField
-                      label="Description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      fullWidth
-                  />
-                </Grid>
-                <Grid size={3}>
-                  <Button
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                      disabled={loading}
-                      startIcon={<UploadIcon />}
-                  >
-                      {loading ? <CircularProgress size={24} /> : formProperties.buttonUploadText}
-                  </Button>
-                </Grid>
-                <Grid size={9}>
-                  {hasUserSubmitted ? (
-                  <Typography sx={{color: "green", fontWeight: "bold"}}>You have submitted feedback for this story</Typography>
-                  ) : (
-                    <div></div>
-                  )}
-                </Grid>
-            </Grid>
-            </Box>
-        </CardContent>
+        <Typography variant={formProperties.titleVariant} mb={1} textAlign="center">
+            {(() => {
+                if (formProperties.title.length > 0) {
+                    return formProperties.title;
+                }
+            })()}
+        </Typography>
+        <Card sx={{ mb: 4, p: 2 }}>
+            <CardContent>
+                <Typography variant="h6" gutterBottom>
+                {formProperties.subtitle}
+                </Typography>
+                <Box component="form" onSubmit={handleSubmit}>
+                    <Grid container spacing={2}>
+                        <Grid size={12}>
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                startIcon={<UploadIcon />}
+                        >
+                                {file ? file.name : formProperties.buttonChooseFileText}
+                                <input type="file" hidden onChange={handleFileChange} />
+                            </Button>
+                        </Grid>
+                        <Grid size={5}>
+                            <TextField
+                                label="Title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                fullWidth
+                                required
+                            />
+                        </Grid>
+                        <Grid size={7}>
+                            <TextField
+                                label="Description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                fullWidth
+                            />
+                        </Grid>
+                        <Grid size={3}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                disabled={loading}
+                                startIcon={<UploadIcon />}
+                            >
+                                {loading ? <CircularProgress size={24} /> : formProperties.buttonUploadText}
+                            </Button>
+                        </Grid>
+                        <Grid size={9}>
+                            {hasUserSubmitted ? (
+                                <Typography sx={{color: "green", fontWeight: "bold"}}>You have submitted feedback for this story</Typography>
+                            ) : (
+                                <div></div>
+                            )}
+                        </Grid>
+                    </Grid>
+                </Box>
+            </CardContent>
     </Card>
     </div>
     )
