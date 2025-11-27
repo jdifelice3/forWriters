@@ -1,4 +1,4 @@
-import { FileType, DocumentType } from "../domain-types";
+import { FileType, DocumentType } from "../../../backend/src/domain-types";
 
 export const getFileTypeString = (fileType: FileType): string => {
   return fileType;

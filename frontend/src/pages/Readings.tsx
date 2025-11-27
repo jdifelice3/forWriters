@@ -9,7 +9,8 @@ import {
   CardContent,
   Stack,
   Divider,
-  Popover
+  Popover,
+  TextField
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 // import FileIcon from "../components/FileIcon";
@@ -30,6 +31,8 @@ const fileListProperties: FileListProperties =
 const styles = {
     marginLeft: '75px' // or a responsive value
 };
+
+const currentDate = new Date();
 
 const Readings = () => {
     const { user, isLoading, error } = useUserContext();
@@ -54,7 +57,6 @@ const Readings = () => {
   }, [user]);
   
   const handleSelectChange = async(readingAuthorId: string, fileId: string) => {
-    console.log('body',JSON.stringify({readingAuthorId: readingAuthorId, appFileId: fileId}));
     const res = await fetch(addFileToReadingUrl, {
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -98,7 +100,7 @@ const Readings = () => {
                   p: 2,
                   borderRadius: 2,
                   backgroundColor:
-                    new Date(ra.reading.submissionDeadline) > new Date()
+                    new Date(ra.reading.submissionDeadline) > currentDate
                       ? "#e3f2fd"
                       : "#f3e5f5",
                 }}
@@ -120,7 +122,21 @@ const Readings = () => {
                   Submitted Manuscript: <InfoIcon style={{ cursor: 'pointer' }} onClick={handleClick}/>
                 </Typography>
                 <div>
-                <FileSelect onSendData={handleSelectChange} readingAuthorId={ra.id} fileListProperties={fileListProperties}/>
+                {new Date(ra.reading.submissionDeadline).valueOf() > currentDate.valueOf() ? (
+                  <FileSelect 
+                      onSendData={handleSelectChange} 
+                      readingAuthorId={ra.id} 
+                      selectedValueId={ra.authorAppFile?.appFile.id || ""}
+                      fileListProperties={fileListProperties}
+                    />
+                ) : (
+                  <TextField
+                    variant="outlined"
+                    sx={{ width: 360 }}
+                    disabled
+                    value={ra.authorAppFile?.appFile.title || ""}
+                  />
+                )}
                 <Popover
                   id={id}
                   open={open}
@@ -161,7 +177,7 @@ const Readings = () => {
                   <Typography variant="caption" color="text.secondary">
                     Submitted to Reading on {
                         ra.authorAppFile ?
-                        new Date(ra.authorAppFile.appFile.uploadedAt).toLocaleDateString()
+                        new Date(ra.authorAppFile.createdAt).toLocaleDateString()
                         : "N/A"
                     }
                   </Typography>

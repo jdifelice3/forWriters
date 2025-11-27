@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { FileType, AppFile } from "../domain-types";
-import { getFileTypeFromString } from "../util/Enum";
+import { FileType, AppFile, DocumentType } from "../domain-types";
+import { getFileTypeFromString, getDocumentTypeFromString } from "../util/Enum";
 
 const prisma = new PrismaClient();
 
@@ -44,9 +44,10 @@ export const getFileRecords = async(authId: string, fileType?: string) => {
   return files;
 }
 
-export const createFileRecord = async(authId: string, mimeType: FileType, filename: string,
+export const createFileRecordBasic = async(authId: string, mimeType: FileType, filename: string,
         title: string, description: string
  ) => {
+  console.log('in createFileRecordBasic');
   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
   const file = await prisma.appFile.create({
@@ -61,6 +62,65 @@ export const createFileRecord = async(authId: string, mimeType: FileType, filena
   });
 
   return file;
+}
+
+// export const createFileRecordReading = async(authId: string, mimeType: FileType, filename: string,
+//         title: string, description: string
+//  ) => {
+//   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
+
+//   const file = await prisma.appFile.create({
+//     data: {
+//       title: title,
+//       description: description,
+//       filename: filename,
+//       mimetype: mimeType,
+//       url: `/uploads/${filename}`,
+//       userId: user ? user.id : '',
+//     },
+//   });
+
+//   return file;
+// }
+
+export const createFileRecordReadingFeedback = async(
+    authId: string, 
+    mimeType: FileType, 
+    filename: string,
+    title: string, 
+    description: string,
+    readingAuthorId: string
+ ) => {
+  console.log('in createFileRecordReadingFeedback');
+  try {
+    const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
+
+    const file = await prisma.appFile.create({
+      data: {
+        title: title,
+        description: description,
+        filename: filename,
+        mimetype: mimeType,
+        url: `/uploads/${filename}`,
+        userId: user ? user.id : '',
+        documentType: getDocumentTypeFromString(DocumentType.FEEDBACK)
+      },
+    });
+
+    const feedback = await prisma.readingFeedback.create({
+      data: {
+        readingAuthorId: readingAuthorId,
+        feedbackUserId: user?.id,
+        feedbackFileId: file.id
+      }
+    });
+    
+    return file;
+  } catch (err) {
+    console.log('err', err);
+    throw err;
+  }
+  
 }
 
 export const updateFileRecord = async(id: string, title: string, description: string) => {

@@ -31,6 +31,10 @@ const fileListProperties: FileListProperties =
     showEditButton: true 
   }
 
+const styles = {
+    marginLeft: '75px' // or a responsive value
+};
+
 interface FileManagerProps {
   fileType: string;
 }
@@ -69,11 +73,12 @@ const FileManager: React.FC<FileManagerProps> = ({fileType: FileType}) => {
   }
 
   return (
-    <Box sx={{ 
-        maxWidth: 900, 
+    <Box 
+        style={styles} 
+        sx={{ 
+        maxWidth: 1000, 
         mx: "auto", 
         p: 4,
-        marginLeft: "100px",
       }}>
       <UploadFileForm onSendData={reloadFromUploadForm} formProperties={uploadFormProperties} />
       

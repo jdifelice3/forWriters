@@ -41,7 +41,6 @@ export const getReadingsByUserId = async(authId: string) => {
             userProfile: true,
         }
     });
-    console.log('userId', user.id);
     const appFiles = await prisma.appFile.findMany({
       where: {
         userId: user.id, // Fetch files for the specific user
@@ -49,29 +48,28 @@ export const getReadingsByUserId = async(authId: string) => {
     });
 
     const readingAuthors = await prisma.readingAuthor.findMany({
-  where: {
-    authorId: user.id,
-  },
-  include: {
-    authorAppFile: {
-      where: {
-        appFileId: {
-          in: appFiles.map(file => file.id), // Map the fetched appFile IDs
+    where: {
+      authorId: user.id,
+    },
+    include: {
+      authorAppFile: {
+        where: {
+          appFileId: {
+            in: appFiles.map(file => file.id), // Map the fetched appFile IDs
+          },
+        },
+        include: {
+          appFile: true, // Include the actual appFile details if needed
         },
       },
-      include: {
-        appFile: true, // Include the actual appFile details if needed
+      reading: {
+        include: {
+          group: true,
+        },
       },
     },
-    reading: {
-      include: {
-        group: true,
-      },
-    },
-  },
 });
 
-    console.log('in getReadingsByUserId. readings:', readingAuthors);
     return readingAuthors;
   } catch (err) {
     console.log('Error in getReadingsByUserId');
@@ -197,17 +195,17 @@ export const createReadingAuthor = async(readingId: string, userId: string) => {
   }
 }
 
-export const createReadingFeedback = async(readingAuthorId: string, feedbackFileId: string): Promise<ReadingFeedback> => {
+export const createReadingFeedback = async(readingAuthorId: string, feedbackFileId: string) => {//}: Promise<ReadingFeedback> => {
   try {
-    const result = await prisma.readingFeedback.create({
-      data: {
-        readingAuthorId: readingAuthorId,
-        feedbackFileId: feedbackFileId
-      },
-    });
-    console.log('dbEvents.createReadingFeedback', result);
+    // const result = await prisma.readingFeedback.create({
+    //   data: {
+    //     readingAuthorId: readingAuthorId,
+    //     feedbackFileId: feedbackFileId
+    //   },
+    // });
+    // console.log('dbEvents.createReadingFeedback', result);
 
-    return result;
+    return null;//result;
   } catch (err) {
     console.error('Error adding a feedback file to readingFeedback:', err);
     throw err;
@@ -215,6 +213,18 @@ export const createReadingFeedback = async(readingAuthorId: string, feedbackFile
 }
 
 export const addFileToReading = async(readingAuthorId: string, appFileId: string) => {
+  //delete all associated AuthorAppFiles
+  try {
+    const deleteReadingAuthor = await prisma.authorAppFile.delete({
+      where: {
+        readingAuthorId: readingAuthorId
+      }
+    });
+    console.log('deleteReadingAuthor', deleteReadingAuthor);
+  } catch (err) {
+    //will throw an error if there are no records to delete
+  }
+
   const result = await prisma.authorAppFile.create({
     data: {
       readingAuthorId: readingAuthorId,

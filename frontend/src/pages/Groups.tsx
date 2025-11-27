@@ -58,7 +58,6 @@ const Groups = () => {
         const data: GroupGetBasic = await res.json();
         //console.log('user', user);
         if(data){
-          console.log('group', data);
           setGroup(data);
           let userIndex: number = data.groupUser.findIndex(item => item.userId === user.id);
           setIsAdmin(data.groupUser[userIndex].isAdmin);

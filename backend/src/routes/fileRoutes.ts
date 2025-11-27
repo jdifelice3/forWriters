@@ -4,11 +4,12 @@ import path from "path";
 import fs from "fs";
 import { FileType } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
-import { getFileRecords, createFileRecord, updateFileRecord, deleteFileRecord } from "../database/dbFiles";
+import { getFileRecords, createFileRecordBasic, updateFileRecord, deleteFileRecord, createFileRecordReadingFeedback } from "../database/dbFiles";
 import { deleteFile } from "../services/srvFiles";
 
 const router = express.Router();
 
+//#region STORAGE
 const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
@@ -18,7 +19,10 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+//#endregion
 
+
+//#region GET
 router.get("/", async (_req, res) => {
   try{
     console.log('in file Routes GET');
@@ -53,7 +57,10 @@ router.get("/:fileType", async(_req, res) => {
       res.status(500).json({ err: 'Error retrieving file records' });
   }
 });
+//#endregion
 
+
+//#region POST
 router.post("/", upload.single("file"), async (req, res) => {
   try{
     const session = await Session.getSession(req, res);
@@ -61,7 +68,13 @@ router.post("/", upload.single("file"), async (req, res) => {
     const mimeType = mapMimeToEnum(req.file?.mimetype);
     const filename = (req.file !== undefined ? req.file.filename : '');
 
-    const file = await createFileRecord(authId, mimeType, filename, req.body.title, req.body.description);
+    const file = await createFileRecordBasic(
+        authId, 
+        mimeType, 
+        filename, 
+        req.body.title, 
+        req.body.description
+      );
 
     res.json(file);
   } catch (err) {
@@ -70,6 +83,56 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
+// router.post("/r/:readingId", upload.single("file"), async (req, res) => {
+//   try{
+//     const session = await Session.getSession(req, res);
+//     const authId = session.getUserId();
+//     const mimeType = mapMimeToEnum(req.file?.mimetype);
+//     const filename = (req.file !== undefined ? req.file.filename : '');
+
+//     const file = await createFileRecordReading(
+//       authId, 
+//       mimeType, 
+//       filename, 
+//       req.body.title, 
+//       req.body.description
+//     );
+
+//     res.status(200).json(file);
+//   } catch (err) {
+//     console.error('Error creating file record:', err);
+
+//     res.status(500).json({ err: 'Error creating file record' });
+//   }
+// });
+
+router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
+  try{
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId();
+    const readingAuthorId = req.params.readingAuthorId;
+    const mimeType = mapMimeToEnum(req.file?.mimetype);
+    const filename = (req.file !== undefined ? req.file.filename : '');
+
+    const file = await createFileRecordReadingFeedback(
+      authId, 
+      mimeType, 
+      filename, 
+      req.body.title, 
+      req.body.description,
+      readingAuthorId
+    );
+
+    res.json(file);
+  } catch (err) {
+      console.error('Error creating file record:', err);
+      res.status(500).json({ err: 'Error creating file record' });
+  }
+});
+//#endregion
+
+
+//#region PUT
 router.put("/", async(_req, res) => {
   try{
     const { id, title, description } = _req.body;
@@ -80,7 +143,10 @@ router.put("/", async(_req, res) => {
     res.status(500).json({ err: 'Error updating file record' });
   }
 });
+//#endregion
 
+
+//#region DELETE
 router.delete("/", async(_req, res) => {
   let id: string = "";
   try {
@@ -99,7 +165,10 @@ router.delete("/", async(_req, res) => {
       res.status(500).json({ err: 'Error deleting file' });
   }
 });
+//#endregion
 
+
+//#region UTIL FUNTIONS
 const mapMimeToEnum = (mime: string | undefined): FileType => {
   if (mime === "application/pdf") return "PDF";
   if (
@@ -109,5 +178,6 @@ const mapMimeToEnum = (mime: string | undefined): FileType => {
     return "DOCX";
   throw new Error(`Unsupported file type: ${mime}`);
 }
+//#endregion
 
 export default router;

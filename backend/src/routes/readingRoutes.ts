@@ -52,7 +52,7 @@ router.get("/:readingId/reading", async(_req, res) => {
 
 router.get("/user/author", async(_req, res) => {
   try{
-    console.log('in /api/events/user');
+    
     const session = await Session.getSession(_req, res);
     const authId = session.getUserId();
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { UploadFileFormProperties } from "../types/File";
-import { AppFile } from "../../../backend/src/domain-types";
+import { AppFile, DocumentType } from "../../../backend/src/domain-types";
 import {
   Box,
   Button,
@@ -15,6 +15,7 @@ import {
 //import folderOpen from "../assets/images/";
 import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
+import { getDocumentTypeString } from "../util/Enum";
 
 interface UploadFileProps {
   onSendData: (data: AppFile, readingId?: string) => void;
@@ -22,16 +23,28 @@ interface UploadFileProps {
   readingId?: string;
   isUserDisabled?: boolean;
   hasUserSubmitted?: boolean;
+  readingAuthorId?: string;
 }
 
-const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, readingId, isUserDisabled=false, hasUserSubmitted=false}) => {
+const UploadFileForm: React.FC<UploadFileProps> = ({
+    onSendData, 
+    formProperties, 
+    readingId, 
+    isUserDisabled=false, 
+    hasUserSubmitted=false,
+    readingAuthorId,
+  }) => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
-  
+  let filesUrl = "";
+  if(!readingAuthorId) {
+    filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
+  } else {
+    filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files/ra/${readingAuthorId}`;
+  }
     // File upload
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const selected = e.target.files?.[0];
@@ -73,19 +86,18 @@ const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, 
           alert("Failed to upload file");
       } finally {
           setLoading(false);
-          //alert("Your feedback has been uploaded")
+          alert("Your feedback has been uploaded")
       }
     };
 
   return (
     <div>
     <Typography variant={formProperties.titleVariant} mb={1} textAlign="center">
-        {/* <img src="/src/assets/images/folder.png" alt="folder"/> */}
-         {(() => {
-                if (formProperties.title.length > 0) {
-                    return formProperties.title;
-                }
-            })()}
+           {(() => {
+            if (formProperties.title.length > 0) {
+                return formProperties.title;
+            }
+          })()}
     </Typography>
     <Card sx={{ mb: 4, p: 2 }}>
         <CardContent>

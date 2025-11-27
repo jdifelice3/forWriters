@@ -51,7 +51,7 @@ export const getGroup = async(groupId: string) => {
         },
       },
     });
-    console.log('in getGroup. group:', group);
+    //console.log('in getGroup. group:', group);
     return group;
   } catch (err) {
       console.error('Error creating group:', err);

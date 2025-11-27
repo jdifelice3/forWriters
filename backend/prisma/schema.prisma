@@ -111,6 +111,7 @@ model AuthorAppFile {
   id              String @id @default(cuid())
   readingAuthorId String @unique
   appFileId       String
+  createdAt       DateTime  @default(now())
 
   readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
   appFile       AppFile       @relation(fields: [appFileId], references: [id])

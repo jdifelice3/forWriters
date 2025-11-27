@@ -12,18 +12,19 @@ import {
 interface FileSelectProps {
   onSendData: (readingAuthorId: string, appfileId: string) => void;
   readingAuthorId: string;
+  selectedValueId?: string;
   fileListProperties: FileListProperties;
 } 
 
 type SelectValue = string;
 
-const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, fileListProperties}) => {
+const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, selectedValueId, fileListProperties}) => {
     const { user } = useUserContext();
 
     const [files, setFiles] = useState<AppFile[]>([]);
     const [selectedValue, setSelectedValue] = useState("");
     const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
-  
+
     const handleChange = (event: SelectChangeEvent<SelectValue>) => {
         setSelectedValue(event.target.value as string);
         onSendData(readingAuthorId, event.target.value as string);
@@ -31,6 +32,7 @@ const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, fil
 
     useEffect(() => {
     if (!user) return;
+      console.log('selectedValue', selectedValue);
       (async () => {
         const res = await fetch(`${filesUrl}/${fileListProperties.fileType}`, 
         { 
@@ -40,8 +42,9 @@ const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, fil
         });
         
         if (res.ok) {
-          const data = await res.json();
-          setFiles(data);
+            const data = await res.json();
+            setFiles(data);
+            (selectedValueId && selectedValueId !== "" ? setSelectedValue(selectedValueId) : "");
           //setIsLoading(false);
         }
       })();
