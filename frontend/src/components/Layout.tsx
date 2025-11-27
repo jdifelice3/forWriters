@@ -11,8 +11,9 @@ import Groups from "../pages/Groups";
 import GroupsCreate from "../pages/GroupsCreate";
 import ReadingSignup from "../pages/ReadingSignup";
 import ReadingFeedback from "../pages/ReadingFeedback";
-import GroupJoinRequestsAdminPage from "../pages/GroupJoinRequestsAdminPage";
+import GroupJoinRequestAdmin from "../pages/GroupJoinRequestAdmin";
 import GroupSearch from "../pages/GroupSearchPage";
+import Readings from "../pages/Readings";
 
 const Layout = () => {
   const session = useSessionContext();
@@ -94,12 +95,15 @@ const Layout = () => {
               <Route path="/signout" element={<div><h1>Sign Out</h1></div>} />
               <Route path="/works" element={<div><h1>Your Work</h1></div>} />
               <Route path="/userprofile" element={<UserProfile />} />
-              <Route path="/filemanager" element={<FileManager />} />
+              <Route path="/filemanager/manuscript" element={<FileManager fileType="manuscript" />} />
+              <Route path="/filemanager/feedback" element={<FileManager fileType="feedback" />} />
               <Route path="/joingroup" element={<div><h1>Join a Group</h1></div>} />
               <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
-              <Route path="/readingfeedback/:eventId" element={<ReadingFeedback />} />
-              <Route path="/joinadminpage" element={<GroupJoinRequestsAdminPage />} />
+              <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />
+              <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
               <Route path="/groupsearch" element={<GroupSearch />} /> 
+              <Route path="/groupjoinadmin" element={<GroupJoinRequestAdmin/>}/>
+              <Route path="/readings" element={<Readings />} />
             </Routes>
           </ComponentWrapper>
         </main>

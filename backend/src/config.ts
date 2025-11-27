@@ -14,7 +14,7 @@ export const SuperTokensConfig: TypeInput = {
     },
     appInfo: {
         appName: "forWriters",
-        apiDomain: `${process.env.API_HOST}:${process.env.WEB_PORT}`,
+        apiDomain: `${process.env.API_HOST}:${process.env.API_PORT}`,
         websiteDomain: `${process.env.WEB_HOST}:${process.env.WEB_PORT}`,
         apiBasePath: "/auth",
         websiteBasePath: "/auth",
@@ -50,6 +50,10 @@ export const SuperTokensConfig: TypeInput = {
         }),
         Dashboard.init(),
         UserRoles.init(),
-        Session.init()
+        Session.init({
+            useDynamicAccessTokenSigningKey: false,
+            cookieSameSite: "lax",
+            cookieSecure: false
+        })
     ],
 };

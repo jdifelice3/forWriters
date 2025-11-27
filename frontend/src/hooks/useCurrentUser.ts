@@ -26,6 +26,7 @@ const fetcher = async (url: string) => {
 const apiHost = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}`;
 
 export function useCurrentUser() {
+  
   const navigate = useNavigate();
 
   // SWR handles caching + revalidation
@@ -34,7 +35,7 @@ export function useCurrentUser() {
     fetcher,
     {
       revalidateOnFocus: true,
-      shouldRetryOnError: false, // do not retry 401 loops
+      shouldRetryOnError: true, // do not retry 401 loops
     }
   );
 

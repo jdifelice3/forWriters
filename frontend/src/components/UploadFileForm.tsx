@@ -17,14 +17,14 @@ import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
 
 interface UploadFileProps {
-  onSendData: (data: AppFile, eventId?: string) => void;
+  onSendData: (data: AppFile, readingId?: string) => void;
   formProperties: UploadFileFormProperties;
-  eventId?: string;
+  readingId?: string;
   isUserDisabled?: boolean;
   hasUserSubmitted?: boolean;
 }
 
-const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, eventId, isUserDisabled=false, hasUserSubmitted=false}) => {
+const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, readingId, isUserDisabled=false, hasUserSubmitted=false}) => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -63,8 +63,8 @@ const UploadFileForm: React.FC<UploadFileProps> = ({onSendData, formProperties, 
           setFile(null);
           setTitle("");
           setDescription("");
-          if(eventId){
-            onSendData(file, eventId);
+          if(readingId){
+            onSendData(file, readingId);
           } else {
             onSendData(file);
           }

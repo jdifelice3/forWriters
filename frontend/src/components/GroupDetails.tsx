@@ -10,8 +10,10 @@ import {
   Link,
   ListItem,
   Stack,
+  List,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import UrlList from "./UrlList";
 
 interface GroupDetailsProps {
   group: GroupGetBasic;
@@ -21,6 +23,7 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
 
   const [form, setForm] = useState({
     name: group.name || "",
+    description: group.description || "",
     websiteUrl: group.websiteUrl || "",
     imageUrl: group.imageUrl || "",
     street: (group.groupAddress) ?  group.groupAddress[0].street : "",
@@ -64,6 +67,7 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
                 </ListItem>
             </Stack>
           </Grid>
+
           <Grid size={6}>
             <Stack >
                 <ListItem>
@@ -85,9 +89,20 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
         </Grid>
 
         <Box mt={2}>
-          <Link href={mapUrl} target="_blank" rel="noopener">
-            View on Google Maps
-          </Link>
+          <Grid size={12}>
+            <Stack>
+              <ListItem>
+                <Typography>
+                  {group.description}
+                </Typography>
+              </ListItem>
+              <ListItem>
+              <Link href={mapUrl} target="_blank" rel="noopener">
+                View on Google Maps
+              </Link>
+              </ListItem>
+          </Stack>
+          </Grid>
         </Box>
       </CardContent>
     </Card>

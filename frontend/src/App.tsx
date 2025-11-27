@@ -1,3 +1,4 @@
+import { useEffect, useContext } from 'react';
 import { SessionAuth } from "supertokens-auth-react/recipe/session";
 import { BrowserRouter } from "react-router-dom";
 import SuperTokens, { SuperTokensWrapper } from "supertokens-auth-react";
@@ -12,12 +13,14 @@ SuperTokens.init(SuperTokensConfig);
 
 // ---------- Root App ----------
 export default function App() {
+  
   const theme = createTheme({
     palette: {
       mode: "light", // switch to "dark" if you want full dark mode
       primary: { main: "#1976d2" },
       background: { default: "#f5f5f5" },
     },
+    
   });
 
   return (

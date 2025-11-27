@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { mutate } from "swr";
+import { GroupGetBasic, Reading } from "../../../backend/src/domain-types";
+import { useUserContext } from "../context/UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme, GlobalStyles } from "@mui/material";
 import { ProSidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
@@ -17,61 +20,45 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import KeyIcon from '@mui/icons-material/Key';
-import { useUserContext } from "../context/UserContext";
 import GradientDivider from "./GradientDivider";
-import GroupSearch from "../pages/GroupSearchPage";
-
-
-interface Group {
-    id: string,
-    creatorUserId: string,
-    groupType: string,
-    name: string,
-    description?: string,
-    imageUrl?: string,
-    createdAt: Date,
-    updatedAt: Date
-}
+import RateReviewIcon from '@mui/icons-material/RateReview';
 
 const Sidebar = () => {
+  
   const { user, isLoading, error } = useUserContext();
-  const [groups, setGroups] = useState<Group[]>([]);
-
-  //const session = useSessionContext();
+  const [groups, setGroups] = useState<GroupGetBasic[]>([]);
+  const [reading, setReading] = useState<Reading[]>([]);
   const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname;
-
-  // const groupsUrl = user
-  // ? `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/user/${user.id}`
-  // : null;
   
   useEffect(() => {
-  // wait until user exists and not isLoading
-  if (!user || isLoading) return;
-
-  const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/user/${user.id}`;
-  console.log(groupsUrl);
-  (async () => {
-    try {
-      const res = await fetch(groupsUrl, { credentials: "include" });
-      if (!res.ok) throw new Error(`Failed: ${res.status}`);
-      const data: Group[] = await res.json();
-      setGroups(data);
-    } catch (err) {
-      console.error("Error isLoading groups:", err);
-    }
-  })();
+    if (!user || isLoading) return;
+    
+    const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/user/${user.id}`;
+    
+    (async () => {
+      try {
+        const res = await fetch(groupsUrl, { credentials: "include" });
+        if (!res.ok) throw new Error(`Failed: ${res.status}`);
+        const data: GroupGetBasic[] = await res.json();
+        setGroups(data);
+        //setReading(data.)
+      } catch (err) {
+        console.error("Error isLoading groups:", err);
+      }
+    })();
 }, [user, isLoading]); // ✅ re-runs only once when user is ready
 
   const logoutClicked = async() => {
       await signOut();
+      mutate(() => true, undefined, { revalidate: false }); // Clear SWR cache
       navigate("/auth");
   }
 
   if (isLoading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (error) return <Typography color="error">{error.message}</Typography>;
   if (!user) return <Typography>No user found.</Typography>;
 
   return (
@@ -160,12 +147,12 @@ const Sidebar = () => {
           {/* YOUR GROUPS */}
           <SubMenu
             key="submenu"
-            title="Your Groups"
+            title="Groups"
             icon={<GroupIcon />}
             defaultOpen={pathname.startsWith("/component")}
           >
             <div>
-            {groups ? groups.map((g) => (
+            {groups && groups.length >0 ? groups.map((g) => (
               <MenuItem
                 key={g.id}
                 active={pathname === `/groups/${g.id}`}
@@ -174,11 +161,23 @@ const Sidebar = () => {
                 {g.name}
               </MenuItem>
             )) : (
-              <MenuItem>Join a Group</MenuItem>
+              <MenuItem
+                // active={pathname === `/groupsearch`}
+                // onClick={() => navigate(`/groupsearch`)}
+              >
+                No Groups
+              </MenuItem>
             )}
             </div>
           </SubMenu>
-
+          <MenuItem
+            key="readings"
+            icon={<MenuBookIcon />}
+            active={pathname.startsWith("/readings")}
+            onClick={() => navigate("/readings")}
+          >
+            Readings
+          </MenuItem>          
           <SubMenu
               key="documents"
               title="Documents"
@@ -187,15 +186,15 @@ const Sidebar = () => {
             >
             <MenuItem
               key="manuscripts"
-              active={pathname === "/filemanager"}
-              onClick={() => navigate("/filemanager")}
+              active={pathname === "/filemanager/manuscript"}
+              onClick={() => navigate("/filemanager/manuscript")}
             >
               Manuscripts
             </MenuItem>
             <MenuItem
               key="feedback"
-              active={pathname === "/filemanager"}
-              onClick={() => navigate("/filemanager")}
+              active={pathname === "/filemanager/feedback"}
+              onClick={() => navigate("/filemanager/feedback")}
             >
               Feedback
             </MenuItem>

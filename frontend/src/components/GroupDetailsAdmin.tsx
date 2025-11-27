@@ -13,10 +13,13 @@ import Grid from "@mui/material/Grid";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
+import UrlList from "./UrlList";
 
 interface GroupDetailsProps {
   group: GroupGetBasic;
 }
+
+const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups`;
 
 export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
   
@@ -29,6 +32,8 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
     city: group.groupAddress[0].city || "",
     state: group.groupAddress[0].state || "",
     zip: group.groupAddress[0].zip || "",
+    addressId: group.groupAddress[0].id,
+    description: group.description || ""
   });
 
 
@@ -41,7 +46,7 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/groups/${group.id}`, {
+      const res = await fetch(`${groupsUrl}/${group.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -109,6 +114,15 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
               />
             ))}
               <TextField
+                label="Description"
+                name={"description"}
+                value={form.description}
+                onChange={handleChange}
+                fullWidth
+                disabled={!editing}
+                sx={{ mb: 2 }}
+              />
+              <TextField
                 label="Website"
                 name={"websiteUrl"}
                 value={form.websiteUrl}
@@ -117,9 +131,11 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
                 disabled={!editing}
                 sx={{ mb: 2 }}
               />
-
+              <UrlList isDisabled={!editing}/>
             {editing && (
               <div>
+              <div>&nbsp;</div>
+
               <Button
                 variant="contained"
                 startIcon={<SaveIcon />}

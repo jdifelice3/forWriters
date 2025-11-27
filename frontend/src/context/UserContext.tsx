@@ -1,4 +1,3 @@
-// src/context/UserContext.tsx
 import { createContext, useContext, ReactNode } from "react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 
@@ -10,9 +9,9 @@ export interface UserContextType {
 
 export const UserContext = createContext<UserContextType | null>(null);
 
-export function UserProvider({ children }: { children: ReactNode }) {
+export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { user, isLoading, error } = useCurrentUser();
-
+  //console.log('in UserProvider. user:', user);
   return (
     <UserContext.Provider value={{ user, isLoading, error }}>
       {children}

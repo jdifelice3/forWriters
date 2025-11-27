@@ -1,11 +1,32 @@
 import { PrismaClient } from "@prisma/client";
 import { FileType, AppFile } from "../domain-types";
+import { getFileTypeFromString } from "../util/Enum";
+
 const prisma = new PrismaClient();
 
-export const getFileRecords = async(authId: string) => {
-  
-  const user: any = await prisma.user.findUnique({
-    where: 
+export const getFileRecords = async(authId: string, fileType?: string) => {
+  let user: any = null;
+
+  if(fileType){
+    user = await prisma.user.findUnique({
+      where: 
+        {
+          superTokensId: authId,
+        },
+        include: {
+          appFiles: {
+            where: {
+              mimetype: getFileTypeFromString(fileType)
+            },
+            orderBy: {
+              title: 'asc', // Adjust this to the appropriate field for ordering
+            },
+          },
+        },
+    });
+  } else {
+    user = await prisma.user.findUnique({
+      where: 
         {
             superTokensId: authId,
         },
@@ -17,6 +38,7 @@ export const getFileRecords = async(authId: string) => {
           },
         },
     });
+  }
 
   const files: AppFile[] = user.appFiles;
   return files;

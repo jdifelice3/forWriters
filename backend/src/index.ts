@@ -14,7 +14,7 @@ import fileRoutes from './routes/fileRoutes';
 import pdfRoutes from './routes/pdfRoutes';
 import groupRoutes from './routes/groupRoutes';
 import meRoute from './routes/meRoute';
-import eventRoutes from './routes/eventRoutes';
+import eventRoutes from './routes/readingRoutes';
 
 supertokens.init(SuperTokensConfig);
 
@@ -36,14 +36,14 @@ app.use(middleware());
 
 // Logging Middleware
 app.use((req, res, next) => {
-    console.log(`Received request: ${req.method} ${req.url}`);
+    //console.log(`Received request: ${req.method} ${req.url}`);
 
     // Store original response send method
     const originalSend = res.send.bind(res); // Bind the res context to originalSend
 
     // Override the response send method
     res.send = function (body) {
-        console.log(`Response body: ${body}`);
+        //console.log(`Response body: ${body}`);
         return originalSend(body); // Call the original send method
     };
 

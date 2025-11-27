@@ -9,7 +9,7 @@ import { EventsCalendar } from "../components/EventsCalendar";
 import { useUserContext } from "../context/UserContext";
 
 const styles = {
-    marginLeft: '100px' // or a responsive value
+    marginLeft: '75px' // or a responsive value
 };
 
 const ReadingSignup = () => {

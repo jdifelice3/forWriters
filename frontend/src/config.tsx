@@ -3,7 +3,7 @@
 import EmailPassword from "supertokens-auth-react/recipe/emailpassword";
 import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
 import Session from "supertokens-auth-react/recipe/session";
-
+import { mutate } from "swr";
 
 export function getApiDomain() {
     const apiPort = 3001;
@@ -28,7 +28,14 @@ export const SuperTokensConfig = {
     
     recipeList: [
         EmailPassword.init(),
-        Session.init()
+        Session.init({
+            onHandleEvent: async (event) => {
+                if (event.action === "SESSION_CREATED") {
+                console.log("SESSION_CREATED → revalidating user...");
+                await mutate(`${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/me`);
+                }
+            }
+        })
     ],
     getRedirectionURL: async (context: any) => {
         if (context.action === "SUCCESS") {

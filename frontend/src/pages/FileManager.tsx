@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AppFile } from "../../../backend/src/domain-types";
+import { AppFile, FileType } from "../../../backend/src/domain-types";
 import { FileListProperties, UploadFileFormProperties } from "../types/File";
 import { generateRandomString } from "../util/Math";
 import FileList from "../components/FileList";
@@ -31,7 +31,11 @@ const fileListProperties: FileListProperties =
     showEditButton: true 
   }
 
-const FileManager = () => {
+interface FileManagerProps {
+  fileType: string;
+}
+
+const FileManager: React.FC<FileManagerProps> = ({fileType: FileType}) => {
   const [files, setFiles] = useState<AppFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [reload, setReload] = useState("");

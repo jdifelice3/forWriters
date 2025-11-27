@@ -40,8 +40,9 @@ const uploadFormProperties: UploadFileFormProperties =
 
 const ReadingFeedback = () => {
   const { user } = useUserContext();
-  const { eventId } = useParams<{ eventId: string }>();
-  const [feedbackEventId, setFeedbackEventId] = useState("");
+  const { readingId } = useParams<{ readingId: string }>();
+  
+  const [feedbackreadingId, setFeedbackreadingId] = useState("");
   const [files, setFiles] = useState<AppFile[]>([]);
   const [reading, setReading] = useState<Reading>();
   const [editFile, setEditFile] = useState<AppFile | null>(null);
@@ -49,10 +50,9 @@ const ReadingFeedback = () => {
   const [editDescription, setEditDescription] = useState("");
   const [previewFile, setPreviewFile] = useState<AppFile | null>(null);
   const [eventTitle, setEventTitle] = useState("");
-  const [readingId, setReadingId] = useState(eventId);
-    
-  const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/readingauthors`;
-  const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${eventId}/feedback`;
+      
+  const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/readingauthors`;
+  const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/feedback`;
   const readingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/reading`;
   
   const pdfsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/pdfs`;
@@ -60,6 +60,7 @@ const ReadingFeedback = () => {
   const fileUploadsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/uploads`;
   const [reload, setReload] = useState("");
 
+  console.log('user', user.id);
   // Fetch uploaded files
   useEffect(() => {
     (async () => {
@@ -73,12 +74,13 @@ const ReadingFeedback = () => {
       if (res.ok) {
         const data: Reading = await res.json();
         console.log('reading', data);
-        console.log('readings', data);
         const _eventDate = new Date(data.readingDate).toLocaleDateString('en-US');
-        let t = `Current Reading - ${_eventDate}`;
-        setEventTitle(data.readingAuthor.length > 0 ? t : 'Reading')
+        //let t = `Current Reading - ${_eventDate}`;
+        //setEventTitle(data.readingAuthor.length > 0 ? t : 'Reading')
+        setEventTitle(data.name);
         if(data.readingAuthor && data.readingAuthor.length > 0){
           setReading(data);
+          console.log('findIndex appFileId',data && data.readingAuthor.findIndex(item => item.appFileId !== null) === -1);
           let files: AppFile[] = [];
           data.readingAuthor.forEach((a: ReadingAuthor) => {
             if(a.authorAppFile){
@@ -91,13 +93,13 @@ const ReadingFeedback = () => {
     })();
   }, [reload]);
 
-  const reloadFromUploadForm = async(file: AppFile, eventId?: string) => {
-    //setFeedbackEventId(eventId);
+  const reloadFromUploadForm = async(file: AppFile, readingId?: string) => {
+    //setFeedbackreadingId(readingId);
     const result = await fetch(eventFeedbackUrl, 
         { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ eventId: eventId, userId: user.id, appFileId: file.id }),
+          body: JSON.stringify({ readingId: readingId, userId: user.id, appFileId: file.id }),
           credentials: "include"
         });
     if(result.ok){
@@ -105,15 +107,17 @@ const ReadingFeedback = () => {
     }    
   }
 
-  const userHasSubmitted = (events: Reading, signUpId: string, userId: string) => {
-      let result = false;
-      events.readingAuthor.forEach((s, index) => {
-        if (signUpId === s.id && s.authorId === userId) {
-          result = true;
-        }
-      });
+  const userHasSubmittedFeedback = (readingAuthor: ReadingAuthor, userId: string) => {
+    /*
+    if a user has submitted feedback:
+      readingAuthor.readingFeedback.AppFile.userid = current user id
+    */
+   let findIndex = -1;
+    for(let i = 0; i < readingAuthor.readingFeedback.length; i++){
+      findIndex = readingAuthor.readingFeedback.findIndex(item => item.feedbackUserId = userId);
+    }
+    return findIndex !== -1;
 
-      return result;  
   }
 
   return (
@@ -130,28 +134,28 @@ const ReadingFeedback = () => {
         Manuscripts to Review
       </Typography>
 
-      {!reading ? (
+      {reading && reading.readingAuthor.findIndex(item => item.appFileId !== null) === -1 ? (
         <Typography variant="body1" color="text.secondary">
           No files uploaded yet.
         </Typography>
       ) : (
         <div>
         <Stack direction="column" alignItems="left" gap={1} my={1}>
-          {reading.readingAuthor.map((s: ReadingAuthor) => (
+          {reading?.readingAuthor.map((readingAuthor: ReadingAuthor) => (
 
-            <Grid size={{xs:12, md:6}} key={s.id}>
+            <Grid size={{xs:12, md:6}} key={readingAuthor.id}>
               <Card>
                 <CardContent>
                   <Stack direction="column" alignItems="left" gap={1} my={1}>         
                       <Stack direction="row" alignItems="center" gap={1} mb={1}>
-                        <FileIcon file={(s.authorAppFile) ? s.authorAppFile?.appFile : undefined} />
+                        <FileIcon file={(readingAuthor.authorAppFile) ? readingAuthor.authorAppFile?.appFile : undefined} />
                         <Typography variant="subtitle1" fontWeight="bold">
-                          {s.authorAppFile?.appFile ? s.authorAppFile?.appFile.title : ""}
+                          {readingAuthor.authorAppFile?.appFile ? readingAuthor.authorAppFile?.appFile.title : ""}
                         </Typography>
                       </Stack>
-                    {s.authorAppFile && s.authorAppFile?.appFile.user.userProfile ? (
+                    {readingAuthor.authorAppFile && readingAuthor.authorAppFile?.appFile.user.userProfile ? (
                       <Typography sx={{verticalAlign: "top"}} variant="body2">
-                        by {s.authorAppFile?.appFile.user.userProfile.firstName} {s.authorAppFile?.appFile.user.userProfile.lastName}
+                        by {readingAuthor.authorAppFile?.appFile.user.userProfile.firstName} {readingAuthor.authorAppFile?.appFile.user.userProfile.lastName}
                       </Typography>
                     ) : (
                       <div></div>
@@ -164,14 +168,14 @@ const ReadingFeedback = () => {
                     color="text.secondary"
                     sx={{ mb: 2 }}
                   >
-                    {s.authorAppFile?.appFile ? s.authorAppFile?.appFile.description : "No description"}
+                    {readingAuthor.authorAppFile?.appFile ? readingAuthor.authorAppFile?.appFile.description : "No description"}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Uploaded on {s.authorAppFile?.appFile ? new Date(s.authorAppFile?.appFile.uploadedAt).toLocaleDateString() : ""}
+                    Uploaded on {readingAuthor.authorAppFile?.appFile ? new Date(readingAuthor.authorAppFile?.appFile.uploadedAt).toLocaleDateString() : ""}
                   </Typography>
                 <CardActions>
                   <Button 
-                      href={`${fileUploadsUrl}/${s.authorAppFile?.appFile.filename}` } download={s.authorAppFile?.appFile.filename} 
+                      href={`${fileUploadsUrl}/${readingAuthor.authorAppFile?.appFile.filename}` } download={readingAuthor.authorAppFile?.appFile.filename} 
                       size="small"
                       sx={{borderColor: "primary.main"}}
                       startIcon={<DownloadIcon />}
@@ -180,20 +184,20 @@ const ReadingFeedback = () => {
                   </Button>
                   
                 </CardActions>
-                <Paper 
+                <Paper className={userHasSubmittedFeedback(readingAuthor, user.id) ? "disabled" : ""}
                 // to disable Cards
                     elevation={2}
-                    style={{
-                      opacity: (userHasSubmitted(reading, s.id, s.authorId) ? 0.5 : 1),
-                      pointerEvents: (userHasSubmitted(reading, s.id, s.authorId) ? 'none' : 'auto')
-                    }}
+                    // style={{
+                    //   opacity: (userHasSubmittedFeedback(readingAuthor, user.id) ? 0.5 : 1),
+                    //   pointerEvents: (userHasSubmittedFeedback(readingAuthor, user.id) ? 'none' : 'auto')
+                    // }}
                 >
                   <UploadFileForm 
                     onSendData={reloadFromUploadForm} 
-                    eventId={s.id} 
+                    readingId={readingAuthor.id} 
                     formProperties={uploadFormProperties} 
                     isUserDisabled={false}
-                    hasUserSubmitted={userHasSubmitted(reading, s.id, s.authorId)} 
+                    hasUserSubmitted={userHasSubmittedFeedback(readingAuthor, user.id)} 
                   />
                 </Paper>
                 </CardContent>

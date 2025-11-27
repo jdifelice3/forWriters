@@ -11,6 +11,7 @@ export {
   UrlOwnerType,
   UrlType,
   WorkType,
+  JoinRequestStatus
 } from "@prisma/client";
 
 /**
@@ -61,6 +62,8 @@ export type GroupGetBasic = Prisma.GroupGetPayload<{
   include: {
     groupAddress: true;
     groupUrl: true;
+    groupUser: true;
+    reading: true;
   };
 }>;
 
@@ -126,6 +129,7 @@ export type Reading = Prisma.ReadingGetPayload<{
     readingAuthor: {
       include: {
         userProfile: true,
+        readingFeedback: true,
         authorAppFile: {
           include: {
             appFile: {
@@ -147,6 +151,8 @@ export type Reading = Prisma.ReadingGetPayload<{
 export type ReadingAuthor = Prisma.ReadingAuthorGetPayload<{
       include: {
         userProfile: true,
+        readingFeedback: true,
+        reading: true,
         authorAppFile: {
           include: {
             appFile: {
@@ -161,6 +167,16 @@ export type ReadingAuthor = Prisma.ReadingAuthorGetPayload<{
           },
         }
       }
+}>;
+
+export type ReadingAuthorBasic = Prisma.ReadingAuthorGetPayload<{
+  include: {
+    reading: {
+      include: {
+        group: true
+      }
+    }
+  }
 }>;
 
 export type AuthorAppFile = Prisma.AuthorAppFileGetPayload<{
@@ -186,3 +202,42 @@ export type ReadingFeedback = Prisma.ReadingFeedbackGetPayload<{
   };
 }>;
 
+/**
+ * GROUP ADMIN
+ */
+
+export type JoinRequest = Prisma.JoinRequestGetPayload<{
+  include: {
+    user: true;
+    group: true;
+  }
+}>;
+
+export type JoinRequestPayload = {
+  id: string;
+  userId: string;
+  userName: string;
+  groupId: string;
+  groupName: string;
+  createdAt: Date;
+}
+
+export class JoinRequestError extends Error {
+    statusCode: number;
+    constructor(message: string, statusCode: number) {
+        super(message);
+        this.name = this.constructor.name; 
+        Error.captureStackTrace(this, this.constructor); // Optional: Clean stack trace
+        this.statusCode = statusCode;
+    }
+}
+
+export class GroupError extends Error {
+    statusCode: number;
+    constructor(message: string, statusCode: number) {
+        super(message);
+        this.name = this.constructor.name; 
+        Error.captureStackTrace(this, this.constructor); // Optional: Clean stack trace
+        this.statusCode = statusCode;
+    }
+}

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ReadingFeedback } from "@prisma/client";
 import { Reading, ReadingAuthor } from "../domain-types";
 
 const prisma = new PrismaClient();
@@ -16,7 +16,8 @@ export const getReadings = async(groupId: string): Promise<Reading[]> => {
       include: {
         readingAuthor: {
           include: {
-            userProfile: true
+            userProfile: true,
+            readingFeedback: true
           },
         },
       },
@@ -29,6 +30,56 @@ export const getReadings = async(groupId: string): Promise<Reading[]> => {
   }
 }
 
+export const getReadingsByUserId = async(authId: string) => {
+  try {
+    const user: any = await prisma.user.findUnique({
+    where: 
+        {
+            superTokensId: authId,
+        },
+        include: {
+            userProfile: true,
+        }
+    });
+    console.log('userId', user.id);
+    const appFiles = await prisma.appFile.findMany({
+      where: {
+        userId: user.id, // Fetch files for the specific user
+      },
+    });
+
+    const readingAuthors = await prisma.readingAuthor.findMany({
+  where: {
+    authorId: user.id,
+  },
+  include: {
+    authorAppFile: {
+      where: {
+        appFileId: {
+          in: appFiles.map(file => file.id), // Map the fetched appFile IDs
+        },
+      },
+      include: {
+        appFile: true, // Include the actual appFile details if needed
+      },
+    },
+    reading: {
+      include: {
+        group: true,
+      },
+    },
+  },
+});
+
+    console.log('in getReadingsByUserId. readings:', readingAuthors);
+    return readingAuthors;
+  } catch (err) {
+    console.log('Error in getReadingsByUserId');
+    throw err;
+  }
+
+}
+
 export const getReading = async(readingId: string): Promise<Reading> => {
   try {
       const reading: any = await prisma.reading.findUnique({
@@ -39,6 +90,7 @@ export const getReading = async(readingId: string): Promise<Reading> => {
         readingAuthor: {
           include: {
             userProfile: true,
+            readingFeedback: true,
             authorAppFile: {
               include: {
                 appFile: {
@@ -145,7 +197,7 @@ export const createReadingAuthor = async(readingId: string, userId: string) => {
   }
 }
 
-export const createReadingFeedback = async(readingAuthorId: string, feedbackFileId: string) => {
+export const createReadingFeedback = async(readingAuthorId: string, feedbackFileId: string): Promise<ReadingFeedback> => {
   try {
     const result = await prisma.readingFeedback.create({
       data: {
@@ -161,3 +213,15 @@ export const createReadingFeedback = async(readingAuthorId: string, feedbackFile
     throw err;
   }
 }
+
+export const addFileToReading = async(readingAuthorId: string, appFileId: string) => {
+  const result = await prisma.authorAppFile.create({
+    data: {
+      readingAuthorId: readingAuthorId,
+      appFileId: appFileId
+    }
+  });
+  console.log('dbReadings.addFileToReading:', result);
+
+  return result;
+} 

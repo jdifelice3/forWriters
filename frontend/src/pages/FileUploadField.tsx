@@ -7,6 +7,7 @@ const FileUploadField = ({ onChange }: { onChange: (file: File | null) => void }
       component="label"
       variant="outlined"
       startIcon={<UploadIcon />}
+      sx={{width: "225px"}}
     >
       Upload Profile Pic
       <input

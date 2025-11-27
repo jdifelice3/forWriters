@@ -1,5 +1,5 @@
 import express from "express";
-import { Reading } from "../domain-types";
+import { Reading, ReadingAuthorBasic } from "../domain-types";
 import Session from "supertokens-node/recipe/session";
 import { createGroup, getGroup, getGroupByUserId, } from "../database/dbGroups";
 import { createNewsItem, getNews } from '../database/dbNews';
@@ -9,8 +9,12 @@ import {
   createReadingAuthor, 
   getReadingAuthors, 
   createReadingFeedback,
-  getReading 
-} from '../database/dbEvents';
+  getReading, 
+  getReadingsByUserId
+} from '../database/dbReadings';
+import { ReadingAuthor } from "@prisma/client";
+import { addAbortListener } from "events";
+import { addFileToReading } from "../database/dbReadings";
 
 interface EventItem {
   eventId: string;
@@ -20,6 +24,7 @@ interface EventItem {
 
 const router = express.Router();
 
+//#region GET
 router.get("/:groupId", async(_req, res) => {
   const groupId = _req.params.groupId;
     try {
@@ -45,6 +50,34 @@ router.get("/:readingId/reading", async(_req, res) => {
   }
 });
 
+router.get("/user/author", async(_req, res) => {
+  try{
+    console.log('in /api/events/user');
+    const session = await Session.getSession(_req, res);
+    const authId = session.getUserId();
+
+    const readings: ReadingAuthor[] = await getReadingsByUserId(authId);
+    res.status(200).json(readings);
+  } catch (err) {
+    console.error(`Error retrieving readings with userId.`, err);
+    res.status(500).json({ err: `Error retrieving readings with userId.` });
+  }
+
+});
+
+router.get("/:id/readingauthors", async(req, res) => {
+  const readingId:string = req.params.id;
+  try {
+    const events = await getReadingAuthors(readingId);
+    res.status(200).json(events);
+  } catch (error) {
+    console.error('Error signing up for event:', error);
+    res.status(500).json({ error: 'Error signing up for event' });
+  }
+});
+//#endregion
+
+//#region POST
 router.post("/:groupId", async (req, res) => {
   try {
     const {
@@ -97,15 +130,20 @@ router.post("/:id/feedback", async(_req, res) => {
   }
 });
 
-router.get("/:id/readingauthors", async(req, res) => {
-  const readingId:string = req.params.id;
+router.post("/file/add", async(_req, res) => {
+// Add File to Reading
   try {
-    const events = await getReadingAuthors(readingId);
-    res.status(200).json(events);
-  } catch (error) {
-    console.error('Error signing up for event:', error);
-    res.status(500).json({ error: 'Error signing up for event' });
+    
+    console.log('_req.body', _req.body);
+    const { readingAuthorId, appFileId } = _req.body;
+    const addedFile = await addFileToReading(readingAuthorId, appFileId);
+    res.status(200).json(addedFile); 
+  } catch (err) {
+    console.error('Error adding a file to a reading:', err);
+    res.status(500).json({ error: 'Error adding a file to a reading' });
   }
 });
+
+//#endregion
 
 export default router;

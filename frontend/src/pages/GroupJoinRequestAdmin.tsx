@@ -17,7 +17,7 @@ interface JoinRequest {
   groupName: string;
 }
 
-export default function GroupJoinRequestsAdminPage() {
+export default function GroupJoinRequestAdmin() {
   const [requests, setRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);

@@ -1,0 +1,65 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useUserContext } from "../context/UserContext";
+import { FileListProperties } from '../types/File';
+import { AppFile } from "../../../backend/src/domain-types";
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import {
+  MenuItem, FormControl
+} from "@mui/material";
+
+interface FileSelectProps {
+  onSendData: (readingAuthorId: string, appfileId: string) => void;
+  readingAuthorId: string;
+  fileListProperties: FileListProperties;
+} 
+
+type SelectValue = string;
+
+const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, fileListProperties}) => {
+    const { user } = useUserContext();
+
+    const [files, setFiles] = useState<AppFile[]>([]);
+    const [selectedValue, setSelectedValue] = useState("");
+    const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
+  
+    const handleChange = (event: SelectChangeEvent<SelectValue>) => {
+        setSelectedValue(event.target.value as string);
+        onSendData(readingAuthorId, event.target.value as string);
+    };
+
+    useEffect(() => {
+    if (!user) return;
+      (async () => {
+        const res = await fetch(`${filesUrl}/${fileListProperties.fileType}`, 
+        { 
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: "include"
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setFiles(data);
+          //setIsLoading(false);
+        }
+      })();
+    }, [user]);
+  
+     return (
+        <FormControl sx={{ width: 360 }}>
+            <Select 
+                labelId="select-manuscript"
+                value={selectedValue}
+                onChange={handleChange}
+                displayEmpty
+            >
+                {files.map((f) => (
+                    <MenuItem value={f.id}>{f.title}</MenuItem>
+                ))};
+            </Select>
+        </FormControl>
+    );
+}
+export default FileSelect; 

@@ -9,17 +9,21 @@
         "dev": "nodemon --exec ts-node src/index.ts",
         "build": "tsc",
         "start": "node dist/index.js",
-        "seed": "nodemon --exec ts-node prisma/seed.ts"
+        "seed": "nodemon --exec ts-node prisma/seed.ts",
+        "docx-extractor": "node src/services/docxExtractor.js"
     },
     "dependencies": {
+        "graceful-fs": "^4.2.2",
         "@prisma/client": "^6.19.0",
         "@types/express-session": "^1.18.2",
         "body-parser": "^2.2.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
+        "docx-extractor": "^1.1.5",
         "dotenv": "^17.2.3",
         "express": "^4.21.2",
         "express-session": "^1.18.2",
+        "gulp": "^4.0.2",
         "helmet": "^8.1.0",
         "install": "^0.13.0",
         "multer": "^2.0.2",

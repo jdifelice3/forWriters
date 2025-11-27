@@ -20,6 +20,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { useUserContext } from "../context/UserContext";
 import { useForm } from "react-hook-form";
+import { getSpotsOpenText } from "../util/readingUtil";
 
 interface EventsCalendarProps {
   groupId: string;
@@ -73,7 +74,7 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
     if (!user || isLoading) return;
 
     const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events`;
-    console.log('eventsUrl', eventsUrl);
+    
     (async () => {
       try {
         const res = await fetch(`${eventsUrl}/${groupId}`, {
@@ -81,7 +82,7 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
         }); 
         if (res.ok) {
           const data = await res.json();
-          console.log('events', data);
+          
           setReading(data);
         }
          
@@ -92,7 +93,7 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
   }, [groupId, buttonEventId]);
 
   const handleAddReading = async (values: FormInput ) => {
-    console.log('in handleAddReading');
+   
     setSubmitting(true);
     setErr(null);
     setSuccess(null);
@@ -142,7 +143,7 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
   };
 
 const disableSignInButton = (eventId: string): boolean => {
-  console.log('events in disableSignInButton', reading);
+  
   try {
       for(let i=0; i < reading.length; i++){
         for(let k=0; k < reading[i].readingAuthor.length; k++){
@@ -196,7 +197,7 @@ const disableSignInButton = (eventId: string): boolean => {
                 }}
               >
                 <Typography variant="h6" fontWeight="bold">
-                  {e.name}
+                  {e.name }
                 </Typography>
                 <Typography variant="subtitle1" fontWeight="bold">
                   {new Date(e.readingDate).toLocaleDateString()}
@@ -209,19 +210,19 @@ const disableSignInButton = (eventId: string): boolean => {
                   color="text.secondary" 
                   sx={{
                     fontWeight: "bold", 
-                    color:(e.readingAuthor.length === 0 ? "green" : "red")
+                    color:(e.readingAuthor ? (e.readingAuthor.length === 0 ? "green" : "red") : "green")
                     }}>
-                  {e.spotsOpen - e.readingAuthor.length} of {e.spotsOpen} spots open
+                    {getSpotsOpenText(e)}
+                  {/* {e.readingAuthor ? `${e.spotsOpen - e.readingAuthor.length} of ${e.spotsOpen} spots open` : `${e.spotsOpen} of ${e.spotsOpen} spots open`}  */}
+
                 </Typography>
-                {e.readingAuthor && e.readingAuthor.length > 0 && (
+                {/* {e.readingAuthor && e.readingAuthor.length > 0 && (
                 <Typography variant="body2" color="text.secondary">
-                  Authors:<br/>
-                  <AuthorList reading={e} />
+                   Authors:<br/>
+                   <AuthorList reading={e} />
 
-                </Typography>
-
-                
-                )}
+                 </Typography>
+                )} */}
                 {!isAdmin && (
                 <Box>
                   <Button
@@ -367,12 +368,14 @@ const disableSignInButton = (eventId: string): boolean => {
   );
 };
 
-const AuthorList: React.FC<AuthorListProps> = ({ reading }) => {
-  return (
-    reading.readingAuthor.map((ra: ReadingAuthor) => (
-      <Typography variant="body2" color="text.secondary">
-        {ra.userProfile.firstName} {ra.userProfile.lastName}
-      </Typography>
-    ))
-  );
-}
+// const AuthorList: React.FC<AuthorListProps> = ({ reading }) => {
+//   return (
+//     reading.readingAuthor.map((ra: ReadingAuthor) => (
+//       <Typography variant="body2" color="text.secondary">
+//         {/* {ra.userProfile.firstName} {ra.userProfile.lastName} */}
+//         {!ra.userProfile.firstName && !ra.userProfile.lastName ? "Name unknown" 
+//           : `${ra.userProfile.firstName} ${ra.userProfile.lastName}`}
+//       </Typography>
+//     ))
+//   );
+// }

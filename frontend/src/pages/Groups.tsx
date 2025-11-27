@@ -9,19 +9,29 @@ import {
   CardContent,
   CircularProgress,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Link
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 import { useParams } from "react-router-dom";
 
 import { NewsFeed } from "../components/NewsFeed";
 import { useUserContext } from "../context/UserContext";
 import AddIcon from "@mui/icons-material/Add";
+import ReviewsIcon from '@mui/icons-material/Reviews';
 import { GroupDetailsAdmin } from "../components/GroupDetailsAdmin";
 import { GroupDetails } from "../components/GroupDetails";
 import { EventsCalendar } from "../components/EventsCalendar";
+import ReadingSchedule from "../components/ReadingSchedule";
+import GroupIcon from '@mui/icons-material/Group';
 
 const styles = {
-    marginLeft: '100px' // or a responsive value
+    marginLeft: '75px' // or a responsive value
 };
 
 const Groups = () => {
@@ -30,6 +40,7 @@ const Groups = () => {
   const [group, setGroup] = useState<GroupGetBasic | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -37,6 +48,7 @@ const Groups = () => {
 
   useEffect(() => {
     if (!groupId) return;
+    if (!user) return;
 
     (async () => {
       const res = await fetch(`${groupsUrl}/${groupId}`, {
@@ -44,13 +56,19 @@ const Groups = () => {
       }); 
       if (res.ok) {
         const data: GroupGetBasic = await res.json();
-        
-        setGroup(data);
-        setIsAdmin(group?.creatorUserId === user.id)
+        //console.log('user', user);
+        if(data){
+          console.log('group', data);
+          setGroup(data);
+          let userIndex: number = data.groupUser.findIndex(item => item.userId === user.id);
+          setIsAdmin(data.groupUser[userIndex].isAdmin);
+        } else {
+          setIsAdmin(false);
+        }
       }
       setLoadingData(false);
     })();
-  }, [groupId]);
+  }, [groupId, user]);
 
   if (isLoading || loadingData) {
     return (
@@ -67,7 +85,13 @@ const Groups = () => {
   return (
     <Box style={styles} sx={{ maxWidth: 1000, mx: "auto", p: 4}}>
       <Typography variant="h4" mb={3}>
-        ✍️ {group.name}
+        <GroupIcon 
+              sx={{ 
+                fontSize: '48px',
+                verticalAlign: "bottom", 
+              }}
+            />&nbsp;
+            {group.name}
       </Typography>
 
       <Grid container spacing={3}>
@@ -83,36 +107,86 @@ const Groups = () => {
       {isAdmin ? (
         <EventsCalendar groupId={group.id} isAdmin={isAdmin} />
       ) : (
-        <Card>
-          <CardContent>
-            <Typography variant="h6" mb={2}>
-              Sign Up For a Reading
-            </Typography>
-            <Typography >
-              Want to have your manuscript read and critiqued by other writers?
-            </Typography>
-            <Typography >
-              It's a great way to get valuable feedback on your manuscript.👍
-            </Typography>
-            <Typography>&nbsp;</Typography>
-            <Button
-                startIcon={<AddIcon />}
-                variant="outlined"
-                sx={{ mb: 2 }}
-                onClick={() => navigate(`/readingsignup/${groupId}`)}
-            >
-                SignUp!
-            </Button>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" mb={2}>
+                Sign Up For a Reading
+              </Typography>
+              <Typography >
+                Want to have your manuscript read and critiqued by other writers?
+              </Typography>
+              <Typography >
+                It's a great way to get valuable feedback on your manuscript.👍
+              </Typography>
+              <Typography>&nbsp;</Typography>
+              <Button
+                  startIcon={<AddIcon />}
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                  onClick={() => navigate(`/readingsignup/${groupId}`)}
+              >
+                  SignUp!
+              </Button>
+              <Typography>
+                <Link
+                  component="button"
+                  variant="body1"
+                  onClick={() => {
+                    setOpen(true);
+                  }}
+                  style={{fontWeight: "bold"}}
+                >
+                  See the Reading Schedule
+                </Link>
+                <div>&nbsp;</div>
+              </Typography>
+              <Dialog open={open} onClose={() => setOpen(false)}>
+                  <DialogTitle>
+                    Reading Schedule
+                    <IconButton
+                      edge="end"
+                      color="inherit"
+                      onClick={() => setOpen(false)}
+                      aria-label="close"
+                      style={{ position: 'absolute', right: 12, top: 8 }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </DialogTitle>
+                  <DialogContent>
+                    <Grid alignItems="center" justifyContent="center">
+                      <ReadingSchedule groupId={groupId}/>
+                    </Grid>
+                  </DialogContent>
+              </Dialog>
 
-            <Divider sx={{ mb: 3 }} />
-            
-            <Typography variant="h6" mb={2}>
-              Review Manuscripts for the Next Reading
-            </Typography>
-          </CardContent>
-        </Card>
+              <Divider sx={{ mb: 3 }} />
+
+              <Typography variant="h6" mb={2}>
+                  Review Manuscripts for the Next Reading
+              </Typography>
+
+              {group && group.reading.length > 0 ? (            
+              <Button 
+                  startIcon={<ReviewsIcon />}
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                  onClick={() => navigate(`/readingfeedback/${group.reading[0].id}`)}
+              >
+                Review              
+              </Button>
+              ) : (
+              <div>
+              <Typography variant="body1" mb={2}>
+                  It is not yet time to review manuscripts for this reading.
+              </Typography>
+              
+              </div>
+              )}
+              
+            </CardContent>
+          </Card>
       )}
-      
 
       <Divider sx={{ my: 4 }} />
 
@@ -126,3 +200,5 @@ const Groups = () => {
 }
 
 export default Groups;
+
+//✍️ 

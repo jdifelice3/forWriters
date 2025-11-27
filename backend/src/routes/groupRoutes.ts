@@ -1,13 +1,23 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
-import { GroupCreate } from "../domain-types";
+//import { verifySession } from "supertokens-node/recipe/session/framework/express";
+import { 
+  GroupCreate, 
+  JoinRequest,
+  JoinRequestPayload,
+  JoinRequestError
+} from "../domain-types";
 import { 
   createGroup, 
   getGroup, 
   getGroupByUserId, 
   updateGroup,
-  getGroupSearch 
+  getGroupSearch,
+  getAdminRequests,
+  createJoinGroupRequest,
+  approveJoinRequest,
+  rejectJoinRequest
 } from "../database/dbGroups";
 import { 
   createNewsItem, 
@@ -67,6 +77,34 @@ router.get("/:id/news", async(_req, res) => {
     }
 });
 
+router.get("/admin/requests", async (req, res) => {
+  try {
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId();
+    
+    const requests: JoinRequest[] | null = await getAdminRequests(authId);
+    // Shape data for frontend
+    if(requests){
+      const payload: JoinRequestPayload[] = requests.map((req) => ({
+        id: req.id,
+        userId: req.userId,
+        userName: req.user.username,
+        groupId: req.groupId,
+        groupName: req.group.name,
+        createdAt: req.createdAt,
+      }));
+
+      res.json(payload);
+    } else {
+
+      return res.json([]);
+    }
+  } catch (err) {
+    console.error("Error loading admin join requests:", err);
+    res.status(500).json({ error: "Failed to load join requests." });
+  }
+});
+
 //#endregion
 
 //#region POST
@@ -107,30 +145,102 @@ router.post("/:id/news", async (req, res) => {
   }
 });
 
+router.post("/:groupId/join", async (req, res) => {
+  const { groupId,  } = req.params;
+
+  try {
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId();
+    const joinRequest = await createJoinGroupRequest(authId, groupId);
+
+    res.json(joinRequest);
+    //   {
+    //   message:
+    //     "Join request submitted. An admin for this group must approve your request.",
+    // }
+  //);
+  } catch (err) {
+    if(err instanceof JoinRequestError){
+      res.status(err.statusCode).json({error: err.message});      
+    } else {
+      console.error("Error creating join request:", err);
+      res.status(500).json({ error: "Failed to create join request." });
+    }
+  }
+});
+
+router.post("/admin/requests/:id/approve", async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      const session = await Session.getSession(req, res);
+      const authId = session.getUserId();
+      const isApproved = await approveJoinRequest(id, authId);
+      if(isApproved){
+        res.status(200).json({
+            message: "User approved and added to the group.",
+          });
+      }
+    } catch (err) {
+      console.error("Error approving join request:", err);
+      if(err instanceof JoinRequestError){
+        res.status(err.statusCode).json({error: err.message});
+      } else {
+        res.status(500).json({ error: "Failed to approve join request." });
+      }
+    }
+  }
+);
+
+router.post("/admin/requests/:id/reject",async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      const session = await Session.getSession(req, res);
+      const authId = session.getUserId();
+      const result = await rejectJoinRequest(id, authId);
+      res.status(200).json({
+        message: "User join request has been rejected.",
+      });
+    } catch (err) {
+      console.error("Error rejecting join request:", err);
+      if(err instanceof JoinRequestError){
+        res.status(err.statusCode).json({error: err.message});
+      }
+      res.status(500).json({ error: "Failed to reject join request." });
+    }
+  }
+);
+
 //#endregion
 
 //#region PUT
-router.put("/", async(_req, res) => {
-  
+router.put("/:groupId", async(_req, res) => {
+  console.log(_req.body);
+  const groupId = _req.params.groupId;
   try{
     const {
-      groupId,
+      name,
       addressId,
-      authId, 
-      name, 
-      address, 
-      description, 
-      imgUrl,
-      websiteUrl
+      imageUrl,
+      websiteUrl,
+      description,
+      street,
+      city,
+      state,
+      zip,
     } = _req.body;
 
     const group = await updateGroup(
       groupId,
+      name,
       addressId,
-      name, 
-      address, 
-      description, 
-      imgUrl,
+      street,
+      city,
+      state,
+      zip,
+      description,
+      imageUrl,
       websiteUrl
     );
     

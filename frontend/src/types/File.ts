@@ -23,6 +23,7 @@ export interface UploadFileFormProperties {
 }
 
 export interface FileListProperties {
+  fileType?: string;
   showPreviewButton: boolean;
   showEditButton: boolean;
   showDeleteButton: boolean;

@@ -18,6 +18,11 @@ import { z } from "zod";
 import { updateUserProfile, getUserProfile } from "../services/srvUserProfiles";
 import { useEffect } from 'react';
 import Session from "supertokens-auth-react/recipe/session";
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+
+const styles = {
+    marginLeft: '75px' // or a responsive value
+};
 
 // ----------------------
 // 🔒 Zod Schema
@@ -90,32 +95,28 @@ const UserProfile = () => {
   };
 
   return (
-    <Box
+    <Box style={styles} sx={{ maxWidth: 750, mx: "auto", p: 4}}
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{
-        maxWidth: 600,
-        mx: "auto",
-        p: 3,
-        backgroundColor: "background.paper",
-        borderRadius: 3,
-        boxShadow: 2,
-        marginLeft: "100px",
-        font: 18
-      }}
     >
-      {/* <Typography variant="h5" mb={2}> */}
-        <h2>Edit Profile</h2>
-      {/* </Typography> */}
+      <Typography variant="h4" mb={3}>
+        <AccountBoxIcon 
+              sx={{ 
+                fontSize: '40px',
+                verticalAlign: "bottom", 
+              }}
+            />&nbsp;
+            Profile
+      </Typography>
 
       <Stack spacing={2}>
         {/* Avatar upload */}
         <Controller
-        name="avatar"
-        control={control}
-        render={({ field: { onChange } }) => (
-            <FileUploadField onChange={onChange} />
-        )}
+          name="avatar"
+          control={control}
+          render={({ field: { onChange } }) => (
+              <FileUploadField onChange={onChange} />
+          )}
         />
 
         <Divider />

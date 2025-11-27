@@ -36,6 +36,24 @@ router.get("/", async (_req, res) => {
   }
 });
 
+router.get("/:fileType", async(_req, res) => {
+  try{
+    const fileType = _req.params.fileType;
+    console.log('in file Routes GET');
+    const session = await Session.getSession(_req, res);
+    const authId = session.getUserId();
+
+    console.log('authId', authId);
+
+    const files = await getFileRecords(authId, fileType);
+
+    res.json(files);
+  } catch (err) {
+      console.error('Error retrieving file records:', err);
+      res.status(500).json({ err: 'Error retrieving file records' });
+  }
+});
+
 router.post("/", upload.single("file"), async (req, res) => {
   try{
     const session = await Session.getSession(req, res);
