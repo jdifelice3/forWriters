@@ -87,7 +87,7 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
           alert("Failed to upload file");
       } finally {
           setLoading(false);
-          alert("Your feedback has been uploaded")
+          alert("Your file has been uploaded")
       }
     };
 
@@ -134,6 +134,21 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
                                 fullWidth
                             />
                         </Grid>
+                        {readingAuthorId ? (
+                            <Grid size={12}>
+                                <TextField
+                                    sx={{width: "740px"}}
+                                    multiline
+                                    rows={6} // Sets the initial number of visible rows
+                                    placeholder="Additional feedback (optional)"
+                                >
+
+                                </TextField>
+                            </Grid>
+                        ) : (
+                            <div></div>
+                        )}
+
                         <Grid size={3}>
                             <Button
                                 type="submit"

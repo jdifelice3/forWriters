@@ -5,10 +5,10 @@ import {
   Button,
   Typography,
   Alert,
-  CircularProgress,
-  Paper,
+  CircularProgress
 } from "@mui/material";
 import GroupSearchBox from "../components/GroupSearchBox";
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 export default function GroupSearch() {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -48,13 +48,23 @@ export default function GroupSearch() {
   };
 
   return (
-    <Paper sx={{ maxWidth: 600, mx: "auto", mt: 4, p: 4 }}>
-      <Typography variant="h4" mb={2}>
-        Find a Writing Group
-      </Typography>
+    <Box 
+        sx={{ maxWidth: 500, mx: "auto", p: 4,ml: "75px" }}>
+        <Typography variant="h4" mb={3}>
+            <CheckBoxIcon 
+                sx={{ 
+                    fontSize: '40px',
+                    verticalAlign: "bottom", 
+                }}
+                />&nbsp;
+            Start a Group
+        </Typography>
+        <Typography variant="h6" sx={{}}>
+            Find a Writing Group
+        </Typography>
 
       <GroupSearchBox onSelectGroup={setSelectedGroup} />
-
+        
       {selectedGroup && (
         <Box mt={3}>
           <Typography>
@@ -82,6 +92,6 @@ export default function GroupSearch() {
           {confirmation}
         </Alert>
       )}
-    </Paper>
+    </Box>
   );
 }

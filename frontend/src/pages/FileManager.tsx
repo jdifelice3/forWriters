@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AppFile, FileType } from "../../../backend/src/domain-types";
+import { useUserContext } from "../context/UserContext";
+import { AppFile, FileType, DocumentType } from "../../../backend/src/domain-types";
 import { FileListProperties, UploadFileFormProperties } from "../types/File";
 import { generateRandomString } from "../util/Math";
 import FileList from "../components/FileList";
@@ -12,10 +13,11 @@ import {
   CircularProgress,
   Divider,
 } from "@mui/material";
+import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 
 const uploadFormProperties: UploadFileFormProperties =
   {
-    title: "Upload and Manage Your Manuscripts",
+    title: "",
     subtitle: "Upload a new manuscript",
     buttonChooseFileText: "CHOOSE FILE",
     buttonUploadText: "UPLOAD",
@@ -36,32 +38,57 @@ const styles = {
 };
 
 interface FileManagerProps {
-  fileType: string;
+  documentType?: DocumentType;
 }
 
-const FileManager: React.FC<FileManagerProps> = ({fileType: FileType}) => {
-  const [files, setFiles] = useState<AppFile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [reload, setReload] = useState("");
+const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
+    const { user, isLoading } = useUserContext();
+    const [ pageTitle, setPageTitle ] = useState("");
+    const [ fileListTitle, setFileListTitle] = useState("");
+    const [files, setFiles] = useState<AppFile[]>([]);
+    //const [isLoading, setIsLoading] = useState(true);
+    const [reload, setReload] = useState("");
 
-  const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
-  // Fetch uploaded files
-  useEffect(() => {
-    (async () => {
-      const res = await fetch(filesUrl, 
-      { 
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: "include"
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setFiles(data);
-        setIsLoading(false);
-      }
-    })();
-  }, [reload]);
+    let filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
+    
+    // Fetch uploaded files
+    useEffect(() => {
+        if (!user || isLoading) return;
+        console.log('documentType', documentType);
+        (async () => {
+            switch(documentType) {
+                case DocumentType.MANUSCRIPT:
+                    uploadFormProperties.subtitle = "Upload a new manuscript";
+                    filesUrl = `${filesUrl}/type/${documentType}`;
+                    setPageTitle("Manuscripts");
+                    setFileListTitle("Your manuscripts");
+                    break;
+                case DocumentType.FEEDBACK:
+                    uploadFormProperties.subtitle = "Upload a feedback file (DOCX)";
+                    filesUrl = `${filesUrl}/type/${documentType}`;
+                    setPageTitle("Feedback Documents");
+                    setFileListTitle("Your feedback documents");
+                    break;
+            }
+            const res = await fetch(filesUrl, 
+            { 
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: "include"
+            });
+
+        if (res.ok) {
+            const data = await res.json();
+            setFiles(data);
+            console.log('From FileManager.tsx: documentType', documentType);
+            console.log('data', data);
+
+            
+            console.log('filesUrl', filesUrl);
+            //setIsLoading(false);
+        }
+        })();
+    }, [reload, user, documentType]);
 
   const handleReload = (file: AppFile[]) => {
     setFiles(file);
@@ -80,13 +107,23 @@ const FileManager: React.FC<FileManagerProps> = ({fileType: FileType}) => {
         mx: "auto", 
         p: 4,
       }}>
+        <Typography variant="h4" mb={3}>
+        <CollectionsBookmarkIcon 
+              sx={{ 
+                fontSize: '40px',
+                verticalAlign: "bottom", 
+              }}
+            />&nbsp;
+        {pageTitle}
+      </Typography>
+
       <UploadFileForm onSendData={reloadFromUploadForm} formProperties={uploadFormProperties} />
       
       <Divider sx={{ mb: 3 }} />
 
       {/* File list */}
       <Typography variant="h6" mb={2}>
-        Your uploaded manuscripts
+        {fileListTitle}
       </Typography>
       {isLoading ? (
           <Box display="flex" justifyContent="center" p={6} ><CircularProgress /></Box>

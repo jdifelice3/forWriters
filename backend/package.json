@@ -10,12 +10,12 @@
         "build": "tsc",
         "start": "node dist/index.js",
         "seed": "nodemon --exec ts-node prisma/seed.ts",
-        "docx-extractor": "node src/services/docxExtractor.js"
+        "docx-extractor": "ts-node src/services/runDocxExtractor.ts"
     },
     "dependencies": {
-        "graceful-fs": "^4.2.2",
         "@prisma/client": "^6.19.0",
         "@types/express-session": "^1.18.2",
+        "@types/unzipper": "^0.10.11",
         "body-parser": "^2.2.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
@@ -23,6 +23,8 @@
         "dotenv": "^17.2.3",
         "express": "^4.21.2",
         "express-session": "^1.18.2",
+        "fast-xml-parser": "^5.3.2",
+        "graceful-fs": "^4.2.2",
         "gulp": "^4.0.2",
         "helmet": "^8.1.0",
         "install": "^0.13.0",
@@ -30,6 +32,7 @@
         "npm": "^11.6.2",
         "prisma": "^6.19.0",
         "supertokens-node": "latest",
+        "unzipper": "^0.12.3",
         "zod": "^4.1.12"
     },
     "devDependencies": {

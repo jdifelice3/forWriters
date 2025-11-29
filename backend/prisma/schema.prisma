@@ -1,10 +1,16 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum CommentSource {
+    DOCX
+    MANUAL
 }
 
 enum DocumentType {
@@ -247,6 +253,15 @@ model ReadingFeedback {
 
   readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
   appFile       AppFile       @relation(fields: [feedbackFileId], references: [id])
+}
+
+model ReadingFeedbackComments {
+    id              String   @id @default(cuid())
+    readingAuthorId String
+    source          String   @default(DOCX)
+    commentText     String?
+    targetText      String?
+
 }
 
 model User {

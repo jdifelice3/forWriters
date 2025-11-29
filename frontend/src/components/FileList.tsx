@@ -97,8 +97,8 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
       ) : (
         <Grid container spacing={2}>
           {files.map((f) => (
-            <Grid size={{xs:12, md:6}} key={f.id}>
-              <Card>
+            <Stack spacing={2} sx={{width:"500px"}}> 
+            <Card>
                 <CardContent>
                   <Stack direction="row" alignItems="center" gap={1} mb={1}>
                     <FileIcon file={f} />
@@ -153,7 +153,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
                   )}
                 </CardActions>
               </Card>
-            </Grid>
+            </Stack>
           ))}
         </Grid>
       )}

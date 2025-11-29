@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { GroupGetBasic } from "../../../backend/src/domain-types";
 import {
@@ -21,7 +22,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useParams } from "react-router-dom";
 
 import { NewsFeed } from "../components/NewsFeed";
-import { useUserContext } from "../context/UserContext";
+
 import AddIcon from "@mui/icons-material/Add";
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import { GroupDetailsAdmin } from "../components/GroupDetailsAdmin";

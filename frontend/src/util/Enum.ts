@@ -15,9 +15,9 @@ export const getDocumentTypeString = (documentType: DocumentType): string => {
   return documentType;
 }
 
-export const getDocumentTypeFromString = (value: string): DocumentType | undefined => {
+export const getDocumentTypeFromString = (value: string): DocumentType => {
   if (Object.values(DocumentType).includes(value as DocumentType)) {
     return value as DocumentType;
   }
-  return undefined;
+  return DocumentType.MANUSCRIPT;
 }

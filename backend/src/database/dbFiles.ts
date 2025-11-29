@@ -1,47 +1,40 @@
 import { PrismaClient } from "@prisma/client";
-import { FileType, AppFile, DocumentType } from "../domain-types";
-import { getFileTypeFromString, getDocumentTypeFromString } from "../util/Enum";
+import { FileType, DocumentType } from "../domain-types";
+import { getDocumentTypeFromString } from "../util/Enum";
+import { extractCommentsWithTargets } from "../services/docxExtractor";
+import path from 'path';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    log: [
+    { level: "query", emit: "event" },
+  ],
+});
 
-export const getFileRecords = async(authId: string, fileType?: string) => {
-  let user: any = null;
+prisma.$on('query', e => {
+  //console.log(e.query);
+});
 
-  if(fileType){
-    user = await prisma.user.findUnique({
-      where: 
-        {
-          superTokensId: authId,
-        },
-        include: {
-          appFiles: {
-            where: {
-              mimetype: getFileTypeFromString(fileType)
+export const getFileRecords = async(authId: string, documentType?: string) => {
+    const user: any = await prisma.user.findUnique({
+        where: 
+            {
+                superTokensId: authId,
             },
-            orderBy: {
-              title: 'asc', // Adjust this to the appropriate field for ordering
-            },
-          },
-        },
+            include: {
+                userProfile: true,
+            }
     });
-  } else {
-    user = await prisma.user.findUnique({
-      where: 
-        {
-            superTokensId: authId,
-        },
-        include: {
-          appFiles: {
-            orderBy: {
-              title: 'asc', // Adjust this to the appropriate field for ordering
-            },
-          },
-        },
-    });
-  }
 
-  const files: AppFile[] = user.appFiles;
-  return files;
+    const files = await prisma.appFile.findMany({
+        where: {
+            userId: user?.id,
+            ...(documentType && {
+            documentType: getDocumentTypeFromString(documentType)
+            })
+        },
+        orderBy: { title: "asc" }
+    });
+    return files;
 }
 
 export const createFileRecordBasic = async(authId: string, mimeType: FileType, filename: string,
@@ -91,7 +84,7 @@ export const createFileRecordReadingFeedback = async(
     description: string,
     readingAuthorId: string
  ) => {
-  console.log('in createFileRecordReadingFeedback');
+  
   try {
     const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
@@ -107,6 +100,10 @@ export const createFileRecordReadingFeedback = async(
       },
     });
 
+    const filePath: string = path.join(process.cwd(), "uploads/",filename);
+
+    const comments = await extractCommentsWithTargets(filePath);
+    console.log(comments);
     const feedback = await prisma.readingFeedback.create({
       data: {
         readingAuthorId: readingAuthorId,

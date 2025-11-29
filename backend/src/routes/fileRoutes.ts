@@ -25,7 +25,7 @@ const upload = multer({ storage });
 //#region GET
 router.get("/", async (_req, res) => {
   try{
-    console.log('in file Routes GET');
+    console.log('in GET/ file Routes');
     const session = await Session.getSession(_req, res);
     const authId = session.getUserId();
 
@@ -40,16 +40,21 @@ router.get("/", async (_req, res) => {
   }
 });
 
-router.get("/:fileType", async(_req, res) => {
+router.get("/type/:documentType", async(_req, res) => {
   try{
-    const fileType = _req.params.fileType;
-    console.log('in file Routes GET');
+    console.log('in .get/fileType')
+    const documentType = _req.params.documentType;
+
+    if(!documentType){
+        res.status(404).json({error: "Document Type not found"});
+    }
+    console.log('documentType', documentType);
     const session = await Session.getSession(_req, res);
     const authId = session.getUserId();
 
     console.log('authId', authId);
 
-    const files = await getFileRecords(authId, fileType);
+    const files = await getFileRecords(authId, documentType);
 
     res.json(files);
   } catch (err) {

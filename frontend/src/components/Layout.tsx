@@ -14,6 +14,7 @@ import ReadingFeedback from "../pages/ReadingFeedback";
 import GroupJoinRequestAdmin from "../pages/GroupJoinRequestAdmin";
 import GroupSearch from "../pages/GroupSearchPage";
 import Readings from "../pages/Readings";
+import { getDocumentTypeFromString } from "../util/Enum";
 
 const Layout = () => {
   const session = useSessionContext();
@@ -95,8 +96,8 @@ const Layout = () => {
               <Route path="/signout" element={<div><h1>Sign Out</h1></div>} />
               <Route path="/works" element={<div><h1>Your Work</h1></div>} />
               <Route path="/userprofile" element={<UserProfile />} />
-              <Route path="/filemanager/manuscript" element={<FileManager fileType="manuscript" />} />
-              <Route path="/filemanager/feedback" element={<FileManager fileType="feedback" />} />
+              <Route path="/filemanager/manuscript" element={<FileManager documentType={getDocumentTypeFromString("MANUSCRIPT")} />} />
+              <Route path="/filemanager/feedback" element={<FileManager documentType={getDocumentTypeFromString("FEEDBACK")} />} />
               <Route path="/joingroup" element={<div><h1>Join a Group</h1></div>} />
               <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
               <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />

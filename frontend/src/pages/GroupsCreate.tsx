@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import type { Resolver } from "react-hook-form";
+import KeyIcon from '@mui/icons-material/Key';
 
 // -------------------------
 // Zod schema (client-side)
@@ -47,6 +48,10 @@ const createGroupSchema = z.object({
 type CreateGroupInput = z.infer<typeof createGroupSchema>;
 
 const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups`;
+
+const styles = {
+    marginLeft: '75px' // or a responsive value
+};
 
 const GroupsCreate = () => {
   const navigate = useNavigate();
@@ -102,14 +107,22 @@ const GroupsCreate = () => {
   };
 
   return (
-    <Box sx={{ 
-      maxWidth: 900, 
-      mx: "auto", 
-      p: 4,
-      marginLeft: "100px",
+    <Box
+        style={styles}  
+        sx={{ 
+        maxWidth: 900, 
+        mx: "auto", 
+        p: 4,
+        marginLeft: "100px",
       }}>
-      <Typography variant="h4" mb={3} textAlign="center">
-        Start a Writing Group
+      <Typography variant="h4" mb={3}>
+        <KeyIcon 
+              sx={{ 
+                fontSize: '48px',
+                verticalAlign: "bottom", 
+              }}
+            />&nbsp;
+        Start a Group
       </Typography>
 
       <Card>
@@ -226,7 +239,7 @@ const GroupsCreate = () => {
                   helperText={errors.defaultMinDaysBetweenReads?.message}
                 />
               </Grid>
-              <Grid size={12}>
+              {/* <Grid size={12}>
                 <TextField
                   type="number"
                   label="Max number of contiguous readings for a member"
@@ -235,9 +248,9 @@ const GroupsCreate = () => {
                   error={!!errors.defaultMaxConsecutiveReads}
                   helperText={errors.defaultMaxConsecutiveReads?.message}
                 />
-              </Grid>
+              </Grid> */}
 
-              <Grid size={12}>
+              {/* <Grid size={12}>
                 <Typography variant="h6" sx={{ mt: 2 }}>
                   Initial Invites (optional)
                 </Typography>
@@ -249,7 +262,7 @@ const GroupsCreate = () => {
                   error={!!errors.inviteEmailsCsv}
                   helperText={errors.inviteEmailsCsv?.message}
                 />
-              </Grid>
+              </Grid> */}
 
               <Grid size={12}>
                 <Button

@@ -26,6 +26,7 @@ import Grid from "@mui/material/Grid";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from '@mui/icons-material/Download';
 import { useUserContext } from "../context/UserContext";
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const uploadFormProperties: UploadFileFormProperties =
   {
@@ -141,7 +142,12 @@ const ReadingFeedback = () => {
                 <CardContent>
                   <Stack direction="column" alignItems="left" gap={1} my={1}>         
                       <Stack direction="row" alignItems="center" gap={1} mb={1}>
-                        <FileIcon file={(ra.authorAppFile) ? ra.authorAppFile?.appFile : undefined} />
+                        {ra.authorAppFile?.appFile ? (
+                            <FileIcon file={(ra.authorAppFile) ? ra.authorAppFile?.appFile : undefined} />
+                        ) : (
+                            <CancelIcon/>
+                        )}
+                        
                         <Typography variant="subtitle1" fontWeight="bold">
                           {ra.authorAppFile?.appFile ? ra.authorAppFile?.appFile.title : ""}
                         </Typography>
