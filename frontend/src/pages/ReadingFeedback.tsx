@@ -129,7 +129,7 @@ const ReadingFeedback = () => {
         Manuscripts to Review
       </Typography>
 
-      {reading && reading.readingAuthor.findIndex(item => item.appFileId !== null) === -1 ? (
+      {reading && reading.readingAuthor.findIndex(item => item.authorAppFile !== null) === -1 ? (
         <Typography variant="body1" color="text.secondary">
           No files uploaded yet.
         </Typography>

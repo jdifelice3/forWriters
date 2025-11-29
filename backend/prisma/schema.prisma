@@ -239,29 +239,34 @@ model ReadingAuthor {
   userProfile     UserProfile       @relation(fields: [authorId], references: [userId])
   authorAppFile   AuthorAppFile? //   @relation(fields: [id], references: [ readingAuthorId])
   readingFeedback ReadingFeedback[]
-
+  readingFeedbackComment       ReadingFeedbackComment[]
   @@unique([readingId, authorId])
 }
 
 model ReadingFeedback {
   id              String   @id @default(cuid())
   readingAuthorId String
-  feedbackUserId  String?
+  feedbackUserId  String
   feedbackFileId  String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
+  readingFeedbackComment   ReadingFeedbackComment[]
   appFile       AppFile       @relation(fields: [feedbackFileId], references: [id])
+  user          User        @relation(fields: [feedbackUserId], references: [id])
 }
 
-model ReadingFeedbackComments {
+model ReadingFeedbackComment {
     id              String   @id @default(cuid())
     readingAuthorId String
-    source          String   @default(DOCX)
-    commentText     String?
-    targetText      String?
+    readingFeedbackId String
+    source          CommentSource   @default(DOCX)
+    commentText     String
+    targetText      String
 
+    readingAuthor   ReadingAuthor    @relation(fields: [readingAuthorId], references: [id])
+    readingFeedback ReadingFeedback  @relation(fields: [readingFeedbackId], references: [id])
 }
 
 model User {
@@ -280,6 +285,7 @@ model User {
   appFiles     AppFile[]
   urls         UserUrl[]
   joinRequests JoinRequest[]
+  readingFeedback   ReadingFeedback[]
 }
 
 model UserProfile {

@@ -125,7 +125,8 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
       filename, 
       req.body.title, 
       req.body.description,
-      readingAuthorId
+      readingAuthorId,
+      req.body.additionalFeedback
     );
 
     res.json(file);

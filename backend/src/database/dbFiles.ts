@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import { FileType, DocumentType } from "../domain-types";
+import { PrismaClient, CommentSource } from "@prisma/client";
+import { FileType, DocumentType, ReadingFeedback } from "../domain-types";
 import { getDocumentTypeFromString } from "../util/Enum";
 import { extractCommentsWithTargets } from "../services/docxExtractor";
 import path from 'path';
@@ -82,12 +82,15 @@ export const createFileRecordReadingFeedback = async(
     filename: string,
     title: string, 
     description: string,
-    readingAuthorId: string
+    readingAuthorId: string,
+    additionalFeedback?: string
  ) => {
   
   try {
     const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
-
+    if(!user){
+        throw new Error("user not found");
+    }
     const file = await prisma.appFile.create({
       data: {
         title: title,
@@ -100,18 +103,42 @@ export const createFileRecordReadingFeedback = async(
       },
     });
 
-    const filePath: string = path.join(process.cwd(), "uploads/",filename);
-
-    const comments = await extractCommentsWithTargets(filePath);
-    console.log(comments);
     const feedback = await prisma.readingFeedback.create({
       data: {
         readingAuthorId: readingAuthorId,
-        feedbackUserId: user?.id,
-        feedbackFileId: file.id
+        feedbackUserId: user.id,
+        feedbackFileId: file.id,
       }
     });
+
+    const filePath: string = path.join(process.cwd(), "uploads/",filename);
+    const comments = await extractCommentsWithTargets(filePath);
+    console.log(comments);
+
+    let input = [];
+    //add additional feedback
+    input.push({
+        readingAuthorId: readingAuthorId,
+        readingFeedbackId: feedback.id,
+        source: CommentSource.MANUAL,
+        commentText: (additionalFeedback ? additionalFeedback : ""),
+        targetText: "",
+    })
     
+    for(let i = 0; i < comments.length; i++){
+        input.push({
+            readingAuthorId: readingAuthorId,
+            readingFeedbackId: feedback.id,
+            source: CommentSource.DOCX,
+            commentText: comments[i].commentText,
+            targetText: comments[i].targetText
+        })
+    }
+    console.log('input', input);
+    const commentsResults = await prisma.readingFeedbackComment.createMany({
+        data: input
+    });
+
     return file;
   } catch (err) {
     console.log('err', err);

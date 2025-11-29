@@ -38,6 +38,7 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [additionalFeedback, setAdditionalFeedback] = useState("");
   const [loading, setLoading] = useState(false);
 
   let filesUrl = "";
@@ -64,6 +65,7 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
       formData.append("file", file);
       formData.append("title", title);
       formData.append("description", description);
+      formData.append("additionalFeedback", additionalFeedback.replace(/\r\n/g,"\n"));
   
       try {
         const res = await fetch(filesUrl, {
@@ -137,6 +139,8 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
                         {readingAuthorId ? (
                             <Grid size={12}>
                                 <TextField
+                                    label="Additional Feedback"
+                                    value={additionalFeedback}
                                     sx={{width: "740px"}}
                                     multiline
                                     rows={6} // Sets the initial number of visible rows
