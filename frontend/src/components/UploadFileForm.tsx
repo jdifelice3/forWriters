@@ -145,9 +145,8 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
                                     multiline
                                     rows={6} // Sets the initial number of visible rows
                                     placeholder="Additional feedback (optional)"
-                                >
-
-                                </TextField>
+                                    fullWidth
+                                />
                             </Grid>
                         ) : (
                             <div></div>

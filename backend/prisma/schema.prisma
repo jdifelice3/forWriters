@@ -239,7 +239,7 @@ model ReadingAuthor {
   userProfile     UserProfile       @relation(fields: [authorId], references: [userId])
   authorAppFile   AuthorAppFile? //   @relation(fields: [id], references: [ readingAuthorId])
   readingFeedback ReadingFeedback[]
-  readingFeedbackComment       ReadingFeedbackComment[]
+  //readingFeedbackComment       ReadingFeedbackComment[]
   @@unique([readingId, authorId])
 }
 
@@ -265,7 +265,7 @@ model ReadingFeedbackComment {
     commentText     String
     targetText      String
 
-    readingAuthor   ReadingAuthor    @relation(fields: [readingAuthorId], references: [id])
+    //readingAuthor   ReadingAuthor    @relation(fields: [readingAuthorId], references: [id])
     readingFeedback ReadingFeedback  @relation(fields: [readingFeedbackId], references: [id])
 }
 

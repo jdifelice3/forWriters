@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
 import { ReadingAuthor } from "../../../backend/src/domain-types";
 import {
+    Alert,
   Box,
   Typography,
   Button,
@@ -18,6 +19,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import FileSelect from "../components/FileSelect";
 import { FileListProperties } from '../types/File';
 import InfoIcon from '@mui/icons-material/Info';
+import FeedbackCommentList from "../components/FeedbackCommentList";
 
 const fileListProperties: FileListProperties =
   {
@@ -35,9 +37,10 @@ const styles = {
 const currentDate = new Date();
 
 const Readings = () => {
-    const { user, isLoading, error } = useUserContext();
-    const [readingAuthor, setReadingAuthor] = useState <ReadingAuthor[]>([]);
+    const { user, isLoading } = useUserContext();
+    const [readingAuthor, setReadingAuthor] = useState <ReadingAuthor>();
     const [anchorEl, setAnchorEl] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
     const readingsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/user/author`;
     const addFileToReadingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/file/add`;
@@ -50,8 +53,12 @@ const Readings = () => {
         });
         if (res.ok) {
             const data: ReadingAuthor[] = await res.json();
-            console.log('readingAuthor', data);
-            setReadingAuthor(data);
+            //There is only one ReadingAuthor on this page
+            console.log('readingAuthor', data[0]);
+            setReadingAuthor(data[0]);
+            if(!data[0]){
+                throw new Error("Reading Author not found");
+            }
         }
         })();
   }, [user]);
@@ -80,134 +87,121 @@ const Readings = () => {
   const id = open ? 'simple-popover' : undefined;
 
     return (
-    <Card style={styles} sx={{ maxWidth: 750, mx: "auto", p: 4}}>
-      <CardContent>
-        <Typography variant="h4" mb={2}>
-          <MenuBookIcon 
-            sx={{ 
-              fontSize: '44px',
-              verticalAlign: "bottom", 
-            }}
-          />&nbsp;
-          Readings
-        </Typography>
-        <Grid container spacing={2}>
-          {readingAuthor.map((ra) => (
-            <Grid size={12} key={ra.id}>
-              <Box 
-                sx={{
-                  border: "1px solid #ddd",
-                  p: 2,
-                  borderRadius: 2,
-                  backgroundColor:
-                    new Date(ra.reading.submissionDeadline) > currentDate
-                      ? "#e3f2fd"
-                      : "#f3e5f5",
-                }}
-              >
-                <Typography variant="h6" fontWeight="bold">
-                  {ra.reading.name }
-                </Typography>
-                {/* <Typography>
-                    Group Name Goes Here
-                </Typography> */}
-                <Typography variant="body2">
-                  Date of Reading: <span style={{fontWeight: "bold"}}>{new Date(ra.reading.readingDate).toLocaleDateString()}</span>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Submit manuscripts by <b>{new Date(ra.reading.submissionDeadline).toLocaleDateString()}</b>
-                </Typography>
-                <Divider sx={{ my: 1 }} />
-                <Typography variant="body1" fontWeight="bold">
-                  Submitted Manuscript: <InfoIcon style={{ cursor: 'pointer' }} onClick={handleClick}/>
-                </Typography>
-                <div>
-                {new Date(ra.reading.submissionDeadline).valueOf() > currentDate.valueOf() ? (
-                  <FileSelect 
-                      onSendData={handleSelectChange} 
-                      readingAuthorId={ra.id} 
-                      selectedValueId={ra.authorAppFile?.appFile.id || ""}
-                      fileListProperties={fileListProperties}
-                    />
-                ) : (
-                  <TextField
-                    variant="outlined"
-                    sx={{ width: 360 }}
-                    disabled
-                    value={ra.authorAppFile?.appFile.title || ""}
-                  />
-                )}
-                <Popover
-                  id={id}
-                  open={open}
-                  anchorEl={anchorEl}
-                  onClose={handleClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'left',
-                  }}
-                >
-                  <Typography sx={{ p: 2 }}>
-                    <span style={{fontWeight: "bold"}}>Submission Rules:</span>
-                    <ul>
-                      <li>You may change your manuscript until the submission deadline</li>
-                      <li>Available files are ones you have already uploaded</li>
-                    </ul>
-                     <Button onClick={handleClose}>Close</Button>
-                  </Typography>                
-                </Popover>
-                </div>
-                {/* <Stack direction="row" alignItems="center" gap={1} mb={1}>
-                    <FileIcon file={ra.authorAppFile?.appFile} />
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {ra.authorAppFile?.appFile.title || ""}
+    <>
+        <Box mt={3}>
+            {error && (
+                <Alert severity="error" sx={{ mt: 3 }}>
+                    {error}
+                </Alert>
+            )}
+        </Box>
+        {readingAuthor !== undefined ? (
+            <Card style={styles} sx={{ maxWidth: 750, mx: "auto", p: 4}}>
+                <CardContent>
+                    <Typography variant="h4" mb={2}>
+                    <MenuBookIcon 
+                        sx={{ 
+                        fontSize: '44px',
+                        verticalAlign: "bottom", 
+                        }}
+                    />&nbsp;
+                    Readings
                     </Typography>
-                  </Stack> */}
-                  {/* <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 1 }}
-                  >
-                    {ra.authorAppFile?.appFile.description || "No description"}
-                  </Typography> */}
-                  <Typography variant="caption" color="text.secondary">
-                    Submitted to Reading on {
-                        ra.authorAppFile ?
-                        new Date(ra.authorAppFile.createdAt).toLocaleDateString()
-                        : "N/A"
-                    }
-                  </Typography>
-                  <Divider sx={{ mb: 2, mt: 1 }} />
-                  <Typography variant="body1" fontWeight="bold">
-                    Feedback:
-                  </Typography>
-                  {ra.readingFeedback ? ( 
-                    "Feedback file list goes here"
-                  ) : (
-                    "Waiting on feedback"
-                  )}
-                {/* <Typography 
-                  variant="body2" 
-                  color="text.secondary" 
-                  sx={{
-                    fontWeight: "bold", 
-                    color:"green"
-                    }}>
-                    {getSpotsOpenText(ra.reading)}
-
-                </Typography> */}
-                </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </CardContent>
-    </Card>
+                    <Grid container spacing={2}>
+                        <Grid size={12} key={1}>
+                        <Box 
+                            sx={{
+                            border: "1px solid #ddd",
+                            p: 2,
+                            borderRadius: 2,
+                            backgroundColor:
+                                new Date(readingAuthor.reading.submissionDeadline) > currentDate
+                                ? "#e3f2fd"
+                                : "#f3e5f5",
+                            }}
+                        >
+                            <Typography variant="h6" fontWeight="bold">
+                            {readingAuthor.reading.name }
+                            </Typography>
+                            {/* <Typography>
+                                Group Name Goes Here
+                            </Typography> */}
+                            <Typography variant="body2">
+                            Date of Reading: <span style={{fontWeight: "bold"}}>{new Date(readingAuthor.reading.readingDate).toLocaleDateString()}</span>
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                            Submit manuscripts by <b>{new Date(readingAuthor.reading.submissionDeadline).toLocaleDateString()}</b>
+                            </Typography>
+                            <Divider sx={{ my: 1 }} />
+                            <Typography variant="body1" fontWeight="bold">
+                            Submitted Manuscript: <InfoIcon style={{ cursor: 'pointer' }} onClick={handleClick}/>
+                            </Typography>
+                            <div>
+                            {new Date(readingAuthor.reading.submissionDeadline).valueOf() > currentDate.valueOf() ? (
+                            <FileSelect 
+                                onSendData={handleSelectChange} 
+                                readingAuthorId={readingAuthor.id} 
+                                selectedValueId={readingAuthor.authorAppFile?.appFile.id || ""}
+                                fileListProperties={fileListProperties}
+                                />
+                            ) : (
+                            <TextField
+                                variant="outlined"
+                                sx={{ width: 360 }}
+                                disabled
+                                value={readingAuthor.authorAppFile?.appFile.title || ""}
+                            />
+                            )}
+                            <Popover
+                                id={id}
+                                open={open}
+                                anchorEl={anchorEl}
+                                onClose={handleClose}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                }}
+                                >
+                                <Typography sx={{ p: 2 }}>
+                                    <span style={{fontWeight: "bold"}}>Submission Rules:</span>
+                                    <ul>
+                                    <li>You may change your manuscript until the submission deadline</li>
+                                    <li>Available files are ones you have already uploaded</li>
+                                    </ul>
+                                    <Button onClick={handleClose}>Close</Button>
+                                </Typography>                
+                            </Popover>
+                            </div>
+                            <Typography variant="caption" color="text.secondary">
+                                Submitted to Reading on {
+                                    readingAuthor.authorAppFile ?
+                                    new Date(readingAuthor.authorAppFile.createdAt).toLocaleDateString()
+                                    : "N/A"
+                                }
+                            </Typography>
+                            <Divider sx={{ mb: 2, mt: 1 }} />
+                            <Typography variant="body1" fontWeight="bold">
+                                Feedback:
+                            </Typography>
+                                <FeedbackCommentList readingAuthor={readingAuthor}/>
+                                {/* {readingAuthor.readingFeedback && readingAuthor.readingFeedback.map((fb) =>(
+                                    {fb.readingFeedbackComment}
+                                ))};
+                             */}
+                            
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
+        ) : (
+            <div></div>
+        )}
+    </>
     )
 }
 export default Readings;
-
-{/* {e.readingAuthor ? `${e.spotsOpen - e.readingAuthor.length} of ${e.spotsOpen} spots open` : `${e.spotsOpen} of ${e.spotsOpen} spots open`}  */}

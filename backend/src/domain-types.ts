@@ -129,7 +129,11 @@ export type Reading = Prisma.ReadingGetPayload<{
     readingAuthor: {
       include: {
         userProfile: true,
-        readingFeedback: true,
+        readingFeedback: {
+            include: {
+                readingFeedbackComment: true
+            }
+        },
         authorAppFile: {
           include: {
             appFile: {
@@ -151,7 +155,11 @@ export type Reading = Prisma.ReadingGetPayload<{
 export type ReadingAuthor = Prisma.ReadingAuthorGetPayload<{
       include: {
         userProfile: true,
-        readingFeedback: true,
+        readingFeedback: {
+            include: {
+                readingFeedbackComment: true;
+            }
+        }
         reading: true,
         authorAppFile: {
           include: {
@@ -197,6 +205,7 @@ export type AuthorAppFile = Prisma.AuthorAppFileGetPayload<{
  */
 export type ReadingFeedback = Prisma.ReadingFeedbackGetPayload<{
   include: {
+    readingFeedbackComment: true;
     appFile: true;
     user: true;
   };

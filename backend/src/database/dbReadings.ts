@@ -52,6 +52,12 @@ export const getReadingsByUserId = async(authId: string) => {
       authorId: user.id,
     },
     include: {
+        readingFeedback: {
+            include: {
+                readingFeedbackComment: true,
+                user: true,
+            }
+        },
       authorAppFile: {
         where: {
           appFileId: {
@@ -88,7 +94,11 @@ export const getReading = async(readingId: string): Promise<Reading> => {
         readingAuthor: {
           include: {
             userProfile: true,
-            readingFeedback: true,
+            readingFeedback: {
+                include: {
+                    readingFeedbackComment: true
+                }
+            },
             authorAppFile: {
               include: {
                 appFile: {
@@ -121,6 +131,11 @@ export const getReadingAuthors = async(readingId: string): Promise<ReadingAuthor
         id: readingId
       },
       include: {
+        readingFeedback: {
+            include: {
+                readingFeedbackComment: true
+            }
+        },
         authorAppFile: {
           include: {
             appFile: {
