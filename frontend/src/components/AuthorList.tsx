@@ -11,8 +11,8 @@ interface AuthorListProps {
 const AuthorList: React.FC<AuthorListProps> = ({ reading }) => {
   return (
     reading.readingAuthor.map((ra: ReadingAuthor) => (
-      <Typography variant="body2" color="text.secondary">
-        {ra.userProfile.firstName} {ra.userProfile.lastName}
+      <Typography variant="body2" color="text.secondary">        
+            {ra.authorAppFile?.appFile.user.userProfile?.firstName} {ra.authorAppFile?.appFile.user.userProfile?.lastName}
       </Typography>
     ))
   );

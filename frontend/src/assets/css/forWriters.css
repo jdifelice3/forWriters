@@ -75,3 +75,11 @@
     opacity: 0.5; /* Makes the box look faded */
     pointer-events: none; /* Prevents interaction */
 }
+
+.square-list {
+    list-style-type: square;
+}
+        /* Change bullet type to circle */
+.circle-list {
+    list-style-type: circle;
+}

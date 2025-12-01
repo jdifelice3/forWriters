@@ -1,5 +1,7 @@
 import { PrismaClient, Role } from "@prisma/client";
 
+import { UserWithRequiredProfile } from "../domain-types";
+
 const prisma = new PrismaClient();
 
 export const getUsers = async() => {
@@ -9,27 +11,21 @@ export const getUsers = async() => {
     return users;
 }
 
-export const createUser = async(superTokensId: string, email: string, role: Role) => {
+export const createUser = async(superTokensId: string, email: string, role: Role): Promise<UserWithRequiredProfile>  => {
     const newUser: any = await prisma.user.create({
-    data: {
-      email: email,
-      superTokensId: superTokensId,
-      role: role,
-      username: email,
-    }
-  });
+        data: {
+            email: email,
+            superTokensId: superTokensId,
+            role: role,
+            username: email,
+
+            userProfile: {
+                create: {}
+            }
+        }
+    })
   
-  return newUser;
-}
-
-export const createUserProfile = async(userId: string) => {
-  const newUserProfile: any = await prisma.userProfile.create({
-    data: {
-      userId: userId
-    }
-  });
-
-  return newUserProfile;
+    return newUser as UserWithRequiredProfile;
 }
 
 export const getUserProfile = async(authId: string) => {
@@ -40,7 +36,7 @@ export const getUserProfile = async(authId: string) => {
             superTokensId: authId,
         },
         include: {
-            userProfile: true,
+            userProfile: true,  
         }
   });
   console.log('user', user);
@@ -51,7 +47,7 @@ export const updateUserProfile = async(userId: string, firstName: string, lastNa
   try{
     const updatedUser: any = await prisma.userProfile.update({
       where: {
-        userId: userId
+        id: userId
       },
       data: {
         firstName: firstName,

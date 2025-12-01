@@ -90,7 +90,7 @@ const Sidebar = () => {
             active={pathname.startsWith("/dashboard")}
             onClick={() => navigate("/dashboard")}
           >
-            Dashboard
+            Home
           </MenuItem>
                   
           <GradientDivider text="Groups"/>

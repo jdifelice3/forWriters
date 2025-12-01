@@ -108,7 +108,7 @@ model AppFile {
   genre               Genre?
   manuscriptIsVisible Boolean      @default(false)
 
-  user            User              @relation(fields: [userId], references: [id])
+  user            User              @relation("AppFileOwner", fields: [userId], references: [id])
   readingFeedback ReadingFeedback[]
   authorAppFile   AuthorAppFile[]
 }
@@ -232,14 +232,13 @@ model ReadingAuthor {
   id        String   @id @default(cuid())
   readingId String
   authorId  String   
-  appFileId String?
   joinedAt  DateTime @default(now())
 
-  reading         Reading           @relation(fields: [readingId], references: [id])
-  userProfile     UserProfile       @relation(fields: [authorId], references: [userId])
-  authorAppFile   AuthorAppFile? //   @relation(fields: [id], references: [ readingAuthorId])
-  readingFeedback ReadingFeedback[]
-  //readingFeedbackComment       ReadingFeedbackComment[]
+  reading               Reading              @relation(fields: [readingId], references: [id])
+  user                  User                 @relation("ReadingAuthorUser", fields: [authorId], references: [id])
+  authorAppFile         AuthorAppFile?
+  readingFeedback       ReadingFeedback[]
+
   @@unique([readingId, authorId])
 }
 
@@ -254,7 +253,7 @@ model ReadingFeedback {
   readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
   readingFeedbackComment   ReadingFeedbackComment[]
   appFile       AppFile       @relation(fields: [feedbackFileId], references: [id])
-  user          User        @relation(fields: [feedbackUserId], references: [id])
+  user          User        @relation("FeedbackUser", fields: [feedbackUserId], references: [id])
 }
 
 model ReadingFeedbackComment {
@@ -265,40 +264,39 @@ model ReadingFeedbackComment {
     commentText     String
     targetText      String
 
-    //readingAuthor   ReadingAuthor    @relation(fields: [readingAuthorId], references: [id])
     readingFeedback ReadingFeedback  @relation(fields: [readingFeedbackId], references: [id])
 }
 
 model User {
-  id            String   @id @default(cuid())
-  superTokensId String   @unique
-  email         String   @unique
-  role          Role     @default(EDITOR)
-  username      String   @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id            String      @id @default(cuid())
+  superTokensId String      @unique
+  email         String      @unique
+  role          Role        @default(EDITOR)
+  username      String      @unique
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
+  userProfile   UserProfile? 
+  
   groupUser    GroupUser[]
   group        Group[]
   reading      Reading[]
-  userProfile  UserProfile?
-  appFiles     AppFile[]
+  appFiles     AppFile[]    @relation("AppFileOwner")
   urls         UserUrl[]
   joinRequests JoinRequest[]
-  readingFeedback   ReadingFeedback[]
+  readingFeedback   ReadingFeedback[] @relation("FeedbackUser")
+  readingAuthor     ReadingAuthor[] @relation("ReadingAuthorUser")
 }
 
 model UserProfile {
-  id        String  @id @default(cuid())
-  userId    String  @unique
+  id        String      @id            // Primary key
+  user  User     @relation(fields: [id], references: [id]) // FK lives here
+
   firstName String?
   lastName  String?
   phone     String?
   bio       String?
-
-  user          User            @relation(fields: [userId], references: [id])
-  readingAuthor ReadingAuthor[]
-}
+}  
 
 model UserUrl {
   id        String   @id @default(cuid())

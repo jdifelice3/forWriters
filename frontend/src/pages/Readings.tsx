@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
-import { ReadingAuthor } from "../../../backend/src/domain-types";
+import { ReadingAuthor, ReadingAuthorByUser } from "../../../backend/src/domain-types";
 import {
     Alert,
   Box,
@@ -38,7 +38,7 @@ const currentDate = new Date();
 
 const Readings = () => {
     const { user, isLoading } = useUserContext();
-    const [readingAuthor, setReadingAuthor] = useState <ReadingAuthor>();
+    const [readingAuthor, setReadingAuthor] = useState <ReadingAuthorByUser>();
     const [anchorEl, setAnchorEl] = useState(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -48,16 +48,17 @@ const Readings = () => {
     useEffect(() => {
         if(!user) return;
         (async () => {
+            console.log('readingsUrl',readingsUrl);
         const res = await fetch(`${readingsUrl}`, {
             credentials: "include",
         });
         if (res.ok) {
-            const data: ReadingAuthor[] = await res.json();
+            const data: ReadingAuthorByUser[] = await res.json();
             //There is only one ReadingAuthor on this page
             console.log('readingAuthor', data[0]);
             setReadingAuthor(data[0]);
             if(!data[0]){
-                throw new Error("Reading Author not found");
+                setError("You have not signed up for any readings");
             }
         }
         })();
@@ -107,6 +108,7 @@ const Readings = () => {
                     />&nbsp;
                     Readings
                     </Typography>
+                    
                     <Grid container spacing={2}>
                         <Grid size={12} key={1}>
                         <Box 
@@ -115,10 +117,11 @@ const Readings = () => {
                             p: 2,
                             borderRadius: 2,
                             backgroundColor:
-                                new Date(readingAuthor.reading.submissionDeadline) > currentDate
+                                new Date(readingAuthor.reading.submissionDeadline) > currentDate && (!readingAuthor.authorAppFile)
                                 ? "#e3f2fd"
-                                : "#f3e5f5",
-                            }}
+                                : "#e3f2fd"
+                            }}  
+                            // ,"#e3f2fd" #f3e5f5
                         >
                             <Typography variant="h6" fontWeight="bold">
                             {readingAuthor.reading.name }

@@ -4,7 +4,7 @@ import Session from "supertokens-node/recipe/session";
 import Dashboard from "supertokens-node/recipe/dashboard";
 import UserRoles from "supertokens-node/recipe/userroles";
 import type { TypeInput } from "supertokens-node/types";
-import { createUser, createUserProfile } from "../src/database/dbUsers";
+import { createUser } from "../src/database/dbUsers";
 import { Role } from "@prisma/client";
 
 export const SuperTokensConfig: TypeInput = {
@@ -37,10 +37,10 @@ export const SuperTokensConfig: TypeInput = {
                         if (response.status === "OK") {
                             const { user } = response;
                             console.log("New user signed up:", user);
-                            const newUser = await createUser(user.id, user.emails[0],Role.ADMIN );
+                            const newUser = await createUser(user.id, user.emails[0],Role.EDITOR );
                             console.log('newUserId', newUser.id);
                             console.log('newUser',newUser);
-                            await createUserProfile(newUser.id);
+                           
                         }
 
                         return response;

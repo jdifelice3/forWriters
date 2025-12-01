@@ -54,7 +54,6 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
     // Fetch uploaded files
     useEffect(() => {
         if (!user || isLoading) return;
-        console.log('documentType', documentType);
         (async () => {
             switch(documentType) {
                 case DocumentType.MANUSCRIPT:
@@ -116,9 +115,11 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
             />&nbsp;
         {pageTitle}
       </Typography>
-
+        {documentType === DocumentType.MANUSCRIPT ? (
       <UploadFileForm onSendData={reloadFromUploadForm} formProperties={uploadFormProperties} />
-      
+        ) : (
+            <div></div>
+        )}
       <Divider sx={{ mb: 3 }} />
 
       {/* File list */}

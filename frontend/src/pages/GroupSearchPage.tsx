@@ -10,6 +10,10 @@ import {
 import GroupSearchBox from "../components/GroupSearchBox";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
+const styles = {
+    marginLeft: '75px' // or a responsive value
+};
+
 export default function GroupSearch() {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +53,13 @@ export default function GroupSearch() {
 
   return (
     <Box 
-        sx={{ maxWidth: 500, mx: "auto", p: 4,ml: "75px" }}>
+        style={styles}  
+        sx={{ 
+        maxWidth: 900, 
+        mx: "auto", 
+        p: 4,
+        marginLeft: "100px",
+        }}>
         <Typography variant="h4" mb={3}>
             <CheckBoxIcon 
                 sx={{ 
@@ -57,7 +67,7 @@ export default function GroupSearch() {
                     verticalAlign: "bottom", 
                 }}
                 />&nbsp;
-            Start a Group
+            Join a Group
         </Typography>
         <Typography variant="h6" sx={{}}>
             Find a Writing Group

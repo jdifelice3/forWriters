@@ -41,7 +41,7 @@ const uploadFormProperties: UploadFileFormProperties =
 const ReadingFeedback = () => {
   const { user } = useUserContext();
   const { readingId } = useParams<{ readingId: string }>();
-  const [feedbackreadingId, setFeedbackreadingId] = useState("");
+  //const [feedbackreadingId, setFeedbackreadingId] = useState("");
   const [files, setFiles] = useState<AppFile[]>([]);
   const [reading, setReading] = useState<Reading>();
   const [editFile, setEditFile] = useState<AppFile | null>(null);
@@ -51,7 +51,7 @@ const ReadingFeedback = () => {
   const [eventTitle, setEventTitle] = useState("");
   const [reload, setReload] = useState("");
     
-  const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/readingauthors`;
+  //const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/readingauthors`;
   const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/feedback`;
   const readingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/reading`;
   const pdfsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/pdfs`;
@@ -71,8 +71,6 @@ const ReadingFeedback = () => {
         const data: Reading = await res.json();
         console.log('reading', data);
         const eventDate = new Date(data.readingDate).toLocaleDateString('en-US');
-        //let t = `Current Reading - ${_eventDate}`;
-        //setEventTitle(data.readingAuthor.length > 0 ? t : 'Reading')
         setEventTitle(data.name);
         if(data.readingAuthor && data.readingAuthor.length > 0){
           setReading(data);
@@ -89,7 +87,6 @@ const ReadingFeedback = () => {
   }, [reload]);
 
   const reloadFromUploadForm = async(file: AppFile, readingId?: string) => {
-    //setFeedbackreadingId(readingId);
     const result = await fetch(eventFeedbackUrl, 
         { 
           method: 'POST',
@@ -102,14 +99,14 @@ const ReadingFeedback = () => {
     }    
   }
 
-  const userHasSubmittedFeedback = (readingAuthor: ReadingAuthor, userId: string) => {
+  const userHasSubmittedFeedback = (ra: ReadingAuthor, userId: string) => {
     /*
       if a user has submitted feedback:
       readingAuthor.readingFeedback.AppFile.userid = current user id
     */
     let findIndex = -1;
-    for(let i = 0; i < readingAuthor.readingFeedback.length; i++){
-      findIndex = readingAuthor.readingFeedback.findIndex(item => item.feedbackUserId = userId);
+    for(let i = 0; i < ra.readingFeedback.length; i++){
+      findIndex = ra.readingFeedback.findIndex(item => item.feedbackUserId === userId);
     }
     return findIndex !== -1;
 

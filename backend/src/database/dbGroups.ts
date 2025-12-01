@@ -51,7 +51,7 @@ export const getGroup = async(groupId: string) => {
         },
       },
     });
-    //console.log('in getGroup. group:', group);
+
     return group;
   } catch (err) {
       console.error('Error creating group:', err);
@@ -210,7 +210,6 @@ export const createGroup = async (
       },
     });
 
-    console.log('Group created successfully:', group);
     if(group){
       return group;
     } else {
@@ -233,7 +232,7 @@ export const createJoinGroupRequest = async(authId: string, groupId: string): Pr
   const group = await prisma.group.findUnique({
       where: { id: groupId },
   });
-  console.log('In createJoinGroupRequest. groupId:', groupId);
+
   if (!group) {
     const joinGroupError = new JoinRequestError("Group not found.", 404);
     throw joinGroupError;
@@ -249,8 +248,6 @@ export const createJoinGroupRequest = async(authId: string, groupId: string): Pr
     }
   });
 
-  console.log('existingMember', existingMember);
-
   if (existingMember) {
     const joinGroupError = new JoinRequestError("You are already a member of this group.", 400);
     throw joinGroupError;
@@ -264,7 +261,7 @@ export const createJoinGroupRequest = async(authId: string, groupId: string): Pr
       status: JoinRequestStatus.PENDING,
     },
   });
-  console.log('existingRequest', existingRequest);
+
   if (existingRequest) {
     const joinGroupError = new JoinRequestError("You already have a pending join request.", 400);
     throw joinGroupError;

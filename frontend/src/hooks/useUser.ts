@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import Session from "supertokens-auth-react/recipe/session";
 import { useNavigate } from "react-router-dom";
+import { useSWRConfig } from "swr";
 
+const { cache, mutate } = useSWRConfig();
 // --------------------
 // Types
 // --------------------
@@ -81,6 +83,9 @@ export function useUser() {
       console.warn("Backend signout failed", err);
     }
     await Session.signOut();
+    (cache as any).clear();
+    mutate(() => true, undefined, { revalidate: true });
+
     cachedUser = null;
     cacheTimestamp = 0;
     setUser(null);

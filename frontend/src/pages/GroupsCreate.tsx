@@ -113,7 +113,6 @@ const GroupsCreate = () => {
         maxWidth: 900, 
         mx: "auto", 
         p: 4,
-        marginLeft: "100px",
       }}>
       <Typography variant="h4" mb={3}>
         <KeyIcon 

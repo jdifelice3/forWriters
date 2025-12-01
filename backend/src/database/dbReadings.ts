@@ -1,5 +1,5 @@
 import { PrismaClient, ReadingFeedback } from "@prisma/client";
-import { Reading, ReadingAuthor } from "../domain-types";
+import { Reading, ReadingAuthor, ReadingAuthorByUser } from "../domain-types";
 
 const prisma = new PrismaClient();
 
@@ -7,20 +7,32 @@ const prisma = new PrismaClient();
 export const getReadings = async(groupId: string): Promise<Reading[]> => {
   try {
     const events: any = await prisma.reading.findMany({
-      where: {
-        groupId: groupId,
-      },
-      orderBy: {
-        readingDate: 'asc',
-      },
-      include: {
-        readingAuthor: {
-          include: {
-            userProfile: true,
-            readingFeedback: true
-          },
+        where: {
+            groupId: groupId,
         },
-      },
+        orderBy: {
+            readingDate: 'asc',
+        },
+        include: {
+            readingAuthor: {
+                include: {
+                    readingFeedback: true,              
+                    authorAppFile: {
+                        include: {
+                            appFile: {
+                                include: {
+                                    user: {
+                                        include: {
+                                            userProfile: true
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    }  
+                },
+            }
+        }
     });
 
     return events;
@@ -33,48 +45,61 @@ export const getReadings = async(groupId: string): Promise<Reading[]> => {
 export const getReadingsByUserId = async(authId: string) => {
   try {
     const user: any = await prisma.user.findUnique({
-    where: 
-        {
+        where: {
             superTokensId: authId,
         },
         include: {
             userProfile: true,
         }
     });
+
     const appFiles = await prisma.appFile.findMany({
       where: {
         userId: user.id, // Fetch files for the specific user
       },
     });
 
-    const readingAuthors = await prisma.readingAuthor.findMany({
-    where: {
-      authorId: user.id,
-    },
-    include: {
-        readingFeedback: {
-            include: {
-                readingFeedbackComment: true,
-                user: true,
-            }
-        },
-      authorAppFile: {
+    const readingAuthors: ReadingAuthorByUser[] = await prisma.readingAuthor.findMany({
         where: {
-          appFileId: {
-            in: appFiles.map(file => file.id), // Map the fetched appFile IDs
-          },
+            authorId: user.id,
         },
         include: {
-          appFile: true, // Include the actual appFile details if needed
+            reading: true,
+            readingFeedback: {
+                include: {
+                    user: {
+                        include: {
+                            userProfile: true
+                        }
+                    },
+                    readingFeedbackComment: {
+                        orderBy: {
+                            source: "asc"
+                        }
+                    }            
+                }
+            },
+            authorAppFile: {
+                where: {
+                    appFileId: {
+                        in: appFiles.map(file => file.id), // Map the fetched appFile IDs
+                    },
+                },
+                include: {
+                    appFile: { 
+                        include: {
+                            user: {
+                                include : {
+                                    userProfile: true
+                                }
+                            }
+                        }
+                },
+            },
+            
         },
-      },
-      reading: {
-        include: {
-          group: true,
-        },
-      },
-    },
-});
+        }
+    });
 
     return readingAuthors;
   } catch (err) {
@@ -84,19 +109,136 @@ export const getReadingsByUserId = async(authId: string) => {
 
 }
 
-export const getReading = async(readingId: string): Promise<Reading> => {
+// export const getReading = async (readingId: string): Promise<Reading> => {
+//   console.log("=== getReading DEBUG for readingId:", readingId, "===\n");
+
+//   // 1) Direct DB check for all ReadingFeedback rows for this reading
+//   const rawFeedbackRows = await prisma.$queryRaw<
+//     { id: string; readingAuthorId: string; feedbackUserId: string }[]
+//   >`
+//     SELECT rf.id, rf."readingAuthorId", rf."feedbackUserId"
+//     FROM "ReadingFeedback" rf
+//     WHERE rf."readingAuthorId" IN (
+//       SELECT ra.id FROM "ReadingAuthor" ra WHERE ra."readingId" = ${readingId}
+//     )
+//   `;
+//   console.log("RAW DB ReadingFeedback rows:");
+//   console.dir(rawFeedbackRows, { depth: null });
+//   console.log("\n");
+
+//   // 2) Big nested include query (what you had originally)
+//   const reading = await prisma.reading.findUnique({
+//     where: { id: readingId },
+//     include: {
+//       readingAuthor: {
+//         include: {
+//           // if this no longer matches your schema, tweak, but KEEP readingFeedback include
+//           readingFeedback: {
+//             include: {
+//               readingFeedbackComment: {
+//                 orderBy: { source: "asc" },
+//               },
+//             },
+//           },
+//           authorAppFile: {
+//             include: {
+//               appFile: {
+//                 include: {
+//                   user: {
+//                     include: {
+//                       userProfile: true,
+//                     },
+//                   },
+//                 },
+//               },
+//             },
+//           },
+//           // if you now have `user` on ReadingAuthor, you can include it too
+//           // user: true,
+//         },
+//       },
+//     },
+//   });
+
+//   console.log("NESTED PRISMA reading.readingAuthor[*].readingFeedback[*]:");
+//   if (reading?.readingAuthor) {
+//     for (const ra of reading.readingAuthor) {
+//       for (const rf of ra.readingFeedback) {
+//         console.log("  RF from nested query:", {
+//           id: rf.id,
+//           readingAuthorId: rf.readingAuthorId,
+//           feedbackUserId: rf.feedbackUserId,
+//         });
+//       }
+//     }
+//   } else {
+//     console.log("  No readingAuthor rows found in nested query.");
+//   }
+//   console.log("\n");
+
+//   // 3) Cross-check each nested ReadingFeedback row against a fresh findUnique()
+//   if (reading?.readingAuthor) {
+//     for (const ra of reading.readingAuthor) {
+//       for (const rf of ra.readingFeedback) {
+//         const fresh = await prisma.readingFeedback.findUnique({
+//           where: { id: rf.id },
+//         });
+
+//         console.log("CROSS-CHECK for ReadingFeedback id:", rf.id);
+//         console.log("  From nested query   feedbackUserId:", rf.feedbackUserId);
+//         console.log(
+//           "  From findUnique()    feedbackUserId:",
+//           fresh?.feedbackUserId,
+//         );
+//         console.log(
+//           "  From raw SQL rows    feedbackUserId:",
+//           rawFeedbackRows.find((row) => row.id === rf.id)?.feedbackUserId,
+//         );
+//       }
+//     }
+//   }
+
+//   console.log("\n=== END getReading DEBUG ===\n");
+
+//   // Return the same data shape your route expects
+//   return reading;
+// };
+
+export const getReading = async(readingId: string) => {//: Promise<Reading> => {
   try {
-      const reading: any = await prisma.reading.findUnique({
+//     const raw = await prisma.$queryRaw`
+//   SELECT * FROM "ReadingFeedback"
+//   WHERE id = 'cmijw1g5h000ea8q8hwwupvsd'
+// `;
+
+// console.log("RAW TABLE ROW:", raw);
+
+
+// const api = await prisma.readingFeedback.findUnique({
+//   where: { id: "cmijw1g5h000ea8q8hwwupvsd" },
+//   include: {
+//     userProfile: true
+//   }
+// });
+
+// console.log("PRISMA RESULT:", api);
+// const dbInfo = await prisma.$queryRaw`SELECT current_database(), inet_server_addr(), inet_server_port()`;
+// console.log("DB:", dbInfo);
+
+    const reading: any = await prisma.reading.findUnique({
       where: {
         id: readingId,
       },
       include: {
         readingAuthor: {
           include: {
-            userProfile: true,
             readingFeedback: {
                 include: {
-                    readingFeedbackComment: true
+                    readingFeedbackComment: {
+                        orderBy: {
+                            source: "asc"
+                        }
+                    }
                 }
             },
             authorAppFile: {
@@ -116,7 +258,7 @@ export const getReading = async(readingId: string): Promise<Reading> => {
         },
       },
     });
-
+    console.log('reading', reading);
     return reading;
   } catch (err) {
     console.error('Error getting reading:', err);
@@ -193,8 +335,8 @@ export const createReading = async(
 } 
 
 export const createReadingAuthor = async(readingId: string, userId: string) => {
-  console.log('readingId', readingId, 'userId', userId);
-  try {
+
+    try {
       const readingAuthor = await prisma.readingAuthor.create({
         data: {
           readingId: readingId,
@@ -235,7 +377,6 @@ export const addFileToReading = async(readingAuthorId: string, appFileId: string
         readingAuthorId: readingAuthorId
       }
     });
-    console.log('deleteReadingAuthor', deleteReadingAuthor);
   } catch (err) {
     //will throw an error if there are no records to delete
   }
@@ -246,7 +387,6 @@ export const addFileToReading = async(readingAuthorId: string, appFileId: string
       appFileId: appFileId
     }
   });
-  console.log('dbReadings.addFileToReading:', result);
 
   return result;
 } 

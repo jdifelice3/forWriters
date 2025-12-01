@@ -26,7 +26,7 @@ const ReadingSchedule: React.FC<ReadingScheduleProps> = ({groupId}) => {
     const [reading, setReading] = useState<Reading[]>([]);
     const [loadingData, setLoadingData] = useState(true);
     const readingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
-    
+    console.log('readingurl', readingUrl);
     useEffect(() => {
         if (!groupId) return;
     
@@ -38,6 +38,7 @@ const ReadingSchedule: React.FC<ReadingScheduleProps> = ({groupId}) => {
                 const data: Reading[] = await res.json();
                 if(data){
                     setReading(data);
+                    console.log('reading', data);
                 }
             }
             setLoadingData(false);
