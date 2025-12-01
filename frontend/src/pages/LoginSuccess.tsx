@@ -7,7 +7,7 @@ export default function Dashboard() {
     // const sessionContext = useSessionContext();
 
     const okClicked = () => {
-        navigate("../dashboard");
+        navigate("../");
         // const el = document.getElementById('main-container');
         // if(el){
         //     el.style.display='none';

@@ -3,7 +3,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import { useSessionContext } from "supertokens-auth-react/recipe/session";
 import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
 import { PreBuiltUIList, ComponentWrapper } from "../config";
-import Dashboard from "../pages/Dashboard";
+import Home from "../pages/Home";
 import UserProfile from "../pages/UserProfile";
 import FileManager from "../pages/FileManager";
 import Sidebar from "../components/Sidebar";
@@ -18,12 +18,13 @@ import { getDocumentTypeFromString } from "../util/Enum";
 
 const Layout = () => {
   const session = useSessionContext();
-
+  const drawerWidth = 280;
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       {/* Header */}
       <header
         style={{
+          marginLeft: drawerWidth,
           backgroundColor: "#fff",
           borderBottom: "1px solid #ddd",
           padding: "0.5rem 1rem",
@@ -45,6 +46,7 @@ const Layout = () => {
               display: "flex",
               alignItems: "center",
               textDecoration: "none",
+              marginLeft: "-30px"
             }}
           >
             <img
@@ -58,7 +60,8 @@ const Layout = () => {
                 fontSize: "2.5rem",
                 fontWeight: 600,
                 color: "#333",
-                marginLeft: "0.5rem",
+                // marginLeft: "0.5rem",
+                marginLeft: "-0.5rem",
               }}
             >
               forWriters
@@ -80,14 +83,15 @@ const Layout = () => {
             padding: "1rem",
             overflowY: "auto",
             backgroundColor: "#fafafa",
+            marginLeft: session.doesSessionExist ? 0 : 0, 
           }}
         >
           <ComponentWrapper>
             <Routes>
               {getSuperTokensRoutesForReactRouterDom(ReactRouter, PreBuiltUIList)}
 
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/" element={<Home />} />
+              {/* <Route path="/dashboard" element={<Dashboard />} /> */}
               <Route path="/searchgroups" element={<div><h1>Search Groups</h1></div>} />
               <Route path="/groups/:groupId" element={ <Groups /> } />
               <Route path="/creategroup" element={ <GroupsCreate /> } />
