@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["clientExtensions"]
 }
 
@@ -9,8 +9,8 @@ datasource db {
 }
 
 enum CommentSource {
-    DOCX
-    MANUAL
+  DOCX
+  MANUAL
 }
 
 enum DocumentType {
@@ -61,6 +61,7 @@ enum GroupMemberRole {
 
 enum Role {
   ADMIN
+  AUTHOR
   EDITOR
   READER
 }
@@ -114,13 +115,29 @@ model AppFile {
 }
 
 model AuthorAppFile {
-  id              String @id @default(cuid())
-  readingAuthorId String @unique
+  id              String   @id @default(cuid())
+  readingAuthorId String   @unique
   appFileId       String
-  createdAt       DateTime  @default(now())
+  createdAt       DateTime @default(now())
 
   readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
   appFile       AppFile       @relation(fields: [appFileId], references: [id])
+}
+
+model CollaboratorRequest {
+  id                        String                  @id @default(cuid())
+  userId                    String
+  collaboratorId            String
+  status                    JoinRequestStatus       @default(PENDING)
+  createdAt DateTime                                @default(now())
+  updatedAt DateTime                                @updatedAt
+
+  //user                      User                    @relation(fields: [userId], references: [id])
+  user                User                @relation(name: "UserRequest", fields: [userId], references: [id])
+  collaboratorUser    User                @relation(name: "UserCollaboratorRequest", fields: [collaboratorId], references: [id])
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Group {
@@ -231,13 +248,13 @@ model Reading {
 model ReadingAuthor {
   id        String   @id @default(cuid())
   readingId String
-  authorId  String   
+  authorId  String
   joinedAt  DateTime @default(now())
 
-  reading               Reading              @relation(fields: [readingId], references: [id])
-  user                  User                 @relation("ReadingAuthorUser", fields: [authorId], references: [id])
-  authorAppFile         AuthorAppFile?
-  readingFeedback       ReadingFeedback[]
+  reading         Reading           @relation(fields: [readingId], references: [id])
+  user            User              @relation("ReadingAuthorUser", fields: [authorId], references: [id])
+  authorAppFile   AuthorAppFile?
+  readingFeedback ReadingFeedback[]
 
   @@unique([readingId, authorId])
 }
@@ -250,53 +267,78 @@ model ReadingFeedback {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
-  readingFeedbackComment   ReadingFeedbackComment[]
-  appFile       AppFile       @relation(fields: [feedbackFileId], references: [id])
-  user          User        @relation("FeedbackUser", fields: [feedbackUserId], references: [id])
+  readingAuthor          ReadingAuthor            @relation(fields: [readingAuthorId], references: [id])
+  readingFeedbackComment ReadingFeedbackComment[]
+  appFile                AppFile                  @relation(fields: [feedbackFileId], references: [id])
+  user                   User                     @relation("FeedbackUser", fields: [feedbackUserId], references: [id])
 }
 
 model ReadingFeedbackComment {
-    id              String   @id @default(cuid())
-    readingAuthorId String
-    readingFeedbackId String
-    source          CommentSource   @default(DOCX)
-    commentText     String
-    targetText      String
+  id                String        @id @default(cuid())
+  readingAuthorId   String
+  readingFeedbackId String
+  source            CommentSource @default(DOCX)
+  commentText       String
+  targetText        String
 
-    readingFeedback ReadingFeedback  @relation(fields: [readingFeedbackId], references: [id])
+  readingFeedback ReadingFeedback @relation(fields: [readingFeedbackId], references: [id])
 }
 
 model User {
-  id            String      @id @default(cuid())
-  superTokensId String      @unique
-  email         String      @unique
-  role          Role        @default(EDITOR)
-  username      String      @unique
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id            String   @id @default(cuid())
+  superTokensId String   @unique
+  email         String   @unique
+  role          Role     @default(READER)
+  username      String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  userProfile   UserProfile? 
-  
-  groupUser    GroupUser[]
-  group        Group[]
-  reading      Reading[]
-  appFiles     AppFile[]    @relation("AppFileOwner")
-  urls         UserUrl[]
-  joinRequests JoinRequest[]
-  readingFeedback   ReadingFeedback[] @relation("FeedbackUser")
-  readingAuthor     ReadingAuthor[] @relation("ReadingAuthorUser")
+  userProfile UserProfile?
+
+  groupUser           GroupUser[]
+  group               Group[]
+  reading             Reading[]
+  appFiles            AppFile[]             @relation("AppFileOwner")
+  urls                UserUrl[]
+  joinRequests        JoinRequest[]
+  readingFeedback     ReadingFeedback[]     @relation("FeedbackUser")
+  readingAuthor       ReadingAuthor[]       @relation("ReadingAuthorUser")
+  userInviter         UserCollaborator[]    @relation("User")
+  userCollaborator    UserCollaborator[]    @relation("UserCollaborator")
+  userRequestor       CollaboratorRequest[]                         @relation("UserRequest")
+  collaboratorUserRequestor    CollaboratorRequest[]                @relation("UserCollaboratorRequest")
+
+}
+
+model UserCollaborator {
+    id                  String              @id @default(cuid())
+    userId              String
+    collaboratorId      String
+    createdAt DateTime                      @default(now())
+    updatedAt DateTime                      @updatedAt
+
+    user                User                @relation(name: "User", fields: [userId], references: [id])
+    collaboratorUser    User                @relation(name: "UserCollaborator", fields: [collaboratorId], references: [id])
 }
 
 model UserProfile {
-  id        String      @id            // Primary key
-  user  User     @relation(fields: [id], references: [id]) // FK lives here
+  id   String @id // Primary key
+  user User   @relation(fields: [id], references: [id]) // FK lives here
 
   firstName String?
   lastName  String?
   phone     String?
   bio       String?
-}  
+}
+
+model UserSearch {
+  id       String @id
+  fullName String?
+  bio      String?
+
+  @@map("UserSearch")
+}
+
 
 model UserUrl {
   id        String   @id @default(cuid())
@@ -307,3 +349,5 @@ model UserUrl {
 
   user User? @relation(fields: [userId], references: [id])
 }
+
+//create view "UserSearch" as SELECT id, "firstName" || ' ' || "lastName" AS "fullName", bio from "UserProfile";

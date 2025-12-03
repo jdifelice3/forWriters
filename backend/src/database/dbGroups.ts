@@ -2,6 +2,7 @@ import { GroupUser, PrismaClient } from "@prisma/client";
 import { 
   Group, 
   GroupGetBasic, 
+  GroupGetDescription,
   GroupType, 
   GroupCreate,
   JoinRequest,
@@ -53,6 +54,31 @@ export const getGroup = async(groupId: string) => {
     });
 
     return group;
+  } catch (err) {
+      console.error('Error creating group:', err);
+      throw err; 
+  }
+}
+
+export const getGroupDescription = async(groupId: string): Promise<GroupGetDescription> => {
+
+  const currentDate = new Date();
+  try {
+    const group: GroupGetDescription | null = await prisma.group.findUnique({
+      where: {
+        id: groupId,
+      },
+      select: {
+        description: true,
+        websiteUrl: true,
+        groupAddress: true,
+      },
+    });
+    if(group){
+        return group;
+    } else {
+        throw new Error("Group not found");
+    }
   } catch (err) {
       console.error('Error creating group:', err);
       throw err; 

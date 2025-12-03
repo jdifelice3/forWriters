@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Reading, ReadingAuthor } from "../../../backend/src/domain-types";
 import AuthorList from "./AuthorList";
 import {
   Box,
+  Button,
   Grid,
   Typography,
-  Button,
   Card,
   CardContent,
   Dialog,
@@ -17,6 +18,7 @@ import {
   Select, 
   MenuItem
 } from "@mui/material";
+import ReviewsIcon from '@mui/icons-material/Reviews';
 
 interface ReadingScheduleProps {
   groupId: string | undefined;
@@ -26,7 +28,9 @@ const ReadingSchedule: React.FC<ReadingScheduleProps> = ({groupId}) => {
     const [reading, setReading] = useState<Reading[]>([]);
     const [loadingData, setLoadingData] = useState(true);
     const readingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
-    console.log('readingurl', readingUrl);
+    
+    const navigate = useNavigate();
+    
     useEffect(() => {
         if (!groupId) return;
     
@@ -87,6 +91,15 @@ const ReadingSchedule: React.FC<ReadingScheduleProps> = ({groupId}) => {
                         </Typography>
 
                         )}
+                        <Button 
+                            startIcon={<ReviewsIcon />}
+                            size="small"
+                            variant="contained"
+                            sx={{ mt: 2 }}
+                            onClick={() => navigate(`/readingfeedback/${e.id}`)}
+                        >
+                            Review              
+                        </Button>
                     </Box>
                     </Grid>
                 ))}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Group } from "../../../backend/src/domain-types";
+import { UserSearch } from "../../../backend/src/domain-types";
 import {
   Box,
   Button,
@@ -9,22 +9,21 @@ import {
   Card,
   CardContent
 } from "@mui/material";
-import GroupSearchBox from "../components/GroupSearchBox";
+import MemberSearchBox from "../components/MemberSearchBox";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import GroupDescription from "../components/GroupDescription";
 
 const styles = {
     marginLeft: '75px' // or a responsive value
 };
 
-export default function GroupSearch() {
-  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+const MemberSearchPage = () => {
+  const [selectedMember, setSelectedMember] = useState<UserSearch | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleJoin = async () => {
-    if (!selectedGroup) return;
+    if (!selectedMember) return;
 
     setError(null);
     setConfirmation(null);
@@ -32,7 +31,7 @@ export default function GroupSearch() {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${selectedGroup.id}/join`,
+        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/users/${selectedMember.id}/connect`,
         {
           method: "POST",
           credentials: "include",
@@ -41,10 +40,10 @@ export default function GroupSearch() {
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || "Failed to request to join");
+      if (!res.ok) throw new Error(data.error || "Failed to connect");
 
       setConfirmation(
-        `Your request to join "${selectedGroup.name}" has been sent. An admin must approve it.`
+        `Your request to connect with "${selectedMember.fullName}" has been sent. If accepted, you will connect.`
       );
     } catch (err) {
       if (err instanceof Error) setError(err.message);
@@ -70,34 +69,34 @@ export default function GroupSearch() {
                     verticalAlign: "bottom", 
                 }}
                 />&nbsp;
-            Join a Group
+            Search Members
         </Typography>
         <Typography variant="h6" sx={{}}>
-            Find a Writing Group
+            Find a Collaborator
         </Typography>
 
-      <GroupSearchBox onSelectGroup={setSelectedGroup} />
+      <MemberSearchBox onSelectMember={setSelectedMember} />
         
-      {selectedGroup && (
+      {selectedMember && (
         <Box mt={3}>
           <Typography sx={{mb: 2 }}>
-            Selected group: <strong>{selectedGroup.name}</strong>
+            Selected memeber: <strong>{selectedMember.fullName}</strong>
           </Typography>
           <Card>
             <CardContent>
                 <Typography sx={{fontWeight:"bold"}}>
-                    Description
+                    Bio
                 </Typography>
-                <GroupDescription groupId={selectedGroup.id}/>
+                {selectedMember.bio}
             </CardContent>
           </Card>
           <Button
             variant="contained"
             sx={{ mt: 2 }}
-            disabled={loading || !selectedGroup}
+            disabled={loading || !selectedMember}
             onClick={handleJoin}
           >
-            {loading ? <CircularProgress size={22} /> : "Request to Join"}
+            {loading ? <CircularProgress size={22} /> : "Request to Connect"}
           </Button>
           
         </Box>
@@ -117,3 +116,4 @@ export default function GroupSearch() {
     </Box>
   );
 }
+export default MemberSearchPage;

@@ -127,19 +127,6 @@ const Groups = () => {
               >
                   SignUp!
               </Button>
-              <Typography>
-                <Link
-                  component="button"
-                  variant="body1"
-                  onClick={() => {
-                    setOpen(true);
-                  }}
-                  style={{fontWeight: "bold"}}
-                >
-                  See the Reading Schedule
-                </Link>
-                <div>&nbsp;</div>
-              </Typography>
               <Dialog open={open} onClose={() => setOpen(false)}>
                   <DialogTitle>
                     Reading Schedule
@@ -183,6 +170,22 @@ const Groups = () => {
               
               </div>
               )}
+              <Typography variant="h6" mb={2}>
+                  OR
+              </Typography>
+              <Typography>
+                <Link
+                  component="button"
+                  variant="body1"
+                  onClick={() => {
+                    setOpen(true);
+                  }}
+                  style={{fontWeight: "bold"}}
+                >
+                  Review All Available Manuscripts
+                </Link>
+                <div>&nbsp;</div>
+              </Typography>
               
             </CardContent>
           </Card>

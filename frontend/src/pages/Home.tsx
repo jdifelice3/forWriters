@@ -24,21 +24,30 @@ export default function Dashboard() {
 
     return (
         <Container maxWidth="lg" sx={{ pb: 1 }}>
-            <Typography sx={{pt:2}} variant="h4" align="left" gutterBottom>
-                Welcome to <span
+            <Typography sx={{pt:2, fontFamily: "Courier New"}} variant="h4" align="left" gutterBottom>
+            <span
               style={{
-                fontFamily: "Thebarstaindemo",
+                fontFamily: "Courier New",//"Thebarstaindemo",
                 fontSize: "2.5rem",
                 fontWeight: 600,
                 color: "#333",
                 marginLeft: "0.5rem",
               }}
             >
-              forWriters
+                Welcome to forWriters
             </span>
             </Typography>
             <Typography  sx={{p:0, ml: "37px"}} variant="h6" align="left" gutterBottom>
-                How do we feel about criticism?
+                <span
+              style={{
+                fontFamily: "Courier New",
+                fontSize: "18pt",
+                fontWeight: 600,
+                color: "#333",
+                // marginLeft: "0.5rem",
+                marginLeft: "-0.5rem",
+              }}
+            >How do we feel about criticism?</span>
             </Typography>
             <WritingGroupQuotesGrid/>
             
@@ -56,7 +65,7 @@ export default function Dashboard() {
                     <li>Create writing groups</li>
                     <li>Search for writing groups</li>
                     <li>Join existing writing groups (once approved)</li>
-                    <li>Invite others to join their writing group </li>
+                    <li>Invite others to join your writing group </li>
                     <li>Administrators of a writing group can:
                         <ul>
                             <li>Maintain the group's information (name, address, social media urls, etc.)</li>

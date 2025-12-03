@@ -38,6 +38,16 @@ export type UserProfile = Prisma.UserProfileGetPayload<{
   };
 }>;
 
+export type UserSearch = Prisma.UserSearchGetPayload<{
+    
+}>;
+
+export type UserGetBio = Prisma.UserProfileGetPayload<{
+    select: {
+        bio: true,
+      },
+}>;
+
 /**
  * USER URL
  */
@@ -76,6 +86,14 @@ export type GroupGetBasic = Prisma.GroupGetPayload<{
     groupUser: true;
     reading: true;
   };
+}>;
+
+export type GroupGetDescription = Prisma.GroupGetPayload<{
+    select: {
+        description: true,
+        websiteUrl: true,
+        groupAddress: true,
+      },
 }>;
 
 export type GroupCreate = Prisma.GroupGetPayload<{
@@ -249,6 +267,33 @@ export type ReadingFeedback = Prisma.ReadingFeedbackGetPayload<{
     user: true;
   };
 }>;
+
+/***
+ * COLLABORATORS
+ */
+
+export type CollaboratorRequest = Prisma.CollaboratorRequestGetPayload<{
+    include: {
+        user: {
+            include: {
+                userProfile: true
+            }
+        }
+    }
+}>;
+
+export type UserCollaborator = Prisma.UserCollaboratorGetPayload<{
+    include: {
+        user: true;
+    }
+}>;
+
+export type ConnectRequestPayload = {
+  id: string;
+  userId: string;
+  fullname: string;
+  createdAt: Date;
+}
 
 /**
  * GROUP ADMIN

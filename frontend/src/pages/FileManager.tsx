@@ -46,11 +46,15 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
     const [ pageTitle, setPageTitle ] = useState("");
     const [ fileListTitle, setFileListTitle] = useState("");
     const [files, setFiles] = useState<AppFile[]>([]);
+    //const [documentTypeLocal, setDocumentTypeLocal] = useState(DocumentType.MANUSCRIPT);
     //const [isLoading, setIsLoading] = useState(true);
     const [reload, setReload] = useState("");
 
     let filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
-    
+    if(documentType){
+        fileListProperties.showDeleteButton = !(documentType === DocumentType.FEEDBACK);
+        fileListProperties.showEditButton = !(documentType === DocumentType.FEEDBACK);
+    }
     // Fetch uploaded files
     useEffect(() => {
         if (!user || isLoading) return;
@@ -129,9 +133,8 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
       {isLoading ? (
           <Box display="flex" justifyContent="center" p={6} ><CircularProgress /></Box>
         ) : (
-          <FileList files={files} onSendData={handleReload} fileListProperties={fileListProperties}/>
+              <FileList files={files} onSendData={handleReload} fileListProperties={fileListProperties}/>
       )}
-
     </Box>
   );
 }

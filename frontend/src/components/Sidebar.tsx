@@ -10,7 +10,7 @@ import {
   CircularProgress,
   Box,
   Divider,
-  useTheme,
+  Badge
 } from "@mui/material";
 
 import { mutate } from "swr";
@@ -32,6 +32,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import KeyIcon from "@mui/icons-material/Key";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 
 import GradientDivider from "./GradientDivider";
 
@@ -110,6 +111,7 @@ export default function Sidebar() {
       <List>
         {/* HOME */}
         <ListItemButton
+          sx={{pb: 3}}
           selected={pathname.startsWith("/")}
           onClick={() => navigate("/")}
         >
@@ -134,6 +136,7 @@ export default function Sidebar() {
 
         {/* START GROUP */}
         <ListItemButton
+          sx={{pb: 3}}
           selected={pathname === "/creategroup"}
           onClick={() => navigate("/creategroup")}
         >
@@ -143,30 +146,32 @@ export default function Sidebar() {
           <ListItemText primary="Start a Group"  sx={{ml: "-30px"}}/>
         </ListItemButton>
 
-        <GradientDivider text="Find Collaborators" />
+        <GradientDivider text="Collaborators" />
 
-        {/* WRITERS */}
+        {/* COLLABORATORS */}
         <ListItemButton
-          selected={pathname.startsWith("/writers")}
-          onClick={() => navigate("/writers")}
+          
+          selected={pathname.startsWith("/membersearch")}
+          onClick={() => navigate("/membersearch")}
         >
           <ListItemIcon>
             <KeyboardIcon htmlColor="white" />
           </ListItemIcon>
-          <ListItemText primary="Writers"  sx={{ml: "-30px"}}/>
+          <ListItemText primary="Search Members"  sx={{ml: "-30px"}}/>
         </ListItemButton>
 
-        {/* READERS */}
         <ListItemButton
-          selected={pathname.startsWith("/readers")}
-          onClick={() => navigate("/readers")}
+          sx={{pb: 3}}
+          selected={pathname.startsWith("/connectrequests")}
+          onClick={() => navigate("/connectrequests")}
         >
           <ListItemIcon>
-            <MenuBookIcon htmlColor="white" />
+            <ConnectWithoutContactIcon htmlColor="white" />
           </ListItemIcon>
-          <ListItemText primary="Readers"  sx={{ml: "-30px"}}/>
+          <ListItemText primary="Connect Requests"  sx={{ml: "-30px"}}/>
+            <Badge badgeContent={0} color="primary" />
         </ListItemButton>
-
+        
         <GradientDivider text="My Stuff" />
 
         {/* PROFILE */}
@@ -210,6 +215,7 @@ export default function Sidebar() {
         </Collapse>
 
         {/* READINGS */}
+        
         <ListItemButton
           selected={pathname.startsWith("/readings")}
           onClick={() => navigate("/readings")}
@@ -246,8 +252,8 @@ export default function Sidebar() {
           </List>
         </Collapse>
 
-        <Divider sx={{ my: 2 }} />
-
+        {/* <Divider sx={{ my: 2 }} /> */}
+<img className="separator-line" src="/assets/images/separator-line.svg" alt="separator" />
         {/* SIGN OUT */}
         <ListItemButton onClick={logoutClicked}>
           <ListItemIcon>

@@ -17,7 +17,8 @@ import {
   getAdminRequests,
   createJoinGroupRequest,
   approveJoinRequest,
-  rejectJoinRequest
+  rejectJoinRequest,
+  getGroupDescription
 } from "../database/dbGroups";
 import { 
   createNewsItem, 
@@ -31,6 +32,17 @@ const prisma = new PrismaClient();
 router.get("/:id", async(_req, res) => {
     try {
       const group = await getGroup(_req.params.id);
+      res.json(group);
+    } catch (err) {
+      console.error('Error retrieving group:', err);
+      res.status(500).json({ err: 'Error retrieving group' });
+    }
+});
+
+router.get("/:id/description", async(_req, res) => {
+    try {
+        console.log('in GET /:id/description');
+      const group = await getGroupDescription(_req.params.id);
       res.json(group);
     } catch (err) {
       console.error('Error retrieving group:', err);

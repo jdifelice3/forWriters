@@ -1,5 +1,5 @@
-// src/pages/GroupJoinRequestsAdminPage.tsx
 import { useEffect, useState } from "react";
+import { CollaboratorRequest } from "../../../backend/src/domain-types";
 import {
   Box,
   Typography,
@@ -7,18 +7,10 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import GroupJoinRequestList from "../components/GroupJoinRequestList";
+import CollaboratorRequestList from "../components/CollaboratorRequestList";
 
-interface JoinRequest {
-  id: string;
-  userName: string;
-  userId: string;
-  groupId: string;
-  groupName: string;
-}
-
-export default function GroupJoinRequestAdmin() {
-  const [requests, setRequests] = useState<JoinRequest[]>([]);
+const CollaboratorRequestAdmin = () => {
+  const [requests, setRequests] = useState<CollaboratorRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +20,7 @@ export default function GroupJoinRequestAdmin() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/admin/requests`,
+        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/users/admin/requests`,
         { credentials: "include" }
       );
       const data = await res.json();
@@ -45,7 +37,9 @@ export default function GroupJoinRequestAdmin() {
   }, []);
 
   return (
-    <Paper 
+    // <Paper sx={{ maxWidth: 800, mx: "auto", mt: 4, p: 4 }}>
+    <Paper
+        //style={styles}  
         sx={{ 
             maxWidth: 900, 
             mx: "auto", 
@@ -54,7 +48,7 @@ export default function GroupJoinRequestAdmin() {
         }}
     >
       <Typography variant="h4" mb={3}>
-        Manage Join Requests
+        Manage Collaborator Requests
       </Typography>
 
       {loading && <CircularProgress />}
@@ -63,7 +57,7 @@ export default function GroupJoinRequestAdmin() {
       {msg && <Alert severity="success">{msg}</Alert>}
 
       {!loading && (
-        <GroupJoinRequestList
+        <CollaboratorRequestList
           requests={requests}
           onAction={(message) => {
             setMsg(message);
@@ -75,3 +69,4 @@ export default function GroupJoinRequestAdmin() {
     </Paper>
   );
 }
+export default CollaboratorRequestAdmin;

@@ -13,7 +13,9 @@ import ReadingSignup from "../pages/ReadingSignup";
 import ReadingFeedback from "../pages/ReadingFeedback";
 import GroupJoinRequestAdmin from "../pages/GroupJoinRequestAdmin";
 import GroupSearch from "../pages/GroupSearchPage";
+import MemberSearchPage from "../pages/MemberSearchPage";
 import Readings from "../pages/Readings";
+import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
 import { getDocumentTypeFromString } from "../util/Enum";
 
 const Layout = () => {
@@ -60,8 +62,7 @@ const Layout = () => {
                 fontSize: "2.5rem",
                 fontWeight: 600,
                 color: "#333",
-                // marginLeft: "0.5rem",
-                marginLeft: "-0.5rem",
+                marginLeft: "0.5rem",
               }}
             >
               forWriters
@@ -95,8 +96,7 @@ const Layout = () => {
               <Route path="/searchgroups" element={<div><h1>Search Groups</h1></div>} />
               <Route path="/groups/:groupId" element={ <Groups /> } />
               <Route path="/creategroup" element={ <GroupsCreate /> } />
-              <Route path="/readers" element={<div>Readers</div>} />
-              <Route path="/writers" element={<div>Writers</div>} />
+              <Route path="/membersearch" element={<MemberSearchPage />} />
               <Route path="/signout" element={<div><h1>Sign Out</h1></div>} />
               <Route path="/works" element={<div><h1>Your Work</h1></div>} />
               <Route path="/userprofile" element={<UserProfile />} />
@@ -109,6 +109,7 @@ const Layout = () => {
               <Route path="/groupsearch" element={<GroupSearch />} /> 
               <Route path="/groupjoinadmin" element={<GroupJoinRequestAdmin/>}/>
               <Route path="/readings" element={<Readings />} />
+              <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
             </Routes>
           </ComponentWrapper>
         </main>

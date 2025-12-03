@@ -51,7 +51,7 @@ const searchUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_P
       renderInput={(params) => (
         <TextField
           {...params}
-          label="Search for writing groups"
+        //   label="Search for writing groups"
           InputProps={{
             ...params.InputProps,
             endAdornment: (
