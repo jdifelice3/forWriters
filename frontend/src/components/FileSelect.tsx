@@ -32,9 +32,7 @@ const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, sel
 
     useEffect(() => {
     if (!user) return;
-      console.log('selectedValue', selectedValue);
       (async () => {
-        console.log(`${filesUrl}/${fileListProperties.fileType}`);
         const res = await fetch(`${filesUrl}/${fileListProperties.fileType}`, 
         { 
           method: 'GET',

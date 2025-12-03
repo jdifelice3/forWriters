@@ -59,33 +59,45 @@ export default function Dashboard() {
                  of critiquing manuscripts as streamlined as possible.<br/>
                  Using this site, writers can perform the necessary tasks for turning good writing into great writing:<br/><br/>
 
-                 <span style={{fontWeight: "bold"}}>Writing Groups:</span>
+                 <div style={{fontWeight: "bold"}}>Writing Groups:</div>
+                    <span>Writing groups can host many members, or just one writer and one reader.</span>
+                    <span>Writing groups can be set to private so the forWriters search engine will ignore them.</span>
+                <br/><br/>
                  <div>Members can:</div>
-                 <ul>
+                 <ul style={{marginTop: "-1px"}}>
                     <li>Create writing groups</li>
                     <li>Search for writing groups</li>
                     <li>Join existing writing groups (once approved)</li>
                     <li>Invite others to join your writing group </li>
-                    <li>Administrators of a writing group can:
-                        <ul>
-                            <li>Maintain the group's information (name, address, social media urls, etc.)</li>
-                            <li>Add news posts</li>
-                            <li>Set up Readings</li>
-                        </ul>
-                    </li>
-                    <li>Writing groups can host many members, or just one writer and one reader.</li>
-                    <li>Writing groups can be set to private so the forWriters search engine will ignore them.</li>
-                 </ul>  
+                </ul>
+                <div>Administrators of a writing group can:</div>
+                    <ul style={{marginTop: "-1px"}}>
+                        <li>Maintain the group's information (name, address, social media urls, etc.)</li>
+                        <li>Add news posts</li>
+                        <li>Set up Readings</li>
+                    </ul>
                 </Typography>
 
                <span style={{fontWeight: "bold"}}>Manuscripts/File Management:</span>
-              <div>Writers can upload as many manuscripts or other documents as they like, so long as they are PDFs or DOCXs.</div>
+              <div>Writers can upload manuscripts or other documents per their membership, so long as they are PDFs or DOCXs.</div>
               <div>They can also:</div>
               <ul>
                 <li>Preview, download, edit, or delete their manuscripts.</li>
                 <li>Easily share manuscripts with other writers, readers, or writing groups.</li>
                 <li>Make manuscripts searchable and findable by other forWriters members.</li>
               </ul>
+              <div style={{fontWeight: "bold"}}>Authorship:</div>
+                <span>Depending on your membership level, the following tools are available to you:</span>
+                    <ul>
+                        <li>Plagiarism Detection. Detecting plagarism has been an age-old task of any publisher. Now, it is easier
+                            than ever. Sometimes author's include the work of other writers without realizing it. It's best to 
+                            check before you submit.
+                        </li>
+                        <li>AI Detection. This is an ever-increasing concern. Many publishers now check for AI-content 
+                            on a routine basis. If you've ever used an AI Detection tool, you were probably surprised by 
+                            what it flagged as AI content. As with plagarism, it's best to get ahead of it.
+                        </li>
+                    </ul>
               <span style={{fontWeight: "bold"}}>Readings:</span>
               <ul>
                 <li>Readings are created by the administrator of a writing group.</li>

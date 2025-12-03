@@ -40,6 +40,8 @@ type FormInput = {
   description: string
 }
 
+const currentDate = new Date();
+
 export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin }) => {
   const { user, isLoading, error } = useUserContext();
   const [reading, setReading] = useState<Reading[]>([]);
@@ -142,6 +144,20 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
       }
   };
 
+const handleWithdraw = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+      const withdrawUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/withdraw`;
+      const res = await fetch(withdrawUrl, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user ? user.id : "" }),
+        credentials: "include",
+      });
+      if (res.ok){
+        alert("You have withdrawn from this reading!");
+        setButtonEventId(readingId);
+      }
+}
+
 const disableSignInButton = (eventId: string): boolean => {
   
   try {
@@ -186,12 +202,13 @@ const disableSignInButton = (eventId: string): boolean => {
           {reading.map((e) => (
             <Grid size={12} key={e.id}>
               <Box 
+                className={new Date(e.readingDate) < currentDate ? "disabled" : ""}
                 sx={{
                   border: "1px solid #ddd",
                   p: 2,
                   borderRadius: 2,
                   backgroundColor:
-                    new Date(e.submissionDeadline) > new Date()
+                    new Date(e.submissionDeadline) > new Date() || new Date(e.readingDate) < currentDate 
                       ? "#e3f2fd"
                       : "#f3e5f5",
                 }}
@@ -242,7 +259,7 @@ const disableSignInButton = (eventId: string): boolean => {
                     size="small"
                     variant="contained"
                     startIcon={<EventAvailableIcon />}
-                    onClick={(event) => handleSignup(event, e.id)}
+                    onClick={(event) => handleWithdraw(event, e.id)}
                     sx={{ mt: 1 }}         
                     //Check if the current user has already signed-in to the event
                     disabled={!disableSignInButton(e.id)}

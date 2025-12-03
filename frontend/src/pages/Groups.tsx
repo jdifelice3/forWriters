@@ -129,7 +129,7 @@ const Groups = () => {
               </Button>
               <Dialog open={open} onClose={() => setOpen(false)}>
                   <DialogTitle>
-                    Reading Schedule
+                    Review Manuscripts
                     <IconButton
                       edge="end"
                       color="inherit"

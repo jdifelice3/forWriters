@@ -42,13 +42,13 @@ router.get("/", async (_req, res) => {
 
 router.get("/type/:documentType", async(_req, res) => {
   try{
-    console.log('in .get/fileType')
+    
     const documentType = _req.params.documentType;
 
     if(!documentType){
         res.status(404).json({error: "Document Type not found"});
     }
-    console.log('documentType', documentType);
+    
     const session = await Session.getSession(_req, res);
     const authId = session.getUserId();
 
@@ -87,29 +87,6 @@ router.post("/", upload.single("file"), async (req, res) => {
       res.status(500).json({ err: 'Error creating file record' });
   }
 });
-
-// router.post("/r/:readingId", upload.single("file"), async (req, res) => {
-//   try{
-//     const session = await Session.getSession(req, res);
-//     const authId = session.getUserId();
-//     const mimeType = mapMimeToEnum(req.file?.mimetype);
-//     const filename = (req.file !== undefined ? req.file.filename : '');
-
-//     const file = await createFileRecordReading(
-//       authId, 
-//       mimeType, 
-//       filename, 
-//       req.body.title, 
-//       req.body.description
-//     );
-
-//     res.status(200).json(file);
-//   } catch (err) {
-//     console.error('Error creating file record:', err);
-
-//     res.status(500).json({ err: 'Error creating file record' });
-//   }
-// });
 
 router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
   try{

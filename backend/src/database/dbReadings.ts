@@ -87,10 +87,36 @@ export const getReadingsByUserId = async(authId: string) => {
                 },
                 include: {
                     appFile: { 
+                        omit: {
+                            description:  true, 
+                            documentType:  true, 
+                            filename:  true, 
+                            genre:  true, 
+                            manuscriptIsVisible:  true, 
+                            mimetype:  true, 
+                            pageCount:  true, 
+                            //title:  true, 
+                            uploadedAt:  true, 
+                            url:  true, 
+                            wordCount: true,
+                            workType: true,
+                        },
                         include: {
                             user: {
+                                omit: {
+                                    createdAt: true, 
+                                    email: true, 
+                                    role:  true,
+                                    superTokensId:  true,
+                                    updatedAt:  true,
+                              },
                                 include : {
-                                    userProfile: true
+                                    userProfile: {
+                                        select: {
+                                            id: true,
+
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -100,7 +126,7 @@ export const getReadingsByUserId = async(authId: string) => {
         },
         }
     });
-
+    console.log('readingAuthors', readingAuthors);
     return readingAuthors;
   } catch (err) {
     console.log('Error in getReadingsByUserId');
@@ -343,7 +369,7 @@ export const createReadingAuthor = async(readingId: string, userId: string) => {
           authorId: userId,
         }
       });
-
+      console.log('readingAuthor', readingAuthor);
     return readingAuthor;
 
   } catch (error) {
@@ -354,15 +380,7 @@ export const createReadingAuthor = async(readingId: string, userId: string) => {
 
 export const createReadingFeedback = async(readingAuthorId: string, feedbackFileId: string) => {//}: Promise<ReadingFeedback> => {
   try {
-    // const result = await prisma.readingFeedback.create({
-    //   data: {
-    //     readingAuthorId: readingAuthorId,
-    //     feedbackFileId: feedbackFileId
-    //   },
-    // });
-    // console.log('dbEvents.createReadingFeedback', result);
-
-    return null;//result;
+    return null;
   } catch (err) {
     console.error('Error adding a feedback file to readingFeedback:', err);
     throw err;
@@ -390,3 +408,16 @@ export const addFileToReading = async(readingAuthorId: string, appFileId: string
 
   return result;
 } 
+
+export const deleteReadingAuthor = async(readingId: string, authorId: string) => {
+    const deleteAuthorFromReading = await prisma.readingAuthor.delete({
+        where: {
+            readingId_authorId: {
+                readingId: readingId,   
+                authorId: authorId
+            }
+        }
+    });
+
+    return true;
+};

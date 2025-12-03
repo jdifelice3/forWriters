@@ -32,6 +32,10 @@ export const getFileRecords = async(authId: string, documentType?: string) => {
             documentType: getDocumentTypeFromString(documentType)
             })
         },
+        select: {
+            id: true,
+            title: true
+        },
         orderBy: { title: "asc" }
     });
     return files;
