@@ -30,6 +30,7 @@ import { GroupDetails } from "../components/GroupDetails";
 import { EventsCalendar } from "../components/EventsCalendar";
 import ReadingSchedule from "../components/ReadingSchedule";
 import GroupIcon from '@mui/icons-material/Group';
+import GroupUserList from "../components/GroupUserList";
 
 const styles = {
     marginLeft: '75px' // or a responsive value
@@ -196,6 +197,12 @@ const Groups = () => {
       <Grid container spacing={3}>
         <Grid size={12}>
           <NewsFeed groupId={group.id} isAdmin={isAdmin} />
+        </Grid>
+      </Grid>
+      <Divider sx={{ my: 4 }} />
+      <Grid container spacing={3}>
+        <Grid size={12}>
+                <GroupUserList groupId={groupId || ""} />
         </Grid>
       </Grid>
     </Box>

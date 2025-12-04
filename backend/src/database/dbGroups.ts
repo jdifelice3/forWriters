@@ -60,6 +60,41 @@ export const getGroup = async(groupId: string) => {
   }
 }
 
+export const getGroupUsers = async(groupId: string) => {
+    const groupUsers = prisma.groupUser.findMany({
+        where: {
+            groupId: groupId
+        },
+        include: {
+            user: {
+                include: {
+                    userProfile: true
+                },
+                omit: {
+                    id: true,
+                    superTokensId: true,
+                    email: true,
+                    role: true,
+                    username: true,
+                    createdAt: true,
+                    updatedAt: true,
+                }
+            }
+        },
+        omit: {
+            id:  true,
+            userId:  true,
+            groupId:  true,
+            isAdmin: true,
+            invitedBy:  true,
+            createdAt:  true,
+        },
+        
+    });
+
+    return groupUsers;
+}
+
 export const getGroupDescription = async(groupId: string): Promise<GroupGetDescription> => {
 
   const currentDate = new Date();

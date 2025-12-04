@@ -230,16 +230,7 @@ const disableSignInButton = (eventId: string): boolean => {
                     color:(e.readingAuthor ? (e.readingAuthor.length === 0 ? "green" : "red") : "green")
                     }}>
                     {getSpotsOpenText(e)}
-                  {/* {e.readingAuthor ? `${e.spotsOpen - e.readingAuthor.length} of ${e.spotsOpen} spots open` : `${e.spotsOpen} of ${e.spotsOpen} spots open`}  */}
-
                 </Typography>
-                {/* {e.readingAuthor && e.readingAuthor.length > 0 && (
-                <Typography variant="body2" color="text.secondary">
-                   Authors:<br/>
-                   <AuthorList reading={e} />
-
-                 </Typography>
-                )} */}
                 {!isAdmin && (
                 <Box>
                   <Button

@@ -50,7 +50,7 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
     //const [isLoading, setIsLoading] = useState(true);
     const [reload, setReload] = useState("");
 
-    let filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
+    const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
     if(documentType){
         fileListProperties.showDeleteButton = !(documentType === DocumentType.FEEDBACK);
         fileListProperties.showEditButton = !(documentType === DocumentType.FEEDBACK);
@@ -59,21 +59,24 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
     useEffect(() => {
         if (!user || isLoading) return;
         (async () => {
+            let url = "";
             switch(documentType) {
                 case DocumentType.MANUSCRIPT:
                     uploadFormProperties.subtitle = "Upload a new manuscript";
-                    filesUrl = `${filesUrl}/type/${documentType}`;
+                    url = `${filesUrl}/type/${documentType}`;
                     setPageTitle("Manuscripts");
                     setFileListTitle("Your manuscripts");
                     break;
                 case DocumentType.FEEDBACK:
                     uploadFormProperties.subtitle = "Upload a feedback file (DOCX)";
-                    filesUrl = `${filesUrl}/type/${documentType}`;
+                    url = `${filesUrl}/type/${documentType}`;
                     setPageTitle("Feedback Documents");
                     setFileListTitle("Your feedback documents");
                     break;
             }
-            const res = await fetch(filesUrl, 
+            console.log('in FileManager');
+            console.log('url', url);
+            const res = await fetch(url, 
             { 
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },

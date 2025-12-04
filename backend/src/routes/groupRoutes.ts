@@ -18,7 +18,8 @@ import {
   createJoinGroupRequest,
   approveJoinRequest,
   rejectJoinRequest,
-  getGroupDescription
+  getGroupDescription,
+  getGroupUsers
 } from "../database/dbGroups";
 import { 
   createNewsItem, 
@@ -71,6 +72,16 @@ router.get("/user/:id", async(_req, res) => {
     try {
       const group = await getGroupByUserId(_req.params.id);
       res.json(group);
+    } catch (err) {
+      console.error('Error retrieving group:', err);
+      res.status(500).json({ err: 'Error retrieving group' });
+    }
+});
+
+router.get("/:groupId/groupuser", async(_req, res) => {
+    try {
+      const groupUsers = await getGroupUsers(_req.params.groupId);
+      res.json(groupUsers);
     } catch (err) {
       console.error('Error retrieving group:', err);
       res.status(500).json({ err: 'Error retrieving group' });

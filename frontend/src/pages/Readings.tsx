@@ -13,6 +13,7 @@ import {
   Popover,
   TextField
 } from "@mui/material";
+import { generateRandomString } from "../util/Math";
 import Grid from "@mui/material/Grid";
 // import FileIcon from "../components/FileIcon";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
@@ -56,8 +57,7 @@ const Readings = () => {
         if (res.ok) {
             const data: ReadingAuthorByUser[] = await res.json();
             
-            //There is only one ReadingAuthor on this page
-            console.log('readingAuthor', data);
+            //console.log('readingAuthor', data);
             setReadingAuthor(data);
             if(!data[0]){
                 setError("You have not signed up for any readings");
@@ -113,7 +113,7 @@ const Readings = () => {
                     
                     <Grid container spacing={2}>
                     {readingAuthor.map((ra) => (
-                        <Grid size={12} key={ra.id}>
+                        <Grid size={12}>
                         <Box 
                             sx={{
                             border: "1px solid #ddd",
@@ -210,7 +210,7 @@ const Readings = () => {
                 </CardContent>
             </Card>
         ) : (
-            <div></div>
+            <span></span>
         )}
     </>
     )

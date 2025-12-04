@@ -10,6 +10,7 @@ interface FileIconProps {
 }
 
 const FileIcon: React.FC<FileIconProps> = ({file}) => {
+    console.log('file', file);
     if(!file){
       return <InsertDriveFileIcon color="primary" />;
     }

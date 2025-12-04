@@ -93,7 +93,7 @@ export const getReadingsByUserId = async(authId: string) => {
                             filename:  true, 
                             genre:  true, 
                             manuscriptIsVisible:  true, 
-                            mimetype:  true, 
+                            //mimetype:  true, 
                             pageCount:  true, 
                             //title:  true, 
                             uploadedAt:  true, 
