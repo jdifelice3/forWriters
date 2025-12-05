@@ -11,6 +11,7 @@ const dashboard_1 = __importDefault(require("supertokens-node/recipe/dashboard")
 const userroles_1 = __importDefault(require("supertokens-node/recipe/userroles"));
 const dbUsers_1 = require("./database/dbUsers");
 const client_1 = require("@prisma/client");
+console.log('process.env.ENV', process.env.ENV);
 exports.SuperTokensConfig = {
     supertokens: {
         connectionURI: process.env.SUPERTOKENS_URI ?? "",
@@ -18,7 +19,7 @@ exports.SuperTokensConfig = {
     },
     appInfo: {
         appName: "forWriters",
-        apiDomain: `${process.env.API_HOST}:${process.env.API_PORT}`,
+        apiDomain: process.env.ENV === "DEV" ? `${process.env.API_HOST}:${process.env.API_PORT}` : process.env.RENDER_EXTERNAL_URL || "",
         websiteDomain: `${process.env.WEB_HOST}:${process.env.WEB_PORT}`,
         apiBasePath: "/auth",
         websiteBasePath: "/auth",

@@ -7,6 +7,7 @@ import type { TypeInput } from "supertokens-node/types";
 import { createUser } from "./database/dbUsers";
 import { Role } from "@prisma/client";
 
+console.log('process.env.ENV', process.env.ENV);
 export const SuperTokensConfig: TypeInput = {
     supertokens: {
         connectionURI: process.env.SUPERTOKENS_URI ?? "",
@@ -14,7 +15,7 @@ export const SuperTokensConfig: TypeInput = {
     },
     appInfo: {
         appName: "forWriters",
-        apiDomain: `${process.env.API_HOST}:${process.env.API_PORT}`,
+        apiDomain: process.env.ENV === "DEV" ? `${process.env.API_HOST}:${process.env.API_PORT}` :  process.env.RENDER_EXTERNAL_URL || "", 
         websiteDomain: `${process.env.WEB_HOST}:${process.env.WEB_PORT}`,
         apiBasePath: "/auth",
         websiteBasePath: "/auth",
