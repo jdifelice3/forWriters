@@ -338,13 +338,13 @@ model UserProfile {
 }
 
 model UserSearch {
-  id       String @id
+  id       String?
   fullName String?
   bio      String?
 
   @@map("UserSearch")
+  @@ignore  // <- tell Prisma Migrate not to manage this
 }
-
 
 model UserUrl {
   id        String   @id @default(cuid())
