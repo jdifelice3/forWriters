@@ -9,7 +9,7 @@ const emailpassword_1 = __importDefault(require("supertokens-node/recipe/emailpa
 const session_1 = __importDefault(require("supertokens-node/recipe/session"));
 const dashboard_1 = __importDefault(require("supertokens-node/recipe/dashboard"));
 const userroles_1 = __importDefault(require("supertokens-node/recipe/userroles"));
-const dbUsers_1 = require("../src/database/dbUsers");
+const dbUsers_1 = require("./database/dbUsers");
 const client_1 = require("@prisma/client");
 exports.SuperTokensConfig = {
     supertokens: {
