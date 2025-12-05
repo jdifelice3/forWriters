@@ -85,4 +85,4 @@ app.get("/api/sessioninfo", async (req, res, next) => {
 // In case of session related errors, this error handler returns 401 to the client.
 app.use(errorHandler());
 
-app.listen(process.env.API_PORT, () => console.log(`API Server listening on port ${process.env.API_PORT}`));
+app.listen(process.env.PORT, () => console.log(`API Server listening on port ${process.env.PORT}`));

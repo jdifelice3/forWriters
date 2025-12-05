@@ -58,7 +58,7 @@ const Groups = () => {
       }); 
       if (res.ok) {
         const data: GroupGetBasic = await res.json();
-        //console.log('user', user);
+        
         if(data){
           setGroup(data);
           let userIndex: number = data.groupUser.findIndex(item => item.userId === user.id);

@@ -1,5 +1,10 @@
 import express from "express";
-import { Reading, ReadingAuthorBasic } from "../domain-types";
+import { 
+    Reading, 
+    ReadingAuthorBasic, 
+    ReadingDeleteError,
+    ReadingDeleteInvalidGroupIdError
+} from "../domain-types";
 import Session from "supertokens-node/recipe/session";
 import { createGroup, getGroup, getGroupByUserId, } from "../database/dbGroups";
 import { createNewsItem, getNews } from '../database/dbNews';
@@ -11,11 +16,13 @@ import {
   createReadingFeedback,
   getReading, 
   getReadingsByUserId,
-  deleteReadingAuthor
+  deleteReadingAuthor,
+  deleteReading
 } from '../database/dbReadings';
 import { ReadingAuthor } from "@prisma/client";
 import { addAbortListener } from "events";
 import { addFileToReading } from "../database/dbReadings";
+
 
 interface EventItem {
   eventId: string;
@@ -83,16 +90,19 @@ router.get("/:id/readingauthors", async(req, res) => {
 
 //#region POST
 router.post("/:groupId", async (req, res) => {
+    
   try {
-    const {
+    let {
         name, 
         createdUserId,
         readingDate,
         readingStartTime,
         readingEndTime,
         submissionDeadline,
-        description
+        description,
+        schedule
     } = req.body;
+
     const reading = await createReading(
       req.params.groupId, 
       name, 
@@ -101,7 +111,8 @@ router.post("/:groupId", async (req, res) => {
       readingStartTime,
       readingEndTime,
       submissionDeadline,
-      description
+      description,
+      schedule
     );
     res.json(reading);
   } catch (error) {
@@ -162,6 +173,26 @@ router.delete("/:id/withdraw", async (req, res) => {
     console.error('Error signing up for event:', error);
     res.status(500).json({ error: 'Error signing up for event' });
   }
+});
+
+router.delete("/:id/group/:groupId", async(req, res) => {
+    try {
+        const readingId = req.params.id;
+        const groupId = req.params.groupId;
+        const deletedReading = await deleteReading(readingId, groupId);
+        res.status(200).json(deletedReading);
+    } catch (err) {
+        if(err instanceof ReadingDeleteError){
+            console.log('ReadingDeleteError');
+            res.status(err.statusCode).json({error: err.message});      
+        } else if (err instanceof ReadingDeleteInvalidGroupIdError){
+            console.log('ReadingDeleteInvalidGroupIdError');
+            res.status(err.statusCode).json({error: err.message});      
+        } else {
+            console.error("Error deleting reading:", err);
+            res.status(500).json({ error: "Reading deletion failed. Unspecified error." });
+        }
+    }
 });
 
 //#endregion

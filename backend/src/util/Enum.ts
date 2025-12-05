@@ -1,4 +1,4 @@
-import { FileType, DocumentType } from "../domain-types";
+import { FileType, DocumentType, ReadingScheduleType } from "../domain-types";
 
 export const getFileTypeString = (fileType: FileType): string => {
   return fileType;
@@ -20,4 +20,15 @@ export const getDocumentTypeFromString = (value: string): DocumentType | undefin
     return value as DocumentType;
   }
   return undefined;
+}
+
+export const getReadingScheduleTypeString = (readingSchedule: ReadingScheduleType): string => {
+  return readingSchedule;
+}
+
+export const getReadingScheduleTypeFromString = (value: string): ReadingScheduleType => {
+  //if (Object.values(ReadingSchedule).includes(value as ReadingSchedule)) {
+    return value as ReadingScheduleType;
+  //}
+  //return undefined;
 }

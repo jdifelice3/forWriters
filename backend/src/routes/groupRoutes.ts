@@ -177,11 +177,7 @@ router.post("/:groupId/join", async (req, res) => {
     const joinRequest = await createJoinGroupRequest(authId, groupId);
 
     res.json(joinRequest);
-    //   {
-    //   message:
-    //     "Join request submitted. An admin for this group must approve your request.",
-    // }
-  //);
+   
   } catch (err) {
     if(err instanceof JoinRequestError){
       res.status(err.statusCode).json({error: err.message});      

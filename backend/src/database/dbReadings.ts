@@ -1,5 +1,18 @@
-import { PrismaClient, ReadingFeedback } from "@prisma/client";
-import { Reading, ReadingAuthor, ReadingAuthorByUser } from "../domain-types";
+import { 
+    PrismaClient, 
+} from "@prisma/client";
+import { 
+    Reading, 
+    ReadingAuthor, 
+    ReadingAuthorByUser,
+    ReadingScheduleType,
+    ReadingDeleteError,
+    ReadingDeleteInvalidGroupIdError
+} from "../domain-types";
+import { 
+    getReadingScheduleTypeFromString,
+    getReadingScheduleTypeString
+} from "../util/Enum";
 
 const prisma = new PrismaClient();
 
@@ -11,7 +24,7 @@ export const getReadings = async(groupId: string): Promise<Reading[]> => {
             groupId: groupId,
         },
         orderBy: {
-            readingDate: 'asc',
+            readingDate: 'desc',
         },
         include: {
             readingAuthor: {
@@ -327,6 +340,7 @@ export const getReadingAuthors = async(readingId: string): Promise<ReadingAuthor
 }
 //#endregion
 
+//#region CREATE
 export const createReading = async(
     groupId: string, 
     name: string, 
@@ -335,24 +349,31 @@ export const createReading = async(
     readingStartTime: string,
     readingEndTime: string,
     submissionDeadline: string,
-    description: string    
+    description: string,
+    schedule: string
   ) => {
   try {
-  console.log('in create reading');
+    console.log('in create reading');
+    console.log('schedule', schedule);
 
+    const scheduledType: ReadingScheduleType = getReadingScheduleTypeFromString(schedule);
+   // scheduledType === ReadingSchedule.SCHEDULED
+   console.log('scheduledType' ,scheduledType);
+   console.log('scheduledType  === ReadingSchedule.SCHEDULED',scheduledType  === ReadingScheduleType.SCHEDULED);
     const reading = await prisma.reading.create({
       data: {
         groupId: groupId,
-        readingDate: new Date(readingDate),
-        submissionDeadline: new Date(submissionDeadline),
+        readingDate: scheduledType  === ReadingScheduleType.SCHEDULED ? new Date(readingDate) : null,
+        submissionDeadline: scheduledType  === ReadingScheduleType.SCHEDULED ? new Date(submissionDeadline) : null,
         name: name,
         createdUserId: createdUserId,
-        readingStartTime: readingStartTime, 
-        readingEndTime: readingEndTime, 
+        readingStartTime: scheduledType  === ReadingScheduleType.SCHEDULED ? readingStartTime : null, 
+        readingEndTime: scheduledType  === ReadingScheduleType.SCHEDULED ? readingEndTime : null, 
         description: description,
+        scheduledType: scheduledType
       }
     });
-
+    console.log(reading);
     return reading;
   } catch (error) {
     console.error('Error creating reading:', error);
@@ -408,7 +429,9 @@ export const addFileToReading = async(readingAuthorId: string, appFileId: string
 
   return result;
 } 
+//#endregion
 
+//#region DELETE
 export const deleteReadingAuthor = async(readingId: string, authorId: string) => {
     const deleteAuthorFromReading = await prisma.readingAuthor.delete({
         where: {
@@ -421,3 +444,39 @@ export const deleteReadingAuthor = async(readingId: string, authorId: string) =>
 
     return true;
 };
+
+export const deleteReading = async(readingId: string, groupId: string) => {
+    console.log('in deletereading');
+    //make sure the reading belongs to the group
+    const readingInGroup = await prisma.reading.findUnique({
+        where: {
+            id: readingId,
+            groupId: groupId
+        }
+    });
+
+    if (!readingInGroup) {
+        throw new ReadingDeleteInvalidGroupIdError("You are trying to delete a reading that does not belong to your group.", 403);
+    } 
+
+    //make sure there are no authors associated with the reading
+    const authors = await prisma.readingAuthor.findMany({
+        where: {
+            readingId: readingId
+        }
+    });
+
+    if(authors.length > 0){
+        throw new ReadingDeleteError("You cannot delete a reading that has authors associated with it.", 403);
+    }
+
+    const deletedReading = await prisma.reading.delete({
+        where: {
+            id: readingId
+        }
+    });
+    console.log('Reading deletion success');
+    console.log(JSON.stringify(deleteReading));
+    return deletedReading;
+}
+//#endregion

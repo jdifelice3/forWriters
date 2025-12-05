@@ -1,2 +1,0 @@
--- AlterEnum
-ALTER TYPE "UrlType" ADD VALUE 'FACEBOOK';

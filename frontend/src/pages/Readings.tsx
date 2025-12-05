@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
-import { ReadingAuthor, ReadingAuthorByUser } from "../../../backend/src/domain-types";
+import { 
+    ReadingAuthorByUser,
+    Reading
+ } from "../../../backend/src/domain-types";
 import {
     Alert,
   Box,
@@ -22,6 +25,7 @@ import { FileListProperties } from '../types/File';
 import InfoIcon from '@mui/icons-material/Info';
 import FeedbackCommentList from "../components/FeedbackCommentList";
 import wordIcon from '../assets/icons/icons8-word-file-48.png';
+import { getCardBackgroundColor } from "../util/readingUtil";
 
 const fileListProperties: FileListProperties =
   {
@@ -86,18 +90,21 @@ const Readings = () => {
     setAnchorEl(null); // Close the popover
   };
 
+  const canChangeManuscript = (r: Reading) => {
+    if(r.scheduledType === "SCHEDULED"){
+        return new Date(r.submissionDeadline || "").valueOf() > currentDate.valueOf()
+    } else {
+        return true; // As of now, users can can their manuscripts until it has been downloaded.
+                     // TODO: LOG ALL FILE DOWNLOADS
+    }
+}
+
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
 
     return (
     <>
-        <Box mt={3}>
-            {error && (
-                <Alert severity="error" sx={{ mt: 3 }}>
-                    {error}
-                </Alert>
-            )}
-        </Box>
+        
         {readingAuthor !== undefined ? (
             <Card style={styles} sx={{ maxWidth: 750, mx: "auto", p: 4}}>
                 <CardContent>
@@ -110,7 +117,13 @@ const Readings = () => {
                     />&nbsp;
                     Readings
                     </Typography>
-                    
+                    <Box mt={3}>
+                        {error && (
+                            <Alert severity="error" sx={{ mt: 3 }}>
+                                {error}
+                            </Alert>
+                        )}
+                    </Box>
                     <Grid container spacing={2}>
                     {readingAuthor.map((ra) => (
                         <Grid size={12}>
@@ -119,31 +132,40 @@ const Readings = () => {
                             border: "1px solid #ddd",
                             p: 2,
                             borderRadius: 2,
-                            backgroundColor:
-                                new Date(ra.reading.submissionDeadline) > currentDate && (!ra.authorAppFile)
-                                ? "#e3f2fd"
-                                : "#e3f2fd"
+                            backgroundColor: getCardBackgroundColor(ra.reading as Reading)
+                                // new Date(ra.reading.submissionDeadline) > currentDate && (!ra.authorAppFile)
+                                // ? "#e3f2fd"
+                                // : "#e3f2fd"
                             }}  
-                            // ,"#e3f2fd" #f3e5f5
                         >
                             <Typography variant="h6" fontWeight="bold">
-                            {ra.reading.name }
+                                {ra.reading.name }
                             </Typography>
                             {/* <Typography>
                                 Group Name Goes Here
                             </Typography> */}
-                            <Typography variant="body2">
-                            Date of Reading: <span style={{fontWeight: "bold"}}>{new Date(ra.reading.readingDate).toLocaleDateString()}</span>
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                            Submit manuscripts by <b>{new Date(ra.reading.submissionDeadline).toLocaleDateString()}</b>
-                            </Typography>
+                            {ra.reading.scheduledType === "SCHEDULED" ? (
+                                <>
+                                <Typography variant="body2">
+                                    Date of Reading: 
+                                        <span style={{fontWeight: "bold"}}>
+                                            {new Date(ra.reading.readingDate || "").toLocaleDateString()}
+                                        </span>
+                                    </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                Submit manuscripts by <b>{new Date(ra.reading.submissionDeadline || "").toLocaleDateString()}</b>
+                                </Typography>
+                                </>
+                            ) : (
+                                <span></span>
+                            )}
                             <Divider sx={{ my: 1 }} />
                             <Typography variant="body1" fontWeight="bold">
                             Submitted Manuscript: <InfoIcon style={{ cursor: 'pointer' }} onClick={handleClick}/>
                             </Typography>
+                            
                             <div>
-                            {new Date(ra.reading.submissionDeadline).valueOf() > currentDate.valueOf() ? (
+                            {canChangeManuscript(ra.reading as Reading) ? (
                             <FileSelect 
                                 onSendData={handleSelectChange} 
                                 readingAuthorId={ra.id} 

@@ -1,26 +1,40 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Reading, ReadingAuthor } from "../../../backend/src/domain-types";
+import React, { useEffect, useState } from "react";
+import { Reading, ReadingScheduleType} from "../../../backend/src/domain-types";
 import {
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  TextField,
-  DialogActions,
-  CircularProgress,
-  Select, 
-  MenuItem
+    Alert,
+    Box,
+    Typography,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    TextField,
+    DialogActions,
+    CircularProgress,
+    IconButton,
+    Tooltip,
+    // Radio,
+    // RadioGroup,
+    // FormControlLabel,
+    Select, 
+    MenuItem,
+    Stack
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/Add";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { useUserContext } from "../context/UserContext";
 import { useForm } from "react-hook-form";
-import { getSpotsOpenText } from "../util/readingUtil";
+import { getSpotsOpenText, getCardBackgroundColor } from "../util/readingUtil";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Radio from '@mui/material/Radio';
+import ReadingSchedule from "./ReadingSchedule";
 
 interface EventsCalendarProps {
   groupId: string;
@@ -37,7 +51,8 @@ type FormInput = {
   readingStartTime: string,
   readingEndTime: string,
   submissionDeadline: Date,
-  description: string
+  description: string,
+  schedule: string
 }
 
 const currentDate = new Date();
@@ -48,7 +63,6 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
   const [open, setOpen] = useState(false);
   const [readingDate, setReadingDate] = useState("");
   const [name, setName] = useState("");
-  //const [addressId, setAddressId] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [description, setDescription] = useState("");
@@ -57,30 +71,36 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
   const [err, setErr] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [submissionDeadline, setSubmissionDeadline] = useState("");
+  const [schedule, setSchedule] = useState("SCHEDULED");
+  const [editReading, setEditReading] = useState<Reading | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   
-  const {
-      register,
-      handleSubmit,
-      formState: { errors },
-    } = useForm<FormInput>({
-      defaultValues: {
-        name: "", 
-        readingDate: new Date(),
-        readingStartTime: "",
-        readingEndTime: "",
-        submissionDeadline: new Date(),
-        description: ""
-      },
+  
+  const {register, handleSubmit, formState: { errors }} = useForm<FormInput>({
+       
+        defaultValues: {
+            name: "", 
+            readingDate: new Date(),
+            readingStartTime: "",
+            readingEndTime: "",
+            submissionDeadline: new Date(),
+            description: "",
+            schedule: "SCHEDULED"
+        },
     });
+
+    const baseUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events`;
+
   useEffect(() => {
     if (!user || isLoading) return;
-
-    const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events`;
     
     (async () => {
       try {
-        const res = await fetch(`${eventsUrl}/${groupId}`, {
-        credentials: "include",
+        const res = await fetch(`${baseUrl}/${groupId}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
         }); 
         if (res.ok) {
           const data = await res.json();
@@ -94,40 +114,46 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
     })();
   }, [groupId, buttonEventId]);
 
+  const handleScheduleRadioButtons = (event: any) => {
+        console.log('in handleScheduleRadioButtons');
+        console.log('event.target.value', event.target.value);
+         setSchedule(event.target.value);
+         //setIsScheduleVisible((prev) => !prev);
+    };
+
   const handleAddReading = async (values: FormInput ) => {
-   
     setSubmitting(true);
     setErr(null);
     setSuccess(null);
     try{
-    const eventsURrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
-    const res = await fetch(eventsURrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        name: values.name, 
-        createdUserId: user.id,
-        readingDate: values.readingDate,
-        readingStartTime: values.readingStartTime,
-        readingEndTime: values.readingEndTime,
-        //readingAddressId: addressId,
-        submissionDeadline: values.submissionDeadline,
-        description: values.description
-      }),
-      credentials: "include",
-    });
-    if (res.ok) {
-      const newEvent = await res.json();
-      setReading((prev) => [newEvent, ...prev]);
-      setOpen(false);
-    }
-    setSuccess("Reading created successfully.");
-  } catch (err) {
-    setErr("Failed to create reading");
-  } finally {
-    setSubmitting(false);
-  }
+        const eventsURrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
+        const res = await fetch(eventsURrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+            name: values.name, 
+            createdUserId: user.id,
+            readingDate: values.readingDate,
+            readingStartTime: values.readingStartTime,
+            readingEndTime: values.readingEndTime,
+            submissionDeadline: values.submissionDeadline,
+            description: values.description,
+            schedule: schedule
+        }),
+        credentials: "include",
+        });
 
+        if (res.ok) {
+            const newEvent = await res.json();
+            setReading((prev) => [newEvent, ...prev]);
+            setOpen(false);
+        }
+        setSuccess("Reading created successfully.");
+    } catch (err) {
+            setErr("Failed to create reading");
+    } finally {
+            setSubmitting(false);
+    }
   };
 
   const handleSignup = async (event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
@@ -158,6 +184,32 @@ const handleWithdraw = async(event: React.MouseEvent<HTMLButtonElement>, reading
       }
 }
 
+const handleEdit = (reading: Reading) => {
+      setEditReading(reading);
+      setEditTitle(reading.name);
+      setEditDescription(reading.description || "");
+  };
+  
+const handleDelete = async (readingId: string) => {
+    if (!confirm("Are you sure you want to delete this reading?")) return;
+    try {
+        const res = await fetch(`${baseUrl}/${readingId}/group/${groupId}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        });
+        const data = await res.json();
+        if (res.status === 200){
+            setButtonEventId(data.id);
+        } else {
+            setErr(data.error);
+        }
+    } catch (err: any) {
+        setErr(`Error caught in handleDelete: ${err.message}`);
+        console.error(`Error caught in handleDelete: ${err.message}`);
+    }
+  };
+
 const disableSignInButton = (eventId: string): boolean => {
   
   try {
@@ -170,8 +222,8 @@ const disableSignInButton = (eventId: string): boolean => {
       }
     
     return false; // Return the flag value
-  } catch (err) {
-
+  } catch (err:any) {
+    setErr(err.message);
     return false;
   }
 };
@@ -197,166 +249,210 @@ const disableSignInButton = (eventId: string): boolean => {
             Create Reading
           </Button>
         )}
-
+        <Box mt={3}>
+            {err && (
+                <Alert severity="error" sx={{ mt: 3 }}>
+                    {err}
+                </Alert>
+            )}
+        </Box>
         <Grid container spacing={2}>
-          {reading.map((e) => (
-            <Grid size={12} key={e.id}>
-              <Box 
-                className={new Date(e.readingDate) < currentDate ? "disabled" : ""}
+            <Stack spacing={2}>
+            {reading.map((r) => (
+            
+              <Card 
+                className={new Date(r.readingDate || "") < currentDate ? "disabled" : ""}
                 sx={{
                   border: "1px solid #ddd",
-                  p: 2,
+                  p: 1,
                   borderRadius: 2,
-                  backgroundColor:
-                    new Date(e.submissionDeadline) > new Date() || new Date(e.readingDate) < currentDate 
-                      ? "#e3f2fd"
-                      : "#f3e5f5",
+                  backgroundColor: getCardBackgroundColor(r)
                 }}
               >
-                <Typography variant="h6" fontWeight="bold">
-                  {e.name }
-                </Typography>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {new Date(e.readingDate).toLocaleDateString()}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Submit manuscripts by <b>{new Date(e.submissionDeadline).toLocaleDateString()}</b>
-                </Typography>
-                <Typography 
-                  variant="body2" 
-                  color="text.secondary" 
-                  sx={{
-                    fontWeight: "bold", 
-                    color:(e.readingAuthor ? (e.readingAuthor.length === 0 ? "green" : "red") : "green")
-                    }}>
-                    {getSpotsOpenText(e)}
-                </Typography>
-                {!isAdmin && (
-                <Box>
-                  <Button
-                    id={e.id}
-                    size="small"
-                    variant="contained"
-                    startIcon={<EventAvailableIcon />}
-                    onClick={(event) => handleSignup(event, e.id)}
-                    sx={{ mt: 1 }}         
-                    //Check if the current user has already signed-in to the event
-                    disabled={disableSignInButton(e.id)}
-                  >
-                    Sign Up
-                  </Button>&nbsp;
-                  <Button
-                    id={e.id}
-                    size="small"
-                    variant="contained"
-                    startIcon={<EventAvailableIcon />}
-                    onClick={(event) => handleWithdraw(event, e.id)}
-                    sx={{ mt: 1 }}         
-                    //Check if the current user has already signed-in to the event
-                    disabled={!disableSignInButton(e.id)}
-                  >
-                    Withdraw
-                  </Button>
-                  </Box>
-                )}
-              </Box>
-            </Grid>
-          ))}
+                <CardContent>
+                    <Typography variant="h6" fontWeight="bold">
+                        {r.name }
+                    </Typography>
+                    {r.scheduledType === "SCHEDULED" ? (
+                        <>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            {new Date(r.readingDate || "").toLocaleDateString()}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Submit manuscripts by <b>{new Date(r.submissionDeadline || "").toLocaleDateString()}</b>
+                        </Typography>
+                        </>
+                    ) : (
+                        <span></span>
+                    )}
+                    <Typography 
+                        variant="body2" 
+                        color="text.secondary" 
+                        sx={{
+                            fontWeight: "bold", 
+                            color:(r.readingAuthor ? (r.readingAuthor.length === 0 ? "green" : "red") : "green")
+                            }}>
+                            {getSpotsOpenText(r)}
+                    </Typography>
+                </CardContent>
+                <CardActions>
+                    {!isAdmin ? (
+                        <Box>
+                        <Button
+                            id={r.id}
+                            size="small"
+                            variant="contained"
+                            startIcon={<EventAvailableIcon />}
+                            onClick={(event) => handleSignup(event, r.id)}
+                            sx={{ mt: 1 }}         
+                            //Check if the current user has already signed-in to the event
+                            disabled={disableSignInButton(r.id)}
+                        >
+                            Sign Up
+                        </Button>&nbsp;
+                        <Button
+                            id={r.id}
+                            size="small"
+                            variant="contained"
+                            startIcon={<EventAvailableIcon />}
+                            onClick={(event) => handleWithdraw(event, r.id)}
+                            sx={{ mt: 1 }}         
+                            //Check if the current user has already signed-in to the event
+                            disabled={!disableSignInButton(r.id)}
+                        >
+                            Withdraw
+                        </Button>
+                        </Box>
+                    ) : (
+                        <Box sx={{mt: -3}}>
+                            <Tooltip title="Edit" arrow>
+                                <IconButton 
+                                    onClick={() => handleEdit(r)} size="small"
+                                >
+                                    <EditIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete" arrow>
+
+                                <IconButton
+                                    onClick={() => handleDelete(r.id)}
+                                    size="small"
+                                    color="error"
+                                >
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                      </Box>
+                    )}
+                </CardActions>
+              </Card>
+
+            ))}
+          </Stack>
         </Grid>
 
-        <Dialog open={open} onClose={() => setOpen(false)}>
-          <DialogTitle>Create a Reading</DialogTitle>
+        <Dialog 
+            open={open} 
+            onClose={() => setOpen(false)}
+        >
+          <DialogTitle sx={{pb: 0}}>Create a Reading</DialogTitle>
             <Box  component="form" onSubmit={handleSubmit(handleAddReading)} noValidate>
 
           <DialogContent>
-            <TextField
-              label="Reading Name"
-              type="string"
-              value={name}
-              fullWidth
-              sx={{ my: 2 }}
-              required
-              {...register("name", {
-                onChange: (e) => setName(e.target.value) // Update React Hook Form's value
-              })}
-              error={!!errors.name}
-              helperText={errors.name?.message}            
-            />
-            <TextField
-              label="Description"
-              type="string"
-              value={description}
-              fullWidth
-              sx={{ my: 2 }}
-              required
-              {...register("description", {
-                onChange: (e) => setDescription(e.target.value) // Update React Hook Form's value
-              })}
-              error={!!errors.name}
-              helperText={errors.name?.message}            
-            />
-            <TextField
-              label="Reading Date"
-              type="date"
-              value={readingDate}
-              fullWidth
-              sx={{ my: 2 }}
-              required
-              {...register("readingDate", {
-                onChange: (e) => setReadingDate(e.target.value) // Update React Hook Form's value
-              })}
-              error={!!errors.name}
-              helperText={errors.name?.message}            />
-            <TextField
-              label="Start Time"
-              type="string"
-              value={startTime}
-              fullWidth
-              sx={{ my: 2 }}
-              required
-              {...register("readingStartTime", {
-                onChange: (e) => setStartTime(e.target.value) // Update React Hook Form's value
-              })}
-              error={!!errors.name}
-              helperText={errors.name?.message}            />
-            <TextField
-              label="End Time"
-              type="string"
-              value={endTime}
-              fullWidth
-              sx={{ my: 2 }}
-              required
-              {...register("readingEndTime", {
-                onChange: (e) => setEndTime(e.target.value) // Update React Hook Form's value
-              })}
-              error={!!errors.name}
-              helperText={errors.name?.message}            />
-            {/* <Select
-              label=""
-              type="string"
-              // labelId="demo-simple-select-label"
-              // id="demo-simple-select"
-              value={addressId}
-              onChange={(e) => setAddressId(e.target.value)}
-              required
+            <RadioGroup 
+                value={schedule} 
+                onChange={handleScheduleRadioButtons} 
+                //value="SCHEDULED"
             >
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-          </Select> */}
+                <FormControlLabel value="SCHEDULED" control={<Radio />} label="Scheduled"/>
+                <FormControlLabel value="UNSCHEDULED" control={<Radio />} label="Unscheduled" />
+            </RadioGroup>
             <TextField
-              label="Submission Deadline"
-              type="date"
-              value={submissionDeadline}
-              fullWidth
-              required
-              {...register("submissionDeadline", {
-                onChange: (e) => setSubmissionDeadline(e.target.value) // Update React Hook Form's value
-              })}
-              error={!!errors.name}
-              helperText={errors.name?.message}           
+                label="Reading Name"
+                type="string"
+                value={name}
+                fullWidth
+                sx={{ my: 2 }}
+                required
+                {...register("name", {
+                    onChange: (e) => setName(e.target.value) // Update React Hook Form's value
+                })}
+                error={!!errors.name}
+                helperText={errors.name?.message}            
             />
-            
+            <TextField
+                label="Description"
+                type="string"
+                value={description}
+                fullWidth
+                sx={{ my: 2 }}
+                required
+                {...register("description", {
+                    onChange: (e) => setDescription(e.target.value) // Update React Hook Form's value
+                })}
+                error={!!errors.name}
+                helperText={errors.name?.message}            
+            />
+           
+            <Box className={schedule === "SCHEDULED" ? "" : "disabled"}>
+                <TextField
+                    label="Reading Date"
+                    type="date"
+                    value={readingDate}
+                    fullWidth
+                    sx={{ 
+                        my: 2, 
+                    }}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                    {...register("readingDate", {
+                        onChange: (e) => setReadingDate(e.target.value) // Update React Hook Form's value
+                    })}
+                    error={!!errors.readingDate}
+                    helperText={errors.readingDate?.message}            
+                />
+                <TextField
+                    label="Start Time"
+                    type="string"
+                    value={startTime}
+                    fullWidth
+                    sx={{ my: 2 }}
+                    required
+                    {...register("readingStartTime", {
+                        onChange: (e) => setStartTime(e.target.value) // Update React Hook Form's value
+                    })}
+                    error={!!errors.name}
+                    helperText={errors.name?.message}            
+                />
+                <TextField
+                    label="End Time"
+                    type="string"
+                    value={endTime}
+                    fullWidth
+                    sx={{ my: 2 }}
+                    required
+                    {...register("readingEndTime", {
+                        onChange: (e) => setEndTime(e.target.value) // Update React Hook Form's value
+                    })}
+                    error={!!errors.name}
+                    helperText={errors.name?.message}            
+                    />
+                <TextField
+                    label="Submission Deadline"
+                    type="date"
+                    value={submissionDeadline}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    required
+                    {...register("submissionDeadline", {
+                        onChange: (e) => setSubmissionDeadline(e.target.value) // Update React Hook Form's value
+                    })}
+                    error={!!errors.name}
+                    helperText={errors.name?.message}           
+                />
+            </Box>
+        
+           
           </DialogContent>
           <DialogActions>
             <Button
@@ -375,15 +471,3 @@ const disableSignInButton = (eventId: string): boolean => {
     </Card>
   );
 };
-
-// const AuthorList: React.FC<AuthorListProps> = ({ reading }) => {
-//   return (
-//     reading.readingAuthor.map((ra: ReadingAuthor) => (
-//       <Typography variant="body2" color="text.secondary">
-//         {/* {ra.userProfile.firstName} {ra.userProfile.lastName} */}
-//         {!ra.userProfile.firstName && !ra.userProfile.lastName ? "Name unknown" 
-//           : `${ra.userProfile.firstName} ${ra.userProfile.lastName}`}
-//       </Typography>
-//     ))
-//   );
-// }

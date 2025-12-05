@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Reading, ReadingAuthor } from "../../../backend/src/domain-types";
+import { Reading, ReadingAuthor, ReadingScheduleType } from "../../../backend/src/domain-types";
 import AuthorList from "./AuthorList";
+import { getCardBackgroundColor } from "../util/readingUtil";
 import {
   Box,
   Button,
   Grid,
   Typography,
   Card,
+  CardActions,
   CardContent,
   Dialog,
   DialogTitle,
@@ -16,7 +18,8 @@ import {
   DialogActions,
   CircularProgress,
   Select, 
-  MenuItem
+  MenuItem,
+  Stack
 } from "@mui/material";
 import ReviewsIcon from '@mui/icons-material/Reviews';
 
@@ -48,61 +51,68 @@ const ReadingSchedule: React.FC<ReadingScheduleProps> = ({groupId}) => {
             setLoadingData(false);
         })();
     }, [groupId]);   
+
     return (
     <Card>
         <CardContent>
             <Grid container spacing={2}>
-                {reading.map((e) => (
-                    <Grid size={12} key={e.id}>
-                    <Box 
+                <Stack spacing={2} sx={{width:"500px"}}> 
+                {reading.map((r) => (
+                    
+                    <Card 
                         sx={{
-                        border: "1px solid #ddd",
-                        p: 2,
-                        borderRadius: 2,
-                        backgroundColor:
-                            new Date(e.submissionDeadline) > new Date()
-                            ? "#e3f2fd"
-                            : "#f3e5f5",
+                            border: "1px solid #ddd",
+                            p: 2,
+                            borderRadius: 2,
+                            backgroundColor: getCardBackgroundColor(r)
                         }}
                     >
-                        <Typography variant="h6" fontWeight="bold">
-                        {e.name }
-                        </Typography>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                        {new Date(e.readingDate).toLocaleDateString()}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                        Submit manuscripts by <b>{new Date(e.submissionDeadline).toLocaleDateString()}</b>
-                        </Typography>
-                        <Typography 
-                        variant="body2" 
-                        color="text.secondary" 
-                        sx={{
-                            fontWeight: "bold", 
-                            color:(e.readingAuthor ? (e.readingAuthor.length === 0 ? "green" : "red") : "green")
-                            }}>
-                        {e.readingAuthor ? `${e.spotsOpen - e.readingAuthor.length} of ${e.spotsOpen} spots open` : `${e.spotsOpen} of ${e.spotsOpen} spots open`} 
-
-                        </Typography>
-                        {e.readingAuthor && e.readingAuthor.length > 0 && (
-                        <Typography variant="body2" color="text.secondary">
-                            Authors:<br/>
-                            <AuthorList reading={e} />
-                        </Typography>
-
-                        )}
-                        <Button 
-                            startIcon={<ReviewsIcon />}
-                            size="small"
-                            variant="contained"
-                            sx={{ mt: 2 }}
-                            onClick={() => navigate(`/readingfeedback/${e.id}`)}
-                        >
-                            Review              
-                        </Button>
-                    </Box>
-                    </Grid>
+                        <CardContent>
+                            <Typography variant="h6" fontWeight="bold">
+                                {r.name }
+                            </Typography>
+                            {r.scheduledType === "SCHEDULED" && r.readingDate && r.submissionDeadline ? (
+                                <>
+                                <Typography variant="subtitle1" fontWeight="bold">
+                                    {new Date(r.readingDate).toLocaleDateString()}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Submit manuscripts by <b>{new Date(r.submissionDeadline).toLocaleDateString()}</b>
+                                </Typography>
+                                </>
+                            ) : (
+                                <span></span>
+                            )}
+                            <Typography 
+                                variant="body2" 
+                                color="text.secondary" 
+                                sx={{
+                                    fontWeight: "bold", 
+                                    color:(r.readingAuthor ? (r.readingAuthor.length === 0 ? "green" : "red") : "green")
+                                    }}>
+                                {r.readingAuthor ? `${r.spotsOpen - r.readingAuthor.length} of ${r.spotsOpen} spots open` : `${r.spotsOpen} of ${r.spotsOpen} spots open`} 
+                            </Typography>
+                            {r.readingAuthor && r.readingAuthor.length > 0 && (
+                                <Typography variant="body2" color="text.secondary">
+                                    Authors:<br/>
+                                    <AuthorList reading={r} />
+                                </Typography>
+                            )}
+                            <CardActions>
+                                <Button 
+                                    startIcon={<ReviewsIcon />}
+                                    size="small"
+                                    variant="contained"
+                                    sx={{ mt: 2 }}
+                                    onClick={() => navigate(`/readingfeedback/${r.id}`)}
+                                >
+                                    Review              
+                                </Button>
+                            </CardActions>
+                        </CardContent>
+                    </Card>
                 ))}
+                </Stack>
             </Grid>
         </CardContent>
     </Card>

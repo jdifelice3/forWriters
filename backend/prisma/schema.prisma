@@ -59,6 +59,11 @@ enum GroupMemberRole {
   ADMIN
 }
 
+enum ReadingScheduleType {
+    SCHEDULED
+    UNSCHEDULED
+}
+
 enum Role {
   ADMIN
   AUTHOR
@@ -229,15 +234,16 @@ model Reading {
   groupId             String
   createdAt           DateTime @default(now())
   createdUserId       String
-  readingDate         DateTime
-  readingStartTime    String
-  readingEndTime      String
+  readingDate         DateTime?
+  readingStartTime    String?
+  readingEndTime      String?
   readingAddressId    String?  @unique
-  submissionDeadline  DateTime
+  submissionDeadline  DateTime?
   spotsOpen           Int      @default(2)
   description         String
   minDaysBetweenReads Int      @default(20) // configurable
   maxConsecutiveReads Int      @default(1) // e.g., can't sign up twice in a row
+  scheduledType          ReadingScheduleType    @default(SCHEDULED)
 
   user          User            @relation(fields: [createdUserId], references: [id])
   readingAuthor ReadingAuthor[]

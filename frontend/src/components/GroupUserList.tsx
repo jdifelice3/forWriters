@@ -23,10 +23,9 @@ const GroupUserList = ({
   const[groupUsers, setGroupUsers]:any = useState([]);
 
   const url = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${groupId}/groupuser`;
-  console.log(url);
-  
+    
   useEffect(() => {
-      if (!groupId) return;
+    if (!groupId) return;
     try {
       (async () => {
         const res = await fetch(
@@ -39,9 +38,8 @@ const GroupUserList = ({
         if (res.ok) {
             const data = await res.json();
             setGroupUsers(data);
-            console.log('data', data);
+            
         }
-        //setLoadingData(false);
         })();
     } catch (err) {
     //   if (err instanceof Error) onError(err.message);
