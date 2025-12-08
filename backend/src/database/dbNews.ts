@@ -9,6 +9,7 @@ export const getNews = async(groupId: string) => {
     const news: any = await prisma.groupNews.findMany({
       where: {
         groupId: groupId,
+        archived: false
       },
       orderBy: [
         { postedAt: 'desc'}, 
@@ -40,3 +41,17 @@ export const createNewsItem = async (groupId: string, title: string, content: st
     throw error; 
   }
 };
+
+export const archiveNewsItem = async(newsItemId: string) => {
+    console.log('in archiveNewsItem')
+    const archivedNewsItem = await prisma.groupNews.update({
+        where: {
+            id: newsItemId
+        },
+        data: {
+            archived: true
+        }
+    });
+    console.log('archivedNewsItem',archivedNewsItem)
+    return archivedNewsItem;
+}

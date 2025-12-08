@@ -188,6 +188,17 @@ router.post("/admin/requests/:id/reject", async (req, res) => {
         res.status(500).json({ error: "Failed to reject join request." });
     }
 });
+router.put("/news/:newsItemId/archive", async (_req, res) => {
+    const newsItemId = _req.params.newsItemId;
+    try {
+        const archivedNewsItem = await (0, dbNews_1.archiveNewsItem)(newsItemId);
+        res.json(archivedNewsItem);
+    }
+    catch (err) {
+        console.error(`Error archiving news item ${newsItemId}`, err);
+        res.status(500).json({ err: `Error archiving news item ${newsItemId}` });
+    }
+});
 //#endregion
 //#region PUT
 router.put("/:groupId", async (_req, res) => {

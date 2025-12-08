@@ -20,7 +20,8 @@ import {
 } from "../database/dbGroups";
 import { 
   createNewsItem, 
-  getNews 
+  getNews,
+  archiveNewsItem
 } from '../database/dbNews';
 
 const router = express.Router();
@@ -226,6 +227,19 @@ router.post("/admin/requests/:id/reject",async (req, res) => {
     }
   }
 );
+
+router.put("/news/:newsItemId/archive", async(_req, res) => {
+  const newsItemId = _req.params.newsItemId;
+    try {
+      const archivedNewsItem = await archiveNewsItem(newsItemId);
+
+      res.json(archivedNewsItem);
+    } catch (err) {
+      console.error(`Error archiving news item ${newsItemId}`, err);
+      res.status(500).json({ err: `Error archiving news item ${newsItemId}` });
+    }
+});
+
 
 //#endregion
 

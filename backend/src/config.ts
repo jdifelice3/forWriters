@@ -7,23 +7,31 @@ import type { TypeInput } from "supertokens-node/types";
 import { createUser } from "./database/dbUsers";
 import { Role } from "@prisma/client";
 
-console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-console.log('apiDomain',process.env.ENV === "development" ? `${process.env.API_HOST}:${process.env.API_PORT}` :  process.env.RENDER_EXTERNAL_URL || "");
+if (typeof process.env.SUPERTOKENS_CONNECTION_URI === 'undefined') {
+  throw new Error("Environment variable process.env.SUPERTOKENS_CONNECTION_URI is undefined");
+}
+if (typeof process.env.SUPERTOKENS_API_KEY === 'undefined') {
+  throw new Error("Environment variable process.env.SUPERTOKENS_API_KEY is undefined");
+}
+if (typeof process.env.APP_NAME === 'undefined') {
+  throw new Error("Environment variable process.env.APP_NAME is undefined");
+}
+if (typeof process.env.API_DOMAIN === 'undefined') {
+  throw new Error("Environment variable process.env.API_DOMAIN is undefined");
+}
+if (typeof process.env.WEBSITE_DOMAIN === 'undefined') {
+  throw new Error("Environment variable process.env.WEBSITE_DOMAIN is undefined");
+}
 
 export const SuperTokensConfig: TypeInput = {
     supertokens: {
-        // connectionURI: "http://localhost:3567",  //for self-hosted
-        // apiKey: undefined
-        connectionURI: "https://st-dev-06512a21-d3b1-11f0-98c6-a51615ad7bad.aws.supertokens.io",
-        apiKey: "Y1oFrXaii8MlkvNl83bP2Zeyr1"
-
+        connectionURI: process.env.SUPERTOKENS_CONNECTION_URI,
+        apiKey: process.env.SUPERTOKENS_API_KEY
     },
     appInfo: {
-        appName: "forWriters",
-        apiDomain: "http://localhost:3001",
-        //apiDomain: process.env.ENV === "DEV" ? `${process.env.API_HOST}:${process.env.API_PORT}` :  process.env.RENDER_EXTERNAL_URL || "", 
-        //websiteDomain: `${process.env.WEB_HOST}:${process.env.WEB_PORT}`,
-        websiteDomain: "http://localhost:3000",
+        appName: process.env.APP_NAME,
+        apiDomain: process.env.API_DOMAIN,
+        websiteDomain: process.env.WEBSITE_DOMAIN,
         apiBasePath: "/auth",
         websiteBasePath: "/auth",
     },

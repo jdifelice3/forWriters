@@ -10,6 +10,6 @@
     "resolveJsonModule": true,
     "outDir": "./dist"
   },
-  "include": ["src"],
+  "include": ["env.d.ts","src"],
   "exclude": ["node_modules"]
 }

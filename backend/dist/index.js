@@ -37,7 +37,6 @@ app.use((req, res, next) => {
     res.send = function (body) {
         return originalSend(body); // Call the original send method
     };
-    // Continue to the next middleware or route handler
     next();
 });
 app.use('/api/users', userRoutes_1.default);

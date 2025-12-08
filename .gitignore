@@ -17,3 +17,6 @@ build-ssr
 *.sw?
 
 .env
+
+backend/.env.dev
+backend/.env.prod

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createNewsItem = exports.getNews = void 0;
+exports.archiveNewsItem = exports.createNewsItem = exports.getNews = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getNews = async (groupId) => {
@@ -8,6 +8,7 @@ const getNews = async (groupId) => {
         const news = await prisma.groupNews.findMany({
             where: {
                 groupId: groupId,
+                archived: false
             },
             orderBy: [
                 { postedAt: 'desc' },
@@ -39,3 +40,17 @@ const createNewsItem = async (groupId, title, content) => {
     }
 };
 exports.createNewsItem = createNewsItem;
+const archiveNewsItem = async (newsItemId) => {
+    console.log('in archiveNewsItem');
+    const archivedNewsItem = await prisma.groupNews.update({
+        where: {
+            id: newsItemId
+        },
+        data: {
+            archived: true
+        }
+    });
+    console.log('archivedNewsItem', archivedNewsItem);
+    return archivedNewsItem;
+};
+exports.archiveNewsItem = archiveNewsItem;

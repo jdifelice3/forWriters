@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
+  Alert,
   Box,
   Typography,
   Button,
@@ -12,9 +13,8 @@ import {
 import TipTapTextEditor from "./TipTapTextEditor";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import AddIcon from "@mui/icons-material/Add";
-import { extractLinks, extractEmailAddresses } from "../util/links";
+import Tooltip from '@mui/material/Tooltip';
 import { useEditor } from "@tiptap/react";
-import { TextStyle } from "@tiptap/extension-text-style"
 import StarterKit from "@tiptap/starter-kit";
 import {
   MenuButtonBold,
@@ -22,15 +22,9 @@ import {
   MenuControlsContainer,
   MenuDivider,
   MenuSelectHeading,
-  RichTextEditor,
   RichTextEditorProvider,
   RichTextField,
-  type RichTextEditorRef,
-  MenuButtonBulletedList,
-  MenuSelectFontSize,
 } from "mui-tiptap";
-// Import additional necessary styles as needed
-
 
 interface NewsFeedProps {
   groupId: string;
@@ -46,61 +40,80 @@ interface NewsItem {
 }
 
 export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
-   
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [adding, setAdding] = useState(false);
+  const [title, setTitle] = useState("");
+  const [newsContent, setNewsContent] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const newsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${groupId}/news`;
+  const newsArchiveUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/news`;
+  
   const editor = useEditor({
     extensions: [
         StarterKit
     ],
+    editable: true,
     onUpdate: ({ editor }) => {
-      // Update state on content change
-      console.log(editor.getHTML());
-      setContent(editor.getHTML());
+        setNewsContent(editor.getHTML());
     },
   });
-  const rteRef = useRef<RichTextEditorRef>(null);
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [adding, setAdding] = useState(false);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
 
-  const newsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${groupId}/news`;
-  
   useEffect(() => {
     
     fetch(newsUrl, { credentials: "include" })
       .then((r) => r.json())
       .then((data) => setNews(data))
       .catch(console.error);
+
   }, [groupId]);
 
   const handleAddNews = async () => {
-    if (!title) return;
+    setNewsContent(editor.getHTML());
+    setError("");
+
+    if(newsContent === "<p></p>" || newsContent.length === 0){
+        console.log('in newsContent check');
+        setError("You must provide content for a News post.");
+        return;
+    } 
+    if (title.length === 0){
+        console.log('in title check');
+        setError("You must provide a title for a News post.");
+        return;
+    } 
+    
+
     const res = await fetch(newsUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content }),
+      body: JSON.stringify({ title, content: newsContent }),
       credentials: "include",
     });
+
     if (res.ok) {
-      const newItem = await res.json();
-      setNews((prev) => [newItem, ...prev]);
+      const newsItem = await res.json();
+      setNews((prev) => [newsItem, ...prev]);
       setTitle("");
-      setContent("");
+      setNewsContent("");
       setAdding(false);
     }
   };
 
+  const handleOnCancel = async () => {
+    setTitle("");
+    setNewsContent("");
+    setAdding(false);
+    setError("");
+  }
+
   const handleArchive = async (id: string) => {
-    const res = await fetch(`${newsUrl}/${id}/archive`, {
+    const res = await fetch(`${newsArchiveUrl}/${id}/archive`, {
       method: "PUT",
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
     if (res.ok) setNews((prev) => prev.filter((n) => n.id !== id));
-  };
-
-  const handleContentChange = (value: any) => {
-    console.log(value);
-    setContent(value);
   };
 
   return (
@@ -123,34 +136,39 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
 
         {isAdmin && adding && (
           <Box mb={3}>
+             <Box mt={3}>
+                        {error && (
+                             <Alert severity="error" sx={{ mt: 3 }}>
+                                {error}
+                            </Alert>
+                        )}
+                    </Box>
             <TextField
               label="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               fullWidth
               sx={{ mb: 2 }}
-            />
-
+          />
         <RichTextEditorProvider editor={editor}>
-            <RichTextField sx={{height: "300px"}}
-                
-                controls={
-                <MenuControlsContainer>
-                    <MenuSelectHeading />
-                    <MenuDivider />
-                    <MenuButtonBold />
-                    <MenuButtonItalic />
-                    <MenuButtonBulletedList />
-                </MenuControlsContainer>    
-                }
-            />
-        </RichTextEditorProvider>
+      <RichTextField sx={{ height: "300px" }}
+        controls={
+          <MenuControlsContainer>
+            <MenuSelectHeading />
+            <MenuDivider />
+            <MenuButtonBold />
+            <MenuButtonItalic />
+            {/* Add more controls here */}
+          </MenuControlsContainer>
+        }
+      />
+    </RichTextEditorProvider>                   
 
             <Stack direction="row" spacing={1}>
               <Button variant="contained" onClick={handleAddNews}>
                 Post
               </Button>
-              <Button onClick={() => setAdding(false)}>Cancel</Button>
+              <Button onClick={handleOnCancel}>Cancel</Button>
             </Stack>
           </Box>
         )}
@@ -163,7 +181,9 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
               </Typography>
               {isAdmin && (
                 <IconButton size="small" onClick={() => handleArchive(n.id)}>
+                  <Tooltip title="archive">
                   <ArchiveIcon fontSize="small" />
+                  </Tooltip>
                 </IconButton>
               )}
             </Stack>
@@ -177,32 +197,3 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
     </Card>
   );
 };
-
-const activateLinks = (text: string | undefined) => {
-  let newText: string = '';
-  
-  if(text !== undefined){
-    const links:string[] = extractLinks(text);
-
-    if(links.length > 0){
-      links.forEach((link, index) => {
-        newText = text.replace(link,`<a href='${link}' target="_blank" rel="noopener noreferrer">${link}</a>`);
-      });
-    } else {
-      newText = text;
-    }
-
-    const emailAddresses: string[] = extractEmailAddresses(newText);
-    if(emailAddresses.length > 0){
-      emailAddresses.forEach((email, index) => {
-        newText = newText.replace(email,`<a href='mailto:${email}'">${email}</a>`);
-      });
-    }
-
-    newText = "<div>" + newText + "</div>";
-    
-    return newText;
-  } else {
-    return text;
-  }
-}
