@@ -7,7 +7,7 @@ export default defineConfig(({ command }) => ({
     command === "serve"
       ? {
           proxy: {
-            "/api": "http://localhost:3001",
+            "/api": "https://forwriters-server.onrender.com",
           },
         }
       : undefined,
