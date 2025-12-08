@@ -23,4 +23,7 @@ export default defineConfig({
             "/api": process.env.VITE_API_PORT,
             },
         },
+        build: {
+            outDir: 'dist',  // Ensure this matches your expected output
+        },
 });
