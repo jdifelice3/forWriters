@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
-import { GroupGetBasic } from "../../../backend/src/domain-types";
+import { GroupBasic } from "../types/domain-types";
 import {
   Box,
   Typography,
@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Link
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
@@ -39,7 +38,7 @@ const styles = {
 const Groups = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const { user, isLoading } = useUserContext();
-  const [group, setGroup] = useState<GroupGetBasic | null>(null);
+  const [group, setGroup] = useState<GroupBasic | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
@@ -57,11 +56,11 @@ const Groups = () => {
         credentials: "include",
       }); 
       if (res.ok) {
-        const data: GroupGetBasic = await res.json();
+        const data: GroupBasic = await res.json();
         
         if(data){
           setGroup(data);
-          let userIndex: number = data.groupUser.findIndex(item => item.userId === user.id);
+          const userIndex: number = data.groupUser.findIndex(item => item.userId === user.id);
           setIsAdmin(data.groupUser[userIndex].isAdmin);
         } else {
           setIsAdmin(false);

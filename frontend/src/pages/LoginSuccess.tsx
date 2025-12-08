@@ -1,5 +1,3 @@
-// import { useSessionContext, signOut } from "supertokens-auth-react/recipe/session";
-// import { getApiDomain } from "../config";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -8,10 +6,6 @@ export default function Dashboard() {
 
     const okClicked = () => {
         navigate("../");
-        // const el = document.getElementById('main-container');
-        // if(el){
-        //     el.style.display='none';
-        // }
     }
 
     return (

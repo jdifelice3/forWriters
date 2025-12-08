@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Reading, ReadingScheduleType} from "../../../backend/src/domain-types";
+import { Reading} from "../types/domain-types";
 import {
     Alert,
     Box,
@@ -16,11 +16,6 @@ import {
     CircularProgress,
     IconButton,
     Tooltip,
-    // Radio,
-    // RadioGroup,
-    // FormControlLabel,
-    Select, 
-    MenuItem,
     Stack
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
@@ -34,15 +29,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
-import ReadingSchedule from "./ReadingSchedule";
 
 interface EventsCalendarProps {
   groupId: string;
   isAdmin: boolean;
-}
-
-interface AuthorListProps {
-  reading: Reading;
 }
 
 type FormInput = {
@@ -112,13 +102,10 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
         console.error("Error isLoading events:", err);
       }
     })();
-  }, [groupId, buttonEventId]);
+  }, [groupId, buttonEventId, baseUrl, isLoading, user]);
 
-  const handleScheduleRadioButtons = (event: any) => {
-        console.log('in handleScheduleRadioButtons');
-        console.log('event.target.value', event.target.value);
+  const handleScheduleRadioButtons = (event: React.ChangeEvent<HTMLInputElement>) => {
          setSchedule(event.target.value);
-         //setIsScheduleVisible((prev) => !prev);
     };
 
   const handleAddReading = async (values: FormInput ) => {
@@ -204,9 +191,13 @@ const handleDelete = async (readingId: string) => {
         } else {
             setErr(data.error);
         }
-    } catch (err: any) {
-        setErr(`Error caught in handleDelete: ${err.message}`);
-        console.error(`Error caught in handleDelete: ${err.message}`);
+    } catch (err: unknown) {
+        if(err instanceof Error){
+            setErr(`Error caught in handleDelete: ${err.message}`);
+            console.error(`Error caught in handleDelete: ${err.message}`);
+        } else {
+            console.error("Unknown error occurred")
+        }
     }
   };
 
@@ -221,10 +212,14 @@ const disableSignInButton = (eventId: string): boolean => {
         }
       }
     
-    return false; // Return the flag value
-  } catch (err:any) {
-    setErr(err.message);
-    return false;
+        return false; // Return the flag value
+  } catch (err:unknown) {
+    if(err instanceof Error){
+        setErr(err.message);
+        return false;
+    } else {
+        return false;
+    }
   }
 };
 

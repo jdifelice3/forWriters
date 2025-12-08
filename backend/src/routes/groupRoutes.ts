@@ -3,11 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
 //import { verifySession } from "supertokens-node/recipe/session/framework/express";
 import { 
-  GroupCreate, 
-  JoinRequest,
-  JoinRequestPayload,
   JoinRequestError
-} from "../domain-types";
+} from "../types/Error";
 import { 
   createGroup, 
   getGroup, 
@@ -42,7 +39,7 @@ router.get("/:id", async(_req, res) => {
 
 router.get("/:id/description", async(_req, res) => {
     try {
-        console.log('in GET /:id/description');
+        
       const group = await getGroupDescription(_req.params.id);
       res.json(group);
     } catch (err) {
@@ -52,9 +49,8 @@ router.get("/:id/description", async(_req, res) => {
 });
 
 router.get("/search/search", async (_req, res) => {
-  console.log('in eventRoutes /search');
   const query:string = (_req.query.query as string) || "";
-  console.log('query', query);
+  
   try {
     if (!query.trim()) {
       return res.json([]);
@@ -103,12 +99,12 @@ router.get("/:id/news", async(_req, res) => {
 router.get("/admin/requests", async (req, res) => {
   try {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
+    const authId = session.getUserId(true);
     
-    const requests: JoinRequest[] | null = await getAdminRequests(authId);
+    const requests = await getAdminRequests(authId);
     // Shape data for frontend
     if(requests){
-      const payload: JoinRequestPayload[] = requests.map((req) => ({
+      const payload = requests.map((req) => ({
         id: req.id,
         userId: req.userId,
         userName: req.user.username,
@@ -134,7 +130,7 @@ router.get("/admin/requests", async (req, res) => {
 
 router.post("/", async( _req, res) => {
   const session = await Session.getSession(_req, res);
-  const authId = session.getUserId();
+  const authId = session.getUserId(true);
   
   try {
       const {name, 
@@ -148,7 +144,7 @@ router.post("/", async( _req, res) => {
             websiteUrl,
             groupType
       } = _req.body;
-    const group: GroupCreate  = await createGroup(authId, name, address, description, groupType, imageUrl, websiteUrl);
+    const group  = await createGroup(authId, name, address, description, groupType, imageUrl, websiteUrl);
 
     res.json(group);
   } catch (err) {
@@ -173,7 +169,7 @@ router.post("/:groupId/join", async (req, res) => {
 
   try {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
+    const authId = session.getUserId(true);
     const joinRequest = await createJoinGroupRequest(authId, groupId);
 
     res.json(joinRequest);
@@ -193,7 +189,7 @@ router.post("/admin/requests/:id/approve", async (req, res) => {
 
     try {
       const session = await Session.getSession(req, res);
-      const authId = session.getUserId();
+      const authId = session.getUserId(true);
       const isApproved = await approveJoinRequest(id, authId);
       if(isApproved){
         res.status(200).json({
@@ -216,7 +212,7 @@ router.post("/admin/requests/:id/reject",async (req, res) => {
 
     try {
       const session = await Session.getSession(req, res);
-      const authId = session.getUserId();
+      const authId = session.getUserId(true);
       const result = await rejectJoinRequest(id, authId);
       res.status(200).json({
         message: "User join request has been rejected.",
@@ -235,7 +231,6 @@ router.post("/admin/requests/:id/reject",async (req, res) => {
 
 //#region PUT
 router.put("/:groupId", async(_req, res) => {
-  console.log(_req.body);
   const groupId = _req.params.groupId;
   try{
     const {

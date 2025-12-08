@@ -3,8 +3,6 @@ export async function typedFetcher<T>(url: string): Promise<T> {
 
   const json = await res.json();
 
-  //console.log("FETCH RAW:", url, json);
-
   if (res.status === 401) {
     const err = new Error("Unauthorized");
     (err as any).status = 401;

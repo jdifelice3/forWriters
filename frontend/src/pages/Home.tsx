@@ -1,26 +1,18 @@
 import Session from "supertokens-auth-react/recipe/session";
 import { useEffect } from 'react';
+import { useUserContext } from "../context/UserContext";
 import WritingGroupQuotesGrid from "../components/WritingGroupQuotesGrid";
 import {
-Typography,
-Grid,
-Card,
-CardHeader,
-CardContent,
-Container, 
-Stack,
-Chip
+    Typography,
+    Grid,
+    Card,
+    CardHeader,
+    CardContent,
+    Container
 } from "@mui/material";
 
 export default function Dashboard() {
-    useEffect(() => {
-        const fetchUserId = async() => {
-            const userId = await Session.getUserId();
-            //create the user in the db
-            console.log("Logged in as user:", userId);
-        }
-        fetchUserId();
-    }, []);
+    const { user, isLoading } = useUserContext();
 
     return (
         <Container maxWidth="lg" sx={{ pb: 1 }}>

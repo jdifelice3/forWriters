@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Group } from "../../../backend/src/domain-types";
+import { Group } from "../types/domain-types";
 import {
   Box,
   Button,

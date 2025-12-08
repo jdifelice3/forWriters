@@ -11,15 +11,9 @@ router.get('/', (req: Request<{ name: string}>, res: Response<{}, {}>) => {
         if(req.query.url !== undefined){
             fileUrl = decodeURIComponent(req.query.url as string);
         }
-        
-        //console.log(new Date().toString());
-        //const safeName: string = (!req.params.name || req.params.name.length === 0) ? 'document.pdf' : req.params.name;
-        //console.log('Name:', safeName);
-        //const safeName: string = req.params.name;
+
         const filePath: string = path.join(process.cwd(), fileUrl);
         const safeName = getLastSegment(filePath);
-        //console.log('filePath', filePath);
-        //res.json(filePath);
         fs.stat(filePath, (err, stat) => {
 
             res.setHeader('Content-Type', 'application/pdf');
@@ -40,7 +34,7 @@ router.get('/', (req: Request<{ name: string}>, res: Response<{}, {}>) => {
         });
     } catch (err: unknown) {
         const error = err as Error;
-        console.log(error.message);
+        console.error(error.message);
     }
 });
 

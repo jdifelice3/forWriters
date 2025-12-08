@@ -1,4 +1,5 @@
 import * as ReactRouter from "react-router-dom";
+import Session from "supertokens-auth-react/recipe/session";
 import { Routes, Route, Link } from "react-router-dom";
 import { useSessionContext } from "supertokens-auth-react/recipe/session";
 import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
@@ -16,10 +17,14 @@ import GroupSearch from "../pages/GroupSearchPage";
 import MemberSearchPage from "../pages/MemberSearchPage";
 import Readings from "../pages/Readings";
 import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
-import { getDocumentTypeFromString } from "../util/Enum";
+import { DocType } from "../util/Enum";
 
 const Layout = () => {
   const session = useSessionContext();
+  let doesSessionExist = false;
+  Session.doesSessionExist().then((exists) => {
+       doesSessionExist = exists;
+    });
   const drawerWidth = 280;
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
@@ -76,7 +81,7 @@ const Layout = () => {
 
       {/* Two-column area below header */}
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        {session.doesSessionExist && <Sidebar />}
+        { <Sidebar />}
 
         <main
           style={{
@@ -84,7 +89,7 @@ const Layout = () => {
             padding: "1rem",
             overflowY: "auto",
             backgroundColor: "#fafafa",
-            marginLeft: session.doesSessionExist ? 0 : 0, 
+            marginLeft: doesSessionExist ? 0 : 0, 
           }}
         >
           <ComponentWrapper>
@@ -100,8 +105,8 @@ const Layout = () => {
               <Route path="/signout" element={<div><h1>Sign Out</h1></div>} />
               <Route path="/works" element={<div><h1>Your Work</h1></div>} />
               <Route path="/userprofile" element={<UserProfile />} />
-              <Route path="/filemanager/manuscript" element={<FileManager documentType={getDocumentTypeFromString("MANUSCRIPT")} />} />
-              <Route path="/filemanager/feedback" element={<FileManager documentType={getDocumentTypeFromString("FEEDBACK")} />} />
+              <Route path="/filemanager/manuscript" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
+              <Route path="/filemanager/feedback" element={<FileManager documentType={DocType.FEEDBACK} />} />
               <Route path="/joingroup" element={<div><h1>Join a Group</h1></div>} />
               <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
               <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />

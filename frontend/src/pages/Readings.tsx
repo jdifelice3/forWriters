@@ -3,22 +3,20 @@ import { useUserContext } from "../context/UserContext";
 import { 
     ReadingAuthorByUser,
     Reading
- } from "../../../backend/src/domain-types";
+ } from "../types/domain-types";
 import {
-    Alert,
+  Alert,
   Box,
   Typography,
   Button,
   Card,
   CardContent,
-  Stack,
   Divider,
   Popover,
   TextField
 } from "@mui/material";
-import { generateRandomString } from "../util/Math";
+
 import Grid from "@mui/material/Grid";
-// import FileIcon from "../components/FileIcon";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import FileSelect from "../components/FileSelect";
 import { FileListProperties } from '../types/File';
@@ -43,7 +41,7 @@ const styles = {
 const currentDate = new Date();
 
 const Readings = () => {
-    const { user, isLoading } = useUserContext();
+    const { user } = useUserContext();
     const [readingAuthor, setReadingAuthor] = useState <ReadingAuthorByUser[]>();
     const [anchorEl, setAnchorEl] = useState(null);
     const [error, setError] = useState<string | null>(null);
@@ -61,7 +59,6 @@ const Readings = () => {
         if (res.ok) {
             const data: ReadingAuthorByUser[] = await res.json();
             
-            //console.log('readingAuthor', data);
             setReadingAuthor(data);
             if(!data[0]){
                 setError("You have not signed up for any readings");
@@ -77,9 +74,6 @@ const Readings = () => {
       method: "POST",
       body: JSON.stringify({readingAuthorId: readingAuthorId, appFileId: fileId}),
     });
-    if (res.ok) {
-
-    }
   }
 
   const handleClick = (event: any) => {

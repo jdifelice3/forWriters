@@ -1,10 +1,8 @@
 import express from "express";
 import { 
-    Reading, 
-    ReadingAuthorBasic, 
     ReadingDeleteError,
     ReadingDeleteInvalidGroupIdError
-} from "../domain-types";
+} from "../types/Error";
 import Session from "supertokens-node/recipe/session";
 import { createGroup, getGroup, getGroupByUserId, } from "../database/dbGroups";
 import { createNewsItem, getNews } from '../database/dbNews';
@@ -49,7 +47,7 @@ router.get("/:readingId/reading", async(_req, res) => {
   const readingId = _req.params.readingId;
 
   try {
-    const reading: Reading = await getReading(readingId);
+    const reading = await getReading(readingId);
 
     res.json(reading);
   } catch (err) {
@@ -59,15 +57,12 @@ router.get("/:readingId/reading", async(_req, res) => {
 });
 
 router.get("/user/author", async(_req, res) => {
-    console.log('in /api/events/user/author');
   try{
     
     const session = await Session.getSession(_req, res);
-    const authId = session.getUserId();
+    const authId = session.getUserId(true);
 
     const readings: ReadingAuthor[] = await getReadingsByUserId(authId);
-    console.log('after getReadingsByUserId');
-    console.log('readings', readings);
     res.status(200).json(readings);
   } catch (err) {
     console.error(`Error retrieving readings with userId.`, err);
@@ -148,8 +143,6 @@ router.post("/:id/feedback", async(_req, res) => {
 router.post("/file/add", async(_req, res) => {
 // Add File to Reading
   try {
-    
-    console.log('_req.body', _req.body);
     const { readingAuthorId, appFileId } = _req.body;
     const addedFile = await addFileToReading(readingAuthorId, appFileId);
     res.status(200).json(addedFile); 
@@ -181,12 +174,10 @@ router.delete("/:id/group/:groupId", async(req, res) => {
         const groupId = req.params.groupId;
         const deletedReading = await deleteReading(readingId, groupId);
         res.status(200).json(deletedReading);
-    } catch (err) {
+    } catch (err: any) {
         if(err instanceof ReadingDeleteError){
-            console.log('ReadingDeleteError');
             res.status(err.statusCode).json({error: err.message});      
         } else if (err instanceof ReadingDeleteInvalidGroupIdError){
-            console.log('ReadingDeleteInvalidGroupIdError');
             res.status(err.statusCode).json({error: err.message});      
         } else {
             console.error("Error deleting reading:", err);

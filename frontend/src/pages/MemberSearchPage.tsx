@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UserSearch } from "../../../backend/src/domain-types";
+import { UserSearch } from "../types/domain-types";
 import {
   Box,
   Button,

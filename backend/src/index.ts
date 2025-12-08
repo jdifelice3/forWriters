@@ -19,7 +19,6 @@ import eventRoutes from './routes/readingRoutes';
 supertokens.init(SuperTokensConfig);
 
 const app = express();
-console.log(`${process.env.WEB_HOST}:${process.env.WEB_PORT}`);
 
 app.use(bodyParser.json());
 
@@ -36,14 +35,12 @@ app.use(middleware());
 
 // Logging Middleware
 app.use((req, res, next) => {
-    //console.log(`Received request: ${req.method} ${req.url}`);
-
+    
     // Store original response send method
     const originalSend = res.send.bind(res); // Bind the res context to originalSend
 
     // Override the response send method
     res.send = function (body) {
-        //console.log(`Response body: ${body}`);
         return originalSend(body); // Call the original send method
     };
 
@@ -74,7 +71,7 @@ app.get("/api/sessioninfo", async (req, res, next) => {
 
     res.send({
       sessionHandle: session.getHandle(),
-      userId: session.getUserId(),
+      userId: session.getUserId(true),
       accessTokenPayload: session.getAccessTokenPayload(),
     });
   } catch (err) {

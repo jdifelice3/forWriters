@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { UrlType } from "../../../backend/src/domain-types";
+import { UrlType } from "../util/Enum";
 import { Box, TextField, Select, MenuItem, Button, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 
 type UrlRow = {
   url: string;
-  type: UrlType;
+  type: string;
 };
 
 interface UrlListProps {
@@ -22,7 +22,7 @@ export const UrlList: React.FC<UrlListProps> = ({isDisabled}) => {
     setRows([...rows, { url: "", type: UrlType.WEBSITE }]);
   };
 
-  const updateRow = (index: number, field: keyof UrlRow, value: any) => {
+  const updateRow = (index: number, field: keyof UrlRow, value: string) => {
     const updated = [...rows];
     updated[index][field] = value;
     setRows(updated);
@@ -54,7 +54,7 @@ export const UrlList: React.FC<UrlListProps> = ({isDisabled}) => {
           {/* Select populated by enum */}
           <Select
             value={row.type}
-            onChange={(e) => updateRow(i, "type", e.target.value as UrlType)}
+            onChange={(e) => updateRow(i, "type", e.target.value)}
             sx={{ minWidth: 150 }}
           >
             {Object.values(UrlType).map((value) => (
@@ -84,9 +84,6 @@ export const UrlList: React.FC<UrlListProps> = ({isDisabled}) => {
     >
         Add Url
       </Button>
-
-      {/* For debugging: */}
-      {/* <pre>{JSON.stringify(rows, null, 2)}</pre> */}
     </Box>
   );
 }

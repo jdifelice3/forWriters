@@ -3,7 +3,6 @@ import Session from "supertokens-auth-react/recipe/session";
 import { useNavigate } from "react-router-dom";
 import { useSWRConfig } from "swr";
 
-const { cache, mutate } = useSWRConfig();
 // --------------------
 // Types
 // --------------------
@@ -28,7 +27,9 @@ const apiHost = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_POR
 // Hook implementation
 // --------------------
 export function useUser() {
-  const [user, setUser] = useState<User | null>(cachedUser);
+    const { cache, mutate } = useSWRConfig();
+
+    const [user, setUser] = useState<User | null>(cachedUser);
   const [loading, setLoading] = useState(!cachedUser);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();

@@ -1,23 +1,24 @@
-import { FileType, DocumentType } from "../../../backend/src/domain-types";
-
-export const getFileTypeString = (fileType: FileType): string => {
-  return fileType;
+export const DocType = {
+	MANUSCRIPT: "MANUSCRIPT",
+	FEEDBACK: "FEEDBACK"
 }
+Object.freeze(DocType);
 
-export const getFileTypeFromString = (value: string): FileType | undefined => {
-  if (Object.values(FileType).includes(value as FileType)) {
-    return value as FileType;
-  }
-  return undefined;
+export const FileType = {
+    DOCX: "DOCX",
+    PDF: "PDF"
 }
+Object.freeze(FileType);
 
-export const getDocumentTypeString = (documentType: DocumentType): string => {
-  return documentType;
+export const UrlType = {
+    "AUDIO":"AUDIO",
+    "FACEBOOK":"FACEBOOK", 
+    "IMAGE":"IMAGE",
+    "LINKEDIN":"LINKEDIN", 
+    "MEETUP":"MEETUP", 
+    "SUBSTACK":"SUBSTACK", 
+    "WEBSITE":"WEBSITE", 
+    "YOUTUBE":"YOUTUBE"
 }
-
-export const getDocumentTypeFromString = (value: string): DocumentType => {
-  if (Object.values(DocumentType).includes(value as DocumentType)) {
-    return value as DocumentType;
-  }
-  return DocumentType.MANUSCRIPT;
-}
+Object.freeze(UrlType);
+    

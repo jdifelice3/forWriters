@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GroupGetBasic, GroupUrl } from "../../../backend/src/domain-types";
+import { GroupBasic } from "../types/domain-types";
 import { getUrlLabel } from "../types/Url";
 import {
   Box,
@@ -10,13 +10,11 @@ import {
   Link,
   ListItem,
   Stack,
-  List,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import UrlList from "./UrlList";
 
 interface GroupDetailsProps {
-  group: GroupGetBasic;
+  group: GroupBasic;
 }
 
 export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
@@ -31,7 +29,6 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
     state: (group.groupAddress) ?  group.groupAddress[0].state : "",
     zip: (group.groupAddress) ?  group.groupAddress[0].zip : "",
     urls: (group.groupUrl) ? group.groupUrl : []  
-    //urls: group.urls
   });
 
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(

@@ -7,7 +7,7 @@ router.get("/", async (_req, res) => {
 
     try{
         const authId = _req.query.authId;
-        console.log('authId', authId);
+        
         if (typeof authId === 'string') {
             const results = await getUserProfile(authId);
             res.status(200).json(results);
@@ -26,7 +26,6 @@ router.get("/", async (_req, res) => {
 
 router.put("/", async (_req, res) => {
     try{
-        console.log('_req.body', _req.body);
         const { userId, firstName, lastName, bio } = _req.body;
         const results = await updateUserProfile(userId, firstName, lastName, bio);
         res.status(200).json(results);

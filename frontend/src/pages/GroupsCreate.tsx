@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { GroupCreate } from "../../../backend/src/domain-types";
+import { GroupCreate } from "../types/domain-types";
 import {
   Box,
   Button,

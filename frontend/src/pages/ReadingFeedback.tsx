@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UploadFileFormProperties } from "../types/File";
-import { AppFile, Reading, ReadingAuthor } from "../../../backend/src/domain-types";
+import { AppFile, Reading, ReadingAuthor } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import { generateRandomString } from "../util/Math";
 import UploadFileForm from "../components/UploadFileForm";
@@ -69,12 +69,10 @@ const ReadingFeedback = () => {
       
       if (res.ok) {
         const data: Reading = await res.json();
-        console.log('reading', data);
-        const eventDate = new Date(data.readingDate).toLocaleDateString('en-US');
         setEventTitle(data.name);
         if(data.readingAuthor && data.readingAuthor.length > 0){
           setReading(data);
-          let files: AppFile[] = [];
+          const files: AppFile[] = [];
           data.readingAuthor.forEach((a: any) => {
             if(a.authorAppFile){
                 files.push(a.authorAppFile.appFile);

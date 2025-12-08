@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FileListProperties } from '../types/File';
-import { AppFile } from "../../../backend/src/domain-types";
+import { AppFile } from "../types/domain-types";
 import {
   Button,
   Card,
@@ -62,7 +62,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
       });
 
       if (!res.ok) throw new Error("Failed to update metadata");
-      const updated = await res.json();
+      
       setEditFile(null);
       onSendData(files);
     } catch (err) {

@@ -1,4 +1,3 @@
-// src/components/GroupJoinRequestList.tsx
 import {
   Box,
   Button,

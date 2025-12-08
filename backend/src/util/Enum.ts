@@ -1,5 +1,6 @@
-import { FileType, DocumentType, ReadingScheduleType } from "../domain-types";
-
+import { 
+    FileType, DocumentType, ReadingScheduleType
+} from "@prisma/client";
 export const getFileTypeString = (fileType: FileType): string => {
   return fileType;
 }

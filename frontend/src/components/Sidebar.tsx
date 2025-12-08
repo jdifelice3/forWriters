@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Drawer,
   List,
@@ -36,7 +36,7 @@ import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact
 
 import GradientDivider from "./GradientDivider";
 
-import { GroupGetBasic, Reading } from "../../../backend/src/domain-types";
+import { GroupBasic } from "../types/domain-types";
 
 const drawerWidth = 250;
 
@@ -48,8 +48,7 @@ export default function Sidebar() {
     });
   //const theme = useTheme();
   const { user, isLoading, error } = useUserContext();
-
-  const [groups, setGroups] = useState<GroupGetBasic[]>([]);
+  const [groups, setGroups] = useState<GroupBasic[]>([]);
   const [groupsOpen, setGroupsOpen] = useState(true);
   const [docsOpen, setDocsOpen] = useState(false);
 
@@ -66,7 +65,7 @@ export default function Sidebar() {
       try {
         const res = await fetch(groupsUrl, { credentials: "include" });
         if (!res.ok) throw new Error(`Failed: ${res.status}`);
-        const data: GroupGetBasic[] = await res.json();
+        const data: GroupBasic[] = await res.json();
         setGroups(data);
       } catch (err) {
         console.error("Error loading groups:", err);

@@ -11,7 +11,6 @@ export const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { user, isLoading, error } = useCurrentUser();
-  //console.log('in UserProvider. user:', user);
   return (
     <UserContext.Provider value={{ user, isLoading, error }}>
       {children}

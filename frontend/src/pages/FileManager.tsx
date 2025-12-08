@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useUserContext } from "../context/UserContext";
-import { AppFile, FileType, DocumentType } from "../../../backend/src/domain-types";
+import { AppFile } from "../types/domain-types";
+import { DocType } from "../util/Enum";
+
 import { FileListProperties, UploadFileFormProperties } from "../types/File";
 import { generateRandomString } from "../util/Math";
 import FileList from "../components/FileList";
@@ -38,7 +40,7 @@ const styles = {
 };
 
 interface FileManagerProps {
-  documentType?: DocumentType;
+  documentType?: string;
 }
 
 const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
@@ -46,52 +48,46 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
     const [ pageTitle, setPageTitle ] = useState("");
     const [ fileListTitle, setFileListTitle] = useState("");
     const [files, setFiles] = useState<AppFile[]>([]);
-    //const [documentTypeLocal, setDocumentTypeLocal] = useState(DocumentType.MANUSCRIPT);
-    //const [isLoading, setIsLoading] = useState(true);
     const [reload, setReload] = useState("");
 
     const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
-    if(documentType){
-        fileListProperties.showDeleteButton = !(documentType === DocumentType.FEEDBACK);
-        fileListProperties.showEditButton = !(documentType === DocumentType.FEEDBACK);
-    }
     // Fetch uploaded files
     useEffect(() => {
         if (!user || isLoading) return;
+        if(documentType){
+            fileListProperties.showDeleteButton = !(documentType === DocType.FEEDBACK);
+            fileListProperties.showEditButton = !(documentType === DocType.FEEDBACK);
+        }
+
         (async () => {
             let url = "";
-            switch(documentType) {
-                case DocumentType.MANUSCRIPT:
-                    uploadFormProperties.subtitle = "Upload a new manuscript";
-                    url = `${filesUrl}/type/${documentType}`;
-                    setPageTitle("Manuscripts");
-                    setFileListTitle("Your manuscripts");
-                    break;
-                case DocumentType.FEEDBACK:
-                    uploadFormProperties.subtitle = "Upload a feedback file (DOCX)";
-                    url = `${filesUrl}/type/${documentType}`;
-                    setPageTitle("Feedback Documents");
-                    setFileListTitle("Your feedback documents");
-                    break;
-            }
-            console.log('in FileManager');
-            console.log('url', url);
-            const res = await fetch(url, 
-            { 
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: "include"
-            });
-
-        if (res.ok) {
-            const data = await res.json();
-            setFiles(data);
-            console.log('From FileManager.tsx: documentType', documentType);
-            console.log('data', data);
-
+            if(documentType){
+                switch(documentType.toString()) {
+                    case DocType.MANUSCRIPT:
+                        uploadFormProperties.subtitle = "Upload a new manuscript";
+                        url = `${filesUrl}/type/${documentType}`;
+                        setPageTitle("Manuscripts");
+                        setFileListTitle("Your manuscripts");
+                        break;
+                    case DocType.FEEDBACK:
+                        uploadFormProperties.subtitle = "Upload a feedback file (DOCX)";
+                        url = `${filesUrl}/type/${documentType}`;
+                        setPageTitle("Feedback Documents");
+                        setFileListTitle("Your feedback documents");
+                        break;
+                }
+                const res = await fetch(url, 
+                { 
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: "include"
+                });
             
-            console.log('filesUrl', filesUrl);
-            //setIsLoading(false);
+
+            if (res.ok) {
+                const data = await res.json();
+                setFiles(data);
+            }
         }
         })();
     }, [reload, user, documentType]);
@@ -101,7 +97,8 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
     setReload(generateRandomString(8)); //change the reload variable to something unique. This will rerun useEffect
   };
 
-  const reloadFromUploadForm = (file: AppFile) => {
+  //const reloadFromUploadForm = (file: AppFile) => {
+  const reloadFromUploadForm = () => {
     setReload(generateRandomString(8));
   }
 
@@ -122,7 +119,7 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
             />&nbsp;
         {pageTitle}
       </Typography>
-        {documentType === DocumentType.MANUSCRIPT ? (
+        {documentType && documentType.toString() === DocType.MANUSCRIPT ? (
       <UploadFileForm onSendData={reloadFromUploadForm} formProperties={uploadFormProperties} />
         ) : (
             <div></div>

@@ -6,7 +6,7 @@ import {
   Typography,
   Stack,
 } from "@mui/material";
-import { CollaboratorRequest } from "../../../backend/src/domain-types";
+import { CollaboratorRequest } from "../types/domain-types";
 interface Props {
   requests: CollaboratorRequest[];
   onAction: (message: string) => void;
@@ -23,7 +23,6 @@ const CollaboratorRequestList = ({
     action: "approve" | "reject"
   ) => {
         const url = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/users/admin/requests/${collaboratorId}/${action}`;
-        console.log('url', url);
 
     try {
         const res = await fetch(

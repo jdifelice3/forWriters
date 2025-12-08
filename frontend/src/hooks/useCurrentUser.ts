@@ -2,7 +2,7 @@ import useSWR from "swr";
 import Session from "supertokens-auth-react/recipe/session";
 import { useNavigate } from "react-router-dom";
 import { typedFetcher } from "../util/fetcher";
-import { User } from "../../../backend/src/domain-types";
+import { User } from "../types/domain-types";
 
 const apiHost = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}`;
 
@@ -20,7 +20,7 @@ export function useCurrentUser() {
   });
 
   // Handle unauthorized redirects
-  if (error && (error as any).status === 401) {
+  if (error && error.status === 401) {
     Session.doesSessionExist().then((exists) => {
       if (!exists) {
         navigate("/auth");

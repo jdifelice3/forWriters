@@ -25,12 +25,9 @@ const upload = multer({ storage });
 //#region GET
 router.get("/", async (_req, res) => {
   try{
-    console.log('in GET/ file Routes');
+    
     const session = await Session.getSession(_req, res);
-    const authId = session.getUserId();
-
-    console.log('authId', authId);
-
+    const authId = session.getUserId(true);
     const files = await getFileRecords(authId);
 
     res.json(files);
@@ -50,10 +47,7 @@ router.get("/type/:documentType", async(_req, res) => {
     }
     
     const session = await Session.getSession(_req, res);
-    const authId = session.getUserId();
-
-    console.log('authId', authId);
-
+    const authId = session.getUserId(true);
     const files = await getFileRecords(authId, documentType);
 
     res.json(files);
@@ -69,7 +63,7 @@ router.get("/type/:documentType", async(_req, res) => {
 router.post("/", upload.single("file"), async (req, res) => {
   try{
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
+    const authId = session.getUserId(true);
     const mimeType = mapMimeToEnum(req.file?.mimetype);
     const filename = (req.file !== undefined ? req.file.filename : '');
 
@@ -91,7 +85,7 @@ router.post("/", upload.single("file"), async (req, res) => {
 router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
   try{
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
+    const authId = session.getUserId(true);
     const readingAuthorId = req.params.readingAuthorId;
     const mimeType = mapMimeToEnum(req.file?.mimetype);
     const filename = (req.file !== undefined ? req.file.filename : '');
@@ -135,11 +129,11 @@ router.delete("/", async(_req, res) => {
   try {
     if(typeof _req.query.id === "string"){
       id = _req.query.id;
-      console.log(`delete file id: ${id}`);
+      
       const fileUrl = await deleteFileRecord(id);
-      //const deleteResult = await deleteFile(fileUrl);
+      
       res.status(200).json({status: "OK"})
-      //res.json({status: deleteResult});
+      
     } else {
       throw new Error("Expecting a string data type in the query string for file id");
     }

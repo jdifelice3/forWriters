@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -9,10 +9,28 @@ import {
   IconButton,
   Stack,
 } from "@mui/material";
+import TipTapTextEditor from "./TipTapTextEditor";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import AddIcon from "@mui/icons-material/Add";
 import { extractLinks, extractEmailAddresses } from "../util/links";
-import { email } from "zod";
+import { useEditor } from "@tiptap/react";
+import { TextStyle } from "@tiptap/extension-text-style"
+import StarterKit from "@tiptap/starter-kit";
+import {
+  MenuButtonBold,
+  MenuButtonItalic,
+  MenuControlsContainer,
+  MenuDivider,
+  MenuSelectHeading,
+  RichTextEditor,
+  RichTextEditorProvider,
+  RichTextField,
+  type RichTextEditorRef,
+  MenuButtonBulletedList,
+  MenuSelectFontSize,
+} from "mui-tiptap";
+// Import additional necessary styles as needed
+
 
 interface NewsFeedProps {
   groupId: string;
@@ -28,6 +46,18 @@ interface NewsItem {
 }
 
 export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
+   
+  const editor = useEditor({
+    extensions: [
+        StarterKit
+    ],
+    onUpdate: ({ editor }) => {
+      // Update state on content change
+      console.log(editor.getHTML());
+      setContent(editor.getHTML());
+    },
+  });
+  const rteRef = useRef<RichTextEditorRef>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
@@ -68,6 +98,11 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
     if (res.ok) setNews((prev) => prev.filter((n) => n.id !== id));
   };
 
+  const handleContentChange = (value: any) => {
+    console.log(value);
+    setContent(value);
+  };
+
   return (
     <Card>
       <CardContent>
@@ -95,15 +130,22 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
               fullWidth
               sx={{ mb: 2 }}
             />
-            <TextField
-              label="Content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              fullWidth
-              multiline
-              rows={3}
-              sx={{ mb: 2 }}
+
+        <RichTextEditorProvider editor={editor}>
+            <RichTextField sx={{height: "300px"}}
+                
+                controls={
+                <MenuControlsContainer>
+                    <MenuSelectHeading />
+                    <MenuDivider />
+                    <MenuButtonBold />
+                    <MenuButtonItalic />
+                    <MenuButtonBulletedList />
+                </MenuControlsContainer>    
+                }
             />
+        </RichTextEditorProvider>
+
             <Stack direction="row" spacing={1}>
               <Button variant="contained" onClick={handleAddNews}>
                 Post
@@ -125,10 +167,10 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
                 </IconButton>
               )}
             </Stack>
+            <TipTapTextEditor initialContent={n.content || ""} editable={false} />
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               Posted on {new Date(n.postedAt).toLocaleDateString()}
             </Typography>
-            <Typography dangerouslySetInnerHTML={{ __html: activateLinks(n.content) }}/>
           </Box>
         ))}
       </CardContent>

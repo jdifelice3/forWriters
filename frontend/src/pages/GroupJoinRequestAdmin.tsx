@@ -1,7 +1,6 @@
 // src/pages/GroupJoinRequestsAdminPage.tsx
 import { useEffect, useState } from "react";
 import {
-  Box,
   Typography,
   Paper,
   Alert,

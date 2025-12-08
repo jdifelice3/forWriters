@@ -1,5 +1,4 @@
-import { PrismaClient, CommentSource } from "@prisma/client";
-import { FileType, DocumentType, ReadingFeedback } from "../domain-types";
+import { PrismaClient, CommentSource, DocumentType, FileType } from "@prisma/client";
 import { getDocumentTypeFromString } from "../util/Enum";
 import { extractCommentsWithTargets } from "../services/docxExtractor";
 import path from 'path';
@@ -11,7 +10,7 @@ const prisma = new PrismaClient({
 });
 
 prisma.$on('query', e => {
-  //console.log(e.query);
+  console.log(e.query);
 });
 
 export const getFileRecords = async(authId: string, documentType?: string) => {
@@ -32,11 +31,7 @@ export const getFileRecords = async(authId: string, documentType?: string) => {
             documentType: getDocumentTypeFromString(documentType)
             })
         },
-        // select: {
-        //     id: true,
-        //     title: true,
-        //     mimetype: true
-        // },
+     
         orderBy: { title: "asc" }
     });
     return files;
@@ -45,7 +40,7 @@ export const getFileRecords = async(authId: string, documentType?: string) => {
 export const createFileRecordBasic = async(authId: string, mimeType: FileType, filename: string,
         title: string, description: string
  ) => {
-  console.log('in createFileRecordBasic');
+  
   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
   const file = await prisma.appFile.create({
@@ -118,8 +113,7 @@ export const createFileRecordReadingFeedback = async(
 
     const filePath: string = path.join(process.cwd(), "uploads/",filename);
     const comments = await extractCommentsWithTargets(filePath);
-    console.log(comments);
-
+    
     let input = [];
     //add additional feedback
     input.push({
@@ -139,14 +133,14 @@ export const createFileRecordReadingFeedback = async(
             targetText: comments[i].targetText
         })
     }
-    console.log('input', input);
+    
     const commentsResults = await prisma.readingFeedbackComment.createMany({
         data: input
     });
 
     return file;
   } catch (err) {
-    console.log('err', err);
+    console.error('err', err);
     throw err;
   }
   

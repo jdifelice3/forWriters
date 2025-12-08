@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useUserContext } from "../context/UserContext";
 import { UploadFileFormProperties } from "../types/File";
-import { AppFile } from "../../../backend/src/domain-types";
+import { AppFile } from "../types/domain-types";
 import {
   Box,
   Button,
@@ -33,7 +32,6 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
     hasUserSubmitted=false,
     readingAuthorId,
   }) => {
-  const { user } = useUserContext();
 
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");

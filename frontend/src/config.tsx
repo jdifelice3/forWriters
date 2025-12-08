@@ -1,27 +1,16 @@
 "use client";
 
+import React from 'react';
 import EmailPassword from "supertokens-auth-react/recipe/emailpassword";
 import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
 import Session from "supertokens-auth-react/recipe/session";
 import { mutate } from "swr";
 
-export function getApiDomain() {
-    const apiPort = 3001;
-    const apiUrl = `http://localhost:${apiPort}`;
-    return apiUrl;
-}
-
-export function getWebsiteDomain() {
-    const websitePort = 3000;
-    const websiteUrl = `http://localhost:${websitePort}`;
-    return websiteUrl;
-}
-
 export const SuperTokensConfig = {
     appInfo: {
         appName: "forWriters",
-        apiDomain: getApiDomain(),
-        websiteDomain: getWebsiteDomain(),
+        apiDomain: "http://localhost:3001",
+        websiteDomain: "http://localhost:3000",
         apiBasePath: "/auth",
         websiteBasePath: "/auth",
     },
@@ -29,6 +18,7 @@ export const SuperTokensConfig = {
     recipeList: [
         EmailPassword.init(),
         Session.init({
+            tokenTransferMethod: "cookie",
             onHandleEvent: async (event) => {
                 if (event.action === "SESSION_CREATED") {
                 console.log("SESSION_CREATED → revalidating user...");
@@ -56,8 +46,8 @@ export const PreBuiltUIList = [EmailPasswordPreBuiltUI];
 
 
 
-export const ComponentWrapper = (props: { children: JSX.Element }): JSX.Element => {
-    let childrenToRender = props.children;
+export const ComponentWrapper = (props: { children: React.JSX.Element }): React.JSX.Element => {
+    const childrenToRender = props.children;
 
     
     return childrenToRender;

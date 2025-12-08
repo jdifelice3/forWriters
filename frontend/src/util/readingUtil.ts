@@ -1,4 +1,4 @@
-import { Reading } from "../../../backend/src/domain-types";
+import { Reading } from "../types/domain-types";
 
 export const getSpotsOpenText = (e: Reading) => {
     if(e.readingAuthor){

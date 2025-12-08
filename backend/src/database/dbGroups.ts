@@ -1,18 +1,7 @@
-import { GroupUser, PrismaClient } from "@prisma/client";
-import { 
-  Group, 
-  GroupGetBasic, 
-  GroupGetDescription,
-  GroupType, 
-  GroupCreate,
-  JoinRequest,
-  JoinRequestStatus,
-  JoinRequestError,
-  Reading,
-  GroupError
-} from "../domain-types";
+import { PrismaClient, JoinRequestStatus, GroupType } from "@prisma/client";
 import { z } from 'zod';
 import { join } from "node:path";
+import { GroupError, JoinRequestError } from "../types/Error";
 
 const prisma = new PrismaClient();
 
@@ -29,7 +18,7 @@ type Address = z.infer<typeof addressSchema>;
 export const getGroup = async(groupId: string) => {
   const currentDate = new Date();
   try {
-    const group: GroupGetBasic | null = await prisma.group.findUnique({
+    const group = await prisma.group.findUnique({
       where: {
         id: groupId,
       },
@@ -95,11 +84,11 @@ export const getGroupUsers = async(groupId: string) => {
     return groupUsers;
 }
 
-export const getGroupDescription = async(groupId: string): Promise<GroupGetDescription> => {
+export const getGroupDescription = async(groupId: string) => {
 
   const currentDate = new Date();
   try {
-    const group: GroupGetDescription | null = await prisma.group.findUnique({
+    const group = await prisma.group.findUnique({
       where: {
         id: groupId,
       },
@@ -120,13 +109,14 @@ export const getGroupDescription = async(groupId: string): Promise<GroupGetDescr
   }
 }
 
-export const getGroupByUserId = async(userId: string): Promise<Group> => {
+export const getGroupByUserId = async(userId: string) => {
   try {
-    const groupsByUserId:GroupUser[] = await prisma.groupUser.findMany({
+    const groupsByUserId = await prisma.groupUser.findMany({
       where: {
         userId: userId
       }
     });
+
     let groupIdArray = []; 
 
     for(let i=0; i < groupsByUserId.length; i++){
@@ -182,7 +172,7 @@ export const getGroupSearch = async(query: string) => {
    return groups;
 }
 
-export const getAdminRequests = async(authId: string): Promise<JoinRequest[] | null> => {
+export const getAdminRequests = async(authId: string) => {
   const user: any = await prisma.user.findUnique({
       where: {
         superTokensId: authId,
@@ -204,7 +194,7 @@ export const getAdminRequests = async(authId: string): Promise<JoinRequest[] | n
       return null; // no admin groups -> no requests
     }
 
-    const requests: JoinRequest[] = await prisma.joinRequest.findMany({
+    const requests = await prisma.joinRequest.findMany({
       where: {
         groupId: { in: groupIds },
         status: JoinRequestStatus.PENDING,
@@ -243,7 +233,7 @@ export const createGroup = async (
       throw new Error('User not found');
     }
 
-    const group: GroupCreate | null = await prisma.group.create({
+    const group = await prisma.group.create({
       data: {
         name: name,
         description: description,
@@ -282,7 +272,7 @@ export const createGroup = async (
   }
 };
 
-export const createJoinGroupRequest = async(authId: string, groupId: string): Promise<JoinRequest> => {
+export const createJoinGroupRequest = async(authId: string, groupId: string) => {
   const user: any = await prisma.user.findUnique({
       where: {
         superTokensId: authId,
@@ -329,7 +319,7 @@ export const createJoinGroupRequest = async(authId: string, groupId: string): Pr
   }
 
   // Create new join request
-  const joinRequest: JoinRequest = await prisma.joinRequest.create({
+  const joinRequest = await prisma.joinRequest.create({
     data: {
       userId: user.id,
       groupId,

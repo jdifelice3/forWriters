@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
-  Box,
-  Button,
   Card,
   CardContent,
   Typography,
   Grid,
 } from "@mui/material";
-
+import { GroupUser } from "../types/domain-types"
 interface Props {
   groupId: string;
 //   onAction: (message: string) => void;
@@ -20,7 +18,7 @@ const GroupUserList = ({
 //   onError,
 }: Props) => {
   
-  const[groupUsers, setGroupUsers]:any = useState([]);
+  const[groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
 
   const url = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${groupId}/groupuser`;
     
@@ -58,12 +56,13 @@ const GroupUserList = ({
             </Typography>
         </Grid>
         {groupUsers.length > 0 && 
-            groupUsers.map((gu: any) => (
+            groupUsers.map((gu: GroupUser) => (
                 <Grid>
                 <Card>
                     <CardContent sx={{p:2, backgroundColor:"whitesmoke"}}>
                         <Typography >
-                            {gu.user.userProfile.firstName} {gu.user.userProfile.lastName}                            
+                            {gu.user.userProfile ? gu.user.userProfile.firstName : ""} 
+                            {gu.user.userProfile ? gu.user.userProfile.lastName : ""}                            
                         </Typography>
                     </CardContent>
                 </Card>

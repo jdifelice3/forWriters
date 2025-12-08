@@ -1,5 +1,5 @@
 import React from "react";
-import { Reading, ReadingAuthor } from "../../../backend/src/domain-types";
+import { Reading, ReadingAuthor } from "../types/domain-types";
 import {
   Typography,
 } from "@mui/material";

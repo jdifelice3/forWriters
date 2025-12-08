@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UserSearch } from "../../../backend/src/domain-types";
+import { UserSearch } from "../types/domain-types";
 import { Autocomplete, TextField, CircularProgress } from "@mui/material";
 
 interface Props {
@@ -13,13 +13,10 @@ const MemberSearchBox = ({ onSelectMember: onSelectMember }: Props) => {
     const searchUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/users/search?query=`;
 
     const handleInput = async (query: string) => {
-        console.log('in handleInput');
-        console.log('query', query);
         if (!query) {
         setOptions([]);
         return;
         }
-        console.log('before setLoading');
         setLoading(true);
         
         try {
@@ -31,7 +28,6 @@ const MemberSearchBox = ({ onSelectMember: onSelectMember }: Props) => {
             }
         );
         const data = await res.json();
-        console.log('data', data)
         setOptions(data || []);
         } finally {
         setLoading(false);

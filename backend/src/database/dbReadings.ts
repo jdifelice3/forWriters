@@ -1,14 +1,10 @@
 import { 
-    PrismaClient, 
+    PrismaClient, ReadingScheduleType
 } from "@prisma/client";
 import { 
-    Reading, 
-    ReadingAuthor, 
-    ReadingAuthorByUser,
-    ReadingScheduleType,
     ReadingDeleteError,
     ReadingDeleteInvalidGroupIdError
-} from "../domain-types";
+} from "../types/Error";
 import { 
     getReadingScheduleTypeFromString,
     getReadingScheduleTypeString
@@ -17,7 +13,7 @@ import {
 const prisma = new PrismaClient();
 
 //#region GET
-export const getReadings = async(groupId: string): Promise<Reading[]> => {
+export const getReadings = async(groupId: string) => {
   try {
     const events: any = await prisma.reading.findMany({
         where: {
@@ -72,7 +68,7 @@ export const getReadingsByUserId = async(authId: string) => {
       },
     });
 
-    const readingAuthors: ReadingAuthorByUser[] = await prisma.readingAuthor.findMany({
+    const readingAuthors = await prisma.readingAuthor.findMany({
         where: {
             authorId: user.id,
         },
@@ -139,15 +135,229 @@ export const getReadingsByUserId = async(authId: string) => {
         },
         }
     });
-    console.log('readingAuthors', readingAuthors);
+    
     return readingAuthors;
   } catch (err) {
-    console.log('Error in getReadingsByUserId');
+    console.error('Error in getReadingsByUserId');
     throw err;
   }
 
 }
 
+export const getReading = async(readingId: string) => {
+  try {
+    const reading: any = await prisma.reading.findUnique({
+      where: {
+        id: readingId,
+      },
+      include: {
+        readingAuthor: {
+          include: {
+            readingFeedback: {
+                include: {
+                    readingFeedbackComment: {
+                        orderBy: {
+                            source: "asc"
+                        }
+                    }
+                }
+            },
+            authorAppFile: {
+              include: {
+                appFile: {
+                  include: {
+                    user: {
+                      include: {
+                        userProfile: true
+                      },
+                    },
+                  },
+                }
+              }
+            }
+          },
+        },
+      },
+    });
+    
+    return reading;
+  } catch (err) {
+    console.error('Error getting reading:', err);
+    throw err;
+  }
+}
+
+export const getReadingAuthors = async(readingId: string) => {
+  try {
+    const readings: any = await prisma.readingAuthor.findMany({
+      where: {
+        id: readingId
+      },
+      include: {
+        readingFeedback: {
+            include: {
+                readingFeedbackComment: true
+            }
+        },
+        authorAppFile: {
+          include: {
+            appFile: {
+              include: {
+                user: {
+                  include: {
+                    userProfile: true
+                  }
+                }
+              },
+            },
+          },
+        }
+      }
+    });
+      return readings[0];
+    } catch (err) {
+        console.error('Error getting events:', err);
+        throw err; 
+    }
+}
+//#endregion
+
+//#region CREATE
+export const createReading = async(
+    groupId: string, 
+    name: string, 
+    createdUserId: string,
+    readingDate: string,
+    readingStartTime: string,
+    readingEndTime: string,
+    submissionDeadline: string,
+    description: string,
+    schedule: string
+  ) => {
+  try {
+    const scheduledType: ReadingScheduleType = getReadingScheduleTypeFromString(schedule);
+   
+    const reading = await prisma.reading.create({
+      data: {
+        groupId: groupId,
+        readingDate: scheduledType  === ReadingScheduleType.SCHEDULED ? new Date(readingDate) : null,
+        submissionDeadline: scheduledType  === ReadingScheduleType.SCHEDULED ? new Date(submissionDeadline) : null,
+        name: name,
+        createdUserId: createdUserId,
+        readingStartTime: scheduledType  === ReadingScheduleType.SCHEDULED ? readingStartTime : null, 
+        readingEndTime: scheduledType  === ReadingScheduleType.SCHEDULED ? readingEndTime : null, 
+        description: description,
+        scheduledType: scheduledType
+      }
+    });
+    
+    return reading;
+  } catch (error) {
+    console.error('Error creating reading:', error);
+    throw error; 
+  }
+} 
+
+export const createReadingAuthor = async(readingId: string, userId: string) => {
+
+    try {
+      const readingAuthor = await prisma.readingAuthor.create({
+        data: {
+          readingId: readingId,
+          authorId: userId,
+        }
+      });
+      
+    return readingAuthor;
+
+  } catch (error) {
+    console.error('Error adding a user to a Reading:', error);
+    throw error; 
+  }
+}
+
+export const createReadingFeedback = async(readingAuthorId: string, feedbackFileId: string) => {
+  try {
+    return null;
+  } catch (err) {
+    console.error('Error adding a feedback file to readingFeedback:', err);
+    throw err;
+  }
+}
+
+export const addFileToReading = async(readingAuthorId: string, appFileId: string) => {
+  //delete all associated AuthorAppFiles
+  try {
+    const deleteReadingAuthor = await prisma.authorAppFile.delete({
+      where: {
+        readingAuthorId: readingAuthorId
+      }
+    });
+  } catch (err) {
+    //will throw an error if there are no records to delete
+  }
+
+  const result = await prisma.authorAppFile.create({
+    data: {
+      readingAuthorId: readingAuthorId,
+      appFileId: appFileId
+    }
+  });
+
+  return result;
+} 
+//#endregion
+
+//#region DELETE
+export const deleteReadingAuthor = async(readingId: string, authorId: string) => {
+    const deleteAuthorFromReading = await prisma.readingAuthor.delete({
+        where: {
+            readingId_authorId: {
+                readingId: readingId,   
+                authorId: authorId
+            }
+        }
+    });
+
+    return true;
+};
+
+export const deleteReading = async(readingId: string, groupId: string) => {
+    
+    //make sure the reading belongs to the group
+    const readingInGroup = await prisma.reading.findUnique({
+        where: {
+            id: readingId,
+            groupId: groupId
+        }
+    });
+
+    if (!readingInGroup) {
+        throw new ReadingDeleteInvalidGroupIdError("You are trying to delete a reading that does not belong to your group.", 403);
+    } 
+
+    //make sure there are no authors associated with the reading
+    const authors = await prisma.readingAuthor.findMany({
+        where: {
+            readingId: readingId
+        }
+    });
+
+    if(authors.length > 0){
+        throw new ReadingDeleteError("You cannot delete a reading that has authors associated with it.", 403);
+    }
+
+    const deletedReading = await prisma.reading.delete({
+        where: {
+            id: readingId
+        }
+    });
+    
+    return deletedReading;
+}
+//#endregion
+
+//#region VERBOSE CODE
 // export const getReading = async (readingId: string): Promise<Reading> => {
 //   console.log("=== getReading DEBUG for readingId:", readingId, "===\n");
 
@@ -242,241 +452,4 @@ export const getReadingsByUserId = async(authId: string) => {
 //   // Return the same data shape your route expects
 //   return reading;
 // };
-
-export const getReading = async(readingId: string) => {//: Promise<Reading> => {
-  try {
-//     const raw = await prisma.$queryRaw`
-//   SELECT * FROM "ReadingFeedback"
-//   WHERE id = 'cmijw1g5h000ea8q8hwwupvsd'
-// `;
-
-// console.log("RAW TABLE ROW:", raw);
-
-
-// const api = await prisma.readingFeedback.findUnique({
-//   where: { id: "cmijw1g5h000ea8q8hwwupvsd" },
-//   include: {
-//     userProfile: true
-//   }
-// });
-
-// console.log("PRISMA RESULT:", api);
-// const dbInfo = await prisma.$queryRaw`SELECT current_database(), inet_server_addr(), inet_server_port()`;
-// console.log("DB:", dbInfo);
-
-    const reading: any = await prisma.reading.findUnique({
-      where: {
-        id: readingId,
-      },
-      include: {
-        readingAuthor: {
-          include: {
-            readingFeedback: {
-                include: {
-                    readingFeedbackComment: {
-                        orderBy: {
-                            source: "asc"
-                        }
-                    }
-                }
-            },
-            authorAppFile: {
-              include: {
-                appFile: {
-                  include: {
-                    user: {
-                      include: {
-                        userProfile: true
-                      },
-                    },
-                  },
-                }
-              }
-            }
-          },
-        },
-      },
-    });
-    console.log('reading', reading);
-    return reading;
-  } catch (err) {
-    console.error('Error getting reading:', err);
-    throw err;
-  }
-}
-
-export const getReadingAuthors = async(readingId: string): Promise<ReadingAuthor> => {
-  try {
-    const readings: any = await prisma.readingAuthor.findMany({
-      where: {
-        id: readingId
-      },
-      include: {
-        readingFeedback: {
-            include: {
-                readingFeedbackComment: true
-            }
-        },
-        authorAppFile: {
-          include: {
-            appFile: {
-              include: {
-                user: {
-                  include: {
-                    userProfile: true
-                  }
-                }
-              },
-            },
-          },
-        }
-      }
-    });
-      return readings[0];
-    } catch (err) {
-        console.error('Error getting events:', err);
-        throw err; 
-    }
-}
-//#endregion
-
-//#region CREATE
-export const createReading = async(
-    groupId: string, 
-    name: string, 
-    createdUserId: string,
-    readingDate: string,
-    readingStartTime: string,
-    readingEndTime: string,
-    submissionDeadline: string,
-    description: string,
-    schedule: string
-  ) => {
-  try {
-    console.log('in create reading');
-    console.log('schedule', schedule);
-
-    const scheduledType: ReadingScheduleType = getReadingScheduleTypeFromString(schedule);
-   // scheduledType === ReadingSchedule.SCHEDULED
-   console.log('scheduledType' ,scheduledType);
-   console.log('scheduledType  === ReadingSchedule.SCHEDULED',scheduledType  === ReadingScheduleType.SCHEDULED);
-    const reading = await prisma.reading.create({
-      data: {
-        groupId: groupId,
-        readingDate: scheduledType  === ReadingScheduleType.SCHEDULED ? new Date(readingDate) : null,
-        submissionDeadline: scheduledType  === ReadingScheduleType.SCHEDULED ? new Date(submissionDeadline) : null,
-        name: name,
-        createdUserId: createdUserId,
-        readingStartTime: scheduledType  === ReadingScheduleType.SCHEDULED ? readingStartTime : null, 
-        readingEndTime: scheduledType  === ReadingScheduleType.SCHEDULED ? readingEndTime : null, 
-        description: description,
-        scheduledType: scheduledType
-      }
-    });
-    console.log(reading);
-    return reading;
-  } catch (error) {
-    console.error('Error creating reading:', error);
-    throw error; 
-  }
-} 
-
-export const createReadingAuthor = async(readingId: string, userId: string) => {
-
-    try {
-      const readingAuthor = await prisma.readingAuthor.create({
-        data: {
-          readingId: readingId,
-          authorId: userId,
-        }
-      });
-      console.log('readingAuthor', readingAuthor);
-    return readingAuthor;
-
-  } catch (error) {
-    console.error('Error adding a user to a Reading:', error);
-    throw error; 
-  }
-}
-
-export const createReadingFeedback = async(readingAuthorId: string, feedbackFileId: string) => {//}: Promise<ReadingFeedback> => {
-  try {
-    return null;
-  } catch (err) {
-    console.error('Error adding a feedback file to readingFeedback:', err);
-    throw err;
-  }
-}
-
-export const addFileToReading = async(readingAuthorId: string, appFileId: string) => {
-  //delete all associated AuthorAppFiles
-  try {
-    const deleteReadingAuthor = await prisma.authorAppFile.delete({
-      where: {
-        readingAuthorId: readingAuthorId
-      }
-    });
-  } catch (err) {
-    //will throw an error if there are no records to delete
-  }
-
-  const result = await prisma.authorAppFile.create({
-    data: {
-      readingAuthorId: readingAuthorId,
-      appFileId: appFileId
-    }
-  });
-
-  return result;
-} 
-//#endregion
-
-//#region DELETE
-export const deleteReadingAuthor = async(readingId: string, authorId: string) => {
-    const deleteAuthorFromReading = await prisma.readingAuthor.delete({
-        where: {
-            readingId_authorId: {
-                readingId: readingId,   
-                authorId: authorId
-            }
-        }
-    });
-
-    return true;
-};
-
-export const deleteReading = async(readingId: string, groupId: string) => {
-    console.log('in deletereading');
-    //make sure the reading belongs to the group
-    const readingInGroup = await prisma.reading.findUnique({
-        where: {
-            id: readingId,
-            groupId: groupId
-        }
-    });
-
-    if (!readingInGroup) {
-        throw new ReadingDeleteInvalidGroupIdError("You are trying to delete a reading that does not belong to your group.", 403);
-    } 
-
-    //make sure there are no authors associated with the reading
-    const authors = await prisma.readingAuthor.findMany({
-        where: {
-            readingId: readingId
-        }
-    });
-
-    if(authors.length > 0){
-        throw new ReadingDeleteError("You cannot delete a reading that has authors associated with it.", 403);
-    }
-
-    const deletedReading = await prisma.reading.delete({
-        where: {
-            id: readingId
-        }
-    });
-    console.log('Reading deletion success');
-    console.log(JSON.stringify(deleteReading));
-    return deletedReading;
-}
 //#endregion

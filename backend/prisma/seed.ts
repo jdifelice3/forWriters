@@ -1,7 +1,7 @@
 import { PrismaClient, Role } from "@prisma/client";
 import { 
   createUser, 
-  createUserProfile,
+  //createUserProfile,
   updateUserProfile
 } from '../src/database/dbUsers';
 import {
@@ -20,10 +20,10 @@ const prisma = new PrismaClient();
 
 */
 const main = async() => {
-  const authId = 'f4843bc5-33a3-4f21-8364-b354f0714b97';
-  const user = await createUser(authId,'johndifelice@protonmail.com', Role.ADMIN);
-  const userProfile = await createUserProfile(user.id);
-  const updatedProfile = await updateUserProfile(user.id, "John", "DiFelice", `My name is John, and I'm a semi-professional writer of fiction. Semi-professional means that I'm occasionally paid for my writing. It means I'm good enough for sporadic publication and a nominal fee, but either not good enough or not ambitious enough to earn a living with it. This site contains many of my published and unpublished works, so have a read and you be the judge.`);
+  const authId = '980a20d4-f188-48cc-870e-47dab7d3f955'//'f4843bc5-33a3-4f21-8364-b354f0714b97';
+  //const user = await createUser(authId,'johndifelice@protonmail.com', Role.ADMIN);
+  //const userProfile = await createUserProfile(user.id);
+  //const updatedProfile = await updateUserProfile(user.id, "John", "DiFelice", `My name is John, and I'm a semi-professional writer of fiction. Semi-professional means that I'm occasionally paid for my writing. It means I'm good enough for sporadic publication and a nominal fee, but either not good enough or not ambitious enough to earn a living with it. This site contains many of my published and unpublished works, so have a read and you be the judge.`);
 
   const group = await createGroup(
     authId,

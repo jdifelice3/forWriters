@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUserContext } from "../context/UserContext";
 import { FileListProperties } from '../types/File';
-import { AppFile } from "../../../backend/src/domain-types";
+import { AppFile } from "../types/domain-types";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import {
   MenuItem, FormControl
@@ -47,7 +47,7 @@ const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, sel
           //setIsLoading(false);
         }
       })();
-    }, [user]);
+    }, [user, fileListProperties.fileType, filesUrl, selectedValueId]);
   
      return (
         <FormControl sx={{ width: 360 }}>

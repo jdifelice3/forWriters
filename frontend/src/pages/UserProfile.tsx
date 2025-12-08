@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { User } from "../types/User";
 import {
   Box,
   Button,
   TextField,
-  Avatar,
   Typography,
   Stack,
   Divider,
@@ -46,10 +45,26 @@ const UserProfile = () => {
   const [userId, setUserId] = useState<string>("");
   const [preview, setPreview] = useState<string | null>(null);
 
+    const {
+    control,
+    handleSubmit,
+    formState: { errors }, reset,
+        } = useForm<ProfileFormInputs>({
+            resolver: zodResolver(profileSchema),
+            defaultValues: {
+                firstName: "",
+                lastName: "",
+                email: "",
+                bio: "",
+                title: "",
+                description: "",
+                avatar: null,
+            },
+  });
+
   useEffect(() => {
     const fetchUserId = async() => {
       const authId = await Session.getUserId();
-      console.log('authId', authId);
       const user: User = await getUserProfile(authId);
       setUserId(user.id);
       reset({ 
@@ -62,32 +77,14 @@ const UserProfile = () => {
     fetchUserId();
   }, []);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors }, reset,
-  } = useForm<ProfileFormInputs>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      bio: "",
-      title: "",
-      description: "",
-      avatar: null,
-    },
-  });
 
   const onSubmit = async(data: ProfileFormInputs) => {
-    console.log('in UserProfile.onSubmit')
     //const userId: string = userId;
     const firstName: string = data.firstName;
     const lastName: string = data.lastName;
     const bio: string = data.bio ? data.bio : '';
     const results: Response = await updateUserProfile(userId, firstName, lastName, bio);
     if(results.status === 200){
-      console.log("✅ Profile updated:", data);
       alert("Profile saved successfully!");
     } else if (results.status === 500){
       alert(results.json);

@@ -1,19 +1,12 @@
-import { PrismaClient, Role } from "@prisma/client";
-import { UserWithRequiredProfile, UserGetBio } from "../domain-types";
 import { 
-  Group, 
-  GroupGetBasic, 
-  GroupGetDescription,
-  GroupType, 
-  GroupCreate,
-  JoinRequest,
-  JoinRequestStatus,
+    PrismaClient, 
+    Role, 
+    JoinRequestStatus 
+} from "@prisma/client";
+import { 
   JoinRequestError,
-  CollaboratorRequest,
-  UserCollaborator,
-  Reading,
   GroupError
-} from "../domain-types";
+} from "../types/Error";
 
 const prisma = new PrismaClient();
 
@@ -26,7 +19,7 @@ export const getUsers = async() => {
 }
 
 export const getUserProfile = async(authId: string) => {
-  console.log('in getUserPfrofile');
+  
   const user: any = await prisma.user.findUnique({
     where: 
         {
@@ -36,7 +29,7 @@ export const getUserProfile = async(authId: string) => {
             userProfile: true,  
         }
   });
-  console.log('user', user);
+  
   return user;
 }
 
@@ -69,15 +62,14 @@ export const getUserSearch = async(authId: string, query: string) => {
    return users;
 }
 
-export const getAdminRequests = async(authId: string): Promise<CollaboratorRequest[] | null> => {
+export const getAdminRequests = async(authId: string) => {
   const user: any = await prisma.user.findUnique({
       where: {
         superTokensId: authId,
       },
     });  
-  console.log('in user getAdminRequests');
-  console.log('user.id', user.id);
-    const requests: CollaboratorRequest[] = await prisma.collaboratorRequest.findMany({
+  
+    const requests = await prisma.collaboratorRequest.findMany({
       where: {
         collaboratorId: user.id,
         status: JoinRequestStatus.PENDING,
@@ -91,13 +83,13 @@ export const getAdminRequests = async(authId: string): Promise<CollaboratorReque
         },
       },
     });
-    console.log('requests',requests);
+    
     return requests;
 }
 //#endregion
 
 //#region CREATE
-export const createUser = async(superTokensId: string, email: string, role: Role): Promise<UserWithRequiredProfile>  => {
+export const createUser = async(superTokensId: string, email: string, role: Role)  => {
     const newUser: any = await prisma.user.create({
         data: {
             email: email,
@@ -111,10 +103,10 @@ export const createUser = async(superTokensId: string, email: string, role: Role
         }
     })
   
-    return newUser as UserWithRequiredProfile;
+    return newUser;
 }
 
-export const createMemberConnectRequest = async(authId: string, collaboratorId: string): Promise<CollaboratorRequest> => {
+export const createMemberConnectRequest = async(authId: string, collaboratorId: string) => {
   const user: any = await prisma.user.findUnique({
       where: {
         superTokensId: authId,
@@ -139,7 +131,7 @@ export const createMemberConnectRequest = async(authId: string, collaboratorId: 
     }
   });
 
-  console.log('existingConnection', existingConnection);
+  
   if (existingConnection.length > 0) {
     const joinGroupError = new JoinRequestError("You have already connected to this member.", 400);
     throw joinGroupError;
@@ -160,7 +152,7 @@ export const createMemberConnectRequest = async(authId: string, collaboratorId: 
   }
 
   // Create new member connect request
-  const connectRequest: CollaboratorRequest = await prisma.collaboratorRequest.create({
+  const connectRequest = await prisma.collaboratorRequest.create({
     data: {
       userId: user.id,
       collaboratorId: collaboratorId,
@@ -280,11 +272,11 @@ export const updateUserProfile = async(userId: string, firstName: string, lastNa
         bio: bio
       }
     });
-    console.log('updatedUser', updatedUser);
+    
     return updatedUser;
   } catch (err: any) {
     if(err instanceof Error){
-      console.log(err.message);
+      console.error(err.message);
     }
     throw(err);
   }

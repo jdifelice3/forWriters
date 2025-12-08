@@ -1,6 +1,6 @@
 "use client";
 
-import { ReadingAuthorByUser } from "../../../backend/src/domain-types";
+import { ReadingAuthorByUser } from "../types/domain-types";
 import { generateRandomString } from "../util/Math";
 import {
     Divider,

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { CollaboratorRequest } from "../../../backend/src/domain-types";
+import { CollaboratorRequest } from "../types/domain-types";
 import {
-  Box,
   Typography,
   Paper,
   Alert,

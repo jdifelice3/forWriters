@@ -13,10 +13,8 @@ import {
 } from "../database/dbUsers";
 import Multitenancy from "supertokens-node/recipe/multitenancy";
 import { 
-  JoinRequestError,
-  CollaboratorRequest,
-  ConnectRequestPayload
-} from "../domain-types";
+  JoinRequestError
+} from "../types/Error";
 
 const router = express.Router();
 
@@ -35,26 +33,9 @@ router.get("/", async (_req, res) => {
     }
 });
 
-// router.get("/search", async (_req, res) => {
-//     console.log('in user search route');
-//     const query:string = (_req.query.query as string) || "";
-//     console.log('query', query);
-//     try {
-//         if (!query.trim()) {
-//         return res.json([]);
-//         }
-//         const groups = await getUserSearch(query);
-        
-//         res.json(groups);
-//     } catch (err) {
-//         console.error("Error searching groups:", err);
-//         res.status(500).json({ error: "Failed to search groups." });
-//     }
-// });
-
 router.get("/search", async (_req, res) => {
     const session = await Session.getSession(_req, res);
-    const authId = session.getUserId(); //need current user to exclude it from the search results
+    const authId = session.getUserId(true); //need current user to exclude it from the search results
     const query:string = (_req.query.query as string) || "";
     try {
         if (!query.trim()) {
@@ -72,9 +53,9 @@ router.get("/search", async (_req, res) => {
 router.get("/admin/requests", async (req, res) => {
   try {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
+    const authId = session.getUserId(true);
     
-    const requests: CollaboratorRequest[] | null = await getAdminRequests(authId);
+    const requests = await getAdminRequests(authId);
       
     res.status(200).json(requests);
     
@@ -91,7 +72,7 @@ router.post("/:collaboratorId/connect", async (req, res) => {
 
   try {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
+    const authId = session.getUserId(true);
     const collaboratorRequest = await createMemberConnectRequest(authId, collaboratorId);
 
     res.json(collaboratorRequest);
@@ -111,7 +92,7 @@ router.post("/admin/requests/:id/approve", async (req, res) => {
 
     try {
       const session = await Session.getSession(req, res);
-      const authId = session.getUserId();
+      const authId = session.getUserId(true);
       const isApproved = await approveConnectRequest(id, authId);
       if(isApproved){
         res.status(200).json({
@@ -134,7 +115,7 @@ router.post("/admin/requests/:id/reject",async (req, res) => {
 
     try {
       const session = await Session.getSession(req, res);
-      const authId = session.getUserId();
+      const authId = session.getUserId(true);
       const result = await rejectConnectRequest(id, authId);
       res.status(200).json({
         message: "Member connect request has been rejected.",

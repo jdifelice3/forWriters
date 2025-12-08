@@ -20,7 +20,7 @@ export const deleteFile = async(fileUrl: string) => {
             return false;
         }
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return false;
     }
 }

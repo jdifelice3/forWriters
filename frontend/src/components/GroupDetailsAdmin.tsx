@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GroupGetBasic } from "../../../backend/src/domain-types";
+import { GroupBasic } from "../types/domain-types";
 import {
   Typography,
   TextField,
@@ -16,7 +16,19 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import UrlList from "./UrlList";
 
 interface GroupDetailsProps {
-  group: GroupGetBasic;
+  group: GroupBasic;
+}
+
+interface FormType {
+    name: string;
+    imageUrl: string;
+    websiteUrl: string;
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    addressId: string;
+    description: string;
 }
 
 const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups`;

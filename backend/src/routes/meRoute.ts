@@ -1,7 +1,6 @@
 import express from "express";
 import Session from "supertokens-node/recipe/session";
 import { PrismaClient } from "@prisma/client";
-
 const prisma = new PrismaClient();
 const router = express.Router();
 
@@ -9,7 +8,7 @@ router.get("/", async (req, res) => {
   
   try {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
+    const authId = session.getUserId(true);   
     
     const user = await prisma.user.findUnique({
       where: { superTokensId: authId },
@@ -17,7 +16,7 @@ router.get("/", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "User not found in database" });
     }
 
     res.json(user);

@@ -1,4 +1,3 @@
-import { useEffect, useContext } from 'react';
 import { SessionAuth } from "supertokens-auth-react/recipe/session";
 import { BrowserRouter } from "react-router-dom";
 import SuperTokens, { SuperTokensWrapper } from "supertokens-auth-react";
