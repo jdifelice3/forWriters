@@ -45,7 +45,7 @@ const Groups = () => {
 
   const navigate = useNavigate();
 
-  const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups`;
+  const groupsUrl = `${import.meta.env.VITE_API_HOST}/api/groups`;
 
   useEffect(() => {
     if (!groupId) return;

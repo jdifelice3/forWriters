@@ -23,7 +23,7 @@ const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, sel
 
     const [files, setFiles] = useState<AppFile[]>([]);
     const [selectedValue, setSelectedValue] = useState("");
-    const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files/type`;
+    const filesUrl = `${import.meta.env.VITE_API_HOST}/api/files/type`;
 
     const handleChange = (event: SelectChangeEvent<SelectValue>) => {
         setSelectedValue(event.target.value as string);

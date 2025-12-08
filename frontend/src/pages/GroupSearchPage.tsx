@@ -32,7 +32,7 @@ export default function GroupSearch() {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${selectedGroup.id}/join`,
+        `${import.meta.env.VITE_API_HOST}/api/groups/${selectedGroup.id}/join`,
         {
           method: "POST",
           credentials: "include",

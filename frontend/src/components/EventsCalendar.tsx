@@ -80,7 +80,7 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
         },
     });
 
-    const baseUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events`;
+    const baseUrl = `${import.meta.env.VITE_API_HOST}/api/events`;
 
   useEffect(() => {
     if (!user || isLoading) return;
@@ -113,7 +113,7 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
     setErr(null);
     setSuccess(null);
     try{
-        const eventsURrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
+        const eventsURrl = `${import.meta.env.VITE_API_HOST}/api/events/${groupId}`;
         const res = await fetch(eventsURrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,7 +144,7 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
   };
 
   const handleSignup = async (event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
-      const eventsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/signup`;
+      const eventsUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/signup`;
       const res = await fetch(eventsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -158,7 +158,7 @@ export const EventsCalendar: React.FC<EventsCalendarProps> = ({ groupId, isAdmin
   };
 
 const handleWithdraw = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
-      const withdrawUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/withdraw`;
+      const withdrawUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/withdraw`;
       const res = await fetch(withdrawUrl, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },

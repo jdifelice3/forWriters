@@ -50,7 +50,7 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
     const [files, setFiles] = useState<AppFile[]>([]);
     const [reload, setReload] = useState("");
 
-    const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
+    const filesUrl = `${import.meta.env.VITE_API_HOST}/api/files`;
     // Fetch uploaded files
     useEffect(() => {
         if (!user || isLoading) return;

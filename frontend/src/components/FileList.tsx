@@ -38,8 +38,8 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
   const [editDescription, setEditDescription] = useState("");
   const [previewFile, setPreviewFile] = useState<AppFile | null>(null);
 
-  const filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
-  const pdfsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/pdfs`;
+  const filesUrl = `${import.meta.env.VITE_API_HOST}/api/files`;
+  const pdfsUrl = `${import.meta.env.VITE_API_HOST}/api/pdfs`;
   
   const handleEdit = (file: AppFile) => {
       setEditFile(file);

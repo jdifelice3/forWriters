@@ -59,7 +59,7 @@ export default function Sidebar() {
   useEffect(() => {
     if (!user || isLoading) return;
 
-    const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/user/${user.id}`;
+    const groupsUrl = `${import.meta.env.VITE_API_HOST}/api/groups/user/${user.id}`;
 
     (async () => {
       try {

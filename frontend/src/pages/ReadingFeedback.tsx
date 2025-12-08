@@ -51,11 +51,11 @@ const ReadingFeedback = () => {
   const [eventTitle, setEventTitle] = useState("");
   const [reload, setReload] = useState("");
     
-  //const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/readingauthors`;
-  const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/feedback`;
-  const readingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${readingId}/reading`;
-  const pdfsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/pdfs`;
-  const fileUploadsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/uploads`;
+  //const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/readingauthors`;
+  const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/feedback`;
+  const readingUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/reading`;
+  const pdfsUrl = `${import.meta.env.VITE_API_HOST}/api/pdfs`;
+  const fileUploadsUrl = `${import.meta.env.VITE_API_HOST}/uploads`;
   
   // Fetch uploaded files
   useEffect(() => {

@@ -47,7 +47,7 @@ const createGroupSchema = z.object({
 
 type CreateGroupInput = z.infer<typeof createGroupSchema>;
 
-const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups`;
+const groupsUrl = `${import.meta.env.VITE_API_HOST}/api/groups`;
 
 const styles = {
     marginLeft: '75px' // or a responsive value

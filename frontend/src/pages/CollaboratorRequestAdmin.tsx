@@ -19,7 +19,7 @@ const CollaboratorRequestAdmin = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/users/admin/requests`,
+        `${import.meta.env.VITE_API_HOST}/api/users/admin/requests`,
         { credentials: "include" }
       );
       const data = await res.json();

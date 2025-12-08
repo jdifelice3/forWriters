@@ -10,7 +10,7 @@ const MemberSearchBox = ({ onSelectMember: onSelectMember }: Props) => {
     const [options, setOptions] = useState<UserSearch[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const searchUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/users/search?query=`;
+    const searchUrl = `${import.meta.env.VITE_API_HOST}/api/users/search?query=`;
 
     const handleInput = async (query: string) => {
         if (!query) {

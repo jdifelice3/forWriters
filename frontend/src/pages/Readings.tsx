@@ -46,8 +46,8 @@ const Readings = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [error, setError] = useState<string | null>(null);
 
-    const readingsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/user/author`;
-    const addFileToReadingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/file/add`;
+    const readingsUrl = `${import.meta.env.VITE_API_HOST}/api/events/user/author`;
+    const addFileToReadingUrl = `${import.meta.env.VITE_API_HOST}/api/events/file/add`;
     
     useEffect(() => {
         if(!user) return;

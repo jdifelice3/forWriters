@@ -11,7 +11,7 @@ declare namespace NodeJS {
         WEB_PORT: number;
         API_HOST: string;
         API_PORT: number;
-        PORT: number;
+        PORT: string;
         PATH_TO_UPLOADS_FOLDER: string;
     }
 }

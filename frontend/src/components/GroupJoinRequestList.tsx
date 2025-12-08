@@ -32,7 +32,7 @@ export default function GroupJoinRequestList({
   ) => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/admin/requests/${requestId}/${action}`,
+        `${import.meta.env.VITE_API_HOST}/api/groups/admin/requests/${requestId}/${action}`,
         {
           method: "POST",
           credentials: "include",

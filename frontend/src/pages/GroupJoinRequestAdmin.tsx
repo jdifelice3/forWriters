@@ -27,7 +27,7 @@ export default function GroupJoinRequestAdmin() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/admin/requests`,
+        `${import.meta.env.VITE_API_HOST}/api/groups/admin/requests`,
         { credentials: "include" }
       );
       const data = await res.json();

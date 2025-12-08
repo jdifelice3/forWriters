@@ -23,7 +23,7 @@ supertokens_node_1.default.init(config_1.SuperTokensConfig);
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json());
 app.use((0, cors_1.default)({
-    origin: `${process.env.WEB_HOST}:${process.env.WEB_PORT}`,
+    origin: process.env.WEB_HOST,
     allowedHeaders: ["content-type", ...supertokens_node_1.default.getAllCORSHeaders()],
     methods: ["GET", "PUT", "POST", "DELETE"],
     credentials: true,
@@ -68,4 +68,5 @@ app.get("/api/sessioninfo", async (req, res, next) => {
 });
 // In case of session related errors, this error handler returns 401 to the client.
 app.use((0, express_2.errorHandler)());
-app.listen(process.env.PORT, () => console.log(`API Server listening on port ${process.env.PORT}`));
+const PORT = process.env.PORT || "3001";
+app.listen(PORT, () => console.log(`API Server listening on port ${PORT}`));

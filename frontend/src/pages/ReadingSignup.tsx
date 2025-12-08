@@ -19,7 +19,7 @@ const ReadingSignup = () => {
   const [group, setGroup] = useState<any | null>(null);
   const [loadingData, setLoadingData] = useState(true);
 
-  const groupsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups`;
+  const groupsUrl = `${import.meta.env.VITE_API_HOST}/api/groups`;
 
   useEffect(() => {
     if (!groupId) return;

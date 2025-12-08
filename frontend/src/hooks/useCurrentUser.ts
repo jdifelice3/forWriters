@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { typedFetcher } from "../util/fetcher";
 import { User } from "../types/domain-types";
 
-const apiHost = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}`;
+const apiHost = `${import.meta.env.VITE_API_HOST}`;
 
 export function useCurrentUser() {
   const navigate = useNavigate();

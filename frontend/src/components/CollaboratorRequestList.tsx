@@ -22,7 +22,7 @@ const CollaboratorRequestList = ({
     collaboratorId: string,
     action: "approve" | "reject"
   ) => {
-        const url = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/users/admin/requests/${collaboratorId}/${action}`;
+        const url = `${import.meta.env.VITE_API_HOST}/api/users/admin/requests/${collaboratorId}/${action}`;
 
     try {
         const res = await fetch(

@@ -9,8 +9,8 @@ import { mutate } from "swr";
 export const SuperTokensConfig = {
     appInfo: {
         appName: "forWriters",
-        apiDomain: "http://localhost:3001",
-        websiteDomain: "http://localhost:3000",
+        apiDomain: import.meta.env.VITE_API_HOST,
+        websiteDomain: import.meta.env.VITE_WEB_HOST,
         apiBasePath: "/auth",
         websiteBasePath: "/auth",
     },
@@ -22,7 +22,7 @@ export const SuperTokensConfig = {
             onHandleEvent: async (event) => {
                 if (event.action === "SESSION_CREATED") {
                 console.log("SESSION_CREATED → revalidating user...");
-                await mutate(`${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/me`);
+                await mutate(`${import.meta.env.VITE_API_HOST}/api/me`);
                 }
             }
         })

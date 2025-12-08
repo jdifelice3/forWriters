@@ -21,7 +21,7 @@ interface ReadingScheduleProps {
 const ReadingSchedule: React.FC<ReadingScheduleProps> = ({groupId}) => {
     const [reading, setReading] = useState<Reading[]>([]);
     const [loadingData, setLoadingData] = useState(true);
-    const readingUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/events/${groupId}`;
+    const readingUrl = `${import.meta.env.VITE_API_HOST}/api/events/${groupId}`;
     const navigate = useNavigate();
     
     useEffect(() => {

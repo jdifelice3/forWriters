@@ -46,8 +46,8 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
   const [newsContent, setNewsContent] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const newsUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${groupId}/news`;
-  const newsArchiveUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/news`;
+  const newsUrl = `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/news`;
+  const newsArchiveUrl = `${import.meta.env.VITE_API_HOST}/api/groups/news`;
   
   const editor = useEditor({
     extensions: [

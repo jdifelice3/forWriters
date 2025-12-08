@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 
 app.use(
     cors({
-        origin: `${process.env.WEB_HOST}:${process.env.WEB_PORT}`,
+        origin: process.env.WEB_HOST,
         allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
         methods: ["GET", "PUT", "POST", "DELETE"],
         credentials: true,
@@ -78,4 +78,5 @@ app.get("/api/sessioninfo", async (req, res, next) => {
 // In case of session related errors, this error handler returns 401 to the client.
 app.use(errorHandler());
 
-app.listen(process.env.PORT, () => console.log(`API Server listening on port ${process.env.PORT}`));
+const PORT: string = process.env.PORT || "3001";
+app.listen(PORT, () => console.log(`API Server listening on port ${PORT}`));

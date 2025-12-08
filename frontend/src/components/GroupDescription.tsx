@@ -12,7 +12,7 @@ interface GroupDescriptionProps {
 
 const GroupDescription: React.FC<GroupDescriptionProps> = ({groupId}) => {
   const [groupDesc, setGroupDesc] = useState<GroupDescriptionType | null>(null);
-  const groupDescriptionUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${groupId}/description`;
+  const groupDescriptionUrl = `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/description`;
   
   useEffect(() => {
         (async () => {

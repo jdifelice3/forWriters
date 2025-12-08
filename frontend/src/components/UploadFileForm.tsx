@@ -41,9 +41,9 @@ const UploadFileForm: React.FC<UploadFileProps> = ({
 
   let filesUrl = "";
   if(!readingAuthorId) {
-    filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files`;
+    filesUrl = `${import.meta.env.VITE_API_HOST}/api/files`;
   } else {
-    filesUrl = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/files/ra/${readingAuthorId}`;
+    filesUrl = `${import.meta.env.VITE_API_HOST}/api/files/ra/${readingAuthorId}`;
   }
     // File upload
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

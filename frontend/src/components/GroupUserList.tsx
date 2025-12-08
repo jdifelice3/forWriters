@@ -20,7 +20,7 @@ const GroupUserList = ({
   
   const[groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
 
-  const url = `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/groups/${groupId}/groupuser`;
+  const url = `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/groupuser`;
     
   useEffect(() => {
     if (!groupId) return;
