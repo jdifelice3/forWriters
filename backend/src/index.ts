@@ -12,7 +12,7 @@ console.log("=== Loaded SuperTokensConfig ===");
 console.log("apiDomain =", SuperTokensConfig.appInfo.apiDomain);
 console.log("websiteDomain =", SuperTokensConfig.appInfo.websiteDomain);
 console.log("Expected cookieDomain =", ".onrender.com");
-console.log("SUPERTOKENS_URI =", process.env.SUPERTOKENS_URI);
+console.log("SUPERTOKENS_URI =", process.env.SUPERTOKENS_CONNECTION_URI);
 console.log("SUPERTOKENS_API_KEY =", process.env.SUPERTOKENS_API_KEY ? "[SET]" : "[MISSING]");
 console.log("================================");
 
