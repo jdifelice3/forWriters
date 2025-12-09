@@ -30,6 +30,7 @@ supertokens.init(SuperTokensConfig);
 const app = express();
 
 app.set("trust proxy", true);
+app.use("/auth", middleware());
 app.use((req, res, next) => {
     if (req.headers["x-forwarded-proto"] !== "https") {
         req.headers["x-forwarded-proto"] = "https";
@@ -42,6 +43,8 @@ app.use((req, res, next) => {
     next();
 });
 
+
+
 app.use(bodyParser.json());
 
 app.use(
@@ -53,7 +56,7 @@ app.use(
     })
 );
 
-app.use("/auth", middleware());
+
 
 // Logging Middleware
 app.use((req, res, next) => {
