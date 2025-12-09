@@ -20,6 +20,8 @@ supertokens.init(SuperTokensConfig);
 
 const app = express();
 
+app.set("trust proxy", true);
+
 app.use(bodyParser.json());
 
 app.use(
