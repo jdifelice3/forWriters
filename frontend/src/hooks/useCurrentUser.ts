@@ -17,7 +17,9 @@ export function useCurrentUser() {
   } = useSWR<User>(`${apiHost}/api/me`, typedFetcher, {
     revalidateOnFocus: true,
     shouldRetryOnError: false,
-  });
+    fetcher: (url: string) => fetch(url, { credentials: "include" }).then(r => r.json())
+});
+
 
   // Handle unauthorized redirects
   if (error && error.status === 401) {
