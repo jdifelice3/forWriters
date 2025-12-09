@@ -65,7 +65,11 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserId = async() => {
       const authId = await Session.getUserId();
+      console.log('in UserProfile.tsx');
+      console.log('Session', Session);
+      console.log('authId', authId);
       const user: User = await getUserProfile(authId);
+      console.log('user', user);
       setUserId(user.id);
       reset({ 
         firstName: user.userProfile.firstName, 
