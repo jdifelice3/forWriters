@@ -16,7 +16,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-
 /uploads
 
 dist/
+
+src/scripts/generate-dtos.mjs
+src/scripts/debug-paths.mjs
+src/domain-types/
