@@ -1,13 +1,16 @@
 import express from "express";
 import Session from "supertokens-node/recipe/session";
+import { verifySession } from "supertokens-node/recipe/session/framework/express";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-  
+router.get("/", verifySession() as any, async (req, res) => {
+  console.log("in GET /api/me Route");
   try {
     const session = await Session.getSession(req, res);
+    console.log('session:', session);
+
     const authId = session.getUserId(true);   
     
     const user = await prisma.user.findUnique({
