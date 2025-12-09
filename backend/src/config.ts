@@ -72,7 +72,7 @@ export const SuperTokensConfig: TypeInput = {
             cookieSameSite: "none",
             cookieSecure: true,
             antiCsrf: "VIA_TOKEN",
-            cookieDomain: ".onrender.com",
+            cookieDomain: ".forwriters.ink",
         }),
         
     ],
