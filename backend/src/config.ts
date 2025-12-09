@@ -72,6 +72,12 @@ export const SuperTokensConfig: TypeInput = {
             cookieSecure: true,
             antiCsrf: "VIA_TOKEN",
             cookieDomain: ".onrender.com",
+            override: {
+                functions: (orig) => {
+                    console.log("Session init cookieDomain:", ".onrender.com");
+                    return orig;
+                }
+            }
         }),
         
     ],

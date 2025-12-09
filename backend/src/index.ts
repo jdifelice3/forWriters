@@ -31,6 +31,11 @@ const app = express();
 
 app.set("trust proxy", true);
 
+app.use((req, res, next) => {
+    console.log("Protocol Supertokens sees:", req.protocol);
+    next();
+});
+
 app.use(bodyParser.json());
 
 app.use(
