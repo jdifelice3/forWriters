@@ -1,5 +1,6 @@
 import { SessionAuth } from "supertokens-auth-react/recipe/session";
 import { BrowserRouter } from "react-router-dom";
+import * as ReactRouter from "react-router-dom";
 import SuperTokens, { SuperTokensWrapper } from "supertokens-auth-react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { SuperTokensConfig } from "./config";
@@ -7,6 +8,8 @@ import Layout from "./components/Layout";
 import "react-pro-sidebar/dist/css/styles.css";
 import "./assets/css/forWriters.css";
 import { UserProvider } from "./context/UserContext";
+import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
+import { PreBuiltUIList } from "./config";
 
 SuperTokens.init(SuperTokensConfig);
 
@@ -26,6 +29,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <SuperTokensWrapper>
         <BrowserRouter>
+        {getSuperTokensRoutesForReactRouterDom(ReactRouter, PreBuiltUIList)}
           <SessionAuth requireAuth={false}>
             <UserProvider>
               <Layout/>

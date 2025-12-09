@@ -2,8 +2,7 @@ import * as ReactRouter from "react-router-dom";
 import Session from "supertokens-auth-react/recipe/session";
 import { Routes, Route, Link } from "react-router-dom";
 import { useSessionContext } from "supertokens-auth-react/recipe/session";
-import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
-import { PreBuiltUIList, ComponentWrapper } from "../config";
+import { ComponentWrapper } from "../config";
 import Home from "../pages/Home";
 import UserProfile from "../pages/UserProfile";
 import FileManager from "../pages/FileManager";
@@ -94,8 +93,6 @@ const Layout = () => {
         >
           <ComponentWrapper>
             <Routes>
-              {getSuperTokensRoutesForReactRouterDom(ReactRouter, PreBuiltUIList)}
-
               <Route path="/" element={<Home />} />
               {/* <Route path="/dashboard" element={<Dashboard />} /> */}
               <Route path="/searchgroups" element={<div><h1>Search Groups</h1></div>} />
