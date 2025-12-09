@@ -30,6 +30,12 @@ supertokens.init(SuperTokensConfig);
 const app = express();
 
 app.set("trust proxy", true);
+app.use((req, res, next) => {
+    if (req.headers["x-forwarded-proto"] !== "https") {
+        req.headers["x-forwarded-proto"] = "https";
+    }
+    next();
+});
 
 app.use((req, res, next) => {
     console.log("Protocol Supertokens sees:", req.protocol);

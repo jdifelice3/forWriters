@@ -1,6 +1,7 @@
 import "dotenv/config";
 import EmailPassword from "supertokens-node/recipe/emailpassword";
-import Session from "supertokens-node/recipe/session";
+//import Session from "supertokens-node/recipe/session";
+import Session from "supertokens-node/recipe/session/index.js";
 import Dashboard from "supertokens-node/recipe/dashboard";
 import UserRoles from "supertokens-node/recipe/userroles";
 import type { TypeInput } from "supertokens-node/types";
@@ -72,12 +73,6 @@ export const SuperTokensConfig: TypeInput = {
             cookieSecure: true,
             antiCsrf: "VIA_TOKEN",
             cookieDomain: ".onrender.com",
-            override: {
-                functions: (orig) => {
-                    console.log("Session init cookieDomain:", ".onrender.com");
-                    return orig;
-                }
-            }
         }),
         
     ],
