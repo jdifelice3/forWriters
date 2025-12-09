@@ -11,8 +11,7 @@ export const SuperTokensConfig = {
         appName: "forWriters",
         apiDomain: import.meta.env.VITE_API_HOST,
         websiteDomain: import.meta.env.VITE_WEB_HOST,
-        apiBasePath: "/auth",
-        websiteBasePath: "/auth",
+        apiBasePath: "/auth"
     },
     
     recipeList: [
