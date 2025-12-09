@@ -7,6 +7,15 @@ import cors from "cors";
 import supertokens from "supertokens-node";
 import { middleware, errorHandler } from "supertokens-node/framework/express";
 import { SuperTokensConfig } from "./config";
+
+console.log("=== Loaded SuperTokensConfig ===");
+console.log("apiDomain =", SuperTokensConfig.appInfo.apiDomain);
+console.log("websiteDomain =", SuperTokensConfig.appInfo.websiteDomain);
+console.log("Expected cookieDomain =", ".onrender.com");
+console.log("SUPERTOKENS_URI =", process.env.SUPERTOKENS_URI);
+console.log("SUPERTOKENS_API_KEY =", process.env.SUPERTOKENS_API_KEY ? "[SET]" : "[MISSING]");
+console.log("================================");
+
 import bodyParser from "body-parser";   
 import userRoutes from './routes/userRoutes';
 import userProfileRoutes from './routes/userProfileRoutes';
