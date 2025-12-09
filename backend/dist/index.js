@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 const path_1 = __importDefault(require("path"));
-const session_1 = __importDefault(require("supertokens-node/recipe/session"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const supertokens_node_1 = __importDefault(require("supertokens-node"));
@@ -53,19 +52,18 @@ app.use("/uploads", express_1.default.static(uploadDir));
 app.get("/hello", async (_req, res) => {
     res.send("hello");
 });
-app.get("/api/sessioninfo", async (req, res, next) => {
-    try {
-        const session = await session_1.default.getSession(req, res, { sessionRequired: true });
-        res.send({
-            sessionHandle: session.getHandle(),
-            userId: session.getUserId(true),
-            accessTokenPayload: session.getAccessTokenPayload(),
-        });
-    }
-    catch (err) {
-        next(err);
-    }
-});
+// app.get("/api/sessioninfo", async (req, res, next) => {
+//   try {
+//     const session = await Session.getSession(req, res, { sessionRequired: true });
+//     res.send({
+//       sessionHandle: session.getHandle(),
+//       userId: session.getUserId(true),
+//       accessTokenPayload: session.getAccessTokenPayload(),
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// });
 // In case of session related errors, this error handler returns 401 to the client.
 app.use((0, express_2.errorHandler)());
 const PORT = process.env.PORT || "3001";

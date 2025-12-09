@@ -61,19 +61,19 @@ app.get("/hello", async (_req, res) => {
     res.send("hello");
 });
 
-app.get("/api/sessioninfo", async (req, res, next) => {
-  try {
-    const session = await Session.getSession(req, res, { sessionRequired: true });
+// app.get("/api/sessioninfo", async (req, res, next) => {
+//   try {
+//     const session = await Session.getSession(req, res, { sessionRequired: true });
 
-    res.send({
-      sessionHandle: session.getHandle(),
-      userId: session.getUserId(true),
-      accessTokenPayload: session.getAccessTokenPayload(),
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+//     res.send({
+//       sessionHandle: session.getHandle(),
+//       userId: session.getUserId(true),
+//       accessTokenPayload: session.getAccessTokenPayload(),
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// });
 
 // In case of session related errors, this error handler returns 401 to the client.
 app.use(errorHandler());

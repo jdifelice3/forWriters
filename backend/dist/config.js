@@ -69,7 +69,7 @@ exports.SuperTokensConfig = {
             cookieSameSite: "none",
             cookieSecure: true,
             antiCsrf: "VIA_TOKEN",
-            cookieDomain: ".onrender.com"
-        })
+            cookieDomain: ".onrender.com",
+        }),
     ],
 };
