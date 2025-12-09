@@ -5,8 +5,8 @@
     "type": "module",
     "scripts": {
         "start": "vite",
-        "dev": "vite",
-        "build": "tsc -b && vite build",
+        "dev": "copy .env.dev .env && vite",
+        "build": "copy .env.prod .env && tsc -b && vite build",
         "lint": "eslint .",
         "preview": "vite preview"
     },
