@@ -70,7 +70,8 @@ export const SuperTokensConfig: TypeInput = {
             useDynamicAccessTokenSigningKey: false,
             cookieSameSite: "none",
             cookieSecure: true,
-            antiCsrf: "VIA_TOKEN"
+            antiCsrf: "VIA_TOKEN",
+            cookieDomain: ".onrender.com"
         })
     ],
 };

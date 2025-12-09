@@ -68,7 +68,8 @@ exports.SuperTokensConfig = {
             useDynamicAccessTokenSigningKey: false,
             cookieSameSite: "none",
             cookieSecure: true,
-            antiCsrf: "VIA_TOKEN"
+            antiCsrf: "VIA_TOKEN",
+            cookieDomain: ".onrender.com"
         })
     ],
 };
