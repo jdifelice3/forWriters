@@ -31,7 +31,7 @@ app.use(
     })
 );
 
-app.use(middleware());
+app.use("/auth", middleware());
 
 // Logging Middleware
 app.use((req, res, next) => {
@@ -76,7 +76,8 @@ app.get("/hello", async (_req, res) => {
 // });
 
 // In case of session related errors, this error handler returns 401 to the client.
-app.use(errorHandler());
+
+app.use("/auth", errorHandler());
 
 const PORT: string = process.env.PORT || "3001";
 app.listen(PORT, () => console.log(`API Server listening on port ${PORT}`));

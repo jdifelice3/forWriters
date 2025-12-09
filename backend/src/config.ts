@@ -33,7 +33,7 @@ export const SuperTokensConfig: TypeInput = {
         apiDomain: process.env.API_DOMAIN,
         websiteDomain: process.env.WEBSITE_DOMAIN,
         apiBasePath: "/auth",
-        websiteBasePath: "/auth",
+        websiteBasePath: "/auth",   
     },
     recipeList: [
         EmailPassword.init({
