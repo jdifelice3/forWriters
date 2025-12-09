@@ -1,12 +1,12 @@
-import * as ReactRouter from "react-router-dom";
-import Session from "supertokens-auth-react/recipe/session";
 import { Routes, Route, Link } from "react-router-dom";
 import { useSessionContext } from "supertokens-auth-react/recipe/session";
-import { ComponentWrapper } from "../config";
+
+import Sidebar from "./Sidebar";
+
+// Your pages
 import Home from "../pages/Home";
 import UserProfile from "../pages/UserProfile";
 import FileManager from "../pages/FileManager";
-import Sidebar from "../components/Sidebar";
 import Groups from "../pages/Groups";
 import GroupsCreate from "../pages/GroupsCreate";
 import ReadingSignup from "../pages/ReadingSignup";
@@ -18,106 +18,61 @@ import Readings from "../pages/Readings";
 import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
 import { DocType } from "../util/Enum";
 
-const Layout = () => {
-  const session = useSessionContext();
-  let doesSessionExist = false;
-  Session.doesSessionExist().then((exists) => {
-       doesSessionExist = exists;
-    });
+export default function Layout() {
+  const { loading } = useSessionContext();
+
+  if (loading) return null;
+
   const drawerWidth = 280;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      {/* Header */}
+      
+      {/* HEADER */}
       <header
         style={{
           marginLeft: drawerWidth,
           backgroundColor: "#fff",
           borderBottom: "1px solid #ddd",
           padding: "0.5rem 1rem",
-          display: "flex",
+          display: "Flex",
           alignItems: "center",
         }}
       >
-        <nav
-          className="header-container"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}
-        >
-          <Link
-            to="/"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              textDecoration: "none",
-              marginLeft: "-30px"
-            }}
-          >
-            <img
-              src="/forWriters-logo-black.png"
-              alt="forWriters"
-              style={{ width: 75, display: "block" }}
-            />
-            <span
-              style={{
-                fontFamily: "Thebarstaindemo",
-                fontSize: "2.5rem",
-                fontWeight: 600,
-                color: "#333",
-                marginLeft: "0.5rem",
-              }}
-            >
-              forWriters
-            </span>
-            <span style={{ color: "black" }}>
-              &nbsp;&nbsp;&nbsp;where writers hone their craft
-            </span>
-          </Link>
-        </nav>
+        <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <img src="/forWriters-logo-black.png" alt="logo" style={{ width: 75 }} />
+          <span style={{ fontSize: "2.5rem", marginLeft: ".5rem", color: "#333" }}>
+            forWriters
+          </span>
+          <span style={{ color: "black" }}>&nbsp;&nbsp;&nbsp;where writers hone their craft</span>
+        </Link>
       </header>
 
-      {/* Two-column area below header */}
+      {/* BODY */}
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        { <Sidebar />}
+        <Sidebar />
 
-        <main
-          style={{
-            flex: 1,
-            padding: "1rem",
-            overflowY: "auto",
-            backgroundColor: "#fafafa",
-            marginLeft: doesSessionExist ? 0 : 0, 
-          }}
-        >
-          <ComponentWrapper>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-              <Route path="/searchgroups" element={<div><h1>Search Groups</h1></div>} />
-              <Route path="/groups/:groupId" element={ <Groups /> } />
-              <Route path="/creategroup" element={ <GroupsCreate /> } />
-              <Route path="/membersearch" element={<MemberSearchPage />} />
-              <Route path="/signout" element={<div><h1>Sign Out</h1></div>} />
-              <Route path="/works" element={<div><h1>Your Work</h1></div>} />
-              <Route path="/userprofile" element={<UserProfile />} />
-              <Route path="/filemanager/manuscript" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
-              <Route path="/filemanager/feedback" element={<FileManager documentType={DocType.FEEDBACK} />} />
-              <Route path="/joingroup" element={<div><h1>Join a Group</h1></div>} />
-              <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
-              <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />
-              <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
-              <Route path="/groupsearch" element={<GroupSearch />} /> 
-              <Route path="/groupjoinadmin" element={<GroupJoinRequestAdmin/>}/>
-              <Route path="/readings" element={<Readings />} />
-              <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
-            </Routes>
-          </ComponentWrapper>
+        <main style={{ flex: 1, padding: "1rem", overflowY: "auto", backgroundColor: "#fafafa" }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/userprofile" element={<UserProfile />} />
+
+            <Route path="/filemanager/manuscript" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
+            <Route path="/filemanager/feedback" element={<FileManager documentType={DocType.FEEDBACK} />} />
+
+            <Route path="/groups/:groupId" element={<Groups />} />
+            <Route path="/creategroup" element={<GroupsCreate />} />
+            <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
+            <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />
+            <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
+
+            <Route path="/membersearch" element={<MemberSearchPage />} />
+            <Route path="/groupsearch" element={<GroupSearch />} />
+            <Route path="/readings" element={<Readings />} />
+            <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
+          </Routes>
         </main>
       </div>
     </div>
   );
 }
-
-export default Layout;
