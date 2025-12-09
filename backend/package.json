@@ -11,7 +11,7 @@
         "seed": "nodemon --exec ts-node prisma/seed.ts",
         "docx-extractor": "ts-node src/services/runDocxExtractor.ts",
         "generate:dtos": "node src/scripts/generate-dtos.mjs",
-        "build": "pnpm generate:dtos && tsc"
+        "build": "tsc"
     },
     "dependencies": {
         "@prisma/client": "^6.19.0",
