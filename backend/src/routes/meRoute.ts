@@ -6,20 +6,36 @@ const prisma = new PrismaClient();
 const router = express.Router();
 
 router.get("/", verifySession(), async (req, res) => {
-    console.log("in GET /api/me Route — SESSION TEST");
+  console.log("in GET /api/me Route — PHASE 2");
 
-    try {
-        const session = await Session.getSession(req, res);
-        const authId = session.getUserId(true);
+  // 1. Get the session
+  let session = await Session.getSession(req, res);
 
-        console.log("authId:", authId);
+  // 2. Extract Supertokens userId
+  const authId = session.getUserId(true);
+  console.log("authId =", authId);
 
-        return res.json({ ok: true, authId });
-    } catch (err) {
-        console.error("SESSION ERROR:", err);
-        return res.status(401).json({ error: "Unauthorized" });
-    }
+  // 3. Do ONLY this prisma lookup
+  const user = await prisma.user.findUnique({
+    where: { superTokensId: authId },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!user) {
+    console.log("User NOT found in DB");
+    return res.status(404).json({ error: "User not found in database" });
+  }
+
+  console.log("User found:", user);
+  return res.json(user);
 });
+
 
 // router.get("/", verifySession() as any, async (req, res) => {
 //   console.log("in GET /api/me Route");
