@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User } from "../types/User";
+import { useUserContext } from "../context/UserContext";
 import {
   Box,
   Button,
@@ -18,6 +19,8 @@ import { updateUserProfile, getUserProfile } from "../services/srvUserProfiles";
 import { useEffect } from 'react';
 import Session from "supertokens-auth-react/recipe/session";
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import { useSessionContext } from "supertokens-auth-react/recipe/session";
+
 
 const styles = {
     marginLeft: '75px' // or a responsive value
@@ -42,9 +45,9 @@ const profileSchema = z.object({
 type ProfileFormInputs = z.infer<typeof profileSchema>;
 
 const UserProfile = () => {
-  const [userId, setUserId] = useState<string>("");
-  const [preview, setPreview] = useState<string | null>(null);
-
+    const [userId, setUserId] = useState<string>("");
+    const [preview, setPreview] = useState<string | null>(null);
+    const { user } = useUserContext();
     const {
     control,
     handleSubmit,
@@ -63,24 +66,24 @@ const UserProfile = () => {
   });
 
   useEffect(() => {
-    const fetchUserId = async() => {
-        console.log('in UserProfile.tsx');
-      console.log('Session', Session);
-      const authId = await Session.getUserId();
-      
-      console.log('authId', authId);
-      const user: User = await getUserProfile(authId);
-      console.log('user', user);
-      setUserId(user.id);
-      reset({ 
-        firstName: user.userProfile.firstName, 
-        lastName: user.userProfile.lastName,
-        email: user.email,
-        bio: user.userProfile.bio
-      });
-    }
-    fetchUserId();
-  }, []);
+    if(!user) return;
+
+    (async () => {
+        const authId = user.id;//await Session.getUserId();
+        
+        console.log('authId', authId);
+        //const user: User = await getUserProfile(authId);
+        console.log('user', user);
+        setUserId(user.id);
+        reset({ 
+            firstName: user.userProfile.firstName, 
+            lastName: user.userProfile.lastName,
+            email: user.email,
+            bio: user.userProfile.bio
+        });
+    })
+    //fetchUserId();
+  }, [user]);
 
 
   const onSubmit = async(data: ProfileFormInputs) => {
