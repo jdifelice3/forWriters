@@ -70,7 +70,14 @@ app.use((req, res, next) => {
     };
     next();
 });
-
+app.use((req, res, next) => {
+    console.log("---- INCOMING ----");
+    console.log("HOST:", req.headers.host);
+    console.log("METHOD:", req.method);
+    console.log("ORIGINAL URL:", req.originalUrl);
+    console.log("------------------");
+    next();
+});
 app.use('/api/users', userRoutes); 
 app.use((req, res, next) => {
     console.log("Reached end of middleware chain without response:", req.path);
