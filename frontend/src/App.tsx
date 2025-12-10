@@ -12,8 +12,6 @@ import { PreBuiltUIList } from "./config";
 import { SuperTokensConfig } from "./config";
 
 // ---------- Root App ----------
-SuperTokens.init(SuperTokensConfig);
-
 export default function App() {
     const theme = createTheme({
         typography: {

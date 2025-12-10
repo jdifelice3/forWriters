@@ -69,10 +69,6 @@ const UserProfile = () => {
     if(!user) return;
 
     (async () => {
-        const authId = user.id;//await Session.getUserId();
-        
-        console.log('authId', authId);
-        //const user: User = await getUserProfile(authId);
         console.log('user', user);
         setUserId(user.id);
         reset({ 
