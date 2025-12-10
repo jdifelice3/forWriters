@@ -1,3 +1,5 @@
+console.log("BOOTSTRAP ONCE ONLY");
+
 import "dotenv/config";
 import path from 'path';
 import Session from "supertokens-node/recipe/session";
