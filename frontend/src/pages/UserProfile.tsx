@@ -45,30 +45,44 @@ const profileSchema = z.object({
 type ProfileFormInputs = z.infer<typeof profileSchema>;
 
 const UserProfile = () => {
+    console.log('in UserProfile');
     const [userId, setUserId] = useState<string>("");
     const [preview, setPreview] = useState<string | null>(null);
-    const { user } = useUserContext();
+    const [loading, setLoading] = useState(true);
+
     const {
-    control,
-    handleSubmit,
-    formState: { errors }, reset,
-        } = useForm<ProfileFormInputs>({
-            resolver: zodResolver(profileSchema),
-            defaultValues: {
-                firstName: "",
-                lastName: "",
-                email: "",
-                bio: "",
-                title: "",
-                description: "",
-                avatar: null,
-            },
-  });
+        control,
+        handleSubmit,
+        formState: { errors }, 
+        reset
+    } = useForm<ProfileFormInputs>({
+        resolver: zodResolver(profileSchema),
+        defaultValues: {
+            firstName: "",
+            lastName: "",
+            email: "",
+            bio: "",
+            title: "",
+            description: "",
+            avatar: null,
+        },
+    });
 
-  useEffect(() => {
-    if(!user) return;
+    useEffect(() => {
+        console.log('in useEffect');
+        const fetchUserId = async() => {
+        const exists = await Session.doesSessionExist();
 
-    (async () => {
+        if (!exists) {
+            console.log('session does not exist');
+            setUserId("");
+            setLoading(false);
+            return;
+        }
+
+        const authId = await Session.getUserId();
+        console.log('authId', authId);
+        const user: User = await getUserProfile(authId);
         console.log('user', user);
         setUserId(user.id);
         reset({ 
@@ -77,9 +91,36 @@ const UserProfile = () => {
             email: user.email,
             bio: user.userProfile.bio
         });
-    })
-    //fetchUserId();
-  }, [user]);
+    }
+    fetchUserId();
+  }, []);
+//   useEffect(() => {
+//     console.log('in useEffect');
+//     async function loadUser() {
+//         console.log('in loadUser');
+//       const exists = await Session.doesSessionExist();
+//       console.log('session exists');
+//       if (!exists) {
+//         console.log('session does not exist');
+//         setUserId("");
+//         setLoading(false);
+//         return;
+//       }
+
+//       const id = await Session.getUserId();
+//       console.log('user.id:', id)
+//       setUserId(id);
+//       setLoading(false);
+//     }
+
+//     loadUser();
+//   }, []);
+
+ // if (loading) return null;
+
+  if (!userId) {
+    return <div>No session</div>;
+  }
 
 
   const onSubmit = async(data: ProfileFormInputs) => {
@@ -88,7 +129,8 @@ const UserProfile = () => {
     const lastName: string = data.lastName;
     const bio: string = data.bio ? data.bio : '';
     const results: Response = await updateUserProfile(userId, firstName, lastName, bio);
-    if(results.status === 200){
+    console.log('results', results.status);
+    if(results.status !== 500){
       alert("Profile saved successfully!");
     } else if (results.status === 500){
       alert(results.json);
@@ -182,34 +224,6 @@ const UserProfile = () => {
           )}
         />
 
-        <Divider />
-
-        {/* Metadata section */}
-        <Typography variant="h6" mt={1}>
-          Additional Info
-        </Typography>
-
-        <Controller
-          name="title"
-          control={control}
-          render={({ field }) => (
-            <TextField label="Profile Title" {...field} fullWidth />
-          )}
-        />
-
-        <Controller
-          name="description"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="Profile Description"
-              {...field}
-              fullWidth
-              multiline
-              rows={2}
-            />
-          )}
-        />
 
         <Button
           variant="contained"

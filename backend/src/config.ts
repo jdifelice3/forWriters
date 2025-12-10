@@ -24,6 +24,23 @@ if (typeof process.env.WEBSITE_DOMAIN === 'undefined') {
   throw new Error("Environment variable process.env.WEBSITE_DOMAIN is undefined");
 }
 
+const sessionInit = process.env.NODE_ENV === 'production' ?
+        Session.init({
+            useDynamicAccessTokenSigningKey: false,
+            cookieSameSite: "none",
+            cookieSecure: true,
+            antiCsrf: "VIA_TOKEN",
+            cookieDomain: ".forwriters.ink",
+        })
+        :
+        Session.init({
+            useDynamicAccessTokenSigningKey: false,
+            cookieSameSite: "none",
+            cookieSecure: true,
+            antiCsrf: "VIA_TOKEN",
+            //cookieDomain: ".forwriters.ink",
+        })
+
 export const SuperTokensConfig: TypeInput = {
     supertokens: {
         connectionURI: process.env.SUPERTOKENS_CONNECTION_URI,
@@ -67,13 +84,14 @@ export const SuperTokensConfig: TypeInput = {
         }),
         Dashboard.init(),
         UserRoles.init(),
-        Session.init({
-            useDynamicAccessTokenSigningKey: false,
-            cookieSameSite: "none",
-            cookieSecure: true,
-            antiCsrf: "VIA_TOKEN",
-            cookieDomain: ".forwriters.ink",
-        }),
+        sessionInit
+        // Session.init({
+        //     useDynamicAccessTokenSigningKey: false,
+        //     cookieSameSite: "none",
+        //     cookieSecure: true,
+        //     antiCsrf: "VIA_TOKEN",
+        //     //cookieDomain: ".forwriters.ink",
+        // }),
         
     ],
 };

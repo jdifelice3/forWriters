@@ -26,26 +26,11 @@ import meRoute from './routes/meRoute';
 import eventRoutes from './routes/readingRoutes';
 
 supertokens.init(SuperTokensConfig);
-
+console.log('process.env.WEB_HOST', process.env.WEB_HOST);
+console.log('process.env', process.env);
 const app = express();
 
 app.set("trust proxy", true);
-app.use("/auth", middleware());
-app.use((req, res, next) => {
-    if (req.headers["x-forwarded-proto"] !== "https") {
-        req.headers["x-forwarded-proto"] = "https";
-    }
-    next();
-});
-
-app.use((req, res, next) => {
-    console.log("Protocol Supertokens sees:", req.protocol);
-    next();
-});
-
-
-
-app.use(bodyParser.json());
 
 app.use(
     cors({
@@ -56,7 +41,24 @@ app.use(
     })
 );
 
+app.use("/auth", middleware());
 
+if (process.env.NODE_ENV === "production") {
+    app.use((req, res, next) => {
+        if (req.headers["x-forwarded-proto"] !== "https") {
+            req.headers["x-forwarded-proto"] = "https";
+        }
+        next();
+    });
+}
+
+app.use((req, res, next) => {
+    console.log("Protocol Supertokens sees:", req.protocol);
+    next();
+});
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Logging Middleware
 app.use((req, res, next) => {
@@ -79,30 +81,7 @@ app.use('/api/events', eventRoutes);
 const uploadDir = path.join(process.cwd(), "uploads");
 app.use("/uploads", express.static(uploadDir));
 
-
-// This endpoint can be accessed regardless of
-// having a session with SuperTokens
-app.get("/hello", async (_req, res) => {
-    res.send("hello");
-});
-
-// app.get("/api/sessioninfo", async (req, res, next) => {
-//   try {
-//     const session = await Session.getSession(req, res, { sessionRequired: true });
-
-//     res.send({
-//       sessionHandle: session.getHandle(),
-//       userId: session.getUserId(true),
-//       accessTokenPayload: session.getAccessTokenPayload(),
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// });
-
-// In case of session related errors, this error handler returns 401 to the client.
-
-app.use("/auth", errorHandler());
+app.use(errorHandler());
 
 const PORT: string = process.env.PORT || "3001";
 app.listen(PORT, () => console.log(`API Server listening on port ${PORT}`));
