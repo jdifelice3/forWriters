@@ -26,8 +26,7 @@ import meRoute from './routes/meRoute';
 import eventRoutes from './routes/readingRoutes';
 
 supertokens.init(SuperTokensConfig);
-console.log('process.env.WEB_HOST', process.env.WEB_HOST);
-console.log('process.env', process.env);
+
 const app = express();
 
 app.set("trust proxy", true);
@@ -43,79 +42,25 @@ app.use(
 
 app.use("/auth", middleware());
 
-if (process.env.NODE_ENV === "production") {
-    app.use((req, res, next) => {
-        if (req.headers["x-forwarded-proto"] !== "https") {
-            req.headers["x-forwarded-proto"] = "https";
-        }
-        next();
-    });
-}
-
-app.use((req, res, next) => {
-    console.log("Protocol Supertokens sees:", req.protocol);
-    next();
-});
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-    console.log("---- INCOMING ----");
-    console.log("HOST:", req.headers.host);
-    console.log("METHOD:", req.method);
-    console.log("ORIGINAL URL:", req.originalUrl);
-    console.log("------------------");
-    next();
-});
-// app.use('/api/users', userRoutes); 
-// app.use((req, res, next) => {
-//     console.log("Reached end of middleware chain without response:", req.path);
-//     next();
-// });
+app.use('/api/users', userRoutes); 
 
-// app.use('/api/userProfile', userProfileRoutes);
-// app.use((req, res, next) => {
-//     console.log("Reached end of middleware chain without response:", req.path);
-//     next();
-// });
+app.use('/api/userProfile', userProfileRoutes);
 
-// app.use('/api/files', fileRoutes);
-// app.use((req, res, next) => {
-//     console.log("Reached end of middleware chain without response:", req.path);
-//     next();
-// });
+app.use('/api/files', fileRoutes);
 
-// app.use('/api/pdfs', pdfRoutes);
-// app.use((req, res, next) => {
-//     console.log("Reached end of middleware chain without response:", req.path);
-//     next();
-// });
+app.use('/api/pdfs', pdfRoutes);
 
-// app.use('/api/groups', groupRoutes);
-// app.use((req, res, next) => {
-//     console.log("Reached end of middleware chain without response:", req.path);
-//     next();
-// });
+app.use('/api/groups', groupRoutes);
 
 app.use('/api/me', meRoute);
-app.use((req, res, next) => {
-    console.log("Reached end of middleware chain without response:", req.path);
-    next();
-});
 
-// app.use('/api/events', eventRoutes);
-// app.use((req, res, next) => {
-//     console.log("Reached end of middleware chain without response:", req.path);
-//     next();
-// });
+app.use('/api/events', eventRoutes);
 
-// const uploadDir = path.join(process.cwd(), "uploads");
-// app.use((req, res, next) => {
-//     console.log("Reached end of middleware chain without response:", req.path);
-//     next();
-// });
-// app.use("/uploads", express.static(uploadDir));
+const uploadDir = path.join(process.cwd(), "uploads");
+app.use("/uploads", express.static(uploadDir));
 
 app.use(errorHandler());
 

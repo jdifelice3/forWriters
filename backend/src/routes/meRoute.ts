@@ -5,9 +5,11 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const router = express.Router();
 
-router.get("/", verifySession(), (req, res) => {
-  console.log("in GET /api/me Route — HARD TEST");
-  return res.status(200).json({ ok: true });
+// --- TEMP HARD TEST ---
+router.get("/", verifySession(), async (req, res) => {
+    console.log("in GET /api/me Route — HARD TEST");
+
+    return res.status(200).json({ ok: true });
 });
 
 // router.get("/", verifySession() as any, async (req, res) => {
@@ -28,10 +30,10 @@ router.get("/", verifySession(), (req, res) => {
 //       return res.status(404).json({ error: "User not found in database" });
 //     }
 
-//     res.json(user);
+//     return res.json(user);
 //   } catch (err) {
 //     console.error("In meRoute.ts, GET:", err);
-//     return res.status(401).json({ error: "Unauthorized" });
+//     return return res.status(401).json({ error: "Unauthorized" });
 //   }
 // });
 
