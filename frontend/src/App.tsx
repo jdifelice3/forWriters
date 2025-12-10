@@ -9,7 +9,8 @@ import "./assets/css/forWriters.css";
 import { UserProvider } from "./context/UserContext";
 import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
 import { PreBuiltUIList } from "./config";
-import { SuperTokensConfig } from "./config";
+import { SWRConfig } from "swr";
+import { typedFetcher } from "./util/fetcher";
 
 // ---------- Root App ----------
 export default function App() {
@@ -20,26 +21,27 @@ export default function App() {
     });
   return (
     <ThemeProvider theme={theme}>
-      <SuperTokensWrapper>
-        <BrowserRouter>
-          <Routes>
-
-            {/* 🔵 Supertokens built-in auth routes (login, signup, reset password, etc.) */}
-           {getSuperTokensRoutesForReactRouterDom(ReactRouter, PreBuiltUIList)}
-            {/* 🔵 All your application routes, wrapped in Layout */}
-            <Route
-              path="/*"
-              element={
-                <SessionAuth requireAuth={false}>
-                  <UserProvider>
-                    <Layout />
-                  </UserProvider>
-                </SessionAuth>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
-      </SuperTokensWrapper>
+        <SuperTokensWrapper>
+            <SWRConfig value={{ fetcher: typedFetcher }}>
+                <BrowserRouter>
+                    <Routes>
+                         {/* Supertokens built-in auth routes (login, signup, reset password, etc.) */}
+                        {getSuperTokensRoutesForReactRouterDom(ReactRouter, PreBuiltUIList)}
+                        {/* All your application routes, wrapped in Layout */}
+                        <Route
+                            path="/*"
+                            element={
+                                <SessionAuth requireAuth={false}>
+                                    <UserProvider>
+                                    <Layout />
+                                </UserProvider>
+                                </SessionAuth>
+                            }
+                        />
+                    </Routes>
+                </BrowserRouter>
+            </SWRConfig>
+        </SuperTokensWrapper>
     </ThemeProvider>
   );
 }
