@@ -60,16 +60,6 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Logging Middleware
-app.use((req, res, next) => {
-    // Store original response send method
-    const originalSend = res.send.bind(res); // Bind the res context to originalSend
-    // Override the response send method
-    res.send = function (body) {
-        return originalSend(body); // Call the original send method
-    };
-    next();
-});
 app.use((req, res, next) => {
     console.log("---- INCOMING ----");
     console.log("HOST:", req.headers.host);
