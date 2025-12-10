@@ -8,7 +8,8 @@ const router = express.Router();
 router.get("/", verifySession() as any, async (req, res) => {
   console.log("in GET /api/me Route");
   try {
-    const session = await Session.getSession(req, res);
+    const session = (req as any).session;
+
     console.log('session:', session);
 
     const authId = session.getUserId(true);   
