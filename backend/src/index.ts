@@ -8,6 +8,9 @@ import supertokens from "supertokens-node";
 import { middleware, errorHandler } from "supertokens-node/framework/express";
 import { SuperTokensConfig } from "./config";
 
+if (typeof process.env.WEB_HOST === undefined) {
+  throw new Error("Environment variable process.env.SUPERTOKENS_CONNECTION_URI is undefined");
+}
 console.log("=== Loaded SuperTokensConfig ===");
 console.log("apiDomain =", SuperTokensConfig.appInfo.apiDomain);
 console.log("websiteDomain =", SuperTokensConfig.appInfo.websiteDomain);
