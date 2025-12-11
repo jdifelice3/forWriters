@@ -17,8 +17,9 @@ const storage = multer.diskStorage({
   destination: uploadDir,
   filename: (_req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
-
+console.log('Multer diskStorage', storage);
 const upload = multer({ storage });
+console.log('upload', upload);
 //#endregion
 
 
