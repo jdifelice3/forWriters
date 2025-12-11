@@ -228,7 +228,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
               />
             ) : previewFile.mimetype.startsWith("application/pdf") || previewFile.mimetype.startsWith("PDF") ? (
               <iframe
-                src={previewFile.url}
+                src={`${import.meta.env.VITE_API_HOST}/api/files/${previewFile.id}/download`}
                 title="PDF Preview"
                 width="100%"
                 height="100%"

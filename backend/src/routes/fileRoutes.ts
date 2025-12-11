@@ -1,6 +1,9 @@
 import express from "express";
+import { PrismaClient } from "@prisma/client";
 import multer from "multer";
 import multerS3 from "multer-s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { Readable } from "stream";
 import { S3Client } from "@aws-sdk/client-s3";
 import Session from "supertokens-node/recipe/session";
 import { getFileRecords, createFileRecordBasic, updateFileRecord, deleteFileRecord, createFileRecordReadingFeedback } from "../database/dbFiles";
@@ -123,6 +126,41 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
       console.error('Error creating file record:', err);
       res.status(500).json({ err: 'Error creating file record' });
   }
+});
+
+router.get("/:id/download", async (req, res) => {
+    try {
+        const prisma = new PrismaClient();
+        const file = await prisma.appFile.findUnique({ where: { id: req.params.id } });
+        if (!file) return res.status(404).send("File not found");
+
+        const command = new GetObjectCommand({
+            Bucket: process.env.AWS_S3_BUCKET!,
+            Key: file.filename,
+        });
+
+        const data = await s3.send(command);
+
+        res.setHeader("Content-Type", data.ContentType || "application/octet-stream");
+        res.setHeader("Content-Disposition", `attachment; filename="${file.title}"`);
+
+        if(data.Body === undefined){
+            throw new Error('Error downloading file from S3');
+        }
+        
+        const bodyStream = data.Body as Readable;
+        bodyStream.pipe(res);
+
+    } catch (err) {
+        if(err instanceof Error){
+            console.error(err.message, err);
+            res.status(500).json({ err: err.message });
+        } else {
+            console.error('Unknown Error in file router', err);
+            res.status(500).json({ err: 'Unknown Error in file router' });
+        }
+
+    }
 });
 //#endregion
 
