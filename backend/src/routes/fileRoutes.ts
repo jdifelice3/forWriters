@@ -4,8 +4,6 @@ import multerS3 from "multer-s3";
 import { S3Client } from "@aws-sdk/client-s3";
 import Session from "supertokens-node/recipe/session";
 import { getFileRecords, createFileRecordBasic, updateFileRecord, deleteFileRecord, createFileRecordReadingFeedback } from "../database/dbFiles";
-import { deleteFile } from "../services/srvFiles";
-import { FileType } from "@prisma/client";
 
 const router = express.Router();
 

@@ -47,7 +47,7 @@ app.use(
 app.use("/auth", middleware());
 
 const uploadDir = path.join(process.cwd(), "uploads");
-console.log('uploadDir', uploadDir);
+
 app.use(
   "/uploads",
   express.static(uploadDir, {
