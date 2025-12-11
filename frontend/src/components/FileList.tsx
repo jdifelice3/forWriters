@@ -96,20 +96,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
         </Typography>
       ) : (
         <Grid container spacing={2}>
-            {files.map((f, i) => {
-  console.log("Download URL:", f.url);
-  return (
-    <Button
-      key={i}
-      component="a"
-      href={f.url}
-      download={f.filename}
-      size="small"
-    >
-      Download
-    </Button>
-  );
-})}
+            
           {files.map((f) => (
             <Stack spacing={2} sx={{width:"500px"}}> 
             <Card>
