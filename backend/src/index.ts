@@ -37,6 +37,7 @@ app.use(
         allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
         methods: ["GET", "PUT", "POST", "DELETE"],
         credentials: true,
+        exposedHeaders: ["Content-Disposition"]
     })
 );
 
