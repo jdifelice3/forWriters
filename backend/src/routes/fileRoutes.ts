@@ -140,14 +140,14 @@ router.get("/:id/download", async (req, res) => {
         });
 
         const data = await s3.send(command);
-
+        console.log('S3 data', data);
         res.setHeader("Content-Type", data.ContentType || "application/octet-stream");
         res.setHeader("Content-Disposition", `attachment; filename="${file.title}"`);
 
         if(data.Body === undefined){
             throw new Error('Error downloading file from S3');
         }
-        
+        console.log('res', res);
         const bodyStream = data.Body as Readable;
         bodyStream.pipe(res);
 
