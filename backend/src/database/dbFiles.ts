@@ -56,7 +56,7 @@ export const createFileRecordBasic = async(
       description: description,
       filename: filename,
       mimetype: mapMimeToEnum(mimeType),
-      url: `${process.env.API_HOST}/uploads/${filename}`,
+      url: url,
       userId: user ? user.id : '',
     },
   });
