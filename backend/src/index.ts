@@ -64,6 +64,7 @@ app.use(
     }
   })
 );
+app.use('/api/files', fileRoutes);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -71,8 +72,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api/users', userRoutes); 
 
 app.use('/api/userProfile', userProfileRoutes);
-
-app.use('/api/files', fileRoutes);
 
 app.use('/api/pdfs', pdfRoutes);
 
