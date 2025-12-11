@@ -23,7 +23,7 @@ const upload = multer({
   storage: multerS3({
     s3,
     bucket: process.env.AWS_S3_BUCKET!,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
+    //contentType: multerS3.AUTO_CONTENT_TYPE,  --commented this out so the type would remain octet for downloads. disabled preview enirely for now 12/11/2025
     key: (_req, file, cb) => {
       const filename = `${Date.now()}-${file.originalname}`;
       cb(null, filename);
@@ -110,6 +110,7 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
     const readingAuthorId = req.params.readingAuthorId;
     const mimeType = req.file?.mimetype;
     const filename = (req.file !== undefined ? req.file.filename : '');
+    const s3Url = (req.file as any).location;
 
     const file = await createFileRecordReadingFeedback(
       authId, 
@@ -118,7 +119,8 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
       req.body.title, 
       req.body.description,
       readingAuthorId,
-      req.body.additionalFeedback
+      req.body.additionalFeedback,      
+      s3Url
     );
 
     res.json(file);

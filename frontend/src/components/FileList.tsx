@@ -119,7 +119,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  {fileListProperties.showPreviewButton ? (
+                  {/* {fileListProperties.showPreviewButton ? (
                   <Button
                     size="small"
                     startIcon={<PreviewIcon />}
@@ -130,7 +130,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
                   </Button>
                   ) : (
                     <div></div>   
-                  )}
+                  )} */}
                   <Button component="a" href={f.url} download={f.filename} size="small">
                     {fileListProperties.buttonDownloadText}
                   </Button>
@@ -196,7 +196,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
       </Dialog>
 
       {/* Preview dialog */}
-      <Dialog
+      {/* <Dialog
         open={!!previewFile}
         onClose={() => setPreviewFile(null)}
         fullWidth
@@ -240,7 +240,7 @@ const FileList: React.FC<FileListProps> = ({files, onSendData, fileListPropertie
               </Typography>
             ))}
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   )
 }

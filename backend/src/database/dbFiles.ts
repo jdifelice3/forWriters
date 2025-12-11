@@ -71,7 +71,8 @@ export const createFileRecordReadingFeedback = async(
     title: string, 
     description: string,
     readingAuthorId: string,
-    additionalFeedback?: string
+    s3Url: string,
+    additionalFeedback?: string,
  ) => {
   
   try {
@@ -85,7 +86,7 @@ export const createFileRecordReadingFeedback = async(
         description: description,
         filename: filename,
         mimetype: mapMimeToEnum(mimeType),
-        url: `/uploads/${filename}`,
+        url: s3Url,
         userId: user ? user.id : '',
         documentType: getDocumentTypeFromString(DocumentType.FEEDBACK)
       },
