@@ -2,6 +2,8 @@ import { PrismaClient, CommentSource, DocumentType, FileType } from "@prisma/cli
 import { getDocumentTypeFromString } from "../util/Enum";
 import { extractCommentsWithTargets } from "../services/docxExtractor";
 import path from 'path';
+import { mapMimeToEnum } from "../util/Enum";
+
 
 const prisma = new PrismaClient({
     log: [
@@ -37,8 +39,13 @@ export const getFileRecords = async(authId: string, documentType?: string) => {
     return files;
 }
 
-export const createFileRecordBasic = async(authId: string, mimeType: FileType, filename: string,
-        title: string, description: string
+export const createFileRecordBasic = async(
+    authId: string, 
+    mimeType: string, 
+    filename: string,
+    title: string, 
+    description: string,
+    url: string
  ) => {
   
   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
@@ -48,7 +55,7 @@ export const createFileRecordBasic = async(authId: string, mimeType: FileType, f
       title: title,
       description: description,
       filename: filename,
-      mimetype: mimeType,
+      mimetype: mapMimeToEnum(mimeType),
       url: `${process.env.API_HOST}/uploads/${filename}`,
       userId: user ? user.id : '',
     },
@@ -56,25 +63,6 @@ export const createFileRecordBasic = async(authId: string, mimeType: FileType, f
 
   return file;
 }
-
-// export const createFileRecordReading = async(authId: string, mimeType: FileType, filename: string,
-//         title: string, description: string
-//  ) => {
-//   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
-
-//   const file = await prisma.appFile.create({
-//     data: {
-//       title: title,
-//       description: description,
-//       filename: filename,
-//       mimetype: mimeType,
-//       url: `/uploads/${filename}`,
-//       userId: user ? user.id : '',
-//     },
-//   });
-
-//   return file;
-// }
 
 export const createFileRecordReadingFeedback = async(
     authId: string, 

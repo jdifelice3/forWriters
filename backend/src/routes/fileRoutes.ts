@@ -1,25 +1,34 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { FileType } from "@prisma/client";
+import multerS3 from "multer-s3";
+import { S3Client } from "@aws-sdk/client-s3";
 import Session from "supertokens-node/recipe/session";
 import { getFileRecords, createFileRecordBasic, updateFileRecord, deleteFileRecord, createFileRecordReadingFeedback } from "../database/dbFiles";
 import { deleteFile } from "../services/srvFiles";
+import { FileType } from "@prisma/client";
 
 const router = express.Router();
 
-//#region STORAGE
-const uploadDir = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-const storage = multer.diskStorage({
-  destination: uploadDir,
-  filename: (_req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+//#region S3 and Multer
+const s3 = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
 });
-console.log('Multer diskStorage', storage);
-const upload = multer({ storage });
-console.log('upload', upload);
+
+const upload = multer({
+  storage: multerS3({
+    s3,
+    bucket: process.env.AWS_S3_BUCKET!,
+    acl: "public-read", // optional — remove for private buckets
+    key: (_req, file, cb) => {
+      const filename = `${Date.now()}-${file.originalname}`;
+      cb(null, filename);
+    },
+  }),
+});
 //#endregion
 
 
@@ -62,26 +71,36 @@ router.get("/type/:documentType", async(_req, res) => {
 
 //#region POST
 router.post("/", upload.single("file"), async (req, res) => {
-  try{
+  try {
+    // Get the SuperTokens session
     const session = await Session.getSession(req, res);
     const authId = session.getUserId(true);
-    const mimeType = mapMimeToEnum(req.file?.mimetype);
-    const filename = (req.file !== undefined ? req.file.filename : '');
 
+    // File metadata from multer-s3
+    const s3Url = (req.file as any).location; // full URL: https://bucket.s3.amazonaws.com/file.pdf
+    const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
+    const mimeType = req.file?.mimetype;
+
+    // Create DB entry
     const file = await createFileRecordBasic(
-        authId, 
-        mimeType, 
-        filename, 
-        req.body.title, 
-        req.body.description
-      );
+      authId,
+      mimeType!,
+      key,                // store the S3 key
+      req.body.title,
+      req.body.description,
+      s3Url               // store the full S3 URL
+    );
 
-    res.json(file);
+    res.json({
+      ok: true,
+      file,
+    });
   } catch (err) {
-      console.error('Error creating file record:', err);
-      res.status(500).json({ err: 'Error creating file record' });
+    console.error("Error uploading file:", err);
+    res.status(500).json({ error: "Upload failed" });
   }
 });
+
 
 router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
   try{
@@ -143,19 +162,6 @@ router.delete("/", async(_req, res) => {
       res.status(500).json({ err: 'Error deleting file' });
   }
 });
-//#endregion
-
-
-//#region UTIL FUNTIONS
-const mapMimeToEnum = (mime: string | undefined): FileType => {
-  if (mime === "application/pdf") return "PDF";
-  if (
-    mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    mime === "application/msword"
-  )
-    return "DOCX";
-  throw new Error(`Unsupported file type: ${mime}`);
-}
 //#endregion
 
 export default router;

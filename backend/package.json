@@ -14,7 +14,9 @@
         "build": "tsc"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.948.0",
         "@prisma/client": "^6.19.0",
+        "@types/multer-s3": "^3.0.3",
         "@types/unzipper": "^0.10.11",
         "body-parser": "^2.2.1",
         "cookie-parser": "^1.4.7",
@@ -28,6 +30,7 @@
         "helmet": "^8.1.0",
         "install": "^0.13.0",
         "multer": "^2.0.2",
+        "multer-s3": "^3.0.1",
         "npm": "^11.6.2",
         "supertokens-node": "^16.7.6",
         "unzipper": "^0.12.3",

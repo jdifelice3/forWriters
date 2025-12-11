@@ -33,3 +33,13 @@ export const getReadingScheduleTypeFromString = (value: string): ReadingSchedule
   //}
   //return undefined;
 }
+
+export const mapMimeToEnum = (mime: string | undefined): FileType => {
+  if (mime === "application/pdf") return "PDF";
+  if (
+    mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    mime === "application/msword"
+  )
+    return "DOCX";
+  throw new Error(`Unsupported file type: ${mime}`);
+}
