@@ -61,6 +61,7 @@ app.use('/api/me', meRoute);
 app.use('/api/events', eventRoutes);
 
 const uploadDir = path.join(process.cwd(), "uploads");
+console.log('uploadDir', uploadDir);
 app.use(
   "/uploads",
   express.static(uploadDir, {
