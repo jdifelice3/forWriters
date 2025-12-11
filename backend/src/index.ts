@@ -43,23 +43,6 @@ app.use(
 
 app.use("/auth", middleware());
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use('/api/users', userRoutes); 
-
-app.use('/api/userProfile', userProfileRoutes);
-
-app.use('/api/files', fileRoutes);
-
-app.use('/api/pdfs', pdfRoutes);
-
-app.use('/api/groups', groupRoutes);
-
-app.use('/api/me', meRoute);
-
-app.use('/api/events', eventRoutes);
-
 const uploadDir = path.join(process.cwd(), "uploads");
 console.log('uploadDir', uploadDir);
 app.use(
@@ -81,6 +64,23 @@ app.use(
     }
   })
 );
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/api/users', userRoutes); 
+
+app.use('/api/userProfile', userProfileRoutes);
+
+app.use('/api/files', fileRoutes);
+
+app.use('/api/pdfs', pdfRoutes);
+
+app.use('/api/groups', groupRoutes);
+
+app.use('/api/me', meRoute);
+
+app.use('/api/events', eventRoutes);
 
 app.use(errorHandler());
 
