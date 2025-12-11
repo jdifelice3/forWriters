@@ -66,7 +66,7 @@ export const createFileRecordBasic = async(
 
 export const createFileRecordReadingFeedback = async(
     authId: string, 
-    mimeType: FileType, 
+    mimeType: string, 
     filename: string,
     title: string, 
     description: string,
@@ -84,7 +84,7 @@ export const createFileRecordReadingFeedback = async(
         title: title,
         description: description,
         filename: filename,
-        mimetype: mimeType,
+        mimetype: mapMimeToEnum(mimeType),
         url: `/uploads/${filename}`,
         userId: user ? user.id : '',
         documentType: getDocumentTypeFromString(DocumentType.FEEDBACK)

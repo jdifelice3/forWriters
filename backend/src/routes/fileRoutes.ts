@@ -107,12 +107,12 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
     const session = await Session.getSession(req, res);
     const authId = session.getUserId(true);
     const readingAuthorId = req.params.readingAuthorId;
-    const mimeType = mapMimeToEnum(req.file?.mimetype);
+    const mimeType = req.file?.mimetype;
     const filename = (req.file !== undefined ? req.file.filename : '');
 
     const file = await createFileRecordReadingFeedback(
       authId, 
-      mimeType, 
+      mimeType!, 
       filename, 
       req.body.title, 
       req.body.description,
