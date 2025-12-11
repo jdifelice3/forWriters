@@ -61,7 +61,23 @@ app.use('/api/me', meRoute);
 app.use('/api/events', eventRoutes);
 
 const uploadDir = path.join(process.cwd(), "uploads");
-app.use("/uploads", express.static(uploadDir));
+app.use(
+  "/uploads",
+  express.static(uploadDir, {
+    setHeaders: (res, filePath) => {
+      // 1. CORS
+      res.setHeader("Access-Control-Allow-Origin", process.env.WEB_HOST);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+
+      // 2. Allow browser to read Content-Disposition
+      res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+
+      // 3. Force download behavior
+      const filename = path.basename(filePath);
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    }
+  })
+);
 
 app.use(errorHandler());
 
