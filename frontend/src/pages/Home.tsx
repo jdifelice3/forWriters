@@ -20,7 +20,7 @@ export default function Dashboard() {
             <span
               style={{
                 fontFamily: "Courier New",//"Thebarstaindemo",
-                fontSize: "2.5rem",
+                fontSize: "2.3rem",
                 fontWeight: 600,
                 color: "#333",
                 marginLeft: "0.5rem",
@@ -33,7 +33,7 @@ export default function Dashboard() {
                 <span
               style={{
                 fontFamily: "Courier New",
-                fontSize: "18pt",
+                fontSize: "17pt",
                 fontWeight: 600,
                 color: "#333",
                 // marginLeft: "0.5rem",

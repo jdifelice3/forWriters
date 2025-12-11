@@ -41,11 +41,11 @@ const QUOTES: Quote[] = [
     text: "We all need editors. Even Homer needed editors.",
     source: "Steering the Craft (paraphrased idea)",
   },
-  {
-    author: "Neil Gaiman",
-    text: "When people tell you something’s wrong or doesn’t work for them, they’re almost always right.",
-    source: "Writing advice",
-  },
+//   {
+//     author: "Neil Gaiman",
+//     text: "When people tell you something’s wrong or doesn’t work for them, they’re almost always right.",
+//     source: "Writing advice",
+//   },
   
 //   {
 //     author: "Ray Bradbury",
@@ -62,11 +62,11 @@ const QUOTES: Quote[] = [
 //     text: "Two heads are better than one because they are unlikely to go wrong in the same direction.",
 //     source: "Mere Christianity",
 //   },
-//   {
-//     author: "James Baldwin",
-//     text: "You discover that your pain and heartbreak are not unique when you read—and when you are read.",
-//     source: "On being read (paraphrased idea)",
-//   },
+  {
+    author: "James Baldwin",
+    text: "You discover that your pain and heartbreak are not unique when you read—and when you are read.",
+    source: "On being read (paraphrased idea)",
+  },
 ];
 
 const WritingGroupQuotesGrid = () => {

@@ -41,7 +41,13 @@ export default function Layout() {
       >
         <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
           <img src="/forWriters-logo-black.png" alt="logo" style={{ width: 75 }} />
-          <span style={{ fontSize: "2.5rem", marginLeft: ".5rem", color: "#333" }}>
+          <span style={{ 
+            fontFamily: "Thebarstaindemo", 
+            fontSize: "3.0rem", 
+            fontWeight: 500,
+            marginLeft: "-0.5rem", 
+            color: "#333" 
+          }}>
             forWriters
           </span>
           <span style={{ color: "black" }}>&nbsp;&nbsp;&nbsp;where writers hone their craft</span>

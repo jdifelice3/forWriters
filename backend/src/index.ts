@@ -53,7 +53,7 @@ app.use(
   express.static(uploadDir, {
     setHeaders: (res, filePath) => {
       // 1. CORS
-      res.setHeader("Access-Control-Allow-Origin", process.env.WEB_HOST);
+      res.setHeader("Access-Control-Allow-Origin", process.env.WEB_HOST!);
       res.setHeader("Access-Control-Allow-Credentials", "true");
 
       // 2. Allow browser to read Content-Disposition
