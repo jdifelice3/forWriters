@@ -19,29 +19,33 @@ export const getGroup = async(groupId: string) => {
   const currentDate = new Date();
   try {
     const group = await prisma.group.findUnique({
+  where: {
+    id: groupId,
+  },
+  include: {
+    groupAddress: true,
+    groupUrl: true,
+    groupUser: true,
+    reading: {
       where: {
-        id: groupId,
-      },
-      include: {
-        groupAddress: true,
-        groupUrl: true,
-        groupUser: true,
-        reading: {
-          where: {
-            submissionDeadline: {
-              lte: currentDate
-            },
-            readingDate: {
-              gt: currentDate
-            }
-          },
-          orderBy: {
-            submissionDeadline: 'asc',
-          },
+        submissionDeadline: {
+          lte: currentDate,
+        },
+        readingDate: {
+          gt: currentDate,
         },
       },
-    });
-
+      orderBy: {
+        submissionDeadline: 'asc',
+      },
+    },
+    // _count: {
+    //   select: {
+    //     joinRequests: true, // Counting JoinRequest records related to the group
+    //   },
+    // },
+  },
+});
     return group;
   } catch (err) {
       console.error('Error creating group:', err);

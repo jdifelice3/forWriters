@@ -67,68 +67,6 @@ router.get("/type/:documentType", async(_req, res) => {
       res.status(500).json({ err: 'Error retrieving file records' });
   }
 });
-//#endregion
-
-
-//#region POST
-router.post("/", upload.single("file"), async (req, res) => {
-  try {
-    // Get the SuperTokens session
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
-
-    // File metadata from multer-s3
-    const s3Url = (req.file as any).location; // full URL: https://bucket.s3.amazonaws.com/file.pdf
-    const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
-    const mimeType = req.file?.mimetype;
-
-    // Create DB entry
-    const file = await createFileRecordBasic(
-      authId,
-      mimeType!,
-      key,                // store the S3 key
-      req.body.title,
-      req.body.description,
-      s3Url               // store the full S3 URL
-    );
-
-    res.json({
-      ok: true,
-      file,
-    });
-  } catch (err) {
-    console.error("Error uploading file:", err);
-    res.status(500).json({ error: "Upload failed" });
-  }
-});
-
-
-router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
-  try{
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
-    const readingAuthorId = req.params.readingAuthorId;
-    const mimeType = req.file?.mimetype;
-    const filename = (req.file !== undefined ? req.file.filename : '');
-    const s3Url = (req.file as any).location;
-
-    const file = await createFileRecordReadingFeedback(
-      authId, 
-      mimeType!, 
-      filename, 
-      req.body.title, 
-      req.body.description,
-      readingAuthorId,
-      req.body.additionalFeedback,      
-      s3Url
-    );
-
-    res.json(file);
-  } catch (err) {
-      console.error('Error creating file record:', err);
-      res.status(500).json({ err: 'Error creating file record' });
-  }
-});
 
 router.get("/:id/download", async (req, res) => {
     try {
@@ -164,6 +102,103 @@ router.get("/:id/download", async (req, res) => {
 
     }
 });
+
+//#endregion
+
+
+//#region POST
+router.post("/", upload.single("file"), async (req, res) => {
+  try {
+    // Get the SuperTokens session
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+
+    // File metadata from multer-s3
+    const s3Url = (req.file as any).location; // full URL: https://bucket.s3.amazonaws.com/file.pdf
+    const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
+    const mimeType = req.file?.mimetype;
+
+    // Create DB entry
+    const file = await createFileRecordBasic(
+      authId,
+      mimeType!,
+      key,                // store the S3 key
+      req.body.title,
+      req.body.description,
+      s3Url               // store the full S3 URL
+    );
+
+    res.json({
+      ok: true,
+      file,
+    });
+  } catch (err) {
+    console.error("Error uploading file:", err);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+router.post("/image", upload.single("file"), async (req, res) => {
+  try {
+    // Get the SuperTokens session
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+
+    // File metadata from multer-s3
+    const s3Url = (req.file as any).location; // full URL: https://bucket.s3.amazonaws.com/file.pdf
+    const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
+    const mimeType = req.file?.mimetype;
+
+    // Create DB entry
+    const file = await createFileRecordBasic(
+      authId,
+      mimeType!,
+      key,                // store the S3 key
+      req.body.title,
+      req.body.description,
+      s3Url               // store the full S3 URL
+    );
+
+    res.json({
+      ok: true,
+      file,
+    });
+  } catch (err) {
+    console.error("Error uploading file:", err);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
+  try{
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+
+    const readingAuthorId = req.params.readingAuthorId;
+    const mimeType = req.file?.mimetype;
+    const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
+
+    //const filename = (req.file !== undefined ? req.file.filename : '');
+    const s3Url = (req.file as any).location;
+
+    const file = await createFileRecordReadingFeedback(
+      authId, 
+      mimeType!, 
+      key, 
+      req.body.title, 
+      req.body.description,
+      readingAuthorId,
+      s3Url,
+      req.body.additionalFeedback,      
+    );
+
+    res.json(file);
+  } catch (err) {
+      console.error('Error creating file record:', err);
+      res.status(500).json({ err: 'Error creating file record' });
+  }
+});
+
 //#endregion
 
 

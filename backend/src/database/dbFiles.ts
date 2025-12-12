@@ -64,6 +64,31 @@ export const createFileRecordBasic = async(
   return file;
 }
 
+// export const createImageRecord = async(
+//     authId: string, 
+//     mimeType: string, 
+//     filename: string,
+//     title: string, 
+//     description: string,
+//     url: string
+//  ) => {
+  
+//   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
+
+//   const file = await prisma.appFile.create({
+//     data: {
+//       title: title,
+//       description: description,
+//       filename: filename,
+//       mimetype: mapMimeToEnum(mimeType),
+//       url: url,
+//       userId: user ? user.id : '',
+//     },
+//   });
+
+//   return file;
+// }
+
 export const createFileRecordReadingFeedback = async(
     authId: string, 
     mimeType: string, 
