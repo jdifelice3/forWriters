@@ -117,40 +117,12 @@ export const createFileRecordReadingFeedback = async(
       },
     });
 
-    const feedback = await prisma.readingFeedback.create({
-      data: {
-        readingAuthorId: readingAuthorId,
-        feedbackUserId: user.id,
-        feedbackFileId: file.id,
-      }
-    });
+    
 
-    const filePath: string = path.join(process.cwd(), "uploads/",filename);
-    const comments = await extractCommentsWithTargets(filePath);
+    // const filePath: string = path.join(process.cwd(), "uploads/",filename);
+    // const comments = await extractCommentsWithTargets(filePath);
     
-    let input = [];
-    //add additional feedback
-    input.push({
-        readingAuthorId: readingAuthorId,
-        readingFeedbackId: feedback.id,
-        source: CommentSource.MANUAL,
-        commentText: (additionalFeedback ? additionalFeedback : ""),
-        targetText: "",
-    })
-    
-    for(let i = 0; i < comments.length; i++){
-        input.push({
-            readingAuthorId: readingAuthorId,
-            readingFeedbackId: feedback.id,
-            source: CommentSource.DOCX,
-            commentText: comments[i].commentText,
-            targetText: comments[i].targetText
-        })
-    }
-    
-    const commentsResults = await prisma.readingFeedbackComment.createMany({
-        data: input
-    });
+
 
     return file;
   } catch (err) {

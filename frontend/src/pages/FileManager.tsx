@@ -8,14 +8,18 @@ import { DocType } from "../util/Enum";
 import { FileListProperties, UploadFileFormProperties } from "../types/File";
 import { generateRandomString } from "../util/Math";
 import FileList from "../components/FileList";
-import UploadFileForm from "../components/UploadFileForm";
+import UploadFileForm from "../components/UploadFileForm_old";
 import {
   Box,
+  Card,
+CardContent,
+
   Typography,
   CircularProgress,
   Divider,
 } from "@mui/material";
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
+import ManuscriptUploadSection from "../components/ManuscriptUploadSection";
 
 const uploadFormProperties: UploadFileFormProperties =
   {
@@ -50,7 +54,7 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
     const [files, setFiles] = useState<AppFile[]>([]);
     const [reload, setReload] = useState("");
 
-    const filesUrl = `${import.meta.env.VITE_API_HOST}/api/files`;
+    const filesUrl = `${import.meta.env.VITE_API_HOST}/api/fileApi`;
     // Fetch uploaded files
     useEffect(() => {
         if (!user || isLoading) return;
@@ -119,11 +123,14 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
             />&nbsp;
         {pageTitle}
       </Typography>
-        {documentType && documentType.toString() === DocType.MANUSCRIPT ? (
-      <UploadFileForm onSendData={reloadFromUploadForm} formProperties={uploadFormProperties} />
-        ) : (
-            <div></div>
-        )}
+      <Card sx={{ mb: 4, p: 2 }}>
+            <CardContent>
+        <Typography variant="h6" gutterBottom>
+            Upload a new manuscript
+        </Typography>
+            <ManuscriptUploadSection onSendData={reloadFromUploadForm}/>
+        </CardContent>
+        </Card>
       <Divider sx={{ mb: 3 }} />
 
       {/* File list */}

@@ -5,7 +5,7 @@ import { UploadFileFormProperties } from "../types/File";
 import { AppFile, Reading, ReadingAuthor } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import { generateRandomString } from "../util/Math";
-import UploadFileForm from "../components/UploadFileForm";
+import UploadFileForm from "../components/UploadFileForm_old";
 import FileIcon from "../components/FileIcon";
 import {
   Paper,
@@ -179,7 +179,7 @@ const ReadingFeedback = () => {
                   <CardActions>
                   {ra.authorAppFile?.appFile ? (
                   <Button 
-                      href={`${fileUploadsUrl}/${ra.authorAppFile?.appFile.filename}` } download={ra.authorAppFile?.appFile.filename} 
+                      href={ra.authorAppFile?.appFile.url} download={ra.authorAppFile?.appFile.filename} 
                       size="small"
                       sx={{borderColor: "primary.main"}}
                       startIcon={<DownloadIcon />}

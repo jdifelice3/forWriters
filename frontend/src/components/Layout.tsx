@@ -17,6 +17,7 @@ import MemberSearchPage from "../pages/MemberSearchPage";
 import Readings from "../pages/Readings";
 import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
 import { DocType } from "../util/Enum";
+import Dashboard from "../pages/Dashboard";
 
 export default function Layout() {
   const { loading } = useSessionContext();
@@ -76,6 +77,7 @@ export default function Layout() {
             <Route path="/groupsearch" element={<GroupSearch />} />
             <Route path="/readings" element={<Readings />} />
             <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </main>
       </div>

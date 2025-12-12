@@ -1,5 +1,5 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, CommentSource } from "@prisma/client";
 import multer from "multer";
 import multerS3 from "multer-s3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
@@ -7,8 +7,17 @@ import { Readable } from "stream";
 import { S3Client } from "@aws-sdk/client-s3";
 import Session from "supertokens-node/recipe/session";
 import { getFileRecords, createFileRecordBasic, updateFileRecord, deleteFileRecord, createFileRecordReadingFeedback } from "../database/dbFiles";
+import { extractCommentsWithTargetsFromS3 } from "../services/streamFromS3";
+
+type ExtractedComment = {
+  commentId: string;
+  commentText: string;
+  targetText: string;
+};
 
 const router = express.Router();
+
+const prisma = new PrismaClient();
 
 //#region S3 and Multer
 const s3 = new S3Client({
@@ -33,40 +42,7 @@ const upload = multer({
 //#endregion
 
 
-//#region GET
-router.get("/", async (_req, res) => {
-  try{
-    
-    const session = await Session.getSession(_req, res);
-    const authId = session.getUserId(true);
-    const files = await getFileRecords(authId);
 
-    res.json(files);
-  } catch (err) {
-      console.error('Error retrieving file records:', err);
-      res.status(500).json({ err: 'Error retrieving file records' });
-  }
-});
-
-router.get("/type/:documentType", async(_req, res) => {
-  try{
-    
-    const documentType = _req.params.documentType;
-
-    if(!documentType){
-        res.status(404).json({error: "Document Type not found"});
-    }
-    
-    const session = await Session.getSession(_req, res);
-    const authId = session.getUserId(true);
-    const files = await getFileRecords(authId, documentType);
-
-    res.json(files);
-  } catch (err) {
-      console.error('Error retrieving file records:', err);
-      res.status(500).json({ err: 'Error retrieving file records' });
-  }
-});
 
 router.get("/:id/download", async (req, res) => {
     try {
@@ -138,6 +114,74 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
+router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
+  try{
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
+    if(!user){
+        throw new Error("user not found");
+    }
+
+    const readingAuthorId = req.params.readingAuthorId;
+    const mimeType = req.file?.mimetype;
+    const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
+    //const filename = (req.file !== undefined ? req.file.filename : '');
+    const s3Url = (req.file as any).location;
+    console.log(readingAuthorId, mimeType,key,s3Url);
+
+    const file = await createFileRecordReadingFeedback(
+      authId, 
+      mimeType!, 
+      key, 
+      req.body.title, 
+      req.body.description,
+      readingAuthorId,
+      s3Url,
+      req.body.additionalFeedback,      
+    );
+
+    const feedback = await prisma.readingFeedback.create({
+      data: {
+        readingAuthorId: readingAuthorId,
+        feedbackUserId: user.id,
+        feedbackFileId: file.id,
+      }
+    });
+
+    const comments: any = await extractCommentsWithTargetsFromS3(process.env.AWS_S3_BUCKET!, key, process.env.AWS_REGION!);
+    console.log('comments[]', comments);
+    let input = [];
+    //add additional feedback
+    input.push({
+        readingAuthorId: readingAuthorId,
+        readingFeedbackId: feedback.id,
+        source: CommentSource.MANUAL,
+        commentText: (req.body.additionalFeedback ? req.body.additionalFeedback : ""),
+        targetText: "",
+    })
+    
+    for(let i = 0; i < comments.length; i++){
+        input.push({
+            readingAuthorId: readingAuthorId,
+            readingFeedbackId: feedback.id,
+            source: CommentSource.DOCX,
+            commentText: comments[i].commentText,
+            targetText: comments[i].targetText
+        })
+    }
+    console.log('input', input);
+    const commentsResults = await prisma.readingFeedbackComment.createMany({
+        data: input
+    });
+    console.log('after comments storage');
+    res.json(file);
+  } catch (err) {
+      console.error('Error creating file record:', err);
+      res.status(500).json({ err: 'Error creating file record' });
+  }
+});
+
 router.post("/image", upload.single("file"), async (req, res) => {
   try {
     // Get the SuperTokens session
@@ -166,73 +210,6 @@ router.post("/image", upload.single("file"), async (req, res) => {
   } catch (err) {
     console.error("Error uploading file:", err);
     res.status(500).json({ error: "Upload failed" });
-  }
-});
-
-router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
-  try{
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
-
-    const readingAuthorId = req.params.readingAuthorId;
-    const mimeType = req.file?.mimetype;
-    const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
-
-    //const filename = (req.file !== undefined ? req.file.filename : '');
-    const s3Url = (req.file as any).location;
-
-    const file = await createFileRecordReadingFeedback(
-      authId, 
-      mimeType!, 
-      key, 
-      req.body.title, 
-      req.body.description,
-      readingAuthorId,
-      s3Url,
-      req.body.additionalFeedback,      
-    );
-
-    res.json(file);
-  } catch (err) {
-      console.error('Error creating file record:', err);
-      res.status(500).json({ err: 'Error creating file record' });
-  }
-});
-
-//#endregion
-
-
-//#region PUT
-router.put("/", async(_req, res) => {
-  try{
-    const { id, title, description } = _req.body;
-    const file = await updateFileRecord(id, title, description);
-    res.json(file);
-  } catch (err) {
-    console.error('Error updating file record', err);
-    res.status(500).json({ err: 'Error updating file record' });
-  }
-});
-//#endregion
-
-
-//#region DELETE
-router.delete("/", async(_req, res) => {
-  let id: string = "";
-  try {
-    if(typeof _req.query.id === "string"){
-      id = _req.query.id;
-      
-      const fileUrl = await deleteFileRecord(id);
-      
-      res.status(200).json({status: "OK"})
-      
-    } else {
-      throw new Error("Expecting a string data type in the query string for file id");
-    }
-  } catch (err) { 
-      console.error('Error deleting file:', err);
-      res.status(500).json({ err: 'Error deleting file' });
   }
 });
 //#endregion

@@ -104,9 +104,9 @@ const Groups = () => {
       </Grid>
 
       <Divider sx={{ my: 4 }} />
-      {isAdmin ? (
+      {/* {isAdmin ? (
         <EventsCalendar groupId={group.id} isAdmin={isAdmin} />
-      ) : (
+      ) : ( */}
           <Card>
             <CardContent>
               <Typography variant="h6" mb={2}>
@@ -189,7 +189,8 @@ const Groups = () => {
               
             </CardContent>
           </Card>
-      )}
+      {/* ) */}
+      {/* } */}
 
       <Divider sx={{ my: 4 }} />
 
