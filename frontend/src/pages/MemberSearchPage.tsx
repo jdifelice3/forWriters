@@ -9,7 +9,7 @@ import {
   Card,
   CardContent
 } from "@mui/material";
-import MemberSearchBox from "../components/MemberSearchBox";
+import MemberSearchBox from "../components/member/MemberSearchBox";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 const styles = {

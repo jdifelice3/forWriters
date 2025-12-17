@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import { GroupCreate } from "../types/domain-types";
 import {
   Box,
@@ -12,6 +13,7 @@ import {
   TextField,
   Typography,
   Alert,
+  Popover
 } from "@mui/material";
 import Grid from "@mui/material/Grid"; // legacy grid (item/container)
 import { z } from "zod";
@@ -21,6 +23,10 @@ import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import type { Resolver } from "react-hook-form";
 import KeyIcon from '@mui/icons-material/Key';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import InfoIcon from '@mui/icons-material/Info';
 
 // -------------------------
 // Zod schema (client-side)
@@ -55,6 +61,8 @@ const styles = {
 
 const GroupsCreate = () => {
   const navigate = useNavigate();
+  const [groupType, setGroupType] = React.useState("WRITING");
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
@@ -77,6 +85,18 @@ const GroupsCreate = () => {
     },
   });
 
+    const handleRadioButtons = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setGroupType(event.target.value);
+    };
+
+    const handleClick = (event: any) => {
+        setAnchorEl(event.currentTarget); // Set anchor to the clicked button
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null); // Close the popover
+    };
+  
   const onSubmit = async (values: CreateGroupInput) => {
     setSubmitting(true);
     setError(null);
@@ -87,13 +107,26 @@ const GroupsCreate = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values),
+        body: JSON.stringify({ 
+            name: values.name,
+            description: values.description,
+            imageUrl: values.imageUrl,
+            groupType: groupType,
+            address: values.address,
+            defaultMinDaysBetweenReads: values.defaultMinDaysBetweenReads,
+            defaultMaxConsecutiveReads: values.defaultMaxConsecutiveReads,
+            inviteEmailsCsv: values.inviteEmailsCsv
+        }),
       });
 
-      if (!res.ok) {
+    if (!res.ok) {
         const text = await res.text();
-        throw new Error(text || "Failed to create group");
-      }
+        let message = JSON.parse(text);
+        setError(message.err);
+        return;
+        //throw new Error(text || "Failed to create group");
+      
+    }
 
       const group: GroupCreate = await res.json();
       setSuccess("Group created successfully.");
@@ -105,6 +138,9 @@ const GroupsCreate = () => {
       setSubmitting(false);
     }
   };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
 
   return (
     <Box
@@ -125,7 +161,7 @@ const GroupsCreate = () => {
       </Typography>
 
       <Card>
-        <CardHeader title="Group Details" />
+        <CardHeader title="Group Details" sx={{mb:-2}}/>
         <CardContent>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -140,6 +176,56 @@ const GroupsCreate = () => {
 
           <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <Grid container spacing={2}>
+              <Grid size={12}>
+                <Typography variant="h6" sx={{ mt: 1 }}>
+                  Group Type<InfoIcon style={{ cursor: 'pointer' }} onClick={handleClick}/>
+                </Typography>
+                <RadioGroup
+                    name="groupType" 
+                    value={groupType} 
+                    onChange={handleRadioButtons} 
+                >
+                    <FormControlLabel value="WRITING" control={<Radio />} label="Writing Group"/>
+                    <FormControlLabel value="PERSONAL" control={<Radio />} label="Personal" />
+                </RadioGroup>
+                <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                    }}
+                    >
+                    <Typography sx={{ p: 2 }}>
+                        <span style={{fontWeight: "bold"}}>Writing Group</span>
+                        <ul>
+                            <li>Has multiple authors as members.</li>
+                            <li>Multiple authors can submit manuscripts to one or more readings for feedback.</li>
+                            <li>Has an administrator who creates scheduled or unscheduled readings as well as group news posts.</li>
+                            <li>Is visible to a group search.</li>
+                            <li>The administator must approve requests to join the group.</li>
+                        </ul>
+                        <span style={{fontWeight: "bold"}}>Personal Group</span>
+                        <ul>
+                            <li>Has one author who is also the group administator.</li>
+                            <li>The author is the only one who can submit manscripts to a reading.</li>
+                            <li>Is not visible to a group search.</li>
+                        </ul>
+                        <span style={{fontWeight: "bold"}}>Both</span>
+                        <ul>
+                            <li>Can invite members and non-members to join the group.</li>
+                        </ul>
+                        <Button onClick={handleClose}>Close</Button>
+                    </Typography>                
+                </Popover>
+              
+              </Grid>
               <Grid size={12}>
                 <TextField
                   label="Group Name"

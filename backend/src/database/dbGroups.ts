@@ -1,4 +1,4 @@
-import { PrismaClient, JoinRequestStatus, GroupType } from "@prisma/client";
+import { PrismaClient, Prisma, JoinRequestStatus, GroupType } from "@prisma/client";
 import { z } from 'zod';
 import { join } from "node:path";
 import { GroupError, JoinRequestError } from "../types/Error";
@@ -25,27 +25,58 @@ export const getGroup = async(groupId: string) => {
   include: {
     groupAddress: true,
     groupUrl: true,
-    groupUser: true,
+    groupUser: {
+        include: {
+            user: {
+                include: {
+                    userProfile: true
+                }
+            }
+        }
+    },
     reading: {
-      where: {
-        submissionDeadline: {
-          lte: currentDate,
-        },
-        readingDate: {
-          gt: currentDate,
-        },
-      },
-      orderBy: {
-        submissionDeadline: 'asc',
+        include: {
+            readingAuthor: {
+                include: {
+                    authorAppFile: {
+                        include: {
+                            appFile: {
+                                include: {
+                                    user: {
+                                        include: {
+                                            userProfile: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    // reading: {
+    //   where: {
+    //     submissionDeadline: {
+    //       lte: currentDate,
+    //     },
+    //     readingDate: {
+    //       gt: currentDate,
+    //     },
+    //   },
+    //   orderBy: {
+    //     submissionDeadline: 'asc',
+    //   },
+    //},
+    _count: {
+      select: {
+        joinRequests: true, // Counting JoinRequest records related to the group
       },
     },
-    // _count: {
-    //   select: {
-    //     joinRequests: true, // Counting JoinRequest records related to the group
-    //   },
-    // },
   },
 });
+    console.log('in getGroup(groupId')
+    console.log('group', group)
     return group;
   } catch (err) {
       console.error('Error creating group:', err);
@@ -224,8 +255,22 @@ export const createGroup = async (
       imgUrl?: string,
       websiteUrl?: string
   ) => {
-  
+    console.log('in createGroup');
+    console.log('authId', authId);
   try {
+
+// const userRows = await prisma.$queryRaw<
+//     { id: string; readingAuthorId: string; feedbackUserId: string }[]
+//   >`
+//     SELECT *
+//     FROM "User"
+//     WHERE "superTokensId" = '15ace8c4-50bd-4a2f-8ea2-740c65eb417c'
+//   `;
+//   console.log("RAW DB User rows:");
+//   console.dir(userRows, { depth: null });
+//   console.log("\n");
+
+
     // Get userId from authId
     const user: any = await prisma.user.findUnique({
       where: {
@@ -270,9 +315,19 @@ export const createGroup = async (
     } else {
       throw new Error("Create group failed.");
     }
-  } catch (error) {
-    console.error('Error creating group:', error);
-    throw error; 
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2002') {
+            console.log("error message:", err.message);
+            if(err.message.indexOf("Unique constraint failed on the fields: (`name`)") !== -1){
+                throw new Error("A group with this name already exists. Please choose another.")
+            }
+            console.log('There is a unique constraint violation, a new user cannot be created with this email');
+        }
+    } else {
+        console.error('Error creating group:', err);
+    }
+    throw err; 
   }
 };
 

@@ -6,7 +6,7 @@ import {
   Typography,
   Stack,
 } from "@mui/material";
-import { CollaboratorRequest } from "../types/domain-types";
+import { CollaboratorRequest } from "../../types/domain-types";
 interface Props {
   requests: CollaboratorRequest[];
   onAction: (message: string) => void;

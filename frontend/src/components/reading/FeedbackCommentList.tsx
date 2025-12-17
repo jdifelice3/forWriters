@@ -1,7 +1,7 @@
 "use client";
 
-import { ReadingAuthorByUser } from "../types/domain-types";
-import { generateRandomString } from "../util/Math";
+import { ReadingAuthorByUser } from "../../types/domain-types";
+import { generateRandomString } from "../../util/Math";
 import {
     Divider,
     Typography,
@@ -35,7 +35,7 @@ const FeedbackCommentList: React.FC<FeedbackCommentListProps> = ({readingAuthor}
                 }}
             >
                 <Typography key={generateRandomString(10)} sx={{fontWeight:"bold"}}>
-                    {fb.user.userProfile?.firstName} {fb.user.userProfile?.lastName}
+                    {/* {fb.user.userProfile?.firstName} {fb.user.userProfile?.lastName} */}
                 </Typography>
                 {fb.readingFeedbackComment.map((com => (
                 <>

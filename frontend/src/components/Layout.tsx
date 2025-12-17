@@ -1,6 +1,10 @@
 import { Routes, Route, Link } from "react-router-dom";
 import { useSessionContext } from "supertokens-auth-react/recipe/session";
 
+import {
+    Box,
+} from "@mui/material";
+
 import Sidebar from "./Sidebar";
 
 // Your pages
@@ -18,69 +22,40 @@ import Readings from "../pages/Readings";
 import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
 import { DocType } from "../util/Enum";
 import Dashboard from "../pages/Dashboard";
+import GroupsPersonal from "../pages/GroupsPersonal";
+import TopNav from "../components/nav/TopNav";
 
 export default function Layout() {
   const { loading } = useSessionContext();
 
   if (loading) return null;
 
-  const drawerWidth = 280;
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      
-      {/* HEADER */}
-      <header
-        style={{
-          marginLeft: drawerWidth,
-          backgroundColor: "#fff",
-          borderBottom: "1px solid #ddd",
-          padding: "0.5rem 1rem",
-          display: "Flex",
-          alignItems: "center",
-        }}
-      >
-        <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img src="/forWriters-logo-black.png" alt="logo" style={{ width: 75 }} />
-          <span style={{ 
-            fontFamily: "Thebarstaindemo", 
-            fontSize: "3.0rem", 
-            fontWeight: 500,
-            marginLeft: "-0.5rem", 
-            color: "#333" 
-          }}>
-            forWriters
-          </span>
-          <span style={{ color: "black" }}>&nbsp;&nbsp;&nbsp;where writers hone their craft</span>
-        </Link>
-      </header>
-
-      {/* BODY */}
-      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+    <Box sx={{ display: "flex" }}>
+        <TopNav />
         <Sidebar />
+        <Box component="main" sx={{ flexGrow: 1, mt: 10, ml:0 }}>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/userprofile" element={<UserProfile />} />
 
-        <main style={{ flex: 1, padding: "1rem", overflowY: "auto", backgroundColor: "#fafafa" }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/userprofile" element={<UserProfile />} />
+                <Route path="/filemanager/manuscript" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
+                <Route path="/filemanager/feedback" element={<FileManager documentType={DocType.FEEDBACK} />} />
 
-            <Route path="/filemanager/manuscript" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
-            <Route path="/filemanager/feedback" element={<FileManager documentType={DocType.FEEDBACK} />} />
+                <Route path="/groups/details" element={<Groups />} />
+                <Route path="/groups/details/personal" element={<GroupsPersonal />} />
+                <Route path="/creategroup" element={<GroupsCreate />} />
+                <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
+                <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />
+                <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
 
-            <Route path="/groups/:groupId" element={<Groups />} />
-            <Route path="/creategroup" element={<GroupsCreate />} />
-            <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
-            <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />
-            <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
-
-            <Route path="/membersearch" element={<MemberSearchPage />} />
-            <Route path="/groupsearch" element={<GroupSearch />} />
-            <Route path="/readings" element={<Readings />} />
-            <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Routes>
-        </main>
-      </div>
-    </div>
+                <Route path="/membersearch" element={<MemberSearchPage />} />
+                <Route path="/groupsearch" element={<GroupSearch />} />
+                <Route path="/readings" element={<Readings />} />
+                <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+            </Routes>
+        </Box>
+    </Box>
   );
 }

@@ -1,17 +1,16 @@
-import { User } from './User';
-import { Variant } from './Style';
-
-export interface AppFile {
-  id: string;
-  userId: string;
-  title: string;
-  description?: string;
-  filename: string;
-  mimetype: string;
-  url: string;
-  uploadedAt: string;
-  user: User
-}
+import { Variant } from "./Style";
+import { AppFile } from "./domain-types";
+// export interface AppFile {
+//   id: string;
+//   userId: string;
+//   title: string;
+//   description?: string;
+//   filename: string;
+//   mimetype: string;
+//   url: string;
+//   uploadedAt: string;
+//   user: User
+// }
 
 export interface UploadFileFormProperties {
   title: string;
@@ -28,4 +27,15 @@ export interface FileListProperties {
   showEditButton: boolean;
   showDeleteButton: boolean;
   buttonDownloadText: string; 
+}
+
+export interface FileCommands {
+  edit(file: AppFile): void;
+  save(file: AppFile): void;
+  delete(file: AppFile): void;
+}
+
+export interface FileListFormCommands {
+  edit(fileId: string): void;
+  delete(fileId: string): void;
 }

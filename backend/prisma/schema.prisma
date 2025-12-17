@@ -46,6 +46,7 @@ enum FileType {
 
 enum GroupType {
   WRITING
+  PERSONAL
 }
 
 enum JoinRequestStatus {
@@ -338,11 +339,9 @@ model UserProfile {
 }
 
 model UserSearch {
-  id       String @id
+  userId       String     @id
   fullName String?
   bio      String?
-
-  @@map("UserSearch")
 }
 
 model UserUrl {

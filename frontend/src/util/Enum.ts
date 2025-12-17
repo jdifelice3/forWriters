@@ -21,4 +21,8 @@ export const UrlType = {
     "YOUTUBE":"YOUTUBE"
 }
 Object.freeze(UrlType);
-    
+
+export const ReadingScheduleType = {
+    "SCHEDULED": "SCHEDULED", 
+    "UNSCHEDULED": "UNSCHEDULED" 
+}

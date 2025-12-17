@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUserContext } from "../context/UserContext";
-import { FileListProperties } from '../types/File';
-import { AppFile } from "../types/domain-types";
+import { useUserContext } from "../../context/UserContext";
+import { FileListProperties } from '../../types/File';
+import { AppFile } from "../../types/domain-types";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import {
   MenuItem, FormControl

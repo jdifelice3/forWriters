@@ -1,7 +1,7 @@
-import { AppFile } from "../types/domain-types";
+import { AppFile } from "../../types/domain-types";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import pdfIcon from '../assets/icons/icons8-pdf-48.png';
-import wordIcon from '../assets/icons/icons8-word-file-48.png';
+import pdfIcon from "../../assets/icons/icons8-pdf-48.png";
+import wordIcon from '../../assets/icons/icons8-word-file-48.png';
 import { Avatar } from "@mui/material";  
   
 

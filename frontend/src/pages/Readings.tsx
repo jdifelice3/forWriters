@@ -1,29 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useUserContext } from "../context/UserContext";
 import { 
-    ReadingAuthorByUser,
+    AppFile,
+    Group,
+    ReadingAuthor,
     Reading
  } from "../types/domain-types";
 import {
   Alert,
   Box,
   Typography,
-  Button,
+  CircularProgress,
   Card,
-  CardContent,
-  Divider,
-  Popover,
-  TextField
+  CardContent
 } from "@mui/material";
 
 import Grid from "@mui/material/Grid";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import FileSelect from "../components/FileSelect";
-import { FileListProperties } from '../types/File';
-import InfoIcon from '@mui/icons-material/Info';
-import FeedbackCommentList from "../components/FeedbackCommentList";
-import wordIcon from '../assets/icons/icons8-word-file-48.png';
-import { getCardBackgroundColor } from "../util/readingUtil";
+import ReadingSchedule from "../components/reading/ReadingSchedule";
+import { ReadingCommands } from "../types/Reading";
+import { FileCommands, FileListProperties } from "../types/File";
+import { useGroupDetails } from "../hooks/useGroup";
+import ReadingCalendar from "../components/reading/ReadingCalendar";
+import FileList from "../components/file/FileList";
 
 const fileListProperties: FileListProperties =
   {
@@ -31,204 +30,262 @@ const fileListProperties: FileListProperties =
     showPreviewButton: true,
     buttonDownloadText: "DOWNLOAD",
     showDeleteButton: true,
-    showEditButton: true 
-  }
+    showEditButton: true
+  } 
 
-const styles = {
-    marginLeft: '75px' // or a responsive value
-};
+  type FormInput = {
+    name: string,
+    readingDate: Date,
+    readingStartTime: string,
+    readingEndTime: string,
+    submissionDeadline: Date,
+    description: string,
+    schedule: string
+}
 
 const currentDate = new Date();
 
 const Readings = () => {
     const { user } = useUserContext();
-    const [readingAuthor, setReadingAuthor] = useState <ReadingAuthorByUser[]>();
-    const [anchorEl, setAnchorEl] = useState(null);
+
     const [error, setError] = useState<string | null>(null);
+    const [reading, setReading] = useState<Reading[]>([]);
+    const [open, setOpen] = useState(false);
+    const [buttonEventId, setButtonEventId] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [err, setErr] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+    const [editReading, setEditReading] = useState<Reading | null>(null);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+    const [schedule, setSchedule] = useState("SCHEDULED");
 
-    const readingsUrl = `${import.meta.env.VITE_API_HOST}/api/events/user/author`;
-    const addFileToReadingUrl = `${import.meta.env.VITE_API_HOST}/api/events/file/add`;
-    
-    useEffect(() => {
-        if(!user) return;
-        (async () => {
+    const { data : group, isLoading } = useGroupDetails<Group>();
 
-        const res = await fetch(`${readingsUrl}`, {
-            credentials: "include",
-        });
-        if (res.ok) {
-            const data: ReadingAuthorByUser[] = await res.json();
-            
-            setReadingAuthor(data);
-            if(!data[0]){
-                setError("You have not signed up for any readings");
-            }
-        }
-        })();
-  }, [user]);
-  
-  const handleSelectChange = async(readingAuthorId: string, fileId: string) => {
-    const res = await fetch(addFileToReadingUrl, {
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-      body: JSON.stringify({readingAuthorId: readingAuthorId, appFileId: fileId}),
-    });
-  }
+    let isAdmin = false;
 
-  const handleClick = (event: any) => {
-    setAnchorEl(event.currentTarget); // Set anchor to the clicked button
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null); // Close the popover
-  };
-
-  const canChangeManuscript = (r: Reading) => {
-    if(r.scheduledType === "SCHEDULED"){
-        return new Date(r.submissionDeadline || "").valueOf() > currentDate.valueOf()
-    } else {
-        return true; // As of now, users can can their manuscripts until it has been downloaded.
-                     // TODO: LOG ALL FILE DOWNLOADS
+    if (isLoading) {
+      return (
+        <Box display="flex" justifyContent="center" p={6} >
+          <CircularProgress size={24}/>
+        </Box>
+      );
     }
+
+    const foundUser = group?.groupUser.find(u => u.userId === user.id && u.isAdmin );
+    if(foundUser) isAdmin = true;
+
+    //Get array of readings that the user has joined    
+    let myReadings: Reading[] = [];
+    let partialResult: ReadingAuthor[] = [];
+    console.log('group readings:', group?.reading);
+    group?.reading.forEach((r) => {  
+        partialResult = r.readingAuthor.filter(ra => ra.authorId === user.id);
+        if(partialResult){
+            myReadings.push(r);
+        }
+    });
+
+    //Get array of files the reader has submitted to readings
+    let myFiles: AppFile[] = [];
+    myReadings.forEach((r) => {
+        r.readingAuthor.forEach((ra) => {
+            ra.authorAppFile ? myFiles.push(ra.authorAppFile?.appFile) : {};
+        });
+    });
+
+    console.log('my readings', myReadings);
+    console.log('my files: ', myFiles);
+
+    const baseUrl = `${import.meta.env.VITE_API_HOST}/api/events`;
+
+  const handleAddReading = async (values: FormInput ) => {
+    setSubmitting(true);
+    setErr(null);
+    setSuccess(null);
+    try{
+        const eventsURrl = `${import.meta.env.VITE_API_HOST}/api/events/${group?.id}`;
+        const res = await fetch(eventsURrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+            name: values.name, 
+            createdUserId: user.id,
+            readingDate: values.readingDate,
+            readingStartTime: values.readingStartTime,
+            readingEndTime: values.readingEndTime,
+            submissionDeadline: values.submissionDeadline,
+            description: values.description,
+            schedule: schedule
+        }),
+        credentials: "include",
+        });
+
+        if (res.ok) {
+            const newEvent = await res.json();
+            setReading((prev) => [newEvent, ...prev]);
+            setOpen(false);
+        }
+        setSuccess("Reading created successfully.");
+    } catch (err) {
+            setErr("Failed to create reading");
+    } finally {
+            setSubmitting(false);
+    }
+  };
+
+  const handleSignup = async (event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+      const eventsUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/signup`;
+      const res = await fetch(eventsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user ? user.id : "" }),
+        credentials: "include",
+      });
+      if (res.ok){
+        alert("You are signed up for this reading!");
+        setButtonEventId(readingId);
+      }
+  };
+
+const handleWithdraw = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+      const withdrawUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/withdraw`;
+      const res = await fetch(withdrawUrl, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user ? user.id : "" }),
+        credentials: "include",
+      });
+      if (res.ok){
+        alert("You have withdrawn from this reading!");
+        setButtonEventId(readingId);
+      }
 }
 
-  const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
+  const handleEdit = (reading: Reading) => {
+      setEditReading(reading);
+      setEditTitle(reading.name);
+      setEditDescription(reading.description || "");
+  };
+  
+const handleDelete = async (reading: Reading) => {
+    if (!confirm("Are you sure you want to delete this reading?")) return;
+    try {
+        const res = await fetch(`${baseUrl}/${reading.id}/group/${group?.id}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        });
+        const data = await res.json();
+        if (res.status === 200){
+            setButtonEventId(data.id);
+        } else {
+            setErr(data.error);
+        }
+    } catch (err: unknown) {
+        if(err instanceof Error){
+            setErr(`Error caught in handleDelete: ${err.message}`);
+            console.error(`Error caught in handleDelete: ${err.message}`);
+        } else {
+            console.error("Unknown error occurred")
+        }
+    }
+  };
+
+const readingCommands: ReadingCommands = {
+    edit: handleEdit,
+    save: handleAddReading,
+    delete: handleDelete,
+    signup: handleSignup,
+    withdraw: handleWithdraw
+}
+
+const fileListProperties: FileListProperties = {
+    showPreviewButton: false,
+    buttonDownloadText: "DOWNLOAD",
+    showDeleteButton: false,
+    showEditButton: false 
+}
+
+const handleFileEdit = async(file: AppFile) => {
+};
+
+const handleFileSaveEdit = async (file:AppFile) => {
+};
+
+const handleFileDelete = async (file: AppFile) => {
+};
+
+const fileCommands: FileCommands = {
+    edit: handleFileEdit,
+    save: handleFileSaveEdit,
+    delete: handleFileDelete
+}
 
     return (
-    <>
-        
-        {readingAuthor !== undefined ? (
-            <Card style={styles} sx={{ maxWidth: 750, mx: "auto", p: 4}}>
-                <CardContent>
-                    <Typography variant="h4" mb={2}>
-                    <MenuBookIcon 
-                        sx={{ 
-                        fontSize: '44px',
-                        verticalAlign: "bottom", 
+        <>
+        <Card elevation={0}>
+            <CardContent>
+        <Typography variant="h4" mb={2}>
+            <MenuBookIcon 
+                sx={{ 
+                fontSize: '44px',
+                verticalAlign: "bottom", 
+                }}
+            />&nbsp;
+            Readings
+            </Typography>
+            <Box mt={3}>
+                {error && (
+                    <Alert severity="error" sx={{ mt: 3 }}>
+                        {error}
+                    </Alert>
+                )}
+            </Box>
+            <Card sx={{width:"1200px"}}>
+            <CardContent>
+            <Grid size={12} container spacing={2}>
+                <Grid size={4} >
+                    <Typography variant="h6" mb={2}
+                        sx={{
+                            fontWeight: "bold"
                         }}
-                    />&nbsp;
-                    Readings
+                    >
+                    My Manuscripts
                     </Typography>
-                    <Box mt={3}>
-                        {error && (
-                            <Alert severity="error" sx={{ mt: 3 }}>
-                                {error}
-                            </Alert>
-                        )}
-                    </Box>
-                    <Grid container spacing={2}>
-                    {readingAuthor.map((ra) => (
-                        <Grid size={12}>
-                        <Box 
-                            sx={{
-                            border: "1px solid #ddd",
-                            p: 2,
-                            borderRadius: 2,
-                            backgroundColor: getCardBackgroundColor(ra.reading as Reading)
-                                // new Date(ra.reading.submissionDeadline) > currentDate && (!ra.authorAppFile)
-                                // ? "#e3f2fd"
-                                // : "#e3f2fd"
-                            }}  
-                        >
-                            <Typography variant="h6" fontWeight="bold">
-                                {ra.reading.name }
-                            </Typography>
-                            {/* <Typography>
-                                Group Name Goes Here
-                            </Typography> */}
-                            {ra.reading.scheduledType === "SCHEDULED" ? (
-                                <>
-                                <Typography variant="body2">
-                                    Date of Reading: 
-                                        <span style={{fontWeight: "bold"}}>
-                                            {new Date(ra.reading.readingDate || "").toLocaleDateString()}
-                                        </span>
-                                    </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                Submit manuscripts by <b>{new Date(ra.reading.submissionDeadline || "").toLocaleDateString()}</b>
-                                </Typography>
-                                </>
-                            ) : (
-                                <span></span>
-                            )}
-                            <Divider sx={{ my: 1 }} />
-                            <Typography variant="body1" fontWeight="bold">
-                            Submitted Manuscript: <InfoIcon style={{ cursor: 'pointer' }} onClick={handleClick}/>
-                            </Typography>
-                            
-                            <div>
-                            {canChangeManuscript(ra.reading as Reading) ? (
-                            <FileSelect 
-                                onSendData={handleSelectChange} 
-                                readingAuthorId={ra.id} 
-                                selectedValueId={ra.authorAppFile?.appFile.id || ""}
-                                fileListProperties={fileListProperties}
-                                />
-                            ) : (
-                            <TextField
-                                variant="outlined"
-                                sx={{ width: 360 }}
-                                disabled
-                                value={ra.authorAppFile?.appFile.title || ""}
-                            />
-                            )}
-                            <Popover
-                                id={id}
-                                open={open}
-                                anchorEl={anchorEl}
-                                onClose={handleClose}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
-                                >
-                                <Typography sx={{ p: 2 }}>
-                                    <span style={{fontWeight: "bold"}}>Submission Rules:</span>
-                                    <ul>
-                                        <li>Files must be of type DOCX<img src={wordIcon} className='icon' alt="DOCX" style={{width: "20px", height: "auto", verticalAlign: "text-bottom"}}/></li>
-                                        <li>You may change your manuscript until the submission deadline</li>
-                                        <li>Available files are ones you have already uploaded</li>
-                                    </ul>
-                                    <Button onClick={handleClose}>Close</Button>
-                                </Typography>                
-                            </Popover>
-                            </div>
-                            <Typography variant="caption" color="text.secondary">
-                                 {
-                                    ra.authorAppFile ?
-                                    `Submitted to Reading on ${new Date(ra.authorAppFile.createdAt).toLocaleDateString()}`
-                                    : "You haven't submitted a manuscript"
-                                }
-                            </Typography>
-                            <Divider sx={{ mb: 2, mt: 1 }} />
-                            <Typography variant="body1" fontWeight="bold">
-                                Feedback:
-                            </Typography>
-                            {ra.readingFeedback.length > 0 ? (
-                                <FeedbackCommentList readingAuthor={ra}/>
-                            ) : (
-                                <Typography>
-                                    Awaiting Feedback
-                                </Typography>
-                            )}
-                                
-                            </Box>
-                        </Grid>
-                    ))}
-
-                    </Grid>
-                </CardContent>
+                    <FileList files={myFiles} fileListProperties={fileListProperties} commands={fileCommands} />
+                </Grid>
+                <Grid size={4} >
+                <Typography variant="h6" mb={2}
+                    sx={{
+                        fontWeight: "bold"
+                    }}
+                >
+                    My Readings
+                </Typography>
+                    <ReadingSchedule readings={myReadings} commands={readingCommands}/>
+                </Grid>
+                <Grid size={4} >
+                    <Typography variant="h6" mb={2}
+                        sx={{
+                            fontWeight: "bold"
+                        }}
+                    >
+                    Group Reading Signup
+                    </Typography>
+                    {group?.reading ? (
+                        <ReadingCalendar readings={group?.reading} isAdmin={isAdmin} commands={readingCommands}/>
+                    ) : (
+                        <Typography>Readings have not yet been created for this group.</Typography>
+                    )}
+                    
+                </Grid>
+            </Grid>
+            </CardContent>
             </Card>
-        ) : (
-            <span></span>
-        )}
-    </>
+            </CardContent>
+            </Card>
+        </>
     )
 }
 export default Readings;

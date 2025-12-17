@@ -6,7 +6,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import CollaboratorRequestList from "../components/CollaboratorRequestList";
+import CollaboratorRequestList from "../components/member/CollaboratorRequestList";
 
 const CollaboratorRequestAdmin = () => {
   const [requests, setRequests] = useState<CollaboratorRequest[]>([]);

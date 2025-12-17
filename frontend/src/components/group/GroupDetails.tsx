@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { GroupBasic } from "../types/domain-types";
-import { getUrlLabel } from "../types/Url";
+import { GroupBasic } from "../../types/domain-types";
+import { getUrlLabel } from "../../types/Url";
 import {
   Box,
   Typography,

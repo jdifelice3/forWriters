@@ -10,7 +10,7 @@ import {
   IconButton,
   Stack,
 } from "@mui/material";
-import TipTapTextEditor from "./TipTapTextEditor";
+import TipTapTextEditor from "../TipTapTextEditor";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import AddIcon from "@mui/icons-material/Add";
 import Tooltip from '@mui/material/Tooltip';

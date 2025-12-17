@@ -2,6 +2,7 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
 //import { verifySession } from "supertokens-node/recipe/session/framework/express";
+import { verifySession } from "supertokens-node/recipe/session/framework/express";
 import { 
   JoinRequestError
 } from "../types/Error";
@@ -28,6 +29,7 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 //#region GET
+
 router.get("/:id", async(_req, res) => {
     try {
       const group = await getGroup(_req.params.id);
@@ -132,7 +134,8 @@ router.get("/admin/requests", async (req, res) => {
 router.post("/", async( _req, res) => {
   const session = await Session.getSession(_req, res);
   const authId = session.getUserId(true);
-  
+  console.log('in create group');
+  console.log('authId', authId);
   try {
       const {name, 
             description,
@@ -148,9 +151,9 @@ router.post("/", async( _req, res) => {
     const group  = await createGroup(authId, name, address, description, groupType, imageUrl, websiteUrl);
 
     res.json(group);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error creating group:', err);
-    res.status(500).json({ err: 'Error creating group' });
+    res.status(500).json({ err: err.message });
   }
 });
 

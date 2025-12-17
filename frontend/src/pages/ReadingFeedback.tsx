@@ -5,8 +5,8 @@ import { UploadFileFormProperties } from "../types/File";
 import { AppFile, Reading, ReadingAuthor } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import { generateRandomString } from "../util/Math";
-import UploadFileForm from "../components/UploadFileForm_old";
-import FileIcon from "../components/FileIcon";
+import FeedbackUploadSection from "../components/file/FeedbackUploadSection";
+import FileIcon from "../components/file/FileIcon";
 import {
   Paper,
   Box,
@@ -112,7 +112,7 @@ const ReadingFeedback = () => {
 
   return (
     <Box sx={{ 
-        maxWidth: 900, 
+        maxWidth: 750, 
         mx: "auto", 
         p: 4,
         marginLeft: "100px",
@@ -191,18 +191,22 @@ const ReadingFeedback = () => {
                 </CardActions>
                 <Paper className={userHasSubmittedFeedback(ra, user.id) || ra.authorId === user.id ? "disabled" : ""}
                     // to disable CardsF
-                    elevation={2}
+                    elevation={0}
                 >
                   {ra.authorAppFile?.appFile ? (
-                  <UploadFileForm 
-                    onSendData={reloadFromUploadForm} 
-                    readingId={reading.id} 
-                    formProperties={uploadFormProperties} 
-                    isUserDisabled={false}
-                    hasUserSubmitted={userHasSubmittedFeedback(ra, user.id)} 
-                    readingAuthorId={ra.id}
-                  />
-                  ) : (<div></div>)
+                    <>
+                    <Typography variant="h5" sx={{mt: 4, mb: 2}}>
+                        Upload the author's Word Doc with your comments
+                    </Typography>
+                    <FeedbackUploadSection onSendData={reloadFromUploadForm} readingAuthorId={ra.id} />
+                    <Typography 
+                        className={userHasSubmittedFeedback(ra, user.id) || ra.authorId === user.id ? "disabled" : ""}
+                        sx={{color: "green", fontWeight: "bold", mt: 2}}>
+                            You have submitted feedback for this story
+                    </Typography>
+                    </>
+                  ) : (
+                  <div></div>)
                 }
                 </Paper>
                 </CardContent>

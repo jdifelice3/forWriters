@@ -1,4 +1,3 @@
-// src/pages/GroupJoinRequestsAdminPage.tsx
 import { useEffect, useState } from "react";
 import {
   Typography,
@@ -6,7 +5,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import GroupJoinRequestList from "../components/GroupJoinRequestList";
+import GroupJoinRequestList from '../components/group/GroupJoinRequestList';
 
 interface JoinRequest {
   id: string;

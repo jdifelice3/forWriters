@@ -46,14 +46,14 @@ export const getUserSearch = async(authId: string, query: string) => {
           contains: query,
           mode: "insensitive",
         },
-        id: {
+        userId: {
             not: user.id
         }
       },
       take: 10,
       orderBy: { fullName: "asc" },
       select: {
-        id: true,
+        userId: true,
         fullName: true,
         bio: true
       },
@@ -101,7 +101,16 @@ export const createUser = async(superTokensId: string, email: string, role: Role
                 create: {}
             }
         }
+    });
+
+    const userSearch: any = await prisma.userSearch.create({
+        data: {
+            userId: newUser.id,
+            fullName: `${newUser.userProfile.firstName} ${newUser.userProfile.lastName}`,
+            bio: `${newUser.userProfile.bio}`
+        }
     })
+
   
     return newUser;
 }

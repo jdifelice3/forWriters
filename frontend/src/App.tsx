@@ -11,6 +11,7 @@ import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui
 import { PreBuiltUIList } from "./config";
 import { SWRConfig } from "swr";
 import { typedFetcher } from "./util/fetcher";
+import { GroupContextProvider } from "./context/GroupContextProvider";
 
 // ---------- Root App ----------
 export default function App() {
@@ -33,8 +34,10 @@ export default function App() {
                             element={
                                 <SessionAuth requireAuth={false}>
                                     <UserProvider>
-                                    <Layout />
-                                </UserProvider>
+                                        <GroupContextProvider>
+                                            <Layout />
+                                        </GroupContextProvider>
+                                    </UserProvider>
                                 </SessionAuth>
                             }
                         />

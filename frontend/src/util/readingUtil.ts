@@ -14,7 +14,7 @@ export const getSpotsOpenText = (e: Reading) => {
   }
 
 export const getCardBackgroundColor = (r: Reading) => {
-    if(r.scheduledType === "SCHEDULED" ){
+    if(r === undefined || r.scheduledType === "SCHEDULED" ){
         if(r.submissionDeadline && new Date(r.submissionDeadline) > new Date()){
             return "#e3f2fd";
         } else {

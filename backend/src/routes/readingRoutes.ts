@@ -33,9 +33,11 @@ const router = express.Router();
 //#region GET
 router.get("/:groupId", async(_req, res) => {
   const groupId = _req.params.groupId;
+  console.log('in /api/readings/:groupId')
+  console.log('groupId', groupId)
     try {
       const group = await getReadings(groupId);
-
+        console.log(group);
       res.json(group);
     } catch (err) {
       console.error(`Error retrieving events for groupid ${groupId}`, err);

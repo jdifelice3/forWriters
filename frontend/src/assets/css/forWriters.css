@@ -83,3 +83,7 @@
 .circle-list {
     list-style-type: circle;
 }
+
+.readingReviewButton {
+    width: 110px;
+}

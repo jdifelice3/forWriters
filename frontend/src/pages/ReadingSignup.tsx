@@ -5,7 +5,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { EventsCalendar } from "../components/EventsCalendar";
+import { ReadingCalendar } from "../components/reading/ReadingCalendar";
 import { useUserContext } from "../context/UserContext";
 
 const styles = {
@@ -58,7 +58,7 @@ const ReadingSignup = () => {
         {group.isAdmin ? ("Create Readings") : ("Sign Up For a Reading")} 
       </Typography>
 
-      <EventsCalendar groupId={group.id} isAdmin={group.isAdmin}/>
+      <ReadingCalendar groupId={group.id} isAdmin={group.isAdmin}/>
 
     </Box>
   );

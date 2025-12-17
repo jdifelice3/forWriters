@@ -9,9 +9,9 @@ import {
   Card,
   CardContent
 } from "@mui/material";
-import GroupSearchBox from "../components/GroupSearchBox";
+import GroupSearchBox from "../components/group/GroupSearchBox";
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import GroupDescription from "../components/GroupDescription";
+import GroupDescription from "../components/group/GroupDescription";
 
 const styles = {
     marginLeft: '75px' // or a responsive value
