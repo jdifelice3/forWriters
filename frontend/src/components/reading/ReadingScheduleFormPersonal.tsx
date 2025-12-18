@@ -8,42 +8,34 @@ import {
     Typography,
 } from "@mui/material";
 import ReviewsIcon from '@mui/icons-material/Reviews';
+import { ReadingCommands } from "../../types/Reading";
 
 interface ReadingScheduleFormPersonal {
   reading: Reading;
+  commands: ReadingCommands;
 }
 
-const ReadingScheduleFormPersonal: React.FC<ReadingScheduleFormPersonal> = ({ reading}) => {
+const ReadingScheduleFormPersonal: React.FC<ReadingScheduleFormPersonal> = ({ reading, commands}) => {
 
     return (
         <Stack spacing={2}> 
-            <Typography variant="h6" fontWeight="bold"
-                sx={{
-                    mb:100
-                }}
-            >
+            <Typography variant="body1" fontWeight="bold">
                 {reading.name }
             </Typography>
-            <Grid container spacing={10}>
-                <Grid>
                 {reading.readingAuthor && reading.readingAuthor.length > 0 && (
                     <Box>
-                        <Typography variant={"body1"} fontWeight={"bold"}>Authors:</Typography>
+                        <Typography variant={"body2"} fontWeight={"bold"}>Authors:</Typography>
                         <AuthorList reading={reading} />
                     </Box>
                 )}
-                </Grid>
-                <Grid alignSelf="center">
                 <Button className="readingReviewButton"
                     startIcon={<ReviewsIcon />}
                     size="small"
                     variant="contained"
+                    onClick={(event) => commands.feedback(event, reading.id)}
                 >
-                    {/* onClick={() => navigate(`/readingfeedback/${r.id}`)} */}
-                    Review              
+                    Review            
                 </Button>
-                </Grid>
-            </Grid>
         </Stack>
     )
 }

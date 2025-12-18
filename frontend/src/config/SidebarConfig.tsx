@@ -9,32 +9,32 @@ import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact
 export const NAV_ITEMS: NavItem[] = [
   {
     label: "Dashboard",
-    icon: <DashboardIcon />,
+    icon: <DashboardIcon htmlColor="white"/>,
     path: "/dashboard",
   },
   {
-    label: "Groups",
-    icon: <GroupIcon />,
+    label: "Group",
+    icon: <GroupIcon htmlColor="white"/>,
     path: "/groups/details",
   },
   {
     label: "Readings",
-    icon: <MenuBookIcon />,
+    icon: <MenuBookIcon htmlColor="white"/>,
     path: "/readings",
   },
   {
     label: "Files",
-    icon: <CollectionsBookmarkIcon />,
+    icon: <CollectionsBookmarkIcon htmlColor="white"/>,
     path: "/files",
   },
   {
     label: "Members",
-    icon: <ConnectWithoutContactIcon />,
+    icon: <ConnectWithoutContactIcon htmlColor="white"/>,
     path: "/members",
   },
   {
     label: "Admin",
-    icon: <KeyboardIcon />,
+    icon: <KeyboardIcon htmlColor="white"/>,
     path: "/admin",
     roles: ["ADMIN"],
   },

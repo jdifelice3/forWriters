@@ -7,15 +7,16 @@ import {
   Typography,
 } from "@mui/material";
 import ReviewsIcon from '@mui/icons-material/Reviews';
+import { ReadingCommands } from "../../types/Reading";
 
 interface ReadingScheduleProps {
   reading: Reading;
+  commands: ReadingCommands;
 }
 
-const ReadingScheduleForm: React.FC<ReadingScheduleProps> = ({ reading}) => {
+const ReadingScheduleForm: React.FC<ReadingScheduleProps> = ({ reading, commands}) => {
 
     return (
-        <Grid container spacing={2}>
             <Stack spacing={2} > 
                 <Typography variant="h6" fontWeight="bold">
                     {reading.name }
@@ -46,12 +47,11 @@ const ReadingScheduleForm: React.FC<ReadingScheduleProps> = ({ reading}) => {
                     size="small"
                     variant="contained"
                     sx={{ mt: 2, }}
+                    onClick={(event) => commands.feedback(event, reading.id)}
                 >
-                    {/* onClick={() => navigate(`/readingfeedback/${r.id}`)} */}
-                    Review              
+                    Review            
                 </Button>
             </Stack>
-        </Grid>
     )
 }
 export default ReadingScheduleForm;

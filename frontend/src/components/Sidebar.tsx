@@ -11,6 +11,7 @@ import {
     ThemeProvider, 
 } from "@mui/material";
 
+
 const Sidebar = () => {
     const { activeGroup } = useGroupContext();
     const navigate = useNavigate();
@@ -46,14 +47,14 @@ const Sidebar = () => {
     <br/>
     <List>
       {NAV_ITEMS.filter(item =>
-        !item.roles || item.roles.includes(activeGroup?.role)
+        !item.roles || item.roles.includes(activeGroup ? activeGroup?.role : "MEMBER")
       ).map(item => (
         <ListItemButton
           key={item.path}
           selected={pathname.startsWith(item.path)}
           onClick={() => navigate(item.path)}
         >
-          <ListItemIcon color="white">{item.icon}</ListItemIcon>
+          <ListItemIcon className="sidebarIcon" color="white">{item.icon}</ListItemIcon>
           <ListItemText primary={item.label} />
         </ListItemButton>
       ))}

@@ -41,7 +41,7 @@ export default function GroupSelector() {
             selected={activeGroup?.id === g.id}
             onClick={() => {
               setActiveGroup(g);
-              navigate(`/groups/details`);
+              //navigate(`/groups/details`);
               setAnchorEl(null);
             }}
           >
@@ -56,7 +56,7 @@ export default function GroupSelector() {
 
         <MenuItem
           onClick={() => {
-            navigate("/groups?tab=create");
+            navigate("/creategroup");
             setAnchorEl(null);
           }}
         >
@@ -65,7 +65,7 @@ export default function GroupSelector() {
 
         <MenuItem
           onClick={() => {
-            navigate("/groups?tab=join");
+            navigate("/groupsearch");
             setAnchorEl(null);
           }}
         >

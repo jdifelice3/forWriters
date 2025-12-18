@@ -22,7 +22,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 
 interface FileListProps {
-  files: AppFile[];
+  files: (AppFile | undefined)[];
   commands: FileCommands;
   fileListProperties: FileListProperties;
 }
@@ -34,6 +34,7 @@ interface LocalCommands {
 }
 
 const FileList: React.FC<FileListProps> = ({files, commands, fileListProperties}) => {
+    if(!files) return <Typography>You have not uploaded any files to readings</Typography>
     const [editFile, setEditFile] = useState<AppFile | null>(null);
     const [editTitle, setEditTitle] = useState("");
     const [editDescription, setEditDescription] = useState("");
@@ -71,11 +72,11 @@ const FileList: React.FC<FileListProps> = ({files, commands, fileListProperties}
         </Box>
         ) : (
         <Box>
-            {files.map((f) => (
-            <Card sx={{mb:4, mr: 2}}>
+            {files.map((f, index) => (
+            <Card key={index} className="readingCardMyFiles">
                 <CardContent>
                 <FileListForm
-                    file={f} 
+                    file={f!} 
                     commands={commands}
                     localCommands={localCommands}
                     fileListProperties={fileListProperties} 

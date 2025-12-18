@@ -16,4 +16,6 @@ export interface ReadingCommands {
   delete(reading: Reading): Promise<void>;
   signup(event: React.MouseEvent<HTMLButtonElement>, readingId: string): Promise<void>;
   withdraw(event: React.MouseEvent<HTMLButtonElement>, readingId: string): Promise<void>;
+  review(event: React.MouseEvent<HTMLButtonElement>, readingId: string): Promise<void>;
+  feedback(event: React.MouseEvent<HTMLButtonElement>, readingId: string): (void);
 }

@@ -84,6 +84,41 @@
     list-style-type: circle;
 }
 
+.mainComponentPanel {
+    margin-left: 25px;
+    width: 1200px;
+}
+
+/* Groups */
+.groupSubPanel {
+    width: 75%;
+}
+
+/* Readings */
+.readingSubPanel {
+    width: 33%;
+}
+
 .readingReviewButton {
     width: 110px;
+}
+
+.readingCardMyFiles {
+    background-color:  #fdeee3 !important;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.readingCardReview {
+    background-color:  #e3fdfb !important;
+    width: 300px !important;
+}
+
+.readingCardSignup {
+    background-color: #e3e5fd !important;
+    width:300px;
+}
+
+.sidebarIcon {
+    filter: brightness(1.5) !important;
 }

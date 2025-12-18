@@ -1,21 +1,25 @@
 import { useMemo } from "react";
-import { AppFile, Group } from "../types/domain-types";
+import { AppFile, Group, User } from "../types/domain-types";
 
-export function useReadingsData(group?: Group, userId?: string) {
+export function useReadingsData(
+  group?: Group,
+  user?: User
+) {
   const myReadings = useMemo(() => {
-    if (!group || !userId) return [];
+    if (!group || !user) return [];
     return group.reading.filter(r =>
-      r.readingAuthor.some(ra => ra.authorId === userId)
+      r.readingAuthor.some(ra => ra.authorId === user.id)
     );
-  }, [group, userId]);
+  }, [group, user]);
 
   const myFiles = useMemo(() => {
+    if (!group) return [];
     return myReadings.flatMap(r =>
       r.readingAuthor
         .map(ra => ra.authorAppFile?.appFile)
-        .filter(Boolean) as AppFile[]
+        .filter(Boolean)
     );
-  }, [myReadings]);
+  }, [myReadings, group]);
 
   return { myReadings, myFiles };
 }

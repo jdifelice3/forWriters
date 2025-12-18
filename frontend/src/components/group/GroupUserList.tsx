@@ -15,8 +15,8 @@ const GroupUserList: React.FC<Props> = ({groupUsers}) => {
     return (
     <Grid container spacing={3}>
         <>
-        {groupUsers.map((gu: GroupUser) => (
-            <Grid>
+        {groupUsers.map((gu: GroupUser, index) => (
+            <Grid key={index}>
             <Card>
                 <CardContent sx={{p:2, backgroundColor:"whitesmoke"}}>
                     <Typography >

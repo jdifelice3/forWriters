@@ -69,12 +69,11 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
             startIcon={<AddIcon />}
             variant="outlined"
             onClick={() => setOpen(true)}
-            sx={{ mb: 2 }}
           >
             Create Reading
           </Button>
         )}
-        <Box mt={3}>
+        <Box>
             {err && (
                 <Alert severity="error" sx={{ mt: 3 }}>
                     {err}

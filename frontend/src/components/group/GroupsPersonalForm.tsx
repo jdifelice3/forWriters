@@ -14,7 +14,7 @@ import {
 } from "../../types/domain-types";
 import GroupIcon from '@mui/icons-material/Group';
 import Grid from "@mui/material/Grid";
-import ReadingSchedule from "../reading/ReadingSchedule";
+import ReadingList from "../reading/ReadingList";
 
 import { ReadingCalendar } from "../reading/ReadingCalendar";
 import { useUserContext } from "../../context/UserContext";
@@ -86,7 +86,7 @@ const GroupsPersonalForm: React.FC<GroupsPersonalFormProps> = ({group}) => {
                 </Grid>
                 <Grid alignItems="center" justifyContent="center" size={12  }>
                     {group.reading.length > 0 ? (
-                    <ReadingSchedule readings={group.reading} commands={commands} />
+                    <ReadingList readings={group.reading} commands={commands} />
                     ) : (
                         <div></div>
                     )}

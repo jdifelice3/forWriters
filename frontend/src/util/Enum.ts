@@ -26,3 +26,8 @@ export const ReadingScheduleType = {
     "SCHEDULED": "SCHEDULED", 
     "UNSCHEDULED": "UNSCHEDULED" 
 }
+
+export const GroupType = {
+    "WRITING" : "PERSONAL",
+    "PERSONAL" : "PERSONAL"
+}

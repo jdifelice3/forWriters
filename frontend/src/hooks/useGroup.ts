@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { useGroupContext } from "../context/GroupContextProvider";
 import { fetcher } from "../context/fetcher";
 
@@ -21,7 +21,7 @@ export const useGroupGet = (url: string) => {
   return {  
     group: data,
     isLoading,
-    error,
+    error
   };
 }
 

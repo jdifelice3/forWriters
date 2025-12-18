@@ -25,6 +25,7 @@ import FeedbackCommentList from "./FeedbackCommentList";
 import wordIcon from '../../assets/icons/icons8-word-file-48.png';
 import { getCardBackgroundColor } from "../../util/readingUtil";
 import { useReadings } from "../../hooks/useReading";
+import { ReadingCommands } from "../../types/Reading";
 
 const fileListProperties: FileListProperties =
   {
@@ -43,7 +44,9 @@ const currentDate = new Date();
 
 interface ReadingFormProps {
   readings: Reading[];
+  commands: ReadingCommands;
 }
+
 const ReadingForm: React.FC<ReadingFormProps> = ({readings}) => {
     //const { data : readings = [] , isLoading } = useReadings<Reading[]>();
     const [error, setError] = useState<string | null>(null);

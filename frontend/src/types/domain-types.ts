@@ -13,7 +13,7 @@ export type Genre = "FANTASY" | "HISTORICAL" | "HORROR" | "LITERARY" | "MYSTERY"
 
 export type FileType = "DOCX" | "PDF";
 
-export type GroupType = "WRITING";
+export type GroupType = "WRITING" | "PERSONAL";
 
 export type JoinRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 

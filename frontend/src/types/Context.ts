@@ -1,9 +1,9 @@
-import { GroupMemberRole } from "./domain-types";
-
+import { GroupMemberRole, GroupType } from "./domain-types";
 export type GroupSummary = {
   id: string;
   name: string;
   role: GroupMemberRole;
+  groupType: GroupType;
 };
 
 export type GroupContextValue = {

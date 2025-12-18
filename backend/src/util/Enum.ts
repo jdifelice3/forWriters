@@ -1,3 +1,4 @@
+import { Type } from "@aws-sdk/client-s3";
 import { 
     FileType, DocumentType, ReadingScheduleType
 } from "@prisma/client";

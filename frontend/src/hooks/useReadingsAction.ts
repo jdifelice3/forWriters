@@ -6,7 +6,7 @@ export function useReadingsActions(
   userId: string,
   refresh: () => void
 ) {
-  const create = async (input: FormInput, schedule: string) => {
+    const create = async (input: FormInput, schedule: string) => {
     await ReadingsAPI.create(groupId, input, userId, schedule);
     refresh();
   };

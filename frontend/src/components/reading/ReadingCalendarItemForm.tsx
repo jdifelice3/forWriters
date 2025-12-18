@@ -102,26 +102,26 @@ const disableSignInButton = (eventId: string): boolean => {
 
   return (
     <>
-         <Box mt={3}>
+         <Box mb={2}>
             {err && (
                 <Alert severity="error" sx={{ mt: 3 }}>
                     {err}
                 </Alert>
             )}
         </Box>
-        <Grid container spacing={2}>
             <Stack spacing={2}>
               <Card 
-                className={new Date(reading.readingDate || "") < currentDate ? "disabled" : ""}
+                // className={new Date(reading.readingDate || "") < currentDate ? "disabled" : ""}
+                className = "readingCardSignup"
                 sx={{
                   border: "1px solid #ddd",
                   p: 1,
                   borderRadius: 2,
-                  backgroundColor: getCardBackgroundColor(reading)
+                //   backgroundColor: getCardBackgroundColor(reading)
                 }}
               >
                 <CardContent>
-                    <Typography variant="h6" fontWeight="bold">
+                    <Typography variant="body1" fontWeight="bold">
                         {reading.name }
                     </Typography>
                     {reading.scheduledType === "SCHEDULED" ? (
@@ -171,9 +171,6 @@ const disableSignInButton = (eventId: string): boolean => {
                             Withdraw
                         </Button>
                         </Box>
-
-
-
                            <Dialog 
                                 open={open} 
                                 onClose={() => setOpen(false)}
@@ -282,11 +279,10 @@ const disableSignInButton = (eventId: string): boolean => {
                               </DialogActions>
                               </Box>
                             </Dialog>
-                    
                 </CardActions>
               </Card>
           </Stack>
-        </Grid>
+
         </>
   );
 };

@@ -89,9 +89,14 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
           <Grid size={12}>
             <Stack>
               <ListItem>
-                <Typography>
-                  {group.description}
-                </Typography>
+                <Stack>
+                    <Typography fontWeight={"bold"}>
+                        Description
+                    </Typography>
+                    <Typography>
+                        {group.description}
+                    </Typography>
+                </Stack>
               </ListItem>
               <ListItem>
               <Link href={mapUrl} target="_blank" rel="noopener">

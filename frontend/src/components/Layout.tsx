@@ -36,24 +36,26 @@ export default function Layout() {
         <Sidebar />
         <Box component="main" sx={{ flexGrow: 1, mt: 10, ml:0 }}>
             <Routes>
+                <Route path="/dashboard" element={<Dashboard />} />
+
                 <Route path="/" element={<Home />} />
                 <Route path="/userprofile" element={<UserProfile />} />
-
+                <Route path="/files*" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
                 <Route path="/filemanager/manuscript" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
                 <Route path="/filemanager/feedback" element={<FileManager documentType={DocType.FEEDBACK} />} />
 
                 <Route path="/groups/details" element={<Groups />} />
                 <Route path="/groups/details/personal" element={<GroupsPersonal />} />
+                <Route path="/groupsearch" element={<GroupSearch />} />
                 <Route path="/creategroup" element={<GroupsCreate />} />
-                <Route path="/readingsignup/:groupId" element={<ReadingSignup />} />
+                
+                <Route path="/readings" element={<Readings />} />
+                <Route path="/readingsignup" element={<ReadingSignup />} />
                 <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />
                 <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
 
                 <Route path="/membersearch" element={<MemberSearchPage />} />
-                <Route path="/groupsearch" element={<GroupSearch />} />
-                <Route path="/readings" element={<Readings />} />
                 <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
-                <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
         </Box>
     </Box>

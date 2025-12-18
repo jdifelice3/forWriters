@@ -50,6 +50,7 @@ router.get("/groups", verifySession(), async (req, res) => {
         select: {
           id: true,
           name: true,
+          groupType: true,
         },
       },
       user: {
@@ -59,17 +60,12 @@ router.get("/groups", verifySession(), async (req, res) => {
       },
     },
   });
-console.log('groups',groups)
-console.log('groups mapped', groups.map(g => ({
-      id: g.group.id,
-      name: g.group.name,
-      role: g.user.role,
-    })))
   res.json(
     groups.map(g => ({
       id: g.group.id,
       name: g.group.name,
       role: g.user.role,
+      groupType: g.group.groupType
     }))
   );
 });
