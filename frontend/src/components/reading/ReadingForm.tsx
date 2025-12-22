@@ -18,13 +18,13 @@ import {
 
 import Grid from "@mui/material/Grid";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import FileSelect from "../components/../file/FileSelect";
-import { FileListProperties } from '../../types/File';
+import FileSelect from "../controls/FileSelect";
+import { FileListProperties } from '../../types/FileTypes';
 import InfoIcon from '@mui/icons-material/Info';
 import FeedbackCommentList from "../../components/reading/FeedbackCommentList";
 import wordIcon from '../../assets/icons/icons8-word-file-48.png';
 import { getCardBackgroundColor } from "../../util/readingUtil";
-import { useReadings } from "../../hooks/useReading";
+//import { useReadings } from "../../hooks/useReading";
 
 const fileListProperties: FileListProperties =
   {
@@ -32,7 +32,8 @@ const fileListProperties: FileListProperties =
     showPreviewButton: true,
     buttonDownloadText: "DOWNLOAD",
     showDeleteButton: true,
-    showEditButton: true 
+    showEditButton: true,
+    showVersionHistory: false
   }
 
 const styles = {
@@ -160,7 +161,7 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) =>
                 <FileSelect 
                     onSendData={handleSelectChange} 
                     readingAuthorId={readingAuthor.id} 
-                    selectedValueId={readingAuthor.authorAppFile?.appFile.id || ""}
+                    selectedValueId={readingAuthor.authorAppFileMeta?.id || ""}
                     fileListProperties={fileListProperties}
                     />
                 ) : (
@@ -168,7 +169,7 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) =>
                     variant="outlined"
                     sx={{ width: 360 }}
                     disabled
-                    value={readingAuthor.authorAppFile?.appFile.title || ""}
+                    value={readingAuthor.authorAppFileMeta?.id || ""}
                 />
                 )}
                 <Popover
@@ -198,8 +199,8 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) =>
                 </div>
                 <Typography variant="caption" color="text.secondary">
                         {
-                        readingAuthor.authorAppFile ?
-                        `Submitted to Reading on ${new Date(readingAuthor.authorAppFile.createdAt).toLocaleDateString()}`
+                        readingAuthor.authorAppFileMeta ?
+                        `Submitted to Reading on ${new Date(readingAuthor.authorAppFileMeta.createdAt).toLocaleDateString()}`
                         : "You haven't submitted a manuscript"
                     }
                 </Typography>

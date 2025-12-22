@@ -1,6 +1,6 @@
 import useSWR  from "swr";
 import { fetcher } from "../context/fetcher";
-import { Notification } from "../types/Notification";
+import { Notification } from "../types/NotificationTypes";
 
 export const useNotifications = (activeGroupId: string | null) => {
     const key = activeGroupId

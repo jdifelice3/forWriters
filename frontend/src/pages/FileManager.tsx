@@ -1,21 +1,35 @@
 "use client";
 import { useState } from "react";
-import { AppFile } from "../types/domain-types";
-import { FileCommands } from "../types/File";
+import { AppFile, AppFileMeta } from "../types/domain-types";
+import { FileCommands } from "../types/FileTypes";
 import { DocType } from "../util/Enum";
-import { FileListProperties, UploadFileFormProperties } from "../types/File";
+import { FileListProperties, UploadFileFormProperties } from "../types/FileTypes";
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  CircularProgress,
-  Divider,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CircularProgress,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    Grid,
+    IconButton,
+    Typography
 } from "@mui/material";
+import UploadIcon from "@mui/icons-material/Upload";
+import CloseIcon from "@mui/icons-material/Close";
+import Tab from '@mui/material/Tab';
+import TabContext from '@mui/lab/TabContext';
+import TabList from '@mui/lab/TabList';
+import TabPanel from '@mui/lab/TabPanel';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
-import ManuscriptUpload from "../components/file/ManuscriptUpload";
-import { useFilesGet } from "../hooks/useFile";
-import FileList from "../components/file/FileList";
+import UploadFileDataManuscript from "../components/file/data/UploadFileDataManuscript";
+import { useFiles, useFilesData } from "../hooks/useFile";
+import FileManagerList from "../components/file/lists/FileManagerList";
+import { useFileUpload } from "../hooks/useFile";
+import UploadFileDataVersion from "../components/file/data/UploadFileDataVersion";
+import { FilesAPI } from "../api/filesApi"
 
 const uploadFormProperties: UploadFileFormProperties =
   {
@@ -27,56 +41,49 @@ const uploadFormProperties: UploadFileFormProperties =
     showUploadIcon: true
   }
 
-const fileListProperties: FileListProperties =
+const manuscriptListProperties: FileListProperties =
   {
     showPreviewButton: true,
     buttonDownloadText: "DOWNLOAD",
     showDeleteButton: true,
-    showEditButton: true 
+    showEditButton: true,
+    showVersionHistory: true
   }
 
-const styles     = {
-    marginLeft: '75px' // or a responsive value
-};
+  const feedbackListProperties: FileListProperties =
+  {
+    showPreviewButton: true,
+    buttonDownloadText: "DOWNLOAD",
+    showDeleteButton: true,
+    showEditButton: true,
+    showVersionHistory: false
+  }
 
-interface FileManagerProps {
-  documentType?: string;
-}
+const filesUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi`;
 
-const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
-    const [editFile, setEditFile] = useState<AppFile | null>(null);
+const FileManager = () => {
+    const [appFileVersion, setAppFileVersion] = useState(1); 
+    const [appFileMetaId, setAppFileMetaId] = useState("");
+    const [appFileId, setAppFileId] = useState("");
+    const [version, setVersion] = useState(0);
+    const [editFile, setEditFile] = useState<AppFileMeta | null>(null);
     const [editTitle, setEditTitle] = useState("");
     const [editDescription, setEditDescription] = useState("");
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [versionDialogOpen, setVersionDialogOpen] = useState(false);
+    const [closeDialogOpen, setCloseDialogOpen] = useState(false);
 
-    const filesUrl = `${import.meta.env.VITE_API_HOST}/api/fileApi`;
-
-    const pageTitle = documentType === DocType.MANUSCRIPT ? "Manuscripts" : "Feedback Documents";
-    const fileListTitle = documentType === DocType.MANUSCRIPT ? "Your manuscripts" : "Your feedback documents";
-
-    let url = "";
-
-    if(documentType){
-        fileListProperties.showDeleteButton = !(documentType === DocType.FEEDBACK);
-        fileListProperties.showEditButton = !(documentType === DocType.FEEDBACK);
-
-        switch(documentType.toString()) {
-            case DocType.MANUSCRIPT:
-                uploadFormProperties.subtitle = "Upload a new manuscript";
-                url = `${filesUrl}/type/${documentType}`;
-                break;
-            case DocType.FEEDBACK:
-                uploadFormProperties.subtitle = "Upload a feedback file (DOCX)";
-                break;
-        }
-    }
-
-    const { files, isLoading, error, refresh } = useFilesGet(url);
+    const pageTitle = "Files";
+    
+    const { files, isLoading, error, refresh } = useFiles(filesUrl);
+    const { myManuscripts, myFeedbackDocuments } = useFilesData(files);
 
     const uploadOnSendData = (file: AppFile) => {
-
+        setVersionDialogOpen(false);
+        setAppFileId(file.id);
     }
 
-    const handleEdit = async(file: AppFile) => {
+    const handleEdit = async(file: AppFileMeta) => {
         alert('in handleEdit');
         await refresh();
         setEditFile(null);
@@ -84,12 +91,9 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
         setEditDescription(file.description || "");
     };
 
-    const handleSaveEdit = async (file:AppFile) => {
-        console.log('file', file);
+    const handleSaveEdit = async (file:AppFileMeta) => {
         if (!file) return;
         try {
-            console.log('handleSaveEdit url', filesUrl)
-            console.log('editFile', file)
             const res = await fetch(`${filesUrl}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -109,10 +113,13 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
         }
     };
 
-    const handleDelete = async (file: AppFile) => {
-        if (!confirm("Are you sure you want to delete this file?")) return;
+    const handleDelete = (file: AppFileMeta) => {
+        setCloseDialogOpen(true);
+    }
+
+    const handleDeleteFile = async (file: AppFileMeta) => {
         try {
-        const res = await fetch(`${url}?id=${file.id}`, {
+        const res = await fetch(`${filesUrl}?id=${file.id}`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -126,49 +133,186 @@ const FileManager: React.FC<FileManagerProps> = ({documentType}) => {
         }
     };
 
+    const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+        setAppFileId(newValue);
+    };
+
+    const onVersionChange = async(event: React.SyntheticEvent, fileAppMeta: AppFileMeta, version: string) => {
+        const appFileMeta: AppFileMeta = await FilesAPI.updateVersion(fileAppMeta.id, version);
+        setVersion(appFileMeta.currentVersionId)
+        await refresh();
+    }
+
+    const onVersionUpload = async(event: React.SyntheticEvent, appFileMeta: AppFileMeta) => {
+        setAppFileMetaId(appFileMeta.id);
+        setVersionDialogOpen(true);
+    }
+
     const commands: FileCommands = {
-        edit: handleEdit,
+        edit: handleEdit,   
         save: handleSaveEdit,
-        delete: handleDelete
+        delete: handleDelete,
+        onVersionChange: onVersionChange,
+        onVersionUpload: onVersionUpload
     }
 
     return (
-        <Box 
-            style={styles} 
-            sx={{ 
-            maxWidth: 1000, 
-            mx: "auto", 
-            p: 4,
-        }}>
-            <Typography variant="h4" mb={3}>
-            <CollectionsBookmarkIcon 
-                sx={{ 
-                    fontSize: '40px',
-                    verticalAlign: "bottom", 
-                }}
-                />&nbsp;
-            {pageTitle}
-        </Typography>
-        <Card sx={{ mb: 4, p: 2 }}>
-                <CardContent>
-            <Typography variant="h6" gutterBottom>
-                Upload a new manuscript
-            </Typography>
-                <ManuscriptUpload onSendData={uploadOnSendData}/>
-            </CardContent>
-            </Card>
-        <Divider sx={{ mb: 3 }} />
+        <Box>
+        <Card elevation={0} className="filesComponentPanel">
+            <CardContent>
+                <Grid container >
+{/* Page Title */}
+                    <Grid size={2} >
+                        <Typography variant="h4" mb={3}>
+                        <CollectionsBookmarkIcon 
+                            sx={{ 
+                                fontSize: '40px',
+                                verticalAlign: "bottom", 
+                            }}
+                        />&nbsp;
+                            {pageTitle}
+                        </Typography>
+                    </Grid>
 
-        {/* File list */}
-        <Typography variant="h6" mb={2}>
-            {fileListTitle}
-        </Typography>
-        {isLoading   ? (
-                <Box display="flex" justifyContent="center" p={6} ><CircularProgress /></Box>
-            ) : (
-                <FileList files={files} commands={commands} fileListProperties={fileListProperties}/>
-            )}
-        </Box>
+{/* Upload New Manuscript Button */}
+                    <Grid size={10} sx={{verticalAlign:"middle"}}>
+                        <Button 
+                            variant="outlined"
+                            component="label"
+                            startIcon={<UploadIcon />}
+                            onClick={(e) => setDialogOpen(true)}
+                        >
+                            Upload New Manuscript
+                        </Button>
+                    </Grid>
+                </Grid>
+
+{/* Tab Control */}
+                <TabContext value={appFileVersion} >
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <TabList onChange={handleChange} >
+                        <Tab label="Manuscripts" value={1} sx={{fontSize: 14}}/>
+                        <Tab label="Feedback Documents" value={2} sx={{fontSize: 14}}/>
+                    </TabList>
+                </Box>
+                <TabPanel value={1} >
+                    <Typography variant="h5" mb={2}>
+                        Your manuscripts
+                    </Typography>
+                    {isLoading   ? (
+                        <Box display="flex" justifyContent="center" p={6} ><CircularProgress /></Box>
+                    ) : (
+                        <FileManagerList 
+                            files={myManuscripts} 
+                            commands={commands} 
+                            fileListProperties={manuscriptListProperties}
+                        />
+                    )}
+                </TabPanel>
+
+                <TabPanel value={2}>
+                    <Typography variant="h5" mb={2}>
+                        Your Feedback Submissions
+                    </Typography>
+                    {isLoading   ? (
+                        <Box display="flex" justifyContent="center" p={6} ><CircularProgress /></Box>
+                    ) : (
+                        <FileManagerList 
+                            files={myFeedbackDocuments} 
+                            commands={commands} 
+                            fileListProperties={feedbackListProperties}
+                        />
+                    )}
+                </TabPanel>
+            </TabContext>
+
+            </CardContent>
+        </Card>
+        
+    <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>
+            <IconButton
+                onClick={() => setEditFile(null)}
+                sx={{ position: "absolute", right: 8, top: 8 }}
+            >
+            <CloseIcon onClick={(e) => setDialogOpen(false)}/>
+            </IconButton>
+        </DialogTitle>
+        <DialogContent>
+            <Card sx={{ mb: 4, p: 2 }}>
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                            Upload a new manuscript
+                        </Typography>
+                        <UploadFileDataManuscript onSendData={uploadOnSendData}/>
+                    </CardContent>
+                </Card>
+        </DialogContent>
+    </Dialog>
+    
+    <Dialog open={versionDialogOpen} onClose={() => setVersionDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>
+            <IconButton
+                onClick={() => setEditFile(null)}
+                sx={{ position: "absolute", right: 8, top: 8 }}
+            >
+            <CloseIcon onClick={(e) => setVersionDialogOpen(false)}/>
+            </IconButton>
+        </DialogTitle>
+        <DialogContent>
+            <Card sx={{ mb: 4, p: 2 }}>
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                            Upload a new version
+                        </Typography>
+                        <UploadFileDataVersion onSendData={uploadOnSendData} appFileMetaId={appFileMetaId}/>
+                    </CardContent>
+                </Card>
+        </DialogContent>
+    </Dialog>
+    
+    <Dialog 
+            open={closeDialogOpen} 
+            onClose={() => setCloseDialogOpen(false)} 
+            fullWidth 
+            maxWidth="xs">
+        <DialogTitle>
+            <IconButton
+                onClick={() => setEditFile(null)}
+                sx={{ position: "absolute", right: 8, top: 8 }}
+            >
+            <CloseIcon onClick={(e) => setCloseDialogOpen(false)}/>
+            </IconButton>
+        </DialogTitle>
+        <DialogContent>
+            <Card sx={{ mb: 4, p: 2 , textAlign: "center"}}>
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                            Are you sure you want to delete this file?
+                        </Typography>
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    sx={{mr: 2 }}
+                >
+                    OK 
+                </Button>
+
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    onClick={(e) => setCloseDialogOpen(false)}
+                >
+                    Cancel                
+                </Button>
+                    </CardContent>
+                </Card>
+        </DialogContent>
+    </Dialog>
+
+    </Box>   
     );
 }
 

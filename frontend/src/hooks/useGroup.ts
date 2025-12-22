@@ -24,13 +24,3 @@ export const useGroupGet = (url: string) => {
     error
   };
 }
-
-// const fileCommands = {
-//   async delete(id: string) {
-//     await fetch(`${url}?id=${id}`, { method: "DELETE", credentials: "include" });
-//     await refresh();
-//   },
-//   async update(payload) {
-//     await fetch(url, { method: "PUT", body: JSON.stringify(payload) });
-//     await refresh();
-//   }

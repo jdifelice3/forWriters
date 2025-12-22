@@ -10,6 +10,7 @@ import UploadIcon from "@mui/icons-material/Upload";
 
 interface UploadFileFormProps {
     onSubmit: (data: FormData) => void;
+    appFileMetaId?: string;
     loading?: boolean;
     disabled?: boolean;
     submitLabel?: boolean;
@@ -18,6 +19,7 @@ interface UploadFileFormProps {
 
 const UploadFileForm: React.FC<UploadFileFormProps> = ({
     onSubmit,
+    appFileMetaId,
     loading = false,
     disabled = false,
     submitLabel = "Upload",
@@ -43,7 +45,9 @@ const UploadFileForm: React.FC<UploadFileFormProps> = ({
         formData.append("file", file);
         formData.append("title", title);
         formData.append("description", description);
-
+        if(appFileMetaId){
+            formData.append("appFileMetaId", appFileMetaId);
+        }
         onSubmit(formData);
     };
 

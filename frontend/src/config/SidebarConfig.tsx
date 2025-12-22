@@ -1,4 +1,4 @@
-import { NavItem } from "../types/Nav"
+import { NavItem } from "../types/NavTypes"
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import MenuBookIcon from "@mui/icons-material/MenuBook";

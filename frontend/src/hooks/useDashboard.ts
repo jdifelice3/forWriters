@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { DashboardResponse } from "@/types/Dashboard";
+import { DashboardResponse } from "../types/DashboardTypes";
 import { fetcher } from "../context/fetcher";
 
 export function useDashboard(activeGroupId: string | null) {

@@ -9,8 +9,7 @@ import { useParams } from "react-router-dom";
 import { ReadingCalendar } from "../components/reading/ReadingCalendar";
 import { useUserContext } from "../context/UserContext";
 import { useGroupDetails } from "../hooks/useGroup";
-import { ReadingCommands } from "../types/Reading";
-import { FormInput } from "../types/Reading";
+import { ReadingCommands, FormInput } from "../types/ReadingTypes";
 
 const styles = {
     marginLeft: '75px' // or a responsive value
@@ -55,12 +54,22 @@ const ReadingSignup = () => {
     
     };
     
+    const handleReview = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+
+    }
+
+    const handleFeedback = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+
+    }
+
     const readingCommands: ReadingCommands = {
         edit: handleEdit,
         save: handleAddReading,
         delete: handleDelete,
         signup: handleSignup,
-        withdraw: handleWithdraw
+        withdraw: handleWithdraw,
+        review: handleReview,
+        feedback: handleFeedback
     }
 
   return (

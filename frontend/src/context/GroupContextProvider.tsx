@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { useLocation, useNavigate, matchPath } from "react-router-dom";
 import useSWR from "swr";
 import { fetcher } from "../context/fetcher";
-import { GroupContextValue, GroupSummary } from "../types/Context";
+import { GroupContextValue, GroupSummary } from "../types/ContextTypes";
 
 const GroupContext = createContext<GroupContextValue | undefined>(undefined);
 const GROUP_STORAGE_KEY = "fw:activeGroupId";

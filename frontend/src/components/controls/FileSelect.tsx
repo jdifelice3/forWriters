@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useUserContext } from "../../context/UserContext";
-import { FileListProperties } from '../../types/File';
-import { AppFile } from "../../types/domain-types";
+import { FileListProperties } from '../../types/FileTypes';
+import { AppFileMeta } from "../../types/domain-types";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import {
   MenuItem, FormControl
 } from "@mui/material";
 
 interface FileSelectProps {
-  onSendData: (readingAuthorId: string, appfileId: string) => void;
+  onSendData: (readingAuthorId: string, appfileMetaId: string) => void;
   readingAuthorId: string;
   selectedValueId?: string;
   fileListProperties: FileListProperties;
@@ -21,9 +21,9 @@ type SelectValue = string;
 const FileSelect: React.FC<FileSelectProps> = ({onSendData, readingAuthorId, selectedValueId, fileListProperties}) => {
     const { user } = useUserContext();
 
-    const [files, setFiles] = useState<AppFile[]>([]);
+    const [files, setFiles] = useState<AppFileMeta[]>([]);
     const [selectedValue, setSelectedValue] = useState("");
-    const filesUrl = `${import.meta.env.VITE_API_HOST}/api/fileApi/type`;
+    const filesUrl = `${import.meta.env.VITE_API_HOST}/api/fileApis/type`;
 
     const handleChange = (event: SelectChangeEvent<SelectValue>) => {
         setSelectedValue(event.target.value as string);

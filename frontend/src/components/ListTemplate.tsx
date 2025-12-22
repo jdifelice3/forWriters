@@ -1,6 +1,6 @@
 "use client";
 
-import { FileListProperties } from '../types/File';
+import { FileListProperties } from '../types/FileTypes';
 import {
   Card,
   CardContent,

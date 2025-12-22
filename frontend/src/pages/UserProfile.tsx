@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User } from "../types/User";
+import { User } from "../types/UserTypes";
 import { useUserContext } from "../context/UserContext";
 import {
   Box,

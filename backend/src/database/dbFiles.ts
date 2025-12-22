@@ -12,10 +12,11 @@ const prisma = new PrismaClient({
 });
 
 prisma.$on('query', e => {
-  console.log(e.query);
+  //console.log(e.query);
 });
 
-export const getFileRecords = async(authId: string, documentType?: string) => {
+//#region GET
+export const getFileRecords = async(authId: string) => {
     const user: any = await prisma.user.findUnique({
         where: 
             {
@@ -26,19 +27,21 @@ export const getFileRecords = async(authId: string, documentType?: string) => {
             }
     });
 
-    const files = await prisma.appFile.findMany({
+    const files = await prisma.appFileMeta.findMany({
+        include: {
+            appFile: true
+        },
         where: {
-            userId: user?.id,
-            ...(documentType && {
-            documentType: getDocumentTypeFromString(documentType)
-            })
+            userId: user?.id
         },
      
         orderBy: { title: "asc" }
     });
     return files;
 }
+//#endregion
 
+//#region CREATE
 export const createFileRecordBasic = async(
     authId: string, 
     mimeType: string, 
@@ -50,10 +53,19 @@ export const createFileRecordBasic = async(
   
   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
-  const file = await prisma.appFile.create({
+  const file = await prisma.appFileMeta.create({
     data: {
       title: title,
       description: description,
+      userId: user ? user.id : '',
+      currentVersionId: 1,
+    },
+  });
+
+    const version = await prisma.appFile.create({
+    data: {
+      appFileMetaId: file.id,
+      version: 1,
       filename: filename,
       mimetype: mapMimeToEnum(mimeType),
       url: url,
@@ -61,33 +73,52 @@ export const createFileRecordBasic = async(
     },
   });
 
-  return file;
+  return {file, version};
 }
 
-// export const createImageRecord = async(
-//     authId: string, 
-//     mimeType: string, 
-//     filename: string,
-//     title: string, 
-//     description: string,
-//     url: string
-//  ) => {
+export const createFileVersionRecord = async(
+    authId: string, 
+    appFileMetaId: string,
+    mimeType: string, 
+    filename: string,
+    url: string
+ ) => {
   
-//   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
+    const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
-//   const file = await prisma.appFile.create({
-//     data: {
-//       title: title,
-//       description: description,
-//       filename: filename,
-//       mimetype: mapMimeToEnum(mimeType),
-//       url: url,
-//       userId: user ? user.id : '',
-//     },
-//   });
+    const appFile = await prisma.appFile.aggregate({
+        _max: {
+            version: true
+        },
+        where: {
+            appFileMetaId: appFileMetaId
+        },
+    });
 
-//   return file;
-// }
+    const newVersion = appFile._max.version !== null ? appFile._max.version + 1 : 0;
+
+    const version = await prisma.appFile.create({
+        data: {
+            appFileMetaId: appFileMetaId,
+            version: newVersion,
+            filename: filename,
+            mimetype: mapMimeToEnum(mimeType),
+            url: url,
+            userId: user ? user.id : '',
+        },
+    });
+
+    const file = await prisma.appFileMeta.update({
+        where: {
+            id: appFileMetaId, 
+        },
+        data: {
+            currentVersionId: newVersion
+        },    
+    });
+
+    return { version };
+}
 
 export const createFileRecordReadingFeedback = async(
     authId: string, 
@@ -105,10 +136,19 @@ export const createFileRecordReadingFeedback = async(
     if(!user){
         throw new Error("user not found");
     }
-    const file = await prisma.appFile.create({
+    const fileMeta = await prisma.appFileMeta.create({
       data: {
         title: title,
         description: description,
+        userId: user ? user.id : '',
+        currentVersionId: 1,
+      },
+    });
+
+    const version = await prisma.appFile.create({
+      data: {
+        appFileMetaId: fileMeta.id,
+        version: 1,
         filename: filename,
         mimetype: mapMimeToEnum(mimeType),
         url: s3Url,
@@ -117,23 +157,18 @@ export const createFileRecordReadingFeedback = async(
       },
     });
 
-    
-
-    // const filePath: string = path.join(process.cwd(), "uploads/",filename);
-    // const comments = await extractCommentsWithTargets(filePath);
-    
-
-
-    return file;
+    return {fileMeta, version};
   } catch (err) {
     console.error('err', err);
     throw err;
   }
   
 }
+//#endregion
 
+//#region UPDATE
 export const updateFileRecord = async(id: string, title: string, description: string) => {
-  const file = await prisma.appFile.update({
+  const file = await prisma.appFileMeta.update({
     where: {
       id: id, 
     },
@@ -146,26 +181,51 @@ export const updateFileRecord = async(id: string, title: string, description: st
   return file;
 }
 
+export const updateCurrentVersion = async(id: string, version: number) => {
+    console.log('in updateCurrentVersion')
+    console.log('id', id, 'version', version)
+    const file = await prisma.appFileMeta.update({
+        where: {
+            id: id
+        },
+        data: {
+            currentVersionId: version
+        }
+    })
+
+    return file;
+}
+//#endregion
+
+//#region DELETE
 export const deleteFileRecord = async(id: string) => {
   let file = null;
   let fileUrl: string = "";
 
   //get file url to return the file path so it can be deleted
   try{
-    const fileMetaData = await prisma.appFile.findUnique({
-      where: {
-        id: id
-      }
-    });
+    // const fileMetaData = await prisma.appFileMeta.findUnique({
+    //   where: {
+    //     id: id
+    //   }
+    // });
 
-    fileUrl = (typeof fileMetaData?.url === "string") ? fileMetaData.url : "";
+    fileUrl = "";//(typeof fileMetaData?.url === "string") ? fileMetaData.url : "";
 
     //delete the record of the file
-    file = await prisma.appFile.delete({
+    const file = await prisma.appFile.deleteMany({
       where: {
-        id: id
+        appFileMetaId: id
       }
     });
+
+    const fileMeta = await prisma.appFileMeta.delete({
+        where: {
+            id: id
+        }
+    });
+
+    return fileMeta;
   } catch (err) {
     throw err;
   }
@@ -174,3 +234,4 @@ export const deleteFileRecord = async(id: string) => {
   console.log(`fileUrl: ${fileUrl}`);
   return fileUrl;
 }
+//#endregion

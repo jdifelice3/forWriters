@@ -38,22 +38,23 @@ export const getGroup = async(groupId: string) => {
         include: {
             readingAuthor: {
                 include: {
-                    authorAppFile: {
+                    authorAppFileMeta: {
                         include: {
-                            appFile: {
+                            appFileMeta: {
                                 include: {
                                     user: {
                                         include: {
                                             userProfile: true
                                         }
-                                    }
+                                    },
+                                    appFile: true
                                 }
                             }
                         }
                     }
                 }
             }
-        }
+        },
     },
     // reading: {
     //   where: {

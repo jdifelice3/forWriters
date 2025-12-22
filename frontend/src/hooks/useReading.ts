@@ -1,76 +1,105 @@
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
+import { apiFetch } from "../api/client";
 import { useGroupContext } from "../context/GroupContextProvider";
 import { fetcher } from "../context/fetcher";
+import { useMemo } from "react";
+import { AppFile, Group, User } from "../types/domain-types";
+import { useState } from "react";
+import { Reading } from "../types/domain-types";
+import { ReadingsAPI } from "../api/readings";
+import { FormInput } from "../types/ReadingTypes";
 
-const BASE_URL = import.meta.env.VITE_API_HOST;
+export function useReadingsActions(
+  groupId: string,
+  userId: string,
+  refresh: () => void
+) {
+    const create = async (input: FormInput, schedule: string) => {
+    await ReadingsAPI.create(groupId, input, userId, schedule);
+    refresh();
+  };
 
-export const useReadingGet = ( url: string, readingId?: string ) => {
-    console.log('in useReadingGet');
-    console.log('url', url);
-  const { data, error, isLoading, mutate } = useSWR(
-    url,
-    async (url: string) => {
-      const res = await fetch(url, { credentials: "include", method: "GET" });
-      if (!res.ok) throw new Error("Failed to fetch files");
-      return res.json();
-    }
-  );
-  console.log('data', data);
+  const signup = async (readingId: string) => {
+    await ReadingsAPI.signup(readingId, userId);
+    refresh();
+  };
+
+  const withdraw = async (readingId: string) => {
+    await ReadingsAPI.withdraw(readingId, userId);
+    refresh();
+  };
+
+  const remove = async (readingId: string) => {
+    await ReadingsAPI.remove(readingId, groupId);
+    refresh();
+  };
+
+  return { create, signup, withdraw, remove };
+}
+
+export function useReadingsData(
+  group?: Group,
+  user?: User
+) {
+  const myReadings = useMemo(() => {
+    if (!group || !user) return [];
+    return group.reading.filter(r =>
+      r.readingAuthor.some(ra => ra.authorId === user.id)
+    );
+  }, [group, user]);
+
+  const myFiles = useMemo(() => {
+    if (!group) return [];
+    return myReadings.flatMap(r =>
+      r.readingAuthor
+        .map(ra => ra.authorAppFileMeta?.appFileMeta)
+        .filter(Boolean)
+    );
+  }, [myReadings, group]);
+
+  return { myReadings, myFiles };
+}
+
+export const useReadingsUI = () => {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const [editing, setEditing] = useState<Reading | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+
   return {
-    readings:data ?? [],
-    isLoading,
+    // state
+    open,
+    submitting,
     error,
-    refresh: mutate
+    success,
+    editing,
+    editTitle,
+    editDescription,
+
+    // semantic UI actions
+    openCreate: () => setOpen(true),
+    closeCreate: () => setOpen(false),
+
+    startEdit: (r: Reading) => {
+      setEditing(r);
+      setEditTitle(r.name);
+      setEditDescription(r.description || "");
+    },
+
+    cancelEdit: () => setEditing(null),
+
+    beginSubmit: () => {
+      setSubmitting(true);
+      setError(null);
+      setSuccess(null);
+    },
+
+    endSubmit: () => setSubmitting(false),
+    setError,
+    setSuccess,
   };
 }
-
-export const useReadings = <T>() => {
-  const { activeGroup } = useGroupContext();
-  return useSWR<T>(
-    activeGroup ? `${BASE_URL}/api/events/${activeGroup.id}` : null,
-    fetcher
-  );
-}
-
-// const useReading = (url: string) => {
-//   const { data: readings, error, mutate } = useSWR(
-//     url,
-//     (_url) => fetch(_url, { credentials: "include" }).then(r => r.json())
-//   );
-
-//   const get = (id) => files && files.find(file => file.id === id);
-
-//   const edit = async (id, updatedData) => {
-//     // Optimistically update the cached data
-//     mutate('/api/files', files.map(file => 
-//       file.id === id ? { ...file, ...updatedData } : file
-//     ), false); // Prevent immediate revalidation
-
-//     // Send update request to the server
-//     await fetch(`/api/files/${id}`, {
-//       method: 'PUT',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(updatedData),
-//     });
-
-//     // Revalidate after updating
-//     mutate('/api/files');
-//   };
-
-//   const deleteFile = async (id) => {
-//     // Optimistically delete the file from cached data
-//     mutate('/api/files', files.filter(file => file.id !== id), false); // Prevent immediate revalidation
-
-//     // Send delete request to the server
-//     await fetch(`/api/files/${id}`, {
-//       method: 'DELETE',
-//     });
-
-//     // Revalidate after deletion
-//     mutate('/api/files');
-//   };
-
-//   return { files, error, get, edit, delete: deleteFile };
-// };

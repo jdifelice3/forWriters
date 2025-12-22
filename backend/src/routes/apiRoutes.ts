@@ -1,6 +1,6 @@
 import express from "express";
 import Session from "supertokens-node/recipe/session";
-import { getFileRecords, updateFileRecord, deleteFileRecord } from "../database/dbFiles";
+import { getFileRecords, updateFileRecord, deleteFileRecord, updateCurrentVersion } from "../database/dbFiles";
 
 const router = express.Router();
 
@@ -19,25 +19,25 @@ router.get("/", async (_req, res) => {
   }
 });
 
-router.get("/type/:documentType", async(_req, res) => {
-  try{
+// router.get("/type/:documentType", async(_req, res) => {
+//   try{
     
-    const documentType = _req.params.documentType;
+//     const documentType = _req.params.documentType;
 
-    if(!documentType){
-        res.status(404).json({error: "Document Type not found"});
-    }
+//     if(!documentType){
+//         res.status(404).json({error: "Document Type not found"});
+//     }
     
-    const session = await Session.getSession(_req, res);
-    const authId = session.getUserId(true);
-    const files = await getFileRecords(authId, documentType);
+//     const session = await Session.getSession(_req, res);
+//     const authId = session.getUserId(true);
+//     const files = await getFileRecords(authId, documentType);
 
-    res.json(files);
-  } catch (err) {
-      console.error('Error retrieving file records:', err);
-      res.status(500).json({ err: 'Error retrieving file records' });
-  }
-});
+//     res.json(files);
+//   } catch (err) {
+//       console.error('Error retrieving file records:', err);
+//       res.status(500).json({ err: 'Error retrieving file records' });
+//   }
+//});
 //#endregion
 
 //#region POST
@@ -54,6 +54,34 @@ router.put("/", async(_req, res) => {
     res.status(500).json({ err: 'Error updating file record' });
   }
 });
+
+router.put("/version", async(_req, res) => {
+    console.log('in put /version')
+    let id: string = "";
+    let version: string = "";
+    
+    if(typeof _req.query.id === "string"){
+        id = _req.query.id;
+    } else {
+        throw new Error("");
+    }
+    if(typeof _req.query.version === "string"){
+        version = _req.query.version;
+    } else {
+        throw new Error("");
+    }
+
+    console.log('id', id, 'version', version)
+
+  try{
+    const file = await updateCurrentVersion(id, Number(version));
+    res.status(200).json(file);
+
+  } catch (err) {
+    console.error(`Error updating current version for file ${id}`, err);
+    res.status(500).json({ err: `Error updating current version for file ${id}` });
+  }
+})
 //#endregion
 
 //#region DELETE

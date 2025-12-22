@@ -1,6 +1,6 @@
-import { useFileUpload } from "../../hooks/useFile";
-import UploadFeedbackFileForm from "./UploadFeedbackFileForm";
-import { AppFile } from "../../types/domain-types";
+import { useFileUpload } from "../../../hooks/useFile";
+import UploadFileFormFeedback from "../forms/UploadFileFormFeedback";
+import { AppFile, AppFileMeta } from "../../../types/domain-types";
 import {
   Box,
 } from "@mui/material";
@@ -11,14 +11,13 @@ interface FeedbackProps {
   disabled?: boolean;
 }
 
-const FeedbackUploadSection: React.FC<FeedbackProps> = ({
+const UploadFileDataFeedback: React.FC<FeedbackProps> = ({
   onSendData,
   readingAuthorId,
   disabled,
 }) => {
   const url = `${import.meta.env.VITE_API_HOST}/api/files/ra/${readingAuthorId}`;
   
-
   const { upload, loading } = useFileUpload({
     url,
     onSuccess: (file: AppFile) => {
@@ -33,11 +32,11 @@ const FeedbackUploadSection: React.FC<FeedbackProps> = ({
 
   return (
     <Box title="Upload the author's Word Doc with your comments">
-      <UploadFeedbackFileForm
+      <UploadFileFormFeedback
         onSubmit={upload}
         loading={loading}
       />
     </Box>
   );
 };
-export default FeedbackUploadSection;
+export default UploadFileDataFeedback;

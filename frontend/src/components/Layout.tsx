@@ -20,7 +20,6 @@ import GroupSearch from "../pages/GroupSearchPage";
 import MemberSearchPage from "../pages/MemberSearchPage";
 import Readings from "../pages/Readings";
 import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
-import { DocType } from "../util/Enum";
 import Dashboard from "../pages/Dashboard";
 import GroupsPersonal from "../pages/GroupsPersonal";
 import TopNav from "../components/nav/TopNav";
@@ -40,9 +39,9 @@ export default function Layout() {
 
                 <Route path="/" element={<Home />} />
                 <Route path="/userprofile" element={<UserProfile />} />
-                <Route path="/files*" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
-                <Route path="/filemanager/manuscript" element={<FileManager documentType={DocType.MANUSCRIPT} />} />
-                <Route path="/filemanager/feedback" element={<FileManager documentType={DocType.FEEDBACK} />} />
+                <Route path="/files*" element={<FileManager/>} />
+                <Route path="/filemanager/manuscript" element={<FileManager/>} />
+                <Route path="/filemanager/feedback" element={<FileManager />} />
 
                 <Route path="/groups/details" element={<Groups />} />
                 <Route path="/groups/details/personal" element={<GroupsPersonal />} />

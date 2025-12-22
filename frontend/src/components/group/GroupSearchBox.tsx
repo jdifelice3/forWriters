@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Group } from "../types/domain-types";
+import { Group } from "../../types/domain-types";
 import { Autocomplete, TextField, CircularProgress } from "@mui/material";
 
 interface Props {

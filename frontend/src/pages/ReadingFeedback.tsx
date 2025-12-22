@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UploadFileFormProperties } from "../types/File";
-import { AppFile, Reading, ReadingAuthor } from "../types/domain-types";
+import { UploadFileFormProperties } from "../types/FileTypes";
+import { AppFile, AppFileMeta, Reading, ReadingAuthor } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import { generateRandomString } from "../util/Math";
-import FeedbackUploadSection from "../components/file/FeedbackUploadSection";
-import FileIcon from "../components/file/FileIcon";
+import UploadFileDataFeedback from "../components/file/data/UploadFileDataFeedback";
+import FileIcon from "../components/controls/FileIcon";
 import {
   Paper,
   Box,
@@ -47,7 +47,7 @@ const ReadingFeedback = () => {
   const [editFile, setEditFile] = useState<AppFile | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [previewFile, setPreviewFile] = useState<AppFile | null>(null);
+  const [previewFile, setPreviewFile] = useState<AppFileMeta | null>(null);
   const [eventTitle, setEventTitle] = useState("");
   const [reload, setReload] = useState("");
     
@@ -124,7 +124,7 @@ const ReadingFeedback = () => {
         Manuscripts to Review
       </Typography>
 
-      {reading && reading.readingAuthor.findIndex(item => item.authorAppFile !== null) === -1 ? (
+      {reading && reading.readingAuthor.findIndex(item => item.authorAppFileMeta !== null) === -1 ? (
         <Typography variant="body1" color="text.secondary">
           No files uploaded yet.
         </Typography>
@@ -198,7 +198,7 @@ const ReadingFeedback = () => {
                     <Typography variant="h5" sx={{mt: 4, mb: 2}}>
                         Upload the author's Word Doc with your comments
                     </Typography>
-                    <FeedbackUploadSection onSendData={reloadFromUploadForm} readingAuthorId={ra.id} />
+                    <UploadFileDataFeedback onSendData={reloadFromUploadForm} readingAuthorId={ra.id} />
                     <Typography 
                         className={userHasSubmittedFeedback(ra, user.id) || ra.authorId === user.id ? "disabled" : ""}
                         sx={{color: "green", fontWeight: "bold", mt: 2}}>
@@ -248,7 +248,7 @@ const ReadingFeedback = () => {
       </Dialog>
 
       {/* Preview dialog */}
-      <Dialog
+      {/* <Dialog
         open={!!previewFile}
         onClose={() => setPreviewFile(null)}
         fullWidth
@@ -292,7 +292,7 @@ const ReadingFeedback = () => {
               </Typography>
             ))}
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </Box>
   );
 }

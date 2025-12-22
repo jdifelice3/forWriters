@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { GroupBasic } from "../../types/domain-types";
-import { getUrlLabel } from "../../types/Url";
+import { Group } from "../../types/domain-types";
+import { getUrlLabel } from "../../types/UrlTypes";
 import {
   Box,
   Typography,
@@ -14,7 +14,7 @@ import {
 import Grid from "@mui/material/Grid";
 
 interface GroupDetailsProps {
-  group: GroupBasic;
+  group: Group;
 }
 
 export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {

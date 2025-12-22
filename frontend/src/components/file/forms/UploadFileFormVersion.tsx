@@ -8,25 +8,25 @@ import {
 import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
 
-interface UploadFeedbackFileFormProps {
+interface UploadFileFormProps {
     onSubmit: (data: FormData) => void;
+    appFileMetaId?: string;
     loading?: boolean;
     disabled?: boolean;
     submitLabel?: boolean;
     selectFileLabel?: boolean;
 }
 
-const UploadFeedbackFileForm: React.FC<UploadFeedbackFileFormProps> = ({
+const UploadFileFormVersion: React.FC<UploadFileFormProps> = ({
     onSubmit,
+    appFileMetaId,
     loading = false,
     disabled = false,
     submitLabel = "Upload",
     selectFileLabel: selectFileLable = "CHOOSE FILE"
 }) => {
     const [file, setFile] = useState<File | null>(null);
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [additionalFeedback, setAdditionalFeedback] = useState("");
+    const [comment, setComment] = useState("");
 
     // File upload
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,14 +38,14 @@ const UploadFeedbackFileForm: React.FC<UploadFeedbackFileFormProps> = ({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!file || !title) return;
+        if (!file) return;
 
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("title", title);
-        formData.append("description", description);
-        formData.append("additionalFeedback", additionalFeedback.replace(/\r\n/g,"\n"));
-
+        formData.append("comment", comment);
+        if(appFileMetaId){
+            formData.append("appFileMetaId", appFileMetaId);
+        }
         onSubmit(formData);
     };
 
@@ -61,34 +61,13 @@ const UploadFeedbackFileForm: React.FC<UploadFeedbackFileFormProps> = ({
                     {file ? file.name : selectFileLable}
                     <input type="file" hidden onChange={handleFileChange} />
                 </Button>
-                        </Grid>
-            <Grid size={4}>
-                <TextField
-                    label="Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    fullWidth
-                    required
-                />
             </Grid>
-            <Grid size={8}>
+            <Grid size={7}>
                 <TextField
-                    label="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    label="Comment"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
                     fullWidth
-                />
-            </Grid>
-            <Grid size={12}>
-                <TextField
-                    label="Additional Feedback"
-                    value={additionalFeedback}
-                    // sx={{width: "740px"}}
-                    multiline
-                    rows={6} // Sets the initial number of visible rows
-                    placeholder="Additional feedback (optional)"
-                    fullWidth
-                    onChange={(e) => setAdditionalFeedback(e.target.value)}
                 />
             </Grid>
             <Grid size={3}>
@@ -106,4 +85,4 @@ const UploadFeedbackFileForm: React.FC<UploadFeedbackFileFormProps> = ({
     </Box>
   );
 };
-export default UploadFeedbackFileForm;
+export default UploadFileFormVersion;

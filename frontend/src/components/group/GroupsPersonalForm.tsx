@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GroupBasic } from "../../types/domain-types";
+import { Group } from "../../types/domain-types";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import {
@@ -18,7 +18,7 @@ import ReadingList from "../reading/ReadingList";
 
 import { ReadingCalendar } from "../reading/ReadingCalendar";
 import { useUserContext } from "../../context/UserContext";
-import { ReadingCommands } from "../../types/Reading";
+import { ReadingCommands } from "../../types/ReadingTypes";
 
 type FormInput = {
     name: string,
@@ -41,16 +41,24 @@ const handleSignup = async(event: React.MouseEvent<HTMLButtonElement>, readingId
 const handleWithdraw = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
 }
 
+const handleReview = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+}
+
+const handleFeedback = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+}
+
 const commands: ReadingCommands = {
     edit: handleEdit,
     save: handleAddReading,
     delete: handleDelete,
     signup: handleSignup,
-    withdraw: handleWithdraw
+    withdraw: handleWithdraw,
+    review: handleReview,
+    feedback: handleFeedback
 }
 
 interface GroupsPersonalFormProps {
-    group: GroupBasic;
+    group: Group;
 }
 
 const styles = {

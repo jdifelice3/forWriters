@@ -101,12 +101,12 @@ enum WorkType {
 
 model AppFile {
   id                  String       @id @default(cuid())
+  appFileMetaId       String
+  version             Int          @default(1)
   userId              String
-  title               String
-  description         String?
   filename            String
   documentType        DocumentType @default(MANUSCRIPT)
-  mimetype            FileType     @default(PDF)
+  mimetype            FileType     @default(DOCX)
   url                 String
   uploadedAt          DateTime     @default(now())
   workType            WorkType?
@@ -114,20 +114,39 @@ model AppFile {
   pageCount           Int?
   genre               Genre?
   manuscriptIsVisible Boolean      @default(false)
+  versionComment      String?
+  createdAt           DateTime      @default(now())
 
-  user            User              @relation("AppFileOwner", fields: [userId], references: [id])
-  readingFeedback ReadingFeedback[]
-  authorAppFile   AuthorAppFile[]
+  appFileMeta    AppFileMeta        @relation("OriginalAppFile", fields: [appFileMetaId], references: [id])
 }
 
-model AuthorAppFile {
+model AppFileMeta {
+    id                  String          @id @default(cuid())
+    userId              String
+    title               String
+    description         String
+    documentType        DocumentType    @default(MANUSCRIPT)
+    currentVersionId    Int
+    createdAt           DateTime        @default(now())
+    updatedAt           DateTime        @default(now())
+    deletedAt           DateTime?
+
+    user                User         @relation("AppFileOwnerUser", fields: [userId], references: [id])
+    appFile             AppFile[]    @relation("OriginalAppFile") 
+    readingFeedback     ReadingFeedback[]
+    authorAppFileMeta   AuthorAppFileMeta[]
+
+
+}
+
+model AuthorAppFileMeta {
   id              String   @id @default(cuid())
   readingAuthorId String   @unique
-  appFileId       String
+  appFileMetaId       String
   createdAt       DateTime @default(now())
 
   readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
-  appFile       AppFile       @relation(fields: [appFileId], references: [id])
+  appFileMeta       AppFileMeta       @relation(fields: [appFileMetaId], references: [id])
 }
 
 model CollaboratorRequest {
@@ -175,7 +194,7 @@ model GroupAddress {
 
   groupId String
   group   Group?   @relation(fields: [groupId], references: [id])
-  reading Reading?  
+  reading Reading? 
 }
 
 model GroupNews {
@@ -260,7 +279,7 @@ model ReadingAuthor {
 
   reading         Reading           @relation(fields: [readingId], references: [id])
   user            User              @relation("ReadingAuthorUser", fields: [authorId], references: [id])
-  authorAppFile   AuthorAppFile?
+  authorAppFileMeta   AuthorAppFileMeta?
   readingFeedback ReadingFeedback[]
 
   @@unique([readingId, authorId])
@@ -276,7 +295,7 @@ model ReadingFeedback {
 
   readingAuthor          ReadingAuthor            @relation(fields: [readingAuthorId], references: [id])
   readingFeedbackComment ReadingFeedbackComment[]
-  appFile                AppFile                  @relation(fields: [feedbackFileId], references: [id])
+  appFile                AppFileMeta                  @relation(fields: [feedbackFileId], references: [id])
   user                   User                     @relation("FeedbackUser", fields: [feedbackUserId], references: [id])
 }
 
@@ -305,16 +324,15 @@ model User {
   groupUser           GroupUser[]
   group               Group[]
   reading             Reading[]
-  appFiles            AppFile[]             @relation("AppFileOwner")
+  appFileMetas            AppFileMeta[]                             @relation("AppFileOwnerUser")
   urls                UserUrl[]
   joinRequests        JoinRequest[]
-  readingFeedback     ReadingFeedback[]     @relation("FeedbackUser")
-  readingAuthor       ReadingAuthor[]       @relation("ReadingAuthorUser")
-  userInviter         UserCollaborator[]    @relation("User")
-  userCollaborator    UserCollaborator[]    @relation("UserCollaborator")
-  userRequestor       CollaboratorRequest[]                         @relation("UserRequest")
-  collaboratorUserRequestor    CollaboratorRequest[]                @relation("UserCollaboratorRequest")
-
+  readingFeedback     ReadingFeedback[]                     @relation("FeedbackUser")
+  readingAuthor       ReadingAuthor[]                       @relation("ReadingAuthorUser")
+  userInviter         UserCollaborator[]                    @relation("User")
+  userCollaborator    UserCollaborator[]                    @relation("UserCollaborator")
+  userRequestor       CollaboratorRequest[]                 @relation("UserRequest")
+  collaboratorUserRequestor    CollaboratorRequest[]        @relation("UserCollaboratorRequest")
 }
 
 model UserCollaborator {

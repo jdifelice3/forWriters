@@ -1,7 +1,7 @@
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { 
-    AppFile,
+    AppFileMeta,
     Group,
     Reading
  } from "../types/domain-types";
@@ -17,15 +17,15 @@ import {
 import Grid from "@mui/material/Grid";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import ReadingList from "../components/reading/ReadingList";
-import { ReadingCommands } from "../types/Reading";
-import { FileCommands, FileListProperties } from "../types/File";
+import { ReadingCommands } from "../types/ReadingTypes";
+import { FileCommands, FileListProperties } from "../types/FileTypes";
 import { useGroupDetails } from "../hooks/useGroup";
 import ReadingCalendar from "../components/reading/ReadingCalendar";
-import FileList from "../components/file/FileList";
-import { useReadingsUI } from "../hooks/useReadingsUI";
-import { useReadingsActions } from "../hooks/useReadingsAction";
-import { useReadingsData } from "../hooks/useReadingsData";
-import { FormInput } from "../types/Reading";
+import FileManagerList from "../components/file/lists/FileManagerList";
+import { useReadingsUI } from "../hooks/useReading";
+import { useReadingsActions } from "../hooks/useReading";
+import { useReadingsData } from "../hooks/useReading";
+import { FormInput } from "../types/ReadingTypes";
 
 const Readings = () => {
     let isAdmin = false;
@@ -43,29 +43,29 @@ const Readings = () => {
       );
     }
     
-    const actions = useReadingsActions(group!.id, user.id, mutate);
+const actions = useReadingsActions(group!.id, user.id, mutate);
 
-    const foundUser = group?.groupUser.find(u => u.userId === user.id && u.isAdmin );
-    if(foundUser) isAdmin = true;
+const foundUser = group?.groupUser.find(u => u.userId === user.id && u.isAdmin );
+if(foundUser) isAdmin = true;
 
-    const handleAddReading = async (input: FormInput ) => {
-        try {
-            ui.beginSubmit();
-            actions.create(input, input.schedule);
-            ui.endSubmit();
-        } catch (err) {
-            ui.setError("Failed to create reading");
-        } 
-    };
+const handleAddReading = async (input: FormInput ) => {
+    try {
+        ui.beginSubmit();
+        actions.create(input, input.schedule);
+        ui.endSubmit();
+    } catch (err) {
+        ui.setError("Failed to create reading");
+    } 
+};
 
-    const handleSignup = async (event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
-        try {
-            actions.signup(readingId);
-            alert("You are signed up for this reading!");
-        } catch (err) {
-            if(err instanceof Error) ui.setError(err.message);
-        }
-    };
+const handleSignup = async (event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
+    try {
+        actions.signup(readingId);
+        alert("You are signed up for this reading!");
+    } catch (err) {
+        if(err instanceof Error) ui.setError(err.message);
+    }
+};
 
 const handleWithdraw = async(event: React.MouseEvent<HTMLButtonElement>, readingId: string) => {
     try {
@@ -116,22 +116,31 @@ const fileListProperties: FileListProperties = {
     showPreviewButton: false,
     buttonDownloadText: "DOWNLOAD",
     showDeleteButton: false,
-    showEditButton: false 
+    showEditButton: false,
+    showVersionHistory: false
 }
 
-const handleFileEdit = async(file: AppFile) => {
+const handleFileEdit = async(file: AppFileMeta) => {
 };
 
-const handleFileSaveEdit = async (file:AppFile) => {
+const handleFileSaveEdit = async (file:AppFileMeta) => {
 };
 
-const handleFileDelete = async (file: AppFile) => {
+const handleFileDelete = async (file: AppFileMeta) => {
 };
+
+const onVersionChange = async(event:React.ChangeEvent<HTMLInputElement>, fileAppMeta: AppFileMeta, version: string) => {
+}
+
+const onVersionUpload = async(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, appFileMeta: AppFileMeta) => {
+}
 
 const fileCommands: FileCommands = {
     edit: handleFileEdit,
     save: handleFileSaveEdit,
-    delete: handleFileDelete
+    delete: handleFileDelete,
+    onVersionChange: onVersionChange,
+    onVersionUpload: onVersionUpload
 }
 
     return (
@@ -158,7 +167,7 @@ const fileCommands: FileCommands = {
                             >
                             My Submitted Manuscripts
                             </Typography>
-                                <FileList files={myFiles} fileListProperties={fileListProperties} commands={fileCommands} />
+                                <FileManagerList files={myFiles} fileListProperties={fileListProperties} commands={fileCommands} />
                         </Grid>
                         <Grid size={4}  className="readingSubPanel">
                             <Typography variant="h6" mb={2}
@@ -175,7 +184,7 @@ const fileCommands: FileCommands = {
                             )}
                             
                         </Grid>
-                        <Grid size={4}  className="readingSubPanel">
+                        {/* <Grid size={4}  className="readingSubPanel">
                         <Typography variant="h6" mb={2}
                             sx={{
                                 fontWeight: "bold"
@@ -184,7 +193,7 @@ const fileCommands: FileCommands = {
                             Review Manuscripts
                         </Typography>
                             <ReadingList readings={myReadings} commands={readingCommands}/>
-                        </Grid>
+                        </Grid> */}
                         
                 </Grid>
                 </CardContent>
@@ -193,5 +202,6 @@ const fileCommands: FileCommands = {
             </Card>
         </>
     )
+
 }
 export default Readings;

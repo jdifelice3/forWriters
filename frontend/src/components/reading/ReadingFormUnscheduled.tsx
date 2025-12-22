@@ -18,14 +18,14 @@ import {
 
 import Grid from "@mui/material/Grid";
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import FileSelect from "../file/FileSelect";
-import { FileListProperties } from '../../types/File';
+import FileSelect from "../controls/FileSelect";
+import { FileListProperties } from '../../types/FileTypes';
 import InfoIcon from '@mui/icons-material/Info';
 import FeedbackCommentList from "./FeedbackCommentList";
 import wordIcon from '../../assets/icons/icons8-word-file-48.png';
 import { getCardBackgroundColor } from "../../util/readingUtil";
-import { useReadings } from "../../hooks/useReading";
-import { ReadingCommands } from "../../types/Reading";
+//import { useReadings } from "../../hooks/useReading";
+import { ReadingCommands } from "../../types/ReadingTypes";
 
 const fileListProperties: FileListProperties =
   {
@@ -33,7 +33,8 @@ const fileListProperties: FileListProperties =
     showPreviewButton: true,
     buttonDownloadText: "DOWNLOAD",
     showDeleteButton: true,
-    showEditButton: true 
+    showEditButton: true,
+    showVersionHistory: false
   }
 
 const styles = {
@@ -148,11 +149,11 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthors}) =
                     </Typography>
                     
                     <div>
-                    {canChangeManuscript(ra.reading as Reading) ? (
+                    {/* {canChangeManuscript(ra.reading as Reading) ? (
                     <FileSelect 
                         onSendData={handleSelectChange} 
                         readingAuthorId={ra.id} 
-                        selectedValueId={ra.authorAppFile?.appFile.id || ""}
+                        selectedValueId={ra.authorAppFileMeta?.appFile.id || ""}
                         fileListProperties={fileListProperties}
                         />
                     ) : (
@@ -162,7 +163,7 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthors}) =
                         disabled
                         value={ra.authorAppFile?.appFile.title || ""}
                     />
-                    )}
+                    )} */}
                     <Popover
                         id={id}
                         open={open}
@@ -190,8 +191,8 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthors}) =
                     </div>
                     <Typography variant="caption" color="text.secondary">
                             {
-                            ra.authorAppFile ?
-                            `Submitted to Reading on ${new Date(ra.authorAppFile.createdAt).toLocaleDateString()}`
+                            ra.authorAppFileMeta ?
+                            `Submitted to Reading on ${new Date(ra.authorAppFileMeta?.createdAt).toLocaleDateString()}`
                             : "You haven't submitted a manuscript"
                         }
                     </Typography>

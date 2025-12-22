@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { GroupCreate } from "../types/domain-types";
+import { Group } from "../types/domain-types";
 import {
   Box,
   Button,
@@ -128,7 +128,7 @@ const GroupsCreate = () => {
       
     }
 
-      const group: GroupCreate = await res.json();
+      const group: Group = await res.json();
       setSuccess("Group created successfully.");
       // Navigate to the new group's page (adjust route as needed)
       setTimeout(() => navigate(`/groups/${group.id}`), 600);

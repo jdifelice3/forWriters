@@ -6,8 +6,12 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import { S3Client } from "@aws-sdk/client-s3";
 import Session from "supertokens-node/recipe/session";
-import { getFileRecords, createFileRecordBasic, updateFileRecord, deleteFileRecord, createFileRecordReadingFeedback } from "../database/dbFiles";
 import { extractCommentsWithTargetsFromS3 } from "../services/streamFromS3";
+import { 
+    createFileRecordBasic,
+    createFileRecordReadingFeedback, 
+    createFileVersionRecord 
+} from "../database/dbFiles";
 
 type ExtractedComment = {
   commentId: string;
@@ -41,9 +45,7 @@ const upload = multer({
 });
 //#endregion
 
-
-
-
+//#region GET
 router.get("/:id/download", async (req, res) => {
     try {
         const prisma = new PrismaClient();
@@ -58,7 +60,7 @@ router.get("/:id/download", async (req, res) => {
         const data = await s3.send(command);
         console.log('S3 data', data);
         res.setHeader("Content-Type", data.ContentType || "application/octet-stream");
-        res.setHeader("Content-Disposition", `attachment; filename="${file.title}"`);
+        res.setHeader("Content-Disposition", `attachment; filename=downloadedFile`);
 
         if(data.Body === undefined){
             throw new Error('Error downloading file from S3');
@@ -78,9 +80,7 @@ router.get("/:id/download", async (req, res) => {
 
     }
 });
-
 //#endregion
-
 
 //#region POST
 router.post("/", upload.single("file"), async (req, res) => {
@@ -114,6 +114,37 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
+router.post("/version", upload.single("file"), async (req, res) => {
+  try {
+    // Get the SuperTokens session
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+
+    // File metadata from multer-s3
+    const s3Url = (req.file as any).location; // full URL: https://bucket.s3.amazonaws.com/file.pdf
+    const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
+    const mimeType = req.file?.mimetype;
+    const { appFileMetaId } = req.body;
+    console.log('appFileMetaId',appFileMetaId);
+    // Create DB entry
+    const file = await createFileVersionRecord(
+      authId,
+      appFileMetaId,
+      mimeType!,
+      key,                // store the S3 key
+      s3Url               // store the full S3 URL
+    );
+
+    res.json({
+      ok: true,
+      file,
+    });
+  } catch (err) {
+    console.error("Error uploading file:", err);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
 router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
   try{
     const session = await Session.getSession(req, res);
@@ -130,7 +161,7 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
     const s3Url = (req.file as any).location;
     console.log(readingAuthorId, mimeType,key,s3Url);
 
-    const file = await createFileRecordReadingFeedback(
+    const {fileMeta, version } = await createFileRecordReadingFeedback(
       authId, 
       mimeType!, 
       key, 
@@ -145,7 +176,7 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
       data: {
         readingAuthorId: readingAuthorId,
         feedbackUserId: user.id,
-        feedbackFileId: file.id,
+        feedbackFileId: fileMeta.id,
       }
     });
 
@@ -170,12 +201,10 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
             targetText: comments[i].targetText
         })
     }
-    console.log('input', input);
     const commentsResults = await prisma.readingFeedbackComment.createMany({
         data: input
     });
-    console.log('after comments storage');
-    res.json(file);
+    res.json(fileMeta);
   } catch (err) {
       console.error('Error creating file record:', err);
       res.status(500).json({ err: 'Error creating file record' });

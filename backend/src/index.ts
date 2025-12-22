@@ -73,7 +73,7 @@ app.use('/api/files', fileRoutes);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/api/fileApi', apiRoutes);
+app.use('/api/filesApi', apiRoutes);
 
 app.use('/api/users', userRoutes); 
 

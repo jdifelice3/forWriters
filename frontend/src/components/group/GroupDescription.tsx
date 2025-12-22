@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GroupDescriptionType } from "../types/domain-types";
+//import { GroupDescriptionType } from "../../types/domain-types";
+import { Group } from "../../types/domain-types";
 import {
   Typography,
 } from "@mui/material";
@@ -11,7 +12,7 @@ interface GroupDescriptionProps {
 }
 
 const GroupDescription: React.FC<GroupDescriptionProps> = ({groupId}) => {
-  const [groupDesc, setGroupDesc] = useState<GroupDescriptionType | null>(null);
+  const [groupDesc, setGroupDesc] = useState<Group | null>(null);
   const groupDescriptionUrl = `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/description`;
   
   useEffect(() => {
@@ -23,7 +24,7 @@ const GroupDescription: React.FC<GroupDescriptionProps> = ({groupId}) => {
           });
           
           if (res.ok) {
-              const data: GroupDescriptionType = await res.json();
+              const data: Group = await res.json();
               setGroupDesc(data);
           }
         })();

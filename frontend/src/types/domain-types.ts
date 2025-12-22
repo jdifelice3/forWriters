@@ -31,9 +31,9 @@ export type WorkType = "FLASHFICTION" | "NOVEL" | "NOVELLA" | "NOVELETTE" | "PLA
 
 export interface AppFile {
   id: string;
+  appFileMetaId: string;
+  version: number;
   userId: string;
-  title: string;
-  description?: string;
   filename: string;
   documentType: DocumentType;
   mimetype: FileType;
@@ -44,18 +44,33 @@ export interface AppFile {
   pageCount?: number;
   genre?: Genre;
   manuscriptIsVisible: boolean;
-  user: User;
-  readingFeedback: ReadingFeedback[];
-  authorAppFile: AuthorAppFile[];
+  versionComment?: string;
+  appFileMeta: AppFileMeta;
 }
 
-export interface AuthorAppFile {
+export interface AppFileMeta {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  documentType: DocumentType;
+  currentVersionId: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  user: User;
+  appFile: AppFile[];
+  readingFeedback: ReadingFeedback[];
+  authorAppFileMeta: AuthorAppFileMeta[];
+}
+
+export interface AuthorAppFileMeta {
   id: string;
   readingAuthorId: string;
-  appFileId: string;
+  appFileMetaId: string;
   createdAt: string;
   readingAuthor: ReadingAuthor;
-  appFile: AppFile;
+  appFileMeta: AppFileMeta;
 }
 
 export interface CollaboratorRequest {
@@ -79,21 +94,13 @@ export interface Group {
   websiteUrl?: string;
   createdAt: string;
   updatedAt: string;
-  groupAddress: GroupAddress[];//
-  groupUser: GroupUser[];//
+  groupAddress: GroupAddress[];
+  groupUser: GroupUser[];
   groupNews: GroupNews[];
-  reading: Reading[];//
-  groupUrl: GroupUrl[];//
+  reading: Reading[];
+  groupUrl: GroupUrl[];
   user: User;
   joinRequests: JoinRequest[];
-}
-
-export interface GroupBasic extends Omit<Group, "joinRequests" | "groupNews" | "user" >{
-
-}
-
-export interface GroupCreate extends Omit<Group, "groupNews" | "reading" | "groupUrl" | "user" | "joinRequests">{
-
 }
 
 export interface GroupAddress {
@@ -105,12 +112,6 @@ export interface GroupAddress {
   groupId: string;
   group?: Group;
   reading?: Reading;
-}
-
-export interface GroupDescriptionType {
-    description?: string;
-    websiteUrl?: string;
-    groupAddress: GroupAddress[],
 }
 
 export interface GroupNews {
@@ -183,12 +184,8 @@ export interface ReadingAuthor {
   joinedAt: string;
   reading: Reading;
   user: User;
-  authorAppFile?: AuthorAppFile;
+  authorAppFileMeta?: AuthorAppFileMeta;
   readingFeedback: ReadingFeedback[];
-}
-
-export interface ReadingAuthorByUser extends Omit<ReadingAuthor,"user"> {
-
 }
 
 export interface ReadingFeedback {
@@ -200,7 +197,7 @@ export interface ReadingFeedback {
   updatedAt: string;
   readingAuthor: ReadingAuthor;
   readingFeedbackComment: ReadingFeedbackComment[];
-  appFile: AppFile;
+  appFile: AppFileMeta;
   user: User;
 }
 
@@ -226,7 +223,7 @@ export interface User {
   groupUser: GroupUser[];
   group: Group[];
   reading: Reading[];
-  appFiles: AppFile[];
+  appFileMetas: AppFileMeta[];
   urls: UserUrl[];
   joinRequests: JoinRequest[];
   readingFeedback: ReadingFeedback[];
@@ -257,7 +254,7 @@ export interface UserProfile {
 }
 
 export interface UserSearch {
-  id: string;
+  userId: string;
   fullName?: string;
   bio?: string;
 }

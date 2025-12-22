@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import { FormInput } from "../types/Reading";
+import { FormInput } from "../types/ReadingTypes";
 
 export const ReadingsAPI = {
   create(groupId: string, input: FormInput, userId: string, schedule: string) {

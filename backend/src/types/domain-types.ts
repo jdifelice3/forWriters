@@ -13,7 +13,7 @@ export type Genre = "FANTASY" | "HISTORICAL" | "HORROR" | "LITERARY" | "MYSTERY"
 
 export type FileType = "DOCX" | "PDF";
 
-export type GroupType = "WRITING";
+export type GroupType = "WRITING" | "PERSONAL";
 
 export type JoinRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -31,9 +31,9 @@ export type WorkType = "FLASHFICTION" | "NOVEL" | "NOVELLA" | "NOVELETTE" | "PLA
 
 export interface AppFile {
   id: string;
+  appFileMetaId: string;
+  version: number;
   userId: string;
-  title: string;
-  description?: string;
   filename: string;
   documentType: DocumentType;
   mimetype: FileType;
@@ -44,18 +44,33 @@ export interface AppFile {
   pageCount?: number;
   genre?: Genre;
   manuscriptIsVisible: boolean;
-  user: User;
-  readingFeedback: ReadingFeedback[];
-  authorAppFile: AuthorAppFile[];
+  versionComment?: string;
+  appFileMeta: AppFileMeta;
 }
 
-export interface AuthorAppFile {
+export interface AppFileMeta {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  documentType: DocumentType;
+  currentVersionId: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  user: User;
+  appFile: AppFile[];
+  readingFeedback: ReadingFeedback[];
+  authorAppFileMeta: AuthorAppFileMeta[];
+}
+
+export interface AuthorAppFileMeta {
   id: string;
   readingAuthorId: string;
-  appFileId: string;
+  appFileMetaId: string;
   createdAt: string;
   readingAuthor: ReadingAuthor;
-  appFile: AppFile;
+  appFileMeta: AppFileMeta;
 }
 
 export interface CollaboratorRequest {
@@ -169,7 +184,7 @@ export interface ReadingAuthor {
   joinedAt: string;
   reading: Reading;
   user: User;
-  authorAppFile?: AuthorAppFile;
+  authorAppFileMeta?: AuthorAppFileMeta;
   readingFeedback: ReadingFeedback[];
 }
 
@@ -182,7 +197,7 @@ export interface ReadingFeedback {
   updatedAt: string;
   readingAuthor: ReadingAuthor;
   readingFeedbackComment: ReadingFeedbackComment[];
-  appFile: AppFile;
+  appFile: AppFileMeta;
   user: User;
 }
 
@@ -208,7 +223,7 @@ export interface User {
   groupUser: GroupUser[];
   group: Group[];
   reading: Reading[];
-  appFiles: AppFile[];
+  appFileMetas: AppFileMeta[];
   urls: UserUrl[];
   joinRequests: JoinRequest[];
   readingFeedback: ReadingFeedback[];
@@ -239,7 +254,7 @@ export interface UserProfile {
 }
 
 export interface UserSearch {
-  id: string;
+  userId: string;
   fullName?: string;
   bio?: string;
 }

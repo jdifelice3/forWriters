@@ -8,7 +8,7 @@ import {
     Typography,
 } from "@mui/material";
 import ReviewsIcon from '@mui/icons-material/Reviews';
-import { ReadingCommands } from "../../types/Reading";
+import { ReadingCommands } from "../../types/ReadingTypes";
 
 interface ReadingScheduleFormPersonal {
   reading: Reading;

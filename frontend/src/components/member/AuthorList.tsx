@@ -12,7 +12,7 @@ const AuthorList: React.FC<AuthorListProps> = ({ reading }) => {
   return (
     reading.readingAuthor.map((ra: ReadingAuthor, index) => (
       <Typography key={index} variant="body1" color="text.secondary">        
-            {ra.authorAppFile?.appFile.user.userProfile?.firstName} {ra.authorAppFile?.appFile.user.userProfile?.lastName}
+            {ra.authorAppFileMeta?.appFileMeta.user.userProfile?.firstName} {ra.authorAppFileMeta?.appFileMeta.user.userProfile?.lastName}
       </Typography>
     ))
   );

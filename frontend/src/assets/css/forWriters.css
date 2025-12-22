@@ -89,6 +89,24 @@
     width: 1200px;
 }
 
+.filesComponentPanel {
+    margin-left: 25px;
+    width: 800px;
+}
+
+/* Files */
+.filesCardManuscripts {
+    background-color:  #fdeee3 !important;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.filesCardFeedback {
+    background-color:  #fdeee3 !important;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
 /* Groups */
 .groupSubPanel {
     width: 75%;
@@ -112,11 +130,16 @@
 .readingCardReview {
     background-color:  #e3fdfb !important;
     width: 300px !important;
+    
 }
 
 .readingCardSignup {
-    background-color: #e3e5fd !important;
-    width:300px;
+    background-color:  #e3fdfb !important;
+    /* background-color: #e3e5fd !important; */
+    width:350px;
+    /* border-color: gold !important;
+    border-style: solid !important;
+    border-width: 3px !important; */
 }
 
 .sidebarIcon {

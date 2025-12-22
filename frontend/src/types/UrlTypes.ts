@@ -1,4 +1,4 @@
-import { UrlType } from "../types/domain-types";
+import { UrlType } from "./domain-types";
 export enum Url {
     AUDIO = "AUDIO",
     FACEBOOK = 'FACEBOOK',

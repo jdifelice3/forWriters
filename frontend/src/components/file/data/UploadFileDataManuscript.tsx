@@ -1,6 +1,6 @@
-import { useFileUpload } from "../../hooks/useFile";
-import UploadFileForm from "./UploadFileForm";
-import { AppFile } from "../../types/domain-types";
+import { useFileUpload } from "../../../hooks/useFile";
+import UploadFileForm from "../forms/UploadFileForm";
+import { AppFileMeta, AppFile } from "../../../types/domain-types";
 import {
   Box,
 } from "@mui/material";
@@ -10,7 +10,7 @@ interface ManuscriptProps {
   disabled?: boolean;
 }
 
-const ManuscriptUpload: React.FC<ManuscriptProps> = ({
+const UploadFileDataManuscript: React.FC<ManuscriptProps> = ({
   onSendData,
   disabled,
 }) => {
@@ -37,4 +37,4 @@ const ManuscriptUpload: React.FC<ManuscriptProps> = ({
     </Box>
   );
 };
-export default ManuscriptUpload;
+export default UploadFileDataManuscript;

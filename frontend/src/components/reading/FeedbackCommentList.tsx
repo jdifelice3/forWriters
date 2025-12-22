@@ -1,6 +1,6 @@
 "use client";
 
-import { ReadingAuthorByUser } from "../../types/domain-types";
+import { ReadingAuthor } from "../../types/domain-types";
 import { generateRandomString } from "../../util/Math";
 import {
     Divider,
@@ -12,7 +12,7 @@ import ReviewsIcon from '@mui/icons-material/Reviews';
 import EditIcon from '@mui/icons-material/Edit';
 
 interface FeedbackCommentListProps {
-  readingAuthor: ReadingAuthorByUser;
+  readingAuthor: ReadingAuthor;
 }
 
 const FeedbackCommentList: React.FC<FeedbackCommentListProps> = ({readingAuthor}) => {

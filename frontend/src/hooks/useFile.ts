@@ -1,11 +1,43 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import useSWR from "swr";
-import { AppFile } from "../types/domain-types";
+import { AppFileMeta, AppFile } from "../types/domain-types";
+import { DocType } from "../util/Enum";
+import { fetcher } from "../context/fetcher";
 
 interface UploadOptions {
   url: string;
   onSuccess: (file: AppFile) => void;
   onError: (err: Error) => void;
+}
+
+export const useFiles = (url: string) => {
+  const { data, error, isLoading, mutate } = useSWR<AppFileMeta[]>(
+    url,
+    fetcher
+  );
+
+  return {
+    files: data ?? [],
+    isLoading,
+    error,
+    refresh: mutate, // 👈 important
+  };
+};
+
+export function useFilesData(
+  files?: AppFileMeta[]
+) {
+  const myManuscripts = useMemo(() => {
+    if (!files) return [];
+    return files.filter(f => f.documentType === DocType.MANUSCRIPT);
+  }, [files]);
+
+  const myFeedbackDocuments = useMemo(() => {
+    if (!files) return [];
+    return files.filter(f => f.documentType === DocType.FEEDBACK);
+  }, [files]);
+
+  return { myManuscripts, myFeedbackDocuments };
 }
 
 export function useFileUpload({ url, onSuccess, onError }: UploadOptions) {
@@ -34,24 +66,31 @@ export function useFileUpload({ url, onSuccess, onError }: UploadOptions) {
   return { upload, loading };
 }
 
-export const useFilesGet = (url: string) => {
-  const { data, error, isLoading, mutate } = useSWR<AppFile[]>(
-    url,
-    async (url: string) => {
-      const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch files");
-      return res.json();
+export function useVersionUpdate({ url, onSuccess, onError }: UploadOptions) {
+  const [loading, setLoading] = useState(false);
+
+  const upload = async (formData: FormData) => {
+    setLoading(true);
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const file: AppFile = await res.json();
+      onSuccess(file);
+    } catch (err) {
+        if(err instanceof Error) onError(err);
+    } finally {
+      setLoading(false);
     }
-  );
-
-  return {
-    files: data ?? [],
-    isLoading,
-    error,
-    refresh: mutate, // 👈 important
   };
-};
 
+  return { upload, loading };
+}
 
 export const useFileUpdate = (
     url: string,
@@ -76,7 +115,7 @@ export const useFileUpdate = (
   );
 
   return {
-    file: data as AppFile,
+    file: data as AppFileMeta,
     isLoading,
     error,
   };

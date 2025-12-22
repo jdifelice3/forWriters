@@ -2,7 +2,7 @@ import { Reading } from "../../types/domain-types";
 import { GroupType } from "../../util/Enum";
 import ReadingScheduleForm from "./ReadingScheduleForm";
 import ReadingScheduleFormPersonal from "./ReadingScheduleFormPersonal";
-import { ReadingCommands } from "../../types/Reading";
+import { ReadingCommands } from "../../types/ReadingTypes";
 import {
     Card,
     CardContent,

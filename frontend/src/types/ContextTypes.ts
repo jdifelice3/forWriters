@@ -1,4 +1,10 @@
-import { GroupMemberRole, GroupType } from "./domain-types";
+import { 
+    AppFileMeta, 
+    GroupMemberRole, 
+    GroupType, 
+    DocumentType 
+} from "./domain-types";
+
 export type GroupSummary = {
   id: string;
   name: string;
@@ -10,5 +16,10 @@ export type GroupContextValue = {
   groups: GroupSummary[];
   activeGroup: GroupSummary | null;
   setActiveGroup: (group: GroupSummary) => void;
+  isLoading: boolean;
+};
+
+export type FileContextValue = {
+  files: AppFileMeta[];
   isLoading: boolean;
 };

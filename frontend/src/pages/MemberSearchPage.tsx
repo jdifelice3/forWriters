@@ -31,7 +31,7 @@ const MemberSearchPage = () => {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}/api/users/${selectedMember.id}/connect`,
+        `${import.meta.env.VITE_API_HOST}/api/users/${selectedMember.userId}/connect`,
         {
           method: "POST",
           credentials: "include",

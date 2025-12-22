@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GroupBasic } from "../../types/domain-types";
+import { Group } from "../../types/domain-types";
 import {
   Typography,
   TextField,
@@ -16,7 +16,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import UrlList from "../UrlList";
 
 interface GroupDetailsProps {
-  group: GroupBasic;
+  group: Group;
 }
 
 interface FormType {

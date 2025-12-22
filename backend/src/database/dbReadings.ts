@@ -26,15 +26,16 @@ export const getReadings = async(groupId: string) => {
             readingAuthor: {
                 include: {
                     readingFeedback: true,              
-                    authorAppFile: {
+                    authorAppFileMeta: {
                         include: {
-                            appFile: {
+                            appFileMeta: {
                                 include: {
                                     user: {
                                         include: {
                                             userProfile: true
                                         },
                                     },
+                                    appFile: true
                                 },
                             },
                         },
@@ -62,7 +63,7 @@ export const getReadingsByUserId = async(authId: string) => {
         }
     });
 
-    const appFiles = await prisma.appFile.findMany({
+    const appFileMetas = await prisma.appFileMeta.findMany({
       where: {
         userId: user.id, // Fetch files for the specific user
       },
@@ -88,28 +89,28 @@ export const getReadingsByUserId = async(authId: string) => {
                     }            
                 }
             },
-            authorAppFile: {
+            authorAppFileMeta: {
                 where: {
-                    appFileId: {
-                        in: appFiles.map(file => file.id), // Map the fetched appFile IDs
+                    appFileMetaId: {
+                        in: appFileMetas.map(file => file.id), // Map the fetched appFile IDs
                     },
                 },
                 include: {
-                    appFile: { 
-                        omit: {
-                            description:  true, 
-                            documentType:  true, 
-                            filename:  true, 
-                            genre:  true, 
-                            manuscriptIsVisible:  true, 
-                            //mimetype:  true, 
-                            pageCount:  true, 
-                            //title:  true, 
-                            uploadedAt:  true, 
-                            url:  true, 
-                            wordCount: true,
-                            workType: true,
-                        },
+                    appFileMeta: { 
+                        // omit: {
+                        //     description:  true, 
+                        //     documentType:  true, 
+                        //     filename:  true, 
+                        //     genre:  true, 
+                        //     manuscriptIsVisible:  true, 
+                        //     //mimetype:  true, 
+                        //     pageCount:  true, 
+                        //     //title:  true, 
+                        //     uploadedAt:  true, 
+                        //     url:  true, 
+                        //     wordCount: true,
+                        //     workType: true,
+                        // },
                         include: {
                             user: {
                                 omit: {
@@ -162,22 +163,23 @@ export const getReading = async(readingId: string) => {
                     }
                 }
             },
-            authorAppFile: {
-              include: {
-                appFile: {
+            authorAppFileMeta: {
                   include: {
-                    user: {
-                      include: {
-                        userProfile: true
+                    appFileMeta: {
+                        include: {
+                            user: {
+                                include: {
+                                    userProfile: true
+                                },
+                            },
+                            appFile: true
                       },
                     },
-                  },
-                }
-              }
-            }
+                },
+            },
           },
-        },
-      },
+        }
+      }
     });
     
     return reading;
@@ -199,15 +201,16 @@ export const getReadingAuthors = async(readingId: string) => {
                 readingFeedbackComment: true
             }
         },
-        authorAppFile: {
+        authorAppFileMeta: {
           include: {
-            appFile: {
+            appFileMeta: {
               include: {
                 user: {
                   include: {
                     userProfile: true
                   }
-                }
+                },
+                appFile: true
               },
             },
           },
@@ -288,7 +291,7 @@ export const createReadingFeedback = async(readingAuthorId: string, feedbackFile
 export const addFileToReading = async(readingAuthorId: string, appFileId: string) => {
   //delete all associated AuthorAppFiles
   try {
-    const deleteReadingAuthor = await prisma.authorAppFile.delete({
+    const deleteReadingAuthor = await prisma.authorAppFileMeta.delete({
       where: {
         readingAuthorId: readingAuthorId
       }
@@ -297,10 +300,10 @@ export const addFileToReading = async(readingAuthorId: string, appFileId: string
     //will throw an error if there are no records to delete
   }
 
-  const result = await prisma.authorAppFile.create({
+  const result = await prisma.authorAppFileMeta.create({
     data: {
       readingAuthorId: readingAuthorId,
-      appFileId: appFileId
+      appFileMetaId: appFileId
     }
   });
 
