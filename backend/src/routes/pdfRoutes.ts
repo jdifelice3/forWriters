@@ -15,9 +15,6 @@ router.get('/', (req: Request<{ name: string}>, res: Response<{}, {}>) => {
         const filePath: string = path.join(process.cwd(), fileUrl);
         const safeName = getLastSegment(filePath);
         fs.stat(filePath, (err, stat) => {
-            console.log('filePath', filePath);
-            console.log('safeName', safeName);
-            console.log('stat', stat);
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(safeName)}"`);
             res.setHeader('Content-Length', stat.size.toString());

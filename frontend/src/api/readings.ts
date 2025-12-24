@@ -28,4 +28,12 @@ export const ReadingsAPI = {
       method: "DELETE",
     });
   },
+
+  addFile(formData: FormData) {
+    return apiFetch(`/file/add`, {
+      method: "POST",
+      //headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...formData }),
+    });
+  },
 };

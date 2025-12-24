@@ -38,8 +38,7 @@ export const extractCommentsWithTargetsFromS3 = async(
       entry.autodrain();
     }
   }
-  console.log('targets', targets);
-  console.log('commentMap', commentMap);
+
   return targets.map(t => ({
     commentId: t.id,
     commentText: commentMap.get(t.id) ?? "",

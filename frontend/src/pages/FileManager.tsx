@@ -15,14 +15,12 @@ import {
     DialogContent,
     Grid,
     IconButton,
+    Tab,
+    Tabs,
     Typography
 } from "@mui/material";
 import UploadIcon from "@mui/icons-material/Upload";
 import CloseIcon from "@mui/icons-material/Close";
-import Tab from '@mui/material/Tab';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import UploadFileDataManuscript from "../components/file/data/UploadFileDataManuscript";
 import { useFiles, useFilesData } from "../hooks/useFile";
@@ -30,6 +28,21 @@ import FileManagerList from "../components/file/lists/FileManagerList";
 import { useFileUpload } from "../hooks/useFile";
 import UploadFileDataVersion from "../components/file/data/UploadFileDataVersion";
 import { FilesAPI } from "../api/filesApi"
+
+interface TabPanelProps {
+  value: number;
+  index: number;
+  children: React.ReactNode;
+}
+
+const TabPanel = ({ value, index, children }: TabPanelProps) => {
+    console.log('value', value, 'index', index)
+  return (
+    <div hidden={value !== index} role="tabpanel">
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
+    </div>
+  );
+}
 
 const uploadFormProperties: UploadFileFormProperties =
   {
@@ -62,7 +75,8 @@ const manuscriptListProperties: FileListProperties =
 const filesUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi`;
 
 const FileManager = () => {
-    const [appFileVersion, setAppFileVersion] = useState(1); 
+    const [value, setValue] = useState(0); //for tabs
+    console.log('FileManager value', value);    
     const [appFileMetaId, setAppFileMetaId] = useState("");
     const [appFileId, setAppFileId] = useState("");
     const [version, setVersion] = useState(0);
@@ -133,8 +147,8 @@ const FileManager = () => {
         }
     };
 
-    const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-        setAppFileId(newValue);
+    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+        setValue(newValue);
     };
 
     const onVersionChange = async(event: React.SyntheticEvent, fileAppMeta: AppFileMeta, version: string) => {
@@ -188,14 +202,17 @@ const FileManager = () => {
                 </Grid>
 
 {/* Tab Control */}
-                <TabContext value={appFileVersion} >
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <TabList onChange={handleChange} >
-                        <Tab label="Manuscripts" value={1} sx={{fontSize: 14}}/>
-                        <Tab label="Feedback Documents" value={2} sx={{fontSize: 14}}/>
-                    </TabList>
-                </Box>
-                <TabPanel value={1} >
+            <Box>
+                <Tabs
+                    value={value}
+                    onChange={(_, newValue) => setValue(newValue)}
+                    aria-label="Settings tabs"
+                >
+                    <Tab label="Manuscripts" />
+                    <Tab label="Feedback Submissions" />
+                </Tabs>
+
+                <TabPanel value={value} index={0}>
                     <Typography variant="h5" mb={2}>
                         Your manuscripts
                     </Typography>
@@ -210,7 +227,7 @@ const FileManager = () => {
                     )}
                 </TabPanel>
 
-                <TabPanel value={2}>
+                <TabPanel value={value} index={1}>
                     <Typography variant="h5" mb={2}>
                         Your Feedback Submissions
                     </Typography>
@@ -224,8 +241,7 @@ const FileManager = () => {
                         />
                     )}
                 </TabPanel>
-            </TabContext>
-
+                </Box>
             </CardContent>
         </Card>
         

@@ -73,12 +73,10 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
     setError("");
 
     if(newsContent === "<p></p>" || newsContent.length === 0){
-        console.log('in newsContent check');
         setError("You must provide content for a News post.");
         return;
     } 
     if (title.length === 0){
-        console.log('in title check');
         setError("You must provide a title for a News post.");
         return;
     } 

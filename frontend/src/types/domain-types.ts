@@ -32,6 +32,7 @@ export type WorkType = "FLASHFICTION" | "NOVEL" | "NOVELLA" | "NOVELETTE" | "PLA
 export interface AppFile {
   id: string;
   appFileMetaId: string;
+  name: string;
   version: number;
   userId: string;
   filename: string;

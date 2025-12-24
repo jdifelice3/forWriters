@@ -50,9 +50,6 @@ export const GroupContextProvider = ({ children }: { children: React.ReactNode }
 
     // Only navigate if not already in a group-scoped route
     if (!location.pathname.startsWith(`/groups/${group.id}`)) {
-        console.log('path', location.pathname);
-      //navigate(`/readings`);
-      //navigate(location.pathname);
     }
   }
 

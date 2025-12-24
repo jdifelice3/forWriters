@@ -26,7 +26,6 @@ interface FileVersionListProps {
 const FileVersionList:React.FC<FileVersionListProps> =({currentVersion, fileMeta, handleVersionChange}) => {
     const[oldVersion, setOldVersion] = useState(0); //oldVersion is a test
     useEffect(() => {
-        console.log('in useEffect', 'oldVersion', oldVersion)
     }, [oldVersion]);
 
     const foundAppFile = fileMeta.appFile.find(f => f.version === currentVersion);

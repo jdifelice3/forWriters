@@ -65,7 +65,6 @@ router.get("/:id/download", async (req, res) => {
         if(data.Body === undefined){
             throw new Error('Error downloading file from S3');
         }
-        console.log('res', res);
         const bodyStream = data.Body as Readable;
         bodyStream.pipe(res);
 
@@ -80,6 +79,7 @@ router.get("/:id/download", async (req, res) => {
 
     }
 });
+
 //#endregion
 
 //#region POST
@@ -125,7 +125,7 @@ router.post("/version", upload.single("file"), async (req, res) => {
     const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
     const mimeType = req.file?.mimetype;
     const { appFileMetaId } = req.body;
-    console.log('appFileMetaId',appFileMetaId);
+ 
     // Create DB entry
     const file = await createFileVersionRecord(
       authId,
@@ -159,7 +159,6 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
     const key = (req.file as any).key;        // e.g. 1765428452013-Balk.pdf
     //const filename = (req.file !== undefined ? req.file.filename : '');
     const s3Url = (req.file as any).location;
-    console.log(readingAuthorId, mimeType,key,s3Url);
 
     const {fileMeta, version } = await createFileRecordReadingFeedback(
       authId, 
@@ -181,7 +180,6 @@ router.post("/ra/:readingAuthorId", upload.single("file"), async (req, res) => {
     });
 
     const comments: any = await extractCommentsWithTargetsFromS3(process.env.AWS_S3_BUCKET!, key, process.env.AWS_REGION!);
-    console.log('comments[]', comments);
     let input = [];
     //add additional feedback
     input.push({

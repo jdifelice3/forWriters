@@ -1,7 +1,5 @@
 import "dotenv/config";
 import path from 'path';
-import Session from "supertokens-node/recipe/session";
-import { SessionRequest } from "supertokens-node/framework/express";
 import express from "express";
 import cors from "cors";
 import supertokens from "supertokens-node";
@@ -11,13 +9,6 @@ import { SuperTokensConfig } from "./config";
 if (typeof process.env.WEB_HOST === undefined) {
   throw new Error("Environment variable process.env.SUPERTOKENS_CONNECTION_URI is undefined");
 }
-console.log("=== Loaded SuperTokensConfig ===");
-console.log("apiDomain =", SuperTokensConfig.appInfo.apiDomain);
-console.log("websiteDomain =", SuperTokensConfig.appInfo.websiteDomain);
-console.log("Expected cookieDomain =", ".forwriters.ink");
-console.log("SUPERTOKENS_URI =", process.env.SUPERTOKENS_CONNECTION_URI);
-console.log("SUPERTOKENS_API_KEY =", process.env.SUPERTOKENS_API_KEY ? "[SET]" : "[MISSING]");
-console.log("================================");
 
 import bodyParser from "body-parser";   
 import userRoutes from './routes/userRoutes';

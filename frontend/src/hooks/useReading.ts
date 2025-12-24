@@ -1,7 +1,4 @@
 import useSWR, { mutate } from "swr";
-import { apiFetch } from "../api/client";
-import { useGroupContext } from "../context/GroupContextProvider";
-import { fetcher } from "../context/fetcher";
 import { useMemo } from "react";
 import { AppFile, Group, User } from "../types/domain-types";
 import { useState } from "react";
@@ -34,7 +31,12 @@ export function useReadingsActions(
     refresh();
   };
 
-  return { create, signup, withdraw, remove };
+  const addFile = async (input: FormData) => {
+    await ReadingsAPI.addFile(input);
+    refresh();
+  }
+
+  return { create, signup, withdraw, remove, addFile };
 }
 
 export function useReadingsData(

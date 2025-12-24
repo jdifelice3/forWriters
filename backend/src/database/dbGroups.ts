@@ -76,8 +76,7 @@ export const getGroup = async(groupId: string) => {
     },
   },
 });
-    console.log('in getGroup(groupId')
-    console.log('group', group)
+
     return group;
   } catch (err) {
       console.error('Error creating group:', err);
@@ -256,8 +255,7 @@ export const createGroup = async (
       imgUrl?: string,
       websiteUrl?: string
   ) => {
-    console.log('in createGroup');
-    console.log('authId', authId);
+ 
   try {
 
 // const userRows = await prisma.$queryRaw<
@@ -319,11 +317,11 @@ export const createGroup = async (
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-            console.log("error message:", err.message);
+            console.error("error message:", err.message);
             if(err.message.indexOf("Unique constraint failed on the fields: (`name`)") !== -1){
                 throw new Error("A group with this name already exists. Please choose another.")
             }
-            console.log('There is a unique constraint violation, a new user cannot be created with this email');
+            console.error('There is a unique constraint violation, a new user cannot be created with this email');
         }
     } else {
         console.error('Error creating group:', err);

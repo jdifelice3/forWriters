@@ -43,7 +43,6 @@ export const createNewsItem = async (groupId: string, title: string, content: st
 };
 
 export const archiveNewsItem = async(newsItemId: string) => {
-    console.log('in archiveNewsItem')
     const archivedNewsItem = await prisma.groupNews.update({
         where: {
             id: newsItemId
@@ -52,6 +51,6 @@ export const archiveNewsItem = async(newsItemId: string) => {
             archived: true
         }
     });
-    console.log('archivedNewsItem',archivedNewsItem)
+
     return archivedNewsItem;
 }

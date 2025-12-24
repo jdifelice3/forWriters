@@ -45,7 +45,6 @@ const profileSchema = z.object({
 type ProfileFormInputs = z.infer<typeof profileSchema>;
 
 const UserProfile = () => {
-    console.log('in UserProfile');
     const [userId, setUserId] = useState<string>("");
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -69,7 +68,6 @@ const UserProfile = () => {
     });
 
     useEffect(() => {
-        console.log('in useEffect');
         const fetchUserId = async() => {
         const exists = await Session.doesSessionExist();
 
@@ -81,9 +79,7 @@ const UserProfile = () => {
         }
 
         const authId = await Session.getUserId();
-        console.log('authId', authId);
         const user: User = await getUserProfile(authId);
-        console.log('user', user);
         setUserId(user.id);
         reset({ 
             firstName: user.userProfile.firstName, 
@@ -129,7 +125,7 @@ const UserProfile = () => {
     const lastName: string = data.lastName;
     const bio: string = data.bio ? data.bio : '';
     const results: Response = await updateUserProfile(userId, firstName, lastName, bio);
-    console.log('results', results.status);
+
     if(results.status !== 500){
       alert("Profile saved successfully!");
     } else if (results.status === 500){

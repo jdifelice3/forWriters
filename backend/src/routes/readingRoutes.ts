@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer";
 import { 
     ReadingDeleteError,
     ReadingDeleteInvalidGroupIdError
@@ -29,15 +30,13 @@ interface EventItem {
 }
 
 const router = express.Router();
+const upload = multer();
 
 //#region GET
 router.get("/:groupId", async(_req, res) => {
   const groupId = _req.params.groupId;
-  console.log('in /api/readings/:groupId')
-  console.log('groupId', groupId)
     try {
       const group = await getReadings(groupId);
-        console.log(group);
       res.json(group);
     } catch (err) {
       console.error(`Error retrieving events for groupid ${groupId}`, err);
@@ -142,11 +141,11 @@ router.post("/:id/feedback", async(_req, res) => {
   }
 });
 
-router.post("/file/add", async(_req, res) => {
+router.post("/file/add", upload.none(), async(_req, res) => {
 // Add File to Reading
   try {
-    const { readingAuthorId, appFileId } = _req.body;
-    const addedFile = await addFileToReading(readingAuthorId, appFileId);
+    const { readingAuthorId, appFileId, appFileMetaId} = _req.body;
+    const addedFile = await addFileToReading(readingAuthorId, appFileId, appFileMetaId);
     res.status(200).json(addedFile); 
   } catch (err) {
     console.error('Error adding a file to a reading:', err);

@@ -26,7 +26,7 @@ router.get("/", verifySession(), async (req, res) => {
   });
 
   if (!user) {
-    console.log("User NOT found in DB");
+    console.error("User NOT found in DB");
     return res.status(404).json({ error: "User not found in database" });
   }
 

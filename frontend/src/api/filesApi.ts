@@ -5,8 +5,8 @@ import { AppFileMeta } from "../types/domain-types";
 export const FilesAPI = {
   create(input: FileUploadFormInput) {
     return apiFetch("/files", {
-      method: "POST",
-      body: JSON.stringify({ ...input}),
+        method: "POST",
+        body: JSON.stringify({ ...input}),
     });
   },
 

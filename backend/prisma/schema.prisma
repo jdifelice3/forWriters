@@ -102,6 +102,7 @@ enum WorkType {
 model AppFile {
   id                  String       @id @default(cuid())
   appFileMetaId       String
+  name                String       @default("none")
   version             Int          @default(1)
   userId              String
   filename            String

@@ -134,8 +134,6 @@ router.get("/admin/requests", async (req, res) => {
 router.post("/", async( _req, res) => {
   const session = await Session.getSession(_req, res);
   const authId = session.getUserId(true);
-  console.log('in create group');
-  console.log('authId', authId);
   try {
       const {name, 
             description,

@@ -288,9 +288,10 @@ export const createReadingFeedback = async(readingAuthorId: string, feedbackFile
   }
 }
 
-export const addFileToReading = async(readingAuthorId: string, appFileId: string) => {
+export const addFileToReading = async(readingAuthorId: string, appFileId: string, appFileMetaId: string) => {
   //delete all associated AuthorAppFiles
   try {
+    
     const deleteReadingAuthor = await prisma.authorAppFileMeta.delete({
       where: {
         readingAuthorId: readingAuthorId
@@ -303,7 +304,7 @@ export const addFileToReading = async(readingAuthorId: string, appFileId: string
   const result = await prisma.authorAppFileMeta.create({
     data: {
       readingAuthorId: readingAuthorId,
-      appFileMetaId: appFileId
+      appFileMetaId: appFileMetaId
     }
   });
 

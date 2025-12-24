@@ -39,6 +39,52 @@ export const getFileRecords = async(authId: string) => {
     });
     return files;
 }
+
+export const getFileDescription = async(appFileId: string) => {
+  const currentDate = new Date();
+  try {
+    const appFile = await prisma.appFile.findUnique({
+      where: {
+        id: appFileId,
+      },
+    });
+
+    if(appFile){
+        const appFileMeta = await prisma.appFileMeta.findUnique({
+            where: {
+                id: appFile.appFileMetaId
+            }
+        });
+        return appFileMeta;
+    } else {
+        throw new Error("File version not found");
+    }
+  } catch (err) {
+      console.error('Error getting file description:', err);
+      throw err; 
+  }
+}
+
+export const getFileSearch = async(query: string) => {
+  const groups = await prisma.appFile.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      take: 10,
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        appFileMetaId: true
+        // add any other fields you want to show
+      },
+   }); 
+
+   return groups;
+}
 //#endregion
 
 //#region CREATE
@@ -50,7 +96,8 @@ export const createFileRecordBasic = async(
     description: string,
     url: string
  ) => {
-  
+  const currentDate = new Date();
+
   const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
   const file = await prisma.appFileMeta.create({
@@ -66,6 +113,7 @@ export const createFileRecordBasic = async(
     data: {
       appFileMetaId: file.id,
       version: 1,
+      name: `1-${title}-${currentDate.toLocaleDateString()}`,
       filename: filename,
       mimetype: mapMimeToEnum(mimeType),
       url: url,
@@ -182,8 +230,6 @@ export const updateFileRecord = async(id: string, title: string, description: st
 }
 
 export const updateCurrentVersion = async(id: string, version: number) => {
-    console.log('in updateCurrentVersion')
-    console.log('id', id, 'version', version)
     const file = await prisma.appFileMeta.update({
         where: {
             id: id

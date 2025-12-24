@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Reading} from "../../types/domain-types";
+import { Reading, AppFile, AppFileMeta} from "../../types/domain-types";
 import { ReadingCommands } from "../../types/ReadingTypes";
 import {
     Alert,
     Box,
     Button, 
+    Card,
+    CardContent,
     CircularProgress,
     Dialog,
     DialogActions,
@@ -49,7 +51,6 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
     const [reading, setReading] = useState<Reading[]>([]);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
-    const [err, setErr] = React.useState<string | null>(null);
   
     //const { activeGroup } = useGroupContext();
 
@@ -61,6 +62,12 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
     const [submitting, setSubmitting] = React.useState(false);
     const [submissionDeadline, setSubmissionDeadline] = useState("");
     const [schedule, setSchedule] = useState("SCHEDULED");
+    const [submitManuscriptOpen, setSubmitManuscriptOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<AppFile | null>(null);
+    const [options, setOptions] = useState<AppFile[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState<string | null>(null);
+    const [confirmation, setConfirmation] = useState<string | null>(null);
 
     const {register, handleSubmit, formState: { errors }} = useForm<FormInput>({
         defaultValues: {
@@ -98,6 +105,7 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
     if (error) return <Typography color="error">{error}</Typography>;
     if (!user) return <Typography>No user found.</Typography>;
 
+    
   return (
       <Box>
         {isAdmin && (
@@ -223,6 +231,8 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
                 </DialogActions>
             </Box>
         </Dialog>
+
+
      </Box>
 
 

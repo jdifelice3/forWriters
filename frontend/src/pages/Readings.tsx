@@ -53,6 +53,7 @@ const handleAddReading = async (input: FormInput ) => {
         ui.beginSubmit();
         actions.create(input, input.schedule);
         ui.endSubmit();
+        mutate();
     } catch (err) {
         ui.setError("Failed to create reading");
     } 
@@ -156,50 +157,39 @@ const fileCommands: FileCommands = {
                     />&nbsp;
                     Readings
                 </Typography>
-            <Card>
-                <CardContent>
-                    <Grid size={12} container spacing={3}>
-                        <Grid size={4} className="readingSubPanel">
-                            <Typography variant="h6" mb={2}
-                                sx={{
-                                    fontWeight: "bold"
-                                }}
-                            >
-                            My Submitted Manuscripts
-                            </Typography>
-                                <FileManagerList files={myFiles} fileListProperties={fileListProperties} commands={fileCommands} />
+                <Card>
+                    <CardContent>
+                        <Grid size={12} container spacing={3}>
+                            <Grid size={4} className="readingSubPanel"  sx={{width: 500}}>
+                                <Typography variant="h6" mb={2}
+                                    sx={{
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                My Submitted Manuscripts
+                                </Typography>
+                                    <FileManagerList files={myFiles} fileListProperties={fileListProperties} commands={fileCommands} />
+                            </Grid>
+                            <Grid size={4}  className="readingSubPanel">
+                                <Typography variant="h6" mb={2}
+                                    sx={{
+                                        fontWeight: "bold"
+                                    }}
+                                >
+                                Group Reading Calendar
+                                </Typography>
+                                {group?.reading ? (
+                                    <ReadingCalendar readings={group?.reading} isAdmin={isAdmin} commands={readingCommands}/>
+                                ) : (
+                                    <Typography>Readings have not yet been created for this group.</Typography>
+                                )}
+                                
+                            </Grid>
                         </Grid>
-                        <Grid size={4}  className="readingSubPanel">
-                            <Typography variant="h6" mb={2}
-                                sx={{
-                                    fontWeight: "bold"
-                                }}
-                            >
-                            Group Reading Calendar
-                            </Typography>
-                            {group?.reading ? (
-                                <ReadingCalendar readings={group?.reading} isAdmin={isAdmin} commands={readingCommands}/>
-                            ) : (
-                                <Typography>Readings have not yet been created for this group.</Typography>
-                            )}
-                            
-                        </Grid>
-                        {/* <Grid size={4}  className="readingSubPanel">
-                        <Typography variant="h6" mb={2}
-                            sx={{
-                                fontWeight: "bold"
-                            }}
-                        >
-                            Review Manuscripts
-                        </Typography>
-                            <ReadingList readings={myReadings} commands={readingCommands}/>
-                        </Grid> */}
-                        
-                </Grid>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
             </CardContent>
-            </Card>
+        </Card>
         </>
     )
 
