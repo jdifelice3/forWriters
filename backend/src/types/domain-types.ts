@@ -32,6 +32,7 @@ export type WorkType = "FLASHFICTION" | "NOVEL" | "NOVELLA" | "NOVELETTE" | "PLA
 export interface AppFile {
   id: string;
   appFileMetaId: string;
+  name: string;
   version: number;
   userId: string;
   filename: string;
@@ -45,6 +46,7 @@ export interface AppFile {
   genre?: Genre;
   manuscriptIsVisible: boolean;
   versionComment?: string;
+  createdAt: string;
   appFileMeta: AppFileMeta;
 }
 
@@ -69,6 +71,7 @@ export interface AuthorAppFileMeta {
   readingAuthorId: string;
   appFileMetaId: string;
   createdAt: string;
+  appFileVersion: number;
   readingAuthor: ReadingAuthor;
   appFileMeta: AppFileMeta;
 }

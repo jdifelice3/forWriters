@@ -312,6 +312,19 @@ export const addFileToReading = async(readingAuthorId: string, appFileId: string
 } 
 //#endregion
 
+//#region UPDATE
+export const updateReadingFileVersion = (authorAppFileMetaId: string, version: number) => {
+    const authorAppFileMeta = prisma.authorAppFileMeta.update({
+        where: {
+            id: authorAppFileMetaId
+        },
+        data: {
+            appFileVersion: version
+        }
+    });
+}
+//#endregion
+
 //#region DELETE
 export const deleteReadingAuthor = async(readingId: string, authorId: string) => {
     const deleteAuthorFromReading = await prisma.readingAuthor.delete({
@@ -359,101 +372,4 @@ export const deleteReading = async(readingId: string, groupId: string) => {
     
     return deletedReading;
 }
-//#endregion
-
-//#region VERBOSE CODE
-// export const getReading = async (readingId: string): Promise<Reading> => {
-//   console.log("=== getReading DEBUG for readingId:", readingId, "===\n");
-
-//   // 1) Direct DB check for all ReadingFeedback rows for this reading
-//   const rawFeedbackRows = await prisma.$queryRaw<
-//     { id: string; readingAuthorId: string; feedbackUserId: string }[]
-//   >`
-//     SELECT rf.id, rf."readingAuthorId", rf."feedbackUserId"
-//     FROM "ReadingFeedback" rf
-//     WHERE rf."readingAuthorId" IN (
-//       SELECT ra.id FROM "ReadingAuthor" ra WHERE ra."readingId" = ${readingId}
-//     )
-//   `;
-//   console.log("RAW DB ReadingFeedback rows:");
-//   console.dir(rawFeedbackRows, { depth: null });
-//   console.log("\n");
-
-//   // 2) Big nested include query (what you had originally)
-//   const reading = await prisma.reading.findUnique({
-//     where: { id: readingId },
-//     include: {
-//       readingAuthor: {
-//         include: {
-//           // if this no longer matches your schema, tweak, but KEEP readingFeedback include
-//           readingFeedback: {
-//             include: {
-//               readingFeedbackComment: {
-//                 orderBy: { source: "asc" },
-//               },
-//             },
-//           },
-//           authorAppFile: {
-//             include: {
-//               appFile: {
-//                 include: {
-//                   user: {
-//                     include: {
-//                       userProfile: true,
-//                     },
-//                   },
-//                 },
-//               },
-//             },
-//           },
-//           // if you now have `user` on ReadingAuthor, you can include it too
-//           // user: true,
-//         },
-//       },
-//     },
-//   });
-
-//   console.log("NESTED PRISMA reading.readingAuthor[*].readingFeedback[*]:");
-//   if (reading?.readingAuthor) {
-//     for (const ra of reading.readingAuthor) {
-//       for (const rf of ra.readingFeedback) {
-//         console.log("  RF from nested query:", {
-//           id: rf.id,
-//           readingAuthorId: rf.readingAuthorId,
-//           feedbackUserId: rf.feedbackUserId,
-//         });
-//       }
-//     }
-//   } else {
-//     console.log("  No readingAuthor rows found in nested query.");
-//   }
-//   console.log("\n");
-
-//   // 3) Cross-check each nested ReadingFeedback row against a fresh findUnique()
-//   if (reading?.readingAuthor) {
-//     for (const ra of reading.readingAuthor) {
-//       for (const rf of ra.readingFeedback) {
-//         const fresh = await prisma.readingFeedback.findUnique({
-//           where: { id: rf.id },
-//         });
-
-//         console.log("CROSS-CHECK for ReadingFeedback id:", rf.id);
-//         console.log("  From nested query   feedbackUserId:", rf.feedbackUserId);
-//         console.log(
-//           "  From findUnique()    feedbackUserId:",
-//           fresh?.feedbackUserId,
-//         );
-//         console.log(
-//           "  From raw SQL rows    feedbackUserId:",
-//           rawFeedbackRows.find((row) => row.id === rf.id)?.feedbackUserId,
-//         );
-//       }
-//     }
-//   }
-
-//   console.log("\n=== END getReading DEBUG ===\n");
-
-//   // Return the same data shape your route expects
-//   return reading;
-// };
 //#endregion

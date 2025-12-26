@@ -19,6 +19,7 @@ import {
     Stack,
     Dialog,
     DialogTitle,
+    Popover
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
@@ -28,6 +29,7 @@ import { useUserContext } from "../../context/UserContext";
 import { ReadingCommands } from "../../types/ReadingTypes";
 import FileSearchBox from "../../components/file/data/FileSearchBox";
 import FileDescription from "../../components/file/data/FileDescription";
+import InfoIcon from '@mui/icons-material/Info';
 
 interface ReadingCalendarItemFormProps {
  reading: Reading;
@@ -50,25 +52,33 @@ const currentDate = new Date();
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ reading, isAdmin, commands }) => {
     const { user, isLoading, error } = useUserContext();
     const {data: group, mutate: mutateGroup } = useGroupDetails<Group>();
-    
+    const { myReadings, myFiles } = useReadingsData(group, user);
     if(group === undefined) throw new Error("Group undefined");
     
     const { addFile } = useReadingsActions(group.id, user.id, mutateGroup );
 
     const [err, setErr] = React.useState<string | null>(null);
+    const [anchorEl, setAnchorEl] = useState(null);
     const [submitManuscriptOpen, setSubmitManuscriptOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<AppFile | null>(null);
     const [loading, setLoading] = useState(false);
     const [confirmation, setConfirmation] = useState<string | null>(null);
   
+
     if (isLoading) return <CircularProgress />;
     if (error) return <Typography color="error">{error}</Typography>;
     if (!user) return <Typography>No user found.</Typography>;
 
+    const popOverOpen = Boolean(anchorEl);
+    const popoverId = popOverOpen ? 'simple-popover' : undefined;
+    const handlePopoverClose = () => {
+        setAnchorEl(null);
+    };
     //File submission details
     const getfileSubmissionDetails = () => {
         let hasSignedUp = false;
         let hasSubmitted = false;
+        let isPastSubmissionDeadline = false;
         let title = "";
         let versionName = "";
         let version = 0;
@@ -81,22 +91,66 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
             title = ra.authorAppFileMeta.appFileMeta.title;
             version = ra.authorAppFileMeta.appFileMeta.currentVersionId;
             versionName = `${version.toString()} -${ra.authorAppFileMeta.appFileMeta.title}-${ new Date(ra.authorAppFileMeta.appFileMeta.createdAt).toLocaleDateString()}`;
+            isPastSubmissionDeadline = new Date(reading.submissionDeadline!).getDate() - currentDate.getDate() > 0;
         }
 
-        return { hasSignedUp, hasSubmitted, title, version, versionName};
+        return { hasSignedUp, hasSubmitted, title, version, versionName, isPastSubmissionDeadline};
     }
 
+    const handlePopoverClick = (event: any) => {
+        setAnchorEl(event.currentTarget); // Set anchor to the clicked button
+    };
+
     const FileSubmissionDetails = () => {
-        const { hasSignedUp, hasSubmitted, title, version, versionName} = getfileSubmissionDetails();
+        const { hasSignedUp, hasSubmitted, title, version, versionName, isPastSubmissionDeadline} = getfileSubmissionDetails();
         
         const renderMessage = () => {
             if (hasSignedUp) {
                 if (hasSubmitted) {
                     return (
+                        <>
                         <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
                             You have signed up for this reading<br/>
-                            You have submitted a manuscript for this reading
                         </Typography>
+                        <Typography>
+                            <b>Title:</b> {title}
+                        </Typography>
+                        <Typography>
+                            <b>Version:</b> {versionName}
+                        </Typography>
+                         <Button
+                                variant="text"
+                                color="primary"
+                                size="small"
+                                startIcon={<AddIcon />}
+                                onClick={(e) => setSubmitManuscriptOpen(true)}
+                                disabled={isPastSubmissionDeadline}
+                            >
+                                Change
+                            </Button>
+                            &nbsp;&nbsp;<InfoIcon style={{ cursor: 'pointer' }} onClick={handlePopoverClick}/>
+                            <div>
+                            <Popover
+                                id={popoverId}
+                                open={popOverOpen}
+                                anchorEl={anchorEl}
+                                onClose={handlePopoverClose}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                }}
+                            >
+                            <Typography sx={{ p: 2 }}>
+                                To change the manuscript version, go to the Files page
+                                <Button onClick={handlePopoverClose}>Close</Button>
+                            </Typography>                
+                        </Popover>
+                        </div>
+                        </>
                     )
                 } else {
                     return (
@@ -145,8 +199,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
 
             const results = await addFile(formData);
             mutateGroup();
-            const { myReadings, myFiles } = useReadingsData(group, user);
-
+            
             // const res = await fetch(`${import.meta.env.VITE_API_HOST}/api/events/file/add`,
             // {
             //     method: "POST",
@@ -247,7 +300,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             variant="contained"
                             onClick={(event) => commands.feedback(event, reading.id)}
                             sx={{ mt: 1 }}
-                            disabled={hasSignedUp}
+                            
                         >
                             Review            
                         </Button>

@@ -33,17 +33,16 @@ const searchUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi/search?query=`;
       setLoading(false);
     }
   };
-console.log('options', options);
   return (
     <Autocomplete
       options={options}
       fullWidth
-    //   loading={loading}
       getOptionLabel={(opt) => opt.name}
       onInputChange={(_, value) => handleInput(value)}
       onChange={(_, value) => onSelectFile(value)}
       renderInput={(params) => (
         <TextField
+            placeholder="Type manuscript title"
           {...params}
            //   label="Search for writing groups"
           InputProps={{

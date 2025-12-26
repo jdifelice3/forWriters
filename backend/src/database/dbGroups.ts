@@ -257,20 +257,6 @@ export const createGroup = async (
   ) => {
  
   try {
-
-// const userRows = await prisma.$queryRaw<
-//     { id: string; readingAuthorId: string; feedbackUserId: string }[]
-//   >`
-//     SELECT *
-//     FROM "User"
-//     WHERE "superTokensId" = '15ace8c4-50bd-4a2f-8ea2-740c65eb417c'
-//   `;
-//   console.log("RAW DB User rows:");
-//   console.dir(userRows, { depth: null });
-//   console.log("\n");
-
-
-    // Get userId from authId
     const user: any = await prisma.user.findUnique({
       where: {
         superTokensId: authId,

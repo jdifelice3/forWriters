@@ -16,7 +16,8 @@ import {
   getReading, 
   getReadingsByUserId,
   deleteReadingAuthor,
-  deleteReading
+  deleteReading,
+  updateReadingFileVersion
 } from '../database/dbReadings';
 import { ReadingAuthor } from "@prisma/client";
 import { addAbortListener } from "events";
@@ -82,6 +83,33 @@ router.get("/:id/readingauthors", async(req, res) => {
     res.status(500).json({ error: 'Error signing up for event' });
   }
 });
+//#endregion
+
+//#region PUT
+router.put("/file/version", async(_req, res) => {
+    const { authorAppFileMetaId, version } = _req.body;
+    
+    // if(typeof _req.query.id === "string"){
+    //     id = _req.query.id;
+    // } else {
+    //     throw new Error("");
+    // }
+    // if(typeof _req.query.version === "string"){
+    //     version = _req.query.version;
+    // } else {
+    //     throw new Error("");
+    // }
+
+
+  try{
+    const file = await updateReadingFileVersion(authorAppFileMetaId, Number(version));
+    res.status(200).json(file);
+
+  } catch (err) {
+    console.error(`Error updating version for AuthorAppFileMeta${authorAppFileMetaId}`, err);
+    res.status(500).json({ err: `Error updating version for AuthorAppFileMeta ${authorAppFileMetaId}` });
+  }
+})
 //#endregion
 
 //#region POST

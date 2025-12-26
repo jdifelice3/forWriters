@@ -149,21 +149,7 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthors}) =
                     </Typography>
                     
                     <div>
-                    {/* {canChangeManuscript(ra.reading as Reading) ? (
-                    <FileSelect 
-                        onSendData={handleSelectChange} 
-                        readingAuthorId={ra.id} 
-                        selectedValueId={ra.authorAppFileMeta?.appFile.id || ""}
-                        fileListProperties={fileListProperties}
-                        />
-                    ) : (
-                    <TextField
-                        variant="outlined"
-                        sx={{ width: 360 }}
-                        disabled
-                        value={ra.authorAppFile?.appFile.title || ""}
-                    />
-                    )} */}
+
                     <Popover
                         id={id}
                         open={open}

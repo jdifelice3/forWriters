@@ -80,7 +80,7 @@ const FileManagerList: React.FC<FileListProps> = ({files, commands, fileListProp
             <Card key={index} className="filesCardManuscripts">
                 <CardContent>
                     <Grid container spacing={4}>
-                        <Grid size={6}>
+                        <Grid size={fileListProperties.showVersionHistory ? 6 : 12}>
                             <FileListForm
                                 fileMeta={f!} 
                                 commands={commands}
@@ -88,8 +88,10 @@ const FileManagerList: React.FC<FileListProps> = ({files, commands, fileListProp
                                 fileListProperties={fileListProperties} 
                             />
                         </Grid>
+                        
+                        {fileListProperties.showVersionHistory ? (
                         <Grid size={6}>
-                            {fileListProperties.showVersionHistory ? (
+                            
                                 <>
                                 <Grid container>
                                     <Grid size={4}>
@@ -109,16 +111,23 @@ const FileManagerList: React.FC<FileListProps> = ({files, commands, fileListProp
                                         Upload New Version
                                     </Button>
                             </Grid>
+                            <Grid>
+                                <Typography>
+                                    Select active version
+                                </Typography>
+                            </Grid>
                             </Grid>
                                 <FileVersionList 
                                     fileMeta={f!} 
                                     currentVersion={f?.currentVersionId!}
                                     handleVersionChange={commands.onVersionChange} />
-                                </>
+                                    </>
+                                                            </Grid>
+                                
                             ) : (
                                 <span></span>
                             )}
-                        </Grid>
+
                     </Grid>
             </CardContent>
             </Card>

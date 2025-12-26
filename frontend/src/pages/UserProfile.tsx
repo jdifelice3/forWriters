@@ -90,29 +90,6 @@ const UserProfile = () => {
     }
     fetchUserId();
   }, []);
-//   useEffect(() => {
-//     console.log('in useEffect');
-//     async function loadUser() {
-//         console.log('in loadUser');
-//       const exists = await Session.doesSessionExist();
-//       console.log('session exists');
-//       if (!exists) {
-//         console.log('session does not exist');
-//         setUserId("");
-//         setLoading(false);
-//         return;
-//       }
-
-//       const id = await Session.getUserId();
-//       console.log('user.id:', id)
-//       setUserId(id);
-//       setLoading(false);
-//     }
-
-//     loadUser();
-//   }, []);
-
- // if (loading) return null;
 
   if (!userId) {
     return <div>No session</div>;

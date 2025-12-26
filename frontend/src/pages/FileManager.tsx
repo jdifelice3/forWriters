@@ -36,7 +36,6 @@ interface TabPanelProps {
 }
 
 const TabPanel = ({ value, index, children }: TabPanelProps) => {
-    console.log('value', value, 'index', index)
   return (
     <div hidden={value !== index} role="tabpanel">
       {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
@@ -76,7 +75,6 @@ const filesUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi`;
 
 const FileManager = () => {
     const [value, setValue] = useState(0); //for tabs
-    console.log('FileManager value', value);    
     const [appFileMetaId, setAppFileMetaId] = useState("");
     const [appFileId, setAppFileId] = useState("");
     const [version, setVersion] = useState(0);

@@ -46,6 +46,7 @@ export interface AppFile {
   genre?: Genre;
   manuscriptIsVisible: boolean;
   versionComment?: string;
+  createdAt: string;
   appFileMeta: AppFileMeta;
 }
 
@@ -70,6 +71,7 @@ export interface AuthorAppFileMeta {
   readingAuthorId: string;
   appFileMetaId: string;
   createdAt: string;
+  appFileVersion: number;
   readingAuthor: ReadingAuthor;
   appFileMeta: AppFileMeta;
 }

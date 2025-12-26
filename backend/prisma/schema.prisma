@@ -145,6 +145,7 @@ model AuthorAppFileMeta {
   readingAuthorId String   @unique
   appFileMetaId       String
   createdAt       DateTime @default(now())
+  appFileVersion    Int     @default(1)
 
   readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
   appFileMeta       AppFileMeta       @relation(fields: [appFileMetaId], references: [id])

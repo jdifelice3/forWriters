@@ -6,6 +6,7 @@ const BASE_URL = import.meta.env.VITE_API_HOST;
 
 export const useGroupDetails = <T>() => {
   const { activeGroup } = useGroupContext();
+  console.log(activeGroup);
   return useSWR<T>(
     activeGroup ? `${BASE_URL}/api/groups/${activeGroup.id}` : null,
     fetcher 

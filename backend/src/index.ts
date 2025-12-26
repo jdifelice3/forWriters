@@ -53,8 +53,6 @@ app.use(
 
       // 3. Force download behavior
       const filename = path.basename(filePath);
-      console.log('filePath', filePath);
-      console.log('download filename', filename)
       res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     }
   })

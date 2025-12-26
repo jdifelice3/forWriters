@@ -70,10 +70,7 @@ export const SuperTokensConfig: TypeInput = {
 
                         if (response.status === "OK") {
                             const { user } = response;
-                            console.log("New user signed up:", user);
                             const newUser = await createUser(user.id, user.emails[0],Role.EDITOR );
-                            console.log('newUserId', newUser.id);
-                            console.log('newUser',newUser);
                            
                         }
 

@@ -29,11 +29,10 @@ export const ReadingsAPI = {
     });
   },
 
-  addFile(formData: FormData) {
-    return apiFetch(`/file/add`, {
-      method: "POST",
-      //headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...formData }),
+  addFile(input: FormData) {
+    return apiFetch("/events/file/add",{
+        method: "POST",
+        body: input,
     });
   },
 };

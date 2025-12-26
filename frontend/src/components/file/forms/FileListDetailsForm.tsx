@@ -33,8 +33,7 @@ interface FileListFormProps {
 
 const FileListDetailsForm: React.FC<FileListFormProps> = (
     {fileMeta, commands, localCommands, fileListProperties}) => {
-  
-    const fileVersion = fileMeta.appFile.find(f => fileMeta.currentVersionId === f.version);
+        const fileVersion = fileMeta.appFile.find(f => fileMeta.currentVersionId === f.version);
 
     return (
         <Box>

@@ -4,16 +4,23 @@ const API_BASE_URL = import.meta.env.VITE_API_HOST
 
 export async function apiFetch<T>(
   path: string,
-  options: RequestInit = {},
-  contentType: string = "application/json"
+  options: RequestInit = {}
 ): Promise<T> {
+  const headers = new Headers(options.headers || {});
+
+  // Only set JSON Content-Type when body is NOT FormData
+  if (
+    options.body &&
+    !(options.body instanceof FormData) &&
+    !headers.has("Content-Type")
+  ) {
+    headers.set("Content-Type", "application/json");
+  }
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
-    headers: {
-      "Content-Type": contentType,
-      ...options.headers,
-    },
     ...options,
+    headers,
   });
 
   if (!res.ok) {

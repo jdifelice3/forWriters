@@ -26,7 +26,8 @@ const styles = {
 const Groups = () => {
   const { user } = useUserContext();
   const navigate = useNavigate();
-  const { activeGroup } = useGroupContext();
+  //const { activeGroup } = useGroupContext();
+  console.log('in Groups.tsx')
   const { data : group, isLoading } = useGroupDetails<Group>();
   
   if (isLoading) {
