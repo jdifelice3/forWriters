@@ -1,14 +1,14 @@
 import { Reading } from "../types/domain-types";
 
 export const getSpotsOpenText = (e: Reading) => {
-    if(e.readingAuthor){
-      if(e.readingAuthor.length !== e.spotsOpen){
-        return `${e.spotsOpen - e.readingAuthor.length} of ${e.spotsOpen} spots open`;
+    if(e.readingParticipant){
+      if(e.readingParticipant.length !== e.spotsOpen){
+        return `${e.spotsOpen - e.readingParticipant.length} of ${e.spotsOpen} spots open`;
       } else {
         return "The reading is full";
       }
     } 
-    if(!e.readingAuthor){
+    if(!e.readingParticipant){
       return `${e.spotsOpen} of ${e.spotsOpen} spots open`;
     }
   }

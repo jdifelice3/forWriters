@@ -22,7 +22,7 @@ const GroupUserList: React.FC<Props> = ({groupUsers}) => {
                     <Typography >
                         {gu.user.userProfile ? gu.user.userProfile.firstName : ""} 
                         {gu.user.userProfile ? gu.user.userProfile.lastName : ""}                            
-                        {gu.isAdmin ? (
+                        {gu.role === "ADMIN" ? (
                             <span>&nbsp;(Admin)</span>
                         ) : (
                             <span>&nbsp;</span>

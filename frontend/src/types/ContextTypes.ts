@@ -1,6 +1,6 @@
 import { 
     AppFileMeta, 
-    GroupMemberRole, 
+    GroupRole, 
     GroupType, 
     DocumentType 
 } from "./domain-types";
@@ -8,7 +8,7 @@ import {
 export type GroupSummary = {
   id: string;
   name: string;
-  role: GroupMemberRole;
+  role: GroupRole;
   groupType: GroupType;
 };
 

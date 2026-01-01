@@ -8,7 +8,6 @@ const apiHost = `${import.meta.env.VITE_API_HOST}`;
 
 export function useCurrentUser() {
   const navigate = useNavigate();
-
   const {
     data,
     error,

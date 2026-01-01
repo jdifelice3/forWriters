@@ -1,5 +1,5 @@
 //import { User } from '../types/UserTypes';
-import { Variant } from '../types/StyleTypes';
+import { Variant } from './StyleTypes';
 
 // export interface AppFile {
 //   id: string;

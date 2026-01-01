@@ -16,7 +16,7 @@ const UploadFileDataVersion: React.FC<FileVersionProps> = ({
   appFileMetaId,
   disabled,
 }) => {
-  const url = `${import.meta.env.VITE_API_HOST}/api/files/version`;
+  const url = `${import.meta.env.VITE_API_HOST}/api/files/${appFileMetaId}/upload/version`;
 
   const { upload, loading } = useFileUpload({
     url,

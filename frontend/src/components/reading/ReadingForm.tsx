@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUserContext } from "../../context/UserContext";
 import { 
-    ReadingAuthor,
+    ReadingParticipant,
     Reading
  } from "../../types/domain-types";
 import {
@@ -68,9 +68,9 @@ const ReadingForm: React.FC<ReadingFormProps> = ({reading}) => {
                     </Alert>
                 )}
             </Box>
-            {reading.readingAuthor.map((ra: ReadingAuthor) => (
+            {reading.readingParticipant.map((rp: ReadingParticipant) => (
                 <>
-                    <ReadingAuthorForm readingAuthor={ra} />        
+                    <ReadingAuthorForm readingParticipant={rp} />        
                 </>
             ))}
         </Box>
@@ -79,14 +79,14 @@ const ReadingForm: React.FC<ReadingFormProps> = ({reading}) => {
 export default ReadingForm;
 
 interface ReadingAuthorFormProps {
-  readingAuthor: ReadingAuthor;
+  readingParticipant: ReadingParticipant;
 }
 
-const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) => {
+const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingParticipant: readingParticipant}) => {
     const [error, setError] = useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState(null);
-    const readingsUrl = `${import.meta.env.VITE_API_HOST}/api/events/user/author`;
-    const addFileToReadingUrl = `${import.meta.env.VITE_API_HOST}/api/events/file/add`;
+    const readingsUrl = `${import.meta.env.VITE_API_HOST}/api/readings/user/author`;
+    const addFileToReadingUrl = `${import.meta.env.VITE_API_HOST}/api/readings/file/add`;
 
     const handleClick = (event: any) => {
         setAnchorEl(event.currentTarget); // Set anchor to the clicked button
@@ -124,28 +124,28 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) =>
                 border: "1px solid #ddd",
                 p: 2,
                 borderRadius: 2,
-                backgroundColor: getCardBackgroundColor(readingAuthor.reading as Reading)
+                backgroundColor: getCardBackgroundColor(readingParticipant.reading as Reading)
                     // new Date(ra.reading.submissionDeadline) > currentDate && (!ra.authorAppFile)
                     // ? "#e3f2fd"
                     // : "#e3f2fd"
                 }}  
             >
                 <Typography variant="h6" fontWeight="bold">
-                    {readingAuthor.reading.name }
+                    {readingParticipant.reading.name }
                 </Typography>
                 {/* <Typography>
                     Group Name Goes Here
                 </Typography> */}
-                {readingAuthor.reading.scheduledType === "SCHEDULED" ? (
+                {readingParticipant.reading.scheduledType === "SCHEDULED" ? (
                     <>
                     <Typography variant="body2">
                         Date of Reading: 
                             <span style={{fontWeight: "bold"}}>
-                                {new Date(readingAuthor.reading.readingDate || "").toLocaleDateString()}
+                                {new Date(readingParticipant.reading.readingDate || "").toLocaleDateString()}
                             </span>
                         </Typography>
                     <Typography variant="body2" color="text.secondary">
-                    Submit manuscripts by <b>{new Date(readingAuthor.reading.submissionDeadline || "").toLocaleDateString()}</b>
+                    Submit manuscripts by <b>{new Date(readingParticipant.reading.submissionDeadline || "").toLocaleDateString()}</b>
                     </Typography>
                     </>
                 ) : (
@@ -157,11 +157,11 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) =>
                 </Typography>
                 
                 <div>
-                {canChangeManuscript(readingAuthor.reading as Reading) ? (
+                {canChangeManuscript(readingParticipant.reading as Reading) ? (
                 <FileSelect 
                     onSendData={handleSelectChange} 
-                    readingAuthorId={readingAuthor.id} 
-                    selectedValueId={readingAuthor.authorAppFileMeta?.id || ""}
+                    readingAuthorId={readingParticipant.id} 
+                    selectedValueId={readingParticipant.readingSubmission?.appFile.appFileMeta?.id || ""}
                     fileListProperties={fileListProperties}
                     />
                 ) : (
@@ -169,7 +169,7 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) =>
                     variant="outlined"
                     sx={{ width: 360 }}
                     disabled
-                    value={readingAuthor.authorAppFileMeta?.id || ""}
+                    value={readingParticipant.readingSubmission?.appFile.appFileMeta?.id || ""}
                 />
                 )}
                 <Popover
@@ -199,8 +199,8 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) =>
                 </div>
                 <Typography variant="caption" color="text.secondary">
                         {
-                        readingAuthor.authorAppFileMeta ?
-                        `Submitted to Reading on ${new Date(readingAuthor.authorAppFileMeta.createdAt).toLocaleDateString()}`
+                        readingParticipant.readingSubmission?.appFile.appFileMeta ?
+                        `Submitted to Reading on ${new Date(readingParticipant.readingSubmission.appFile.appFileMeta.createdAt).toLocaleDateString()}`
                         : "You haven't submitted a manuscript"
                     }
                 </Typography>
@@ -208,8 +208,8 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthor}) =>
                 <Typography variant="body1" fontWeight="bold">
                     Feedback:
                 </Typography>
-                {readingAuthor.readingFeedback.length > 0 ? (
-                    <FeedbackCommentList readingAuthor={readingAuthor}/>
+                {readingParticipant.readingFeedback.length > 0 ? (
+                    <FeedbackCommentList readingAuthor={readingParticipant}/>
                 ) : (
                     <Typography>
                         Awaiting Feedback

@@ -8,8 +8,9 @@
     "strict": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
-  "include": ["env.d.ts","src"],
+  "include": ["env.d.ts","src","src/types"],
   "exclude": ["node_modules"]
 }

@@ -12,7 +12,6 @@ interface FileDescriptionProps {
 }
 
 const FileDescription: React.FC<FileDescriptionProps> = ({appFileId: appFileId}) => {
-    console.log('appFileId', appFileId)
   const [fileDesc, setFileDesc] = useState<AppFileMeta | null>(null);
   const fileDescriptionUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi/${appFileId}/description`;
   

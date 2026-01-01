@@ -15,7 +15,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: "Group",
     icon: <GroupIcon htmlColor="white"/>,
-    path: "/groups/details",
+    path: "/groups",
   },
   {
     label: "Readings",

@@ -10,6 +10,7 @@ import {
     ListItemText,
     ThemeProvider, 
 } from "@mui/material";
+import { Group } from "../types/domain-types";
 
 
 const Sidebar = () => {
@@ -17,7 +18,9 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const drawerWidth = 175;
-    
+
+    const groupId = activeGroup ? activeGroup.id : "1";
+   
     const theme = createTheme({
         typography: {
             fontSize: 12,
@@ -52,7 +55,7 @@ const Sidebar = () => {
         <ListItemButton
           key={item.path}
           selected={pathname.startsWith(item.path)}
-          onClick={() => navigate(item.path)}
+          onClick={() => navigate(item.path.includes("groups") ? item.path + "/" + groupId : item.path)}
         >
           <ListItemIcon className="sidebarIcon" color="white">{item.icon}</ListItemIcon>
           <ListItemText primary={item.label} />

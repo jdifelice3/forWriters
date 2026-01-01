@@ -22,31 +22,52 @@ import { FileCommands, FileListProperties } from "../types/FileTypes";
 import { useGroupDetails } from "../hooks/useGroup";
 import ReadingCalendar from "../components/reading/ReadingCalendar";
 import FileManagerList from "../components/file/lists/FileManagerList";
-import { useReadingsUI } from "../hooks/useReading";
-import { useReadingsActions } from "../hooks/useReading";
-import { useReadingsData } from "../hooks/useReading";
+import { useReadings, useReadingsUI, useReadingsActions, useReadingsData } from "../hooks/useReading";
 import { FormInput } from "../types/ReadingTypes";
 
 const Readings = () => {
-    let isAdmin = false;
-    const navigate = useNavigate();
-    const { user } = useUserContext();
-    const { data : group, isLoading, mutate} = useGroupDetails<Group>();
-    const { myReadings, myFiles } = useReadingsData(group, user );
-    const ui = useReadingsUI();
+  const navigate = useNavigate();
+  const { user } = useUserContext();
 
-    if (!group) {
-      return (
-        <Box display="flex" justifyContent="center" p={6} >
-          <CircularProgress size={24}/>
-        </Box>
-      );
-    }
-    
-const actions = useReadingsActions(group!.id, user.id, mutate);
+  const { data: group, isLoading: isGroupLoading, mutate } =
+    useGroupDetails<Group>();
 
-const foundUser = group?.groupUser.find(u => u.userId === user.id && u.isAdmin );
-if(foundUser) isAdmin = true;
+  const {
+    readings,
+    isLoading: isReadingLoading,
+    isError,
+    mutate: refreshReadingData,
+  } = useReadings();
+
+  const ui = useReadingsUI();
+
+  // ✅ Hooks must be called unconditionally
+  const actions = useReadingsActions(group?.id ?? null, user?.id ?? null, mutate);
+
+  // ✅ Safe even while loading (hook runs every render)
+  const { myReadings, myFiles } = useReadingsData(readings, user);
+
+  // ✅ Now you can render-guard
+  if (isGroupLoading || !group) {
+    return (
+      <Box display="flex" justifyContent="center" p={6}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
+
+  if (isReadingLoading) {
+    return (
+      <Box display="flex" justifyContent="center" p={6}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
+
+  // ✅ Admin calc must be safe (findIndex can be -1)
+    const membership = group.groupUser.find((m) => m.userId === user.id);
+    const isAdmin = membership?.role === "ADMIN";
+
 
 const handleAddReading = async (input: FormInput ) => {
     try {
@@ -178,12 +199,12 @@ const fileCommands: FileCommands = {
                                 >
                                 Group Reading Calendar
                                 </Typography>
-                                {group?.reading ? (
-                                    <ReadingCalendar readings={group?.reading} isAdmin={isAdmin} commands={readingCommands}/>
-                                ) : (
+                                {/* {group?.reading ? ( */}
+                                    <ReadingCalendar readings={readings} isAdmin={isAdmin} commands={readingCommands}/>
+                                {/* ) : (
                                     <Typography>Readings have not yet been created for this group.</Typography>
                                 )}
-                                
+                                 */}
                             </Grid>
                         </Grid>
                     </CardContent>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Reading, ReadingAuthor } from "../../types/domain-types";
+import { Reading, ReadingParticipant } from "../../types/domain-types";
 import {
   Typography,
 } from "@mui/material";
@@ -10,9 +10,9 @@ interface AuthorListProps {
 
 const AuthorList: React.FC<AuthorListProps> = ({ reading }) => {
   return (
-    reading.readingAuthor.map((ra: ReadingAuthor, index) => (
+    reading.readingParticipant.map((rp: ReadingParticipant, index) => (
       <Typography key={index} variant="body1" color="text.secondary">        
-            {ra.authorAppFileMeta?.appFileMeta.user.userProfile?.firstName} {ra.authorAppFileMeta?.appFileMeta.user.userProfile?.lastName}
+            {rp.user.userProfile?.firstName} {rp.user.userProfile?.lastName}
       </Typography>
     ))
   );

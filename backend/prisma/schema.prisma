@@ -55,7 +55,7 @@ enum JoinRequestStatus {
   REJECTED
 }
 
-enum GroupMemberRole {
+enum GroupRole {
   MEMBER
   ADMIN
 }
@@ -119,6 +119,8 @@ model AppFile {
   createdAt           DateTime      @default(now())
 
   appFileMeta    AppFileMeta        @relation("OriginalAppFile", fields: [appFileMetaId], references: [id])
+  readingSubmission  ReadingSubmission[]
+  readingFeedback       ReadingFeedback[]
 }
 
 model AppFileMeta {
@@ -134,21 +136,6 @@ model AppFileMeta {
 
     user                User         @relation("AppFileOwnerUser", fields: [userId], references: [id])
     appFile             AppFile[]    @relation("OriginalAppFile") 
-    readingFeedback     ReadingFeedback[]
-    authorAppFileMeta   AuthorAppFileMeta[]
-
-
-}
-
-model AuthorAppFileMeta {
-  id              String   @id @default(cuid())
-  readingAuthorId String   @unique
-  appFileMetaId       String
-  createdAt       DateTime @default(now())
-  appFileVersion    Int     @default(1)
-
-  readingAuthor ReadingAuthor @relation(fields: [readingAuthorId], references: [id])
-  appFileMeta       AppFileMeta       @relation(fields: [appFileMetaId], references: [id])
 }
 
 model CollaboratorRequest {
@@ -214,7 +201,7 @@ model GroupUser {
   id        String   @id @default(cuid())
   userId    String
   groupId   String
-  isAdmin   Boolean  @default(false)
+  role   GroupRole  @default(MEMBER)
   invitedBy String?
   createdAt DateTime @default(now())
 
@@ -268,37 +255,23 @@ model Reading {
   scheduledType          ReadingScheduleType    @default(SCHEDULED)
 
   user          User            @relation(fields: [createdUserId], references: [id])
-  readingAuthor ReadingAuthor[]
+  readingParticipant ReadingParticipant[]
   group         Group           @relation(fields: [groupId], references: [id])
   groupAddress  GroupAddress?   @relation(fields: [readingAddressId], references: [id])
-}
-
-model ReadingAuthor {
-  id        String   @id @default(cuid())
-  readingId String
-  authorId  String
-  joinedAt  DateTime @default(now())
-
-  reading         Reading           @relation(fields: [readingId], references: [id])
-  user            User              @relation("ReadingAuthorUser", fields: [authorId], references: [id])
-  authorAppFileMeta   AuthorAppFileMeta?
-  readingFeedback ReadingFeedback[]
-
-  @@unique([readingId, authorId])
+  readingSubmission         ReadingSubmission[]
 }
 
 model ReadingFeedback {
-  id              String   @id @default(cuid())
-  readingAuthorId String
-  feedbackUserId  String
-  feedbackFileId  String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  reviewerParticipantId String
+  submissionId          String
+  appFileId                String
+  createdAt             DateTime @default(now())
 
-  readingAuthor          ReadingAuthor            @relation(fields: [readingAuthorId], references: [id])
-  readingFeedbackComment ReadingFeedbackComment[]
-  appFile                AppFileMeta                  @relation(fields: [feedbackFileId], references: [id])
-  user                   User                     @relation("FeedbackUser", fields: [feedbackUserId], references: [id])
+  reviewerParticipant ReadingParticipant @relation(fields: [reviewerParticipantId], references: [id])
+  submission           ReadingSubmission  @relation(fields: [submissionId], references: [id])
+  appFile                 AppFile            @relation(fields: [appFileId], references: [id])
+  readingFeedbackComment    ReadingFeedbackComment[]
 }
 
 model ReadingFeedbackComment {
@@ -310,6 +283,35 @@ model ReadingFeedbackComment {
   targetText        String
 
   readingFeedback ReadingFeedback @relation(fields: [readingFeedbackId], references: [id])
+}
+
+model ReadingParticipant {
+  id        String   @id @default(cuid())
+  readingId String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  reading   Reading @relation(fields: [readingId], references: [id])
+  user      User    @relation("ReadingParticipantUser", fields: [userId], references: [id])
+
+  readingSubmission ReadingSubmission?
+  readingFeedback   ReadingFeedback[]
+
+  @@unique([readingId, userId])
+}
+
+model ReadingSubmission {
+  id             String   @id @default(cuid())
+  readingId      String
+  participantId  String    @unique
+  appFileId      String
+  submittedAt    DateTime @default(now())
+
+  reading       Reading   @relation(fields: [readingId], references: [id])
+  participant   ReadingParticipant    @relation(fields: [participantId], references: [id])
+  appFile       AppFile  @relation(fields: [appFileId], references: [id])
+  readingFeedback       ReadingFeedback[]
+  @@unique([readingId, participantId, appFileId])
 }
 
 model User {
@@ -329,8 +331,7 @@ model User {
   appFileMetas            AppFileMeta[]                             @relation("AppFileOwnerUser")
   urls                UserUrl[]
   joinRequests        JoinRequest[]
-  readingFeedback     ReadingFeedback[]                     @relation("FeedbackUser")
-  readingAuthor       ReadingAuthor[]                       @relation("ReadingAuthorUser")
+  readingParticipant       ReadingParticipant[]                       @relation("ReadingParticipantUser")
   userInviter         UserCollaborator[]                    @relation("User")
   userCollaborator    UserCollaborator[]                    @relation("UserCollaborator")
   userRequestor       CollaboratorRequest[]                 @relation("UserRequest")

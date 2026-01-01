@@ -1,6 +1,6 @@
 export const getUserProfile = async(authId: string) => {
   try {
-      const res: Response = await fetch(`${import.meta.env.VITE_API_HOST}/api/userProfile?authId=${authId}`, {
+      const res: Response = await fetch(`${import.meta.env.VITE_API_HOST}/api/users/userprofile`, {
         method: 'GET',
         credentials: "include",
         headers: { 'Content-Type': 'application/json' },
@@ -20,7 +20,7 @@ export const getUserProfile = async(authId: string) => {
 
 export const updateUserProfile = async(userId: string, firstName: string, lastName: string, bio: string) => {
   try {
-    const res: Response = await fetch(`${import.meta.env.VITE_API_HOST}/api/userProfile`, {
+    const res: Response = await fetch(`${import.meta.env.VITE_API_HOST}/api/users/userprofile`, {
       method: 'PUT',
       credentials: "include",
       headers: { 'Content-Type': 'application/json' },

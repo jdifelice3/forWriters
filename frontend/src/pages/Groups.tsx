@@ -24,11 +24,9 @@ const styles = {
 };
 
 const Groups = () => {
-  const { user } = useUserContext();
-  const navigate = useNavigate();
-  //const { activeGroup } = useGroupContext();
-  console.log('in Groups.tsx')
-  const { data : group, isLoading } = useGroupDetails<Group>();
+    const { user } = useUserContext();
+    const navigate = useNavigate();
+    const { data : group, isLoading } = useGroupDetails<Group>();
   
   if (isLoading) {
     return (
@@ -39,11 +37,12 @@ const Groups = () => {
   }
 
   if (!group) {
-    return <Typography>Alas, no group was found.</Typography>;
+    return <Typography sx={{mt:3}}>Alas, no group was found.</Typography>;
   }
 
   const userIndex: number = group.groupUser.findIndex(item => item.userId === user.id);
-  const isAdmin = (group.groupUser[userIndex].isAdmin);
+  const isAdmin = (group.groupUser[userIndex].role === "ADMIN");
+
 
   return (
     <Card elevation={0} className="mainComponentPanel">

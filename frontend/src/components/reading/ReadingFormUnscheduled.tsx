@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useUserContext } from "../../context/UserContext";
 import { 
-    ReadingAuthor,
+    ReadingParticipant,
     Reading
  } from "../../types/domain-types";
 import {
@@ -72,7 +72,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({readings}) => {
                 )}
             </Box>
             {readings.map((r) => (
-                <ReadingAuthorForm readingAuthors={r.readingAuthor} />        
+                <ReadingAuthorForm readingParticipants={r.readingParticipant} />        
             ))}
         </Box>
     )
@@ -80,41 +80,44 @@ const ReadingForm: React.FC<ReadingFormProps> = ({readings}) => {
 export default ReadingForm;
 
 interface ReadingAuthorFormProps {
-  readingAuthors: ReadingAuthor[];
+  readingParticipants: ReadingParticipant[];
 }
 
-const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthors}) => {
+const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingParticipants: readingParticipants}) => {
     const [error, setError] = useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState(null);
-    const readingsUrl = `${import.meta.env.VITE_API_HOST}/api/events/user/author`;
-    const addFileToReadingUrl = `${import.meta.env.VITE_API_HOST}/api/events/file/add`;
+    const readingsUrl = `${import.meta.env.VITE_API_HOST}/api/readings/user/author`;
+    const addFileToReadingUrl = `${import.meta.env.VITE_API_HOST}/api/readings/file/add`;
 
     const handleClick = (event: any) => {
         setAnchorEl(event.currentTarget); // Set anchor to the clicked button
     };
 
     const handleSelectChange = async(readingAuthorId: string, fileId: string) => {
-    const res = await fetch(addFileToReadingUrl, {
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-      body: JSON.stringify({readingAuthorId: readingAuthorId, appFileId: fileId}),
-    });
-  }
+        const res = await fetch(addFileToReadingUrl, {
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            method: "POST",
+            body: JSON.stringify({readingAuthorId: readingAuthorId, appFileId: fileId}),
+        });
+    }
+
     const canChangeManuscript = (r: Reading) => {
         if(r.scheduledType === "SCHEDULED"){
             return new Date(r.submissionDeadline || "").valueOf() > currentDate.valueOf()
         } else {
             return true; // As of now, users can can their manuscripts until it has been downloaded.
-                         // TODO: LOG ALL FILE DOWNLOADS
+                            // TODO: LOG ALL FILE DOWNLOADS
         }
     }
 
-      const handleClose = () => {
-    setAnchorEl(null); // Close the popover
-  };
+    const handleClose = () => {
+        setAnchorEl(null); // Close the popover
+    };
+    
     const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
+    const id = open ? 'simple-popover' : undefined;
+  
     return (
         <>
         <Typography variant="h4" mb={2}>
@@ -134,7 +137,7 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthors}) =
                 )}
             </Box>
             <Grid container spacing={2}>
-            {readingAuthors.map((ra) => (
+            {readingParticipants.map((rp) => (
                 <Grid size={12}>
                 <Box 
                     sx={{
@@ -177,8 +180,8 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthors}) =
                     </div>
                     <Typography variant="caption" color="text.secondary">
                             {
-                            ra.authorAppFileMeta ?
-                            `Submitted to Reading on ${new Date(ra.authorAppFileMeta?.createdAt).toLocaleDateString()}`
+                            rp.readingSubmission?.appFile.appFileMeta ?
+                            `Submitted to Reading on ${new Date(rp.readingSubmission.appFile.appFileMeta?.createdAt).toLocaleDateString()}`
                             : "You haven't submitted a manuscript"
                         }
                     </Typography>
@@ -186,8 +189,8 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingAuthors}) =
                     <Typography variant="body1" fontWeight="bold">
                         Feedback:
                     </Typography>
-                    {ra.readingFeedback.length > 0 ? (
-                        <FeedbackCommentList readingAuthor={ra}/>
+                    {rp.readingFeedback.length > 0 ? (
+                        <FeedbackCommentList readingAuthor={rp}/>
                     ) : (
                         <Typography>
                             Awaiting Feedback

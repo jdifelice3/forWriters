@@ -1,7 +1,7 @@
-import { GroupMemberRole } from "./domain-types";
+import { GroupRole } from "./domain-types";
 
 export type DashboardResponse = {
-  group: { id: string; name: string; role: GroupMemberRole } | null;
+  group: { id: string; name: string; role: GroupRole } | null;
   attention: DashboardAttentionItem[];
   upcoming: DashboardUpcomingItem[];
   resume: DashboardResumeItem[];

@@ -2,6 +2,7 @@ import * as React from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import { Typography } from '@mui/material';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -40,33 +41,38 @@ export default function BasicTabs() {
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-          <Tab label="Manuscripts" {...a11yProps(0)} />
-          <Tab label="Groups" {...a11yProps(1)} />
-          <Tab label="Readings" {...a11yProps(2)} />
-          {/* <Tab label="Join Requests" {...a11yProps(3)} /> These would be under groups*/}
-          <Tab label="Collaborators" {...a11yProps(3)} />
-          <Tab label="Search" {...a11yProps(4)} />
-        </Tabs>
-      </Box>
-      <CustomTabPanel value={value} index={0}>
-        Item One
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={1}>
-        Item Two
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={2}>
-        Item Three
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={3}>
-        Item 4
-      </CustomTabPanel>
-        <CustomTabPanel value={value} index={4}>
-        Item 4
-      </CustomTabPanel>
+    <div>
+        <Typography sx={{mt:3}}>
+            Dashboard
+        </Typography>
+    </div>
+    // <Box sx={{ width: '100%' }}>
+    //   <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+    //     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+    //       <Tab label="Manuscripts" {...a11yProps(0)} />
+    //       <Tab label="Groups" {...a11yProps(1)} />
+    //       <Tab label="Readings" {...a11yProps(2)} />
+    //       {/* <Tab label="Join Requests" {...a11yProps(3)} /> These would be under groups*/}
+    //       <Tab label="Collaborators" {...a11yProps(3)} />
+    //       <Tab label="Search" {...a11yProps(4)} />
+    //     </Tabs>
+    //   </Box>
+    //   <CustomTabPanel value={value} index={0}>
+    //     Item One
+    //   </CustomTabPanel>
+    //   <CustomTabPanel value={value} index={1}>
+    //     Item Two
+    //   </CustomTabPanel>
+    //   <CustomTabPanel value={value} index={2}>
+    //     Item Three
+    //   </CustomTabPanel>
+    //   <CustomTabPanel value={value} index={3}>
+    //     Item 4
+    //   </CustomTabPanel>
+    //     <CustomTabPanel value={value} index={4}>
+    //     Item 4
+    //   </CustomTabPanel>
 
-    </Box>
+    // </Box>
   );
 }

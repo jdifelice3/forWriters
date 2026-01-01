@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { useReadingsActions, useReadingsData } from "../../hooks/useReading";
+import { useReadingsActions, useReadingData } from "../../hooks/useReading";
 import { useGroupDetails } from "../../hooks/useGroup";
 import { 
     AppFile,
     Group,
     Reading, 
-    ReadingAuthor,
+    ReadingParticipant,
+    ReadingSubmission,
 } from "../../types/domain-types";
 import {
     Alert,
@@ -52,11 +53,11 @@ const currentDate = new Date();
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ reading, isAdmin, commands }) => {
     const { user, isLoading, error } = useUserContext();
     const {data: group, mutate: mutateGroup } = useGroupDetails<Group>();
-    const { myReadings, myFiles } = useReadingsData(group, user);
-    if(group === undefined) throw new Error("Group undefined");
     
+    const { isParticipant, myFiles } = useReadingData(reading, user);
+    if(group === undefined) throw new Error("Group undefined");
+        
     const { addFile } = useReadingsActions(group.id, user.id, mutateGroup );
-
     const [err, setErr] = React.useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [submitManuscriptOpen, setSubmitManuscriptOpen] = useState(false);
@@ -83,14 +84,15 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
         let versionName = "";
         let version = 0;
 
-        const ra: ReadingAuthor | undefined =  reading.readingAuthor.find(rauth => rauth.authorId === user.id);
-        hasSignedUp = ra !== undefined;
-        
-        if(ra && ra.authorAppFileMeta){
-            hasSubmitted = ra.authorAppFileMeta.appFileMeta !== undefined;
-            title = ra.authorAppFileMeta.appFileMeta.title;
-            version = ra.authorAppFileMeta.appFileMeta.currentVersionId;
-            versionName = `${version.toString()} -${ra.authorAppFileMeta.appFileMeta.title}-${ new Date(ra.authorAppFileMeta.appFileMeta.createdAt).toLocaleDateString()}`;
+        const rp: ReadingParticipant | undefined =  reading.readingParticipant.find(rp => rp.userId === user.id);
+        const rs: ReadingSubmission | undefined = reading.readingSubmission.find(item => item.participantId === rp?.id)
+
+        hasSignedUp = rp !== undefined;
+        hasSubmitted = rs !== undefined;
+        if(rs){// && rp.readingSubmission){
+            title = rs.appFile.appFileMeta.title;
+            version = rs.appFile.version;
+            versionName = rs.appFile.name;
             isPastSubmissionDeadline = new Date(reading.submissionDeadline!).getDate() - currentDate.getDate() > 0;
         }
 
@@ -103,7 +105,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
 
     const FileSubmissionDetails = () => {
         const { hasSignedUp, hasSubmitted, title, version, versionName, isPastSubmissionDeadline} = getfileSubmissionDetails();
-        
+        console.log('hasSubmitted', hasSubmitted)
         const renderMessage = () => {
             if (hasSignedUp) {
                 if (hasSubmitted) {
@@ -128,28 +130,6 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             >
                                 Change
                             </Button>
-                            &nbsp;&nbsp;<InfoIcon style={{ cursor: 'pointer' }} onClick={handlePopoverClick}/>
-                            <div>
-                            <Popover
-                                id={popoverId}
-                                open={popOverOpen}
-                                anchorEl={anchorEl}
-                                onClose={handlePopoverClose}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
-                            >
-                            <Typography sx={{ p: 2 }}>
-                                To change the manuscript version, go to the Files page
-                                <Button onClick={handlePopoverClose}>Close</Button>
-                            </Typography>                
-                        </Popover>
-                        </div>
                         </>
                     )
                 } else {
@@ -189,27 +169,13 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
         setLoading(true);
 
         try {
-            const ra: ReadingAuthor | undefined =  reading.readingAuthor.find(rauth => rauth.authorId === user.id);
-            let formData = new FormData();
-            if(!ra) throw new Error("Reading author not found");
+            const rp: ReadingParticipant | undefined =  reading.readingParticipant.find(rp => rp.userId === user.id);
+            
+            if(!rp) throw new Error("Reading author not found");
 
-            formData.append("readingAuthorId", ra.id);
-            formData.append("appFileId" ,selectedFile.id); 
-            formData.append("appFileMetaId", selectedFile.appFileMetaId);
-
-            const results = await addFile(formData);
+            const results = await addFile(group.id, reading.id, selectedFile.id);
             mutateGroup();
             
-            // const res = await fetch(`${import.meta.env.VITE_API_HOST}/api/events/file/add`,
-            // {
-            //     method: "POST",
-            //     credentials: "include",
-            //     body: formData
-            // });
-
-            //const data = await res.json();
-
-            //if (!res.ok) throw new Error(data.error || "Failed to request to join");
             setConfirmation(
                 `Your manuscript has been added to the reading.`
             );
@@ -260,7 +226,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         color="text.secondary" 
                         sx={{
                             fontWeight: "bold", 
-                            color:(reading.readingAuthor ? (reading.readingAuthor.length === 0 ? "green" : "red") : "green")
+                            color:(reading.readingParticipant ? (reading.readingParticipant.length === 0 ? "green" : "red") : "green")
                             }}>
                             {getSpotsOpenText(reading)}
                     </Typography>

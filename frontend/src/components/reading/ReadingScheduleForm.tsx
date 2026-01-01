@@ -32,11 +32,11 @@ const ReadingScheduleForm: React.FC<ReadingScheduleProps> = ({ reading, commands
                     color="text.secondary" 
                     sx={{
                         fontWeight: "bold", 
-                        color:(reading.readingAuthor ? (reading.readingAuthor.length === 0 ? "green" : "red") : "green")
+                        color:(reading.readingParticipant ? (reading.readingParticipant.length === 0 ? "green" : "red") : "green")
                         }}>
-                    {reading.readingAuthor ? `${reading.spotsOpen - reading.readingAuthor.length} of ${reading.spotsOpen} spots open` : `${reading.spotsOpen} of ${reading.spotsOpen} spots open`} 
+                    {reading.readingParticipant ? `${reading.spotsOpen - reading.readingParticipant.length} of ${reading.spotsOpen} spots open` : `${reading.spotsOpen} of ${reading.spotsOpen} spots open`} 
                 </Typography>
-                {reading.readingAuthor && reading.readingAuthor.length > 0 && (
+                {reading.readingParticipant && reading.readingParticipant.length > 0 && (
                 <Typography variant="body1" color="text.secondary" fontWeight={"bold"}>
                     Authors:
                     <AuthorList reading={reading} />

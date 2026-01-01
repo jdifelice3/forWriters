@@ -2,37 +2,42 @@ import { apiFetch } from "./client";
 import { FormInput } from "../types/ReadingTypes";
 
 export const ReadingsAPI = {
+    get(groupId: string) {
+        return apiFetch(`/groups/${groupId}/readings`,{
+            method: "GET"
+        });
+    },
+
   create(groupId: string, input: FormInput, userId: string, schedule: string) {
-    return apiFetch(`/events/${groupId}`, {
+    return apiFetch(`/groups/${groupId}/readings`, {
       method: "POST",
       body: JSON.stringify({ ...input, createdUserId: userId, schedule }),
     });
   },
 
-  signup(readingId: string, userId: string) {
-    return apiFetch(`/events/${readingId}/signup`, {
+  signup(readingId: string, groupId: string, userId: string) {
+    return apiFetch(`/groups/${groupId}/readings/${readingId}/signup`, {
       method: "POST",
       body: JSON.stringify({ userId }),
     });
   },
 
   withdraw(readingId: string, userId: string) {
-    return apiFetch(`/events/${readingId}/withdraw`, {
+    return apiFetch(`/readings/${readingId}/withdraw`, {
       method: "DELETE",
       body: JSON.stringify({ userId }),
     });
   },
 
   remove(readingId: string, groupId: string) {
-    return apiFetch(`/events/${readingId}/group/${groupId}`, {
+    return apiFetch(`/readings/${readingId}/group/${groupId}`, {
       method: "DELETE",
     });
   },
 
-  addFile(input: FormData) {
-    return apiFetch("/events/file/add",{
-        method: "POST",
-        body: input,
+  addFile(groupId: string, readingId:string, appFileId: string) {
+    return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${appFileId}/version`,{
+        method: "POST"
     });
   },
 };

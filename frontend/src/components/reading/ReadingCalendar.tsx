@@ -84,8 +84,8 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
     const disableSignInButton = (eventId: string): boolean => {
         try {
             for(let i=0; i < reading.length; i++){
-                for(let k=0; k < reading[i].readingAuthor.length; k++){
-                if(reading[i].id === eventId && reading[i].readingAuthor[k].authorId === user.id){
+                for(let k=0; k < reading[i].readingParticipant.length; k++){
+                if(reading[i].id === eventId && reading[i].readingParticipant[k].userId === user.id){
                     return true;
                 }
             }
@@ -123,9 +123,13 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
                     {err}
                 </Alert>
             )}
-            {readings.map((r, index) => (
+            {readings && readings.length > 0 ? (
+            readings.map((r, index) => (
                 <ReadingCalendarItemForm key={index} reading={r} isAdmin={isAdmin} commands={commands} />
-            ))}
+            ))
+            ) : (
+            <span></span>
+            )}
         </Box>
         <Dialog 
             open={open} 
@@ -178,6 +182,19 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
                             helperText={errors.readingDate?.message}            
                         />
                         <TextField
+                            label="Submission Deadline"
+                            type="date"
+                            value={submissionDeadline}
+                            fullWidth
+                            InputLabelProps={{ shrink: true }}
+                            required
+                            {...register("submissionDeadline", {
+                                onChange: (e) => setSubmissionDeadline(e.target.value)
+                            })}
+                            error={!!errors.name}
+                            helperText={errors.name?.message}           
+                        />
+                        <TextField
                             label="Start Time"
                             type="string"
                             value={startTime}
@@ -203,19 +220,6 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
                             error={!!errors.name}
                             helperText={errors.name?.message}            
                             />
-                        <TextField
-                            label="Submission Deadline"
-                            type="date"
-                            value={submissionDeadline}
-                            fullWidth
-                            InputLabelProps={{ shrink: true }}
-                            required
-                            {...register("submissionDeadline", {
-                                onChange: (e) => setSubmissionDeadline(e.target.value)
-                            })}
-                            error={!!errors.name}
-                            helperText={errors.name?.message}           
-                        />
                     </Box>
                 </DialogContent>
                 <DialogActions>

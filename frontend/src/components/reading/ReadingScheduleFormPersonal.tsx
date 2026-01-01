@@ -22,7 +22,7 @@ const ReadingScheduleFormPersonal: React.FC<ReadingScheduleFormPersonal> = ({ re
             <Typography variant="body1" fontWeight="bold">
                 {reading.name }
             </Typography>
-                {reading.readingAuthor && reading.readingAuthor.length > 0 && (
+                {reading.readingParticipant && reading.readingParticipant.length > 0 && (
                     <Box>
                         <Typography variant={"body2"} fontWeight={"bold"}>Authors:</Typography>
                         <AuthorList reading={reading} />

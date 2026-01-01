@@ -39,12 +39,12 @@ export default function Layout() {
 
                 <Route path="/" element={<Home />} />
                 <Route path="/userprofile" element={<UserProfile />} />
-                <Route path="/files*" element={<FileManager/>} />
+                <Route path="/files" element={<FileManager/>} />
                 <Route path="/filemanager/manuscript" element={<FileManager/>} />
                 <Route path="/filemanager/feedback" element={<FileManager />} />
 
-                <Route path="/groups/:groupId/details" element={<Groups />} />
-                <Route path="/groups/:groupId/details/personal" element={<GroupsPersonal />} />
+                <Route path="/groups/:groupId" element={<Groups />} />
+                <Route path="/groups/personal/:groupId" element={<GroupsPersonal />} />
                 <Route path="/groupsearch" element={<GroupSearch />} />
                 <Route path="/creategroup" element={<GroupsCreate />} />
                 

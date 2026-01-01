@@ -72,7 +72,7 @@ const GroupsPersonalForm: React.FC<GroupsPersonalFormProps> = ({group}) => {
     const { groupId } = useParams<{ groupId: string }>();
 
     const userIndex: number = group.groupUser.findIndex(item => item.userId === user.id);
-    const isAdmin = group.groupUser[userIndex].isAdmin;
+    const isAdmin = group.groupUser[userIndex].role === "ADMIN";
     
     return (
         <Box style={styles} sx={{ maxWidth: 600, mx: "auto", p: 4}}>

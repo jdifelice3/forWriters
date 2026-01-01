@@ -1,82 +1,113 @@
 import "dotenv/config";
-import path from 'path';
+import path from "path";
 import express from "express";
 import cors from "cors";
+import bodyParser from "body-parser";
+
 import supertokens from "supertokens-node";
-import { middleware, errorHandler } from "supertokens-node/framework/express";
+import {
+  middleware as supertokensMiddleware,
+  errorHandler as supertokensErrorHandler,
+} from "supertokens-node/framework/express";
+
 import { SuperTokensConfig } from "./config";
 
-if (typeof process.env.WEB_HOST === undefined) {
-  throw new Error("Environment variable process.env.SUPERTOKENS_CONNECTION_URI is undefined");
+// Infrastructure routes
+import fileUploadRoutes from "./routes/files/files.routes";
+
+// API router (JSON-only domain routes)
+import apiRoutes from "./routes";
+
+// -----------------------------------------------------------------------------
+// Environment checks
+// -----------------------------------------------------------------------------
+if (!process.env.WEB_HOST) {
+  throw new Error("WEB_HOST environment variable is undefined");
 }
 
-import bodyParser from "body-parser";   
-import userRoutes from './routes/userRoutes';
-import userProfileRoutes from './routes/userProfileRoutes';
-import fileRoutes from './routes/fileRoutes';
-import pdfRoutes from './routes/pdfRoutes';
-import groupRoutes from './routes/groupRoutes';
-import meRoute from './routes/meRoute';
-import eventRoutes from './routes/readingRoutes';
-import apiRoutes from "./routes/apiRoutes";
-
+// -----------------------------------------------------------------------------
+// SuperTokens init
+// -----------------------------------------------------------------------------
 supertokens.init(SuperTokensConfig);
 
+// -----------------------------------------------------------------------------
+// Express app
+// -----------------------------------------------------------------------------
 const app = express();
-
 app.set("trust proxy", true);
 
+// -----------------------------------------------------------------------------
+// CORS
+// -----------------------------------------------------------------------------
 app.use(
-    cors({
-        origin: process.env.WEB_HOST,
-        allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
-        methods: ["GET", "PUT", "POST", "DELETE"],
-        credentials: true,
-        exposedHeaders: ["Content-Disposition"]
-    })
+  cors({
+    origin: process.env.WEB_HOST,
+    allowedHeaders: [
+      "content-type",
+      ...supertokens.getAllCORSHeaders(),
+    ],
+    methods: ["GET", "PUT", "POST", "DELETE"],
+    credentials: true,
+    exposedHeaders: ["Content-Disposition"],
+  })
 );
 
-app.use("/auth", middleware());
+// -----------------------------------------------------------------------------
+// SuperTokens core middleware (auth plumbing)
+// -----------------------------------------------------------------------------
+app.use(supertokensMiddleware());
 
+// -----------------------------------------------------------------------------
+// 🚨 Upload routes (MUST come before body parsing)
+// -----------------------------------------------------------------------------
+app.use("/api/files", fileUploadRoutes);
+
+// -----------------------------------------------------------------------------
+// Body parsing (JSON APIs only)
+// -----------------------------------------------------------------------------
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// -----------------------------------------------------------------------------
+// Static uploads (download / preview)
+// -----------------------------------------------------------------------------
 const uploadDir = path.join(process.cwd(), "uploads");
 
 app.use(
   "/uploads",
   express.static(uploadDir, {
     setHeaders: (res, filePath) => {
-      // 1. CORS
       res.setHeader("Access-Control-Allow-Origin", process.env.WEB_HOST!);
       res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader(
+        "Access-Control-Expose-Headers",
+        "Content-Disposition"
+      );
 
-      // 2. Allow browser to read Content-Disposition
-      res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
-
-      // 3. Force download behavior
       const filename = path.basename(filePath);
-      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    }
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+    },
   })
 );
-app.use('/api/files', fileRoutes);
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// -----------------------------------------------------------------------------
+// JSON API routes (authenticated + domain logic)
+// -----------------------------------------------------------------------------
+app.use("/api", apiRoutes);
 
-app.use('/api/filesApi', apiRoutes);
+// -----------------------------------------------------------------------------
+// SuperTokens error handler (MUST be last)
+// -----------------------------------------------------------------------------
+app.use(supertokensErrorHandler());
 
-app.use('/api/users', userRoutes); 
+// -----------------------------------------------------------------------------
+// Server start
+// -----------------------------------------------------------------------------
+const PORT = process.env.PORT || "3001";
 
-app.use('/api/userProfile', userProfileRoutes);
-
-app.use('/api/pdfs', pdfRoutes);
-
-app.use('/api/groups', groupRoutes);
-
-app.use('/api/me', meRoute);
-
-app.use('/api/events', eventRoutes);
-
-app.use(errorHandler());
-
-const PORT: string = process.env.PORT || "3001";
-app.listen(PORT, () => console.log(`API Server listening on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`API Server listening on port ${PORT}`);
+});

@@ -113,7 +113,7 @@ const FileManagerList: React.FC<FileListProps> = ({files, commands, fileListProp
                             </Grid>
                             <Grid>
                                 <Typography>
-                                    Select active version
+                                    Select default version
                                 </Typography>
                             </Grid>
                             </Grid>

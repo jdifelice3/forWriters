@@ -26,23 +26,15 @@ const styles = {
     marginLeft: '75px' // or a responsive value
 };
 
-// ----------------------
-// 🔒 Zod Schema
-// ----------------------
-const profileSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email address"),
-  bio: z.string().max(500, "Bio must be under 500 characters").optional(),
-  title: z.string().optional(),
-  description: z.string().optional(),
-  avatar: z
-    .instanceof(File)
-    .or(z.null())
-    .optional(),
-});
-
-type ProfileFormInputs = z.infer<typeof profileSchema>;
+type ProfileFormInputs = {
+    firstName: string,
+    lastName: string,
+    email: string,
+    bio: string,
+    title: string,
+    description: string,
+    avatar: File,
+}
 
 const UserProfile = () => {
     const [userId, setUserId] = useState<string>("");
@@ -55,15 +47,14 @@ const UserProfile = () => {
         formState: { errors }, 
         reset
     } = useForm<ProfileFormInputs>({
-        resolver: zodResolver(profileSchema),
         defaultValues: {
-            firstName: "",
+            firstName: "John",
             lastName: "",
             email: "",
             bio: "",
             title: "",
             description: "",
-            avatar: null,
+            avatar: undefined,
         },
     });
 
@@ -106,8 +97,17 @@ const UserProfile = () => {
     if(results.status !== 500){
       alert("Profile saved successfully!");
     } else if (results.status === 500){
-      alert(results.json);
+      alert("The profile was not saved due to an error");
     }
+    // reset({
+    //     firstName: "",
+    //     lastName: "",
+    //     email: "",
+    //     bio: "",
+    //     title: "",
+    //     description: "",
+    //     avatar: undefined,
+    // });
   };
 
   return (
@@ -115,41 +115,39 @@ const UserProfile = () => {
       component="form"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <Typography variant="h4" mb={3}>
-        <AccountBoxIcon 
-              sx={{ 
-                fontSize: '40px',
-                verticalAlign: "bottom", 
-              }}
-            />&nbsp;
-            Profile
-      </Typography>
-
+        <Typography variant="h4" mb={3}>
+            <AccountBoxIcon 
+                sx={{ 
+                    fontSize: '40px',
+                    verticalAlign: "bottom", 
+                }}
+                />&nbsp;
+                Profile
+        </Typography>
       <Stack spacing={2}>
         {/* Avatar upload */}
         <Controller
-          name="avatar"
-          control={control}
-          render={({ field: { onChange } }) => (
-              <FileUploadField onChange={onChange} />
-          )}
+            name="avatar"
+            control={control}
+            render={({ field: { onChange } }) => (
+                <FileUploadField onChange={onChange} />
+            )}
         />
-
         <Divider />
-
         {/* Basic info */}
         <Controller
-          name="firstName"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="First Name"
-              {...field}
-              error={!!errors.firstName}
-              helperText={errors.firstName?.message}
-              fullWidth
-            />
-          )}
+            name="firstName"
+            control={control}
+            render={({ field }) => (
+                <TextField
+                    label="First Name"
+                    {...field}
+                    value={field.value ?? ""}
+                    error={!!errors.firstName}
+                    helperText={errors.firstName?.message}
+                    fullWidth
+                />
+            )}
         />
 
         <Controller
@@ -159,6 +157,7 @@ const UserProfile = () => {
             <TextField
               label="Last Name"
               {...field}
+              value={field.value ?? ""}
               error={!!errors.lastName}
               helperText={errors.lastName?.message}
               fullWidth
@@ -167,44 +166,45 @@ const UserProfile = () => {
         />
 
         <Controller
-          name="email"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="Email"
-              {...field}
-              error={!!errors.email}
-              helperText={errors.email?.message}
-              fullWidth
-              disabled
-            />
-          )}
+            name="email"
+            control={control}
+            render={({ field }) => (
+                <TextField
+                    label="Email"
+                    {...field}
+                    value={field.value ?? ""}
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    fullWidth
+                    disabled
+                />
+            )}
         />
 
         <Controller
-          name="bio"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="Bio"
-              {...field}
-              error={!!errors.bio}
-              helperText={errors.bio?.message}
-              fullWidth
-              multiline
-              rows={7}
-            />
-          )}
+            name="bio"
+            control={control}
+            render={({ field }) => (
+                <TextField
+                label="Bio"
+                {...field}
+                value={field.value ?? ""}
+                error={!!errors.bio}
+                helperText={errors.bio?.message}
+                fullWidth
+                multiline
+                rows={7}
+                />
+            )}
         />
 
-
         <Button
-          variant="contained"
-          color="primary"
-          type="submit"
-          sx={{ mt: 2, alignSelf: "flex-end" }}
+            variant="contained"
+            color="primary"
+            type="submit"
+            sx={{ mt: 2, alignSelf: "flex-end" }}
         >
-          Save Changes
+            Save Changes
         </Button>
       </Stack>
     </Box>

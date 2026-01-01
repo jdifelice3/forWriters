@@ -17,7 +17,7 @@ export type GroupType = "WRITING" | "PERSONAL";
 
 export type JoinRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
-export type GroupMemberRole = "MEMBER" | "ADMIN";
+export type GroupRole = "MEMBER" | "ADMIN";
 
 export type ReadingScheduleType = "SCHEDULED" | "UNSCHEDULED";
 
@@ -48,6 +48,8 @@ export interface AppFile {
   versionComment?: string;
   createdAt: string;
   appFileMeta: AppFileMeta;
+  readingSubmission: ReadingSubmission[];
+  readingFeedback: ReadingFeedback[];
 }
 
 export interface AppFileMeta {
@@ -62,18 +64,6 @@ export interface AppFileMeta {
   deletedAt?: string;
   user: User;
   appFile: AppFile[];
-  readingFeedback: ReadingFeedback[];
-  authorAppFileMeta: AuthorAppFileMeta[];
-}
-
-export interface AuthorAppFileMeta {
-  id: string;
-  readingAuthorId: string;
-  appFileMetaId: string;
-  createdAt: string;
-  appFileVersion: number;
-  readingAuthor: ReadingAuthor;
-  appFileMeta: AppFileMeta;
 }
 
 export interface CollaboratorRequest {
@@ -131,7 +121,7 @@ export interface GroupUser {
   id: string;
   userId: string;
   groupId: string;
-  isAdmin: boolean;
+  role: GroupRole;
   invitedBy?: string;
   createdAt: string;
   user: User;
@@ -175,33 +165,22 @@ export interface Reading {
   maxConsecutiveReads: number;
   scheduledType: ReadingScheduleType;
   user: User;
-  readingAuthor: ReadingAuthor[];
+  readingParticipant: ReadingParticipant[];
   group: Group;
   groupAddress?: GroupAddress;
-}
-
-export interface ReadingAuthor {
-  id: string;
-  readingId: string;
-  authorId: string;
-  joinedAt: string;
-  reading: Reading;
-  user: User;
-  authorAppFileMeta?: AuthorAppFileMeta;
-  readingFeedback: ReadingFeedback[];
+  readingSubmission: ReadingSubmission[];
 }
 
 export interface ReadingFeedback {
   id: string;
-  readingAuthorId: string;
-  feedbackUserId: string;
-  feedbackFileId: string;
+  reviewerParticipantId: string;
+  submissionId: string;
+  appFileId: string;
   createdAt: string;
-  updatedAt: string;
-  readingAuthor: ReadingAuthor;
+  reviewerParticipant: ReadingParticipant;
+  submission: ReadingSubmission;
+  appFile: AppFile;
   readingFeedbackComment: ReadingFeedbackComment[];
-  appFile: AppFileMeta;
-  user: User;
 }
 
 export interface ReadingFeedbackComment {
@@ -212,6 +191,29 @@ export interface ReadingFeedbackComment {
   commentText: string;
   targetText: string;
   readingFeedback: ReadingFeedback;
+}
+
+export interface ReadingParticipant {
+  id: string;
+  readingId: string;
+  userId: string;
+  joinedAt: string;
+  reading: Reading;
+  user: User;
+  readingSubmission?: ReadingSubmission;
+  readingFeedback: ReadingFeedback[];
+}
+
+export interface ReadingSubmission {
+  id: string;
+  readingId: string;
+  participantId: string;
+  appFileId: string;
+  submittedAt: string;
+  reading: Reading;
+  participant: ReadingParticipant;
+  appFile: AppFile;
+  readingFeedback: ReadingFeedback[];
 }
 
 export interface User {
@@ -229,8 +231,7 @@ export interface User {
   appFileMetas: AppFileMeta[];
   urls: UserUrl[];
   joinRequests: JoinRequest[];
-  readingFeedback: ReadingFeedback[];
-  readingAuthor: ReadingAuthor[];
+  readingParticipant: ReadingParticipant[];
   userInviter: UserCollaborator[];
   userCollaborator: UserCollaborator[];
   userRequestor: CollaboratorRequest[];

@@ -22,7 +22,7 @@ const ReadingSignup = () => {
     const { user } = useUserContext();
     const { data : group, isLoading, mutate} = useGroupDetails<Group>();
     
-    const foundUser = group?.groupUser.find(u => u.userId === user.id && u.isAdmin );
+    const foundUser = group?.groupUser.find(u => u.userId === user.id && u.role === "ADMIN" );
     if(foundUser) isAdmin = true;
     
     if (!group) {

@@ -30,5 +30,5 @@
     "types": ["vite/client"]
   },
 
-  "include": ["src", "src/types"]
+  "include": ["src", "src/types", "src/api"]
 }

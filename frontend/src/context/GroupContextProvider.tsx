@@ -9,8 +9,8 @@ const GROUP_STORAGE_KEY = "fw:activeGroupId";
 
 const extractGroupIdFromPath = (pathname: string): string | null => {
   const match =
-    matchPath("/groups/:groupId/*", pathname) ||
-    matchPath("/groups/:groupId", pathname);
+    matchPath("/groups/:groupId", pathname) ||
+    matchPath("/groups/personal/:groupId", pathname);
 
   return match?.params?.groupId ?? null;
 }
@@ -27,17 +27,10 @@ export const GroupContextProvider = ({ children }: { children: React.ReactNode }
   // 1️⃣ Sync active group from URL or storage when groups load
   useEffect(() => {
     if (isLoading || groups === undefined ) return ;//|| groups.length === 0) return;
-
     const urlGroupId = extractGroupIdFromPath(location.pathname);
     const storedGroupId = localStorage.getItem(GROUP_STORAGE_KEY);
-console.log('in GroupContextProvider')
     const candidateId = urlGroupId ?? storedGroupId;
-    console.log('urlGroupId', urlGroupId)
-    console.log('storedGroupId', storedGroupId);
-    console.log('candidateId', candidateId)
     const found = groups.find(g => g.id === candidateId) ?? groups[0];
-    console.log('found', found);
-    console.log('groups[0]', groups[0]);
     setActiveGroupState(found);
   }, [isLoading, groups, location.pathname]);
 

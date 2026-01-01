@@ -124,8 +124,6 @@ const GroupsCreate = () => {
         let message = JSON.parse(text);
         setError(message.err);
         return;
-        //throw new Error(text || "Failed to create group");
-      
     }
 
       const group: Group = await res.json();

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UploadFileFormProperties } from "../types/FileTypes";
-import { AppFile, AppFileMeta, Reading, ReadingAuthor } from "../types/domain-types";
+import { AppFile, AppFileMeta, Reading, ReadingParticipant } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import { generateRandomString } from "../util/Math";
 import UploadFileDataFeedback from "../components/file/data/UploadFileDataFeedback";
@@ -51,9 +51,9 @@ const ReadingFeedback = () => {
   const [eventTitle, setEventTitle] = useState("");
   const [reload, setReload] = useState("");
     
-  //const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/readingauthors`;
-  const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/feedback`;
-  const readingUrl = `${import.meta.env.VITE_API_HOST}/api/events/${readingId}/reading`;
+  //const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}/api/readings/${readingId}/readingauthors`;
+  const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}/api/readings/${readingId}/feedback`;
+  const readingUrl = `${import.meta.env.VITE_API_HOST}/api/readings/${readingId}/reading`;
   const pdfsUrl = `${import.meta.env.VITE_API_HOST}/api/pdfs`;
   const fileUploadsUrl = `${import.meta.env.VITE_API_HOST}/uploads`;
   
@@ -70,10 +70,10 @@ const ReadingFeedback = () => {
       if (res.ok) {
         const data: Reading = await res.json();
         setEventTitle(data.name);
-        if(data.readingAuthor && data.readingAuthor.length > 0){
+        if(data.readingParticipant && data.readingParticipant.length > 0){
           setReading(data);
           const files: AppFile[] = [];
-          data.readingAuthor.forEach((a: any) => {
+          data.readingParticipant.forEach((a: any) => {
             if(a.authorAppFile){
                 files.push(a.authorAppFile.appFile);
             }
@@ -97,14 +97,14 @@ const ReadingFeedback = () => {
     }    
   }
 
-  const userHasSubmittedFeedback = (ra: ReadingAuthor, userId: string) => {
+  const userHasSubmittedFeedback = (ra: ReadingParticipant, userId: string) => {
     /*
       if a user has submitted feedback:
       readingAuthor.readingFeedback.AppFile.userid = current user id
     */
     let findIndex = -1;
     for(let i = 0; i < ra.readingFeedback.length; i++){
-      findIndex = ra.readingFeedback.findIndex(item => item.feedbackUserId === userId);
+      findIndex = ra.readingFeedback.findIndex(item => item.reviewerParticipantId === userId);
     }
     return findIndex !== -1;
 
@@ -124,14 +124,14 @@ const ReadingFeedback = () => {
         Manuscripts to Review
       </Typography>
 
-      {reading && reading.readingAuthor.findIndex(item => item.authorAppFileMeta !== null) === -1 ? (
+      {reading && reading.readingParticipant.findIndex(rp => rp.readingSubmission?.appFile.appFileMeta !== null) === -1 ? (
         <Typography variant="body1" color="text.secondary">
           No files uploaded yet.
         </Typography>
       ) : (
         
         <Stack direction="column" alignItems="left" gap={1} my={1}>
-          {reading && reading.readingAuthor.map((ra: any) => (
+          {reading && reading.readingParticipant.map((ra: any) => (
             <Grid size={{xs:12, md:6}} key={ra.id}>
               <Card>
                 <CardContent>
