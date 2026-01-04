@@ -167,4 +167,37 @@ router.post("/submissions/:appFileId/version", async (req: Request, res: Respons
     }
 
 });
+
+router.put("/submissions/:appFileId/version", async (req: Request, res: Response) => {
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const user: any = await prisma.user.findUnique({where: {superTokensId: authId,},});
+    const appFileId: string = req.params.appFileId;
+
+    const readingsParticipant = await prisma.readingParticipant.findUnique({
+        where: {
+             readingId_userId: {
+                readingId: req.reading.id,
+                userId: user.id,
+            },
+        }
+    });
+
+    if(readingsParticipant){
+        const readingSubmission = await prisma.readingSubmission.update({
+            where: {
+                readingId: req.reading.id,
+                participantId: readingsParticipant.id,
+            },
+            data: {
+                appFileId: appFileId,
+            }
+        });
+
+        res.json(readingSubmission);
+    } else {
+        res.json([]);
+    }
+
+});
 export default router;

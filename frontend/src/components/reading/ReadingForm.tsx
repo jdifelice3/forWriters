@@ -24,7 +24,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import FeedbackCommentList from "../../components/reading/FeedbackCommentList";
 import wordIcon from '../../assets/icons/icons8-word-file-48.png';
 import { getCardBackgroundColor } from "../../util/readingUtil";
-//import { useReadings } from "../../hooks/useReading";
 
 const fileListProperties: FileListProperties =
   {
@@ -121,21 +120,15 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingParticipant
             <Grid size={12}>
             <Box 
                 sx={{
-                border: "1px solid #ddd",
-                p: 2,
-                borderRadius: 2,
-                backgroundColor: getCardBackgroundColor(readingParticipant.reading as Reading)
-                    // new Date(ra.reading.submissionDeadline) > currentDate && (!ra.authorAppFile)
-                    // ? "#e3f2fd"
-                    // : "#e3f2fd"
+                    border: "1px solid #ddd",
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: getCardBackgroundColor(readingParticipant.reading as Reading)
                 }}  
             >
                 <Typography variant="h6" fontWeight="bold">
                     {readingParticipant.reading.name }
                 </Typography>
-                {/* <Typography>
-                    Group Name Goes Here
-                </Typography> */}
                 {readingParticipant.reading.scheduledType === "SCHEDULED" ? (
                     <>
                     <Typography variant="body2">

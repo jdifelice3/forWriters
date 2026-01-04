@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useReadings } from "../hooks/reading/useReadings";
+import { useReadingData } from "../hooks/reading/useReadingsData";
 import { UploadFileFormProperties } from "../types/FileTypes";
-import { AppFile, AppFileMeta, Reading, ReadingParticipant } from "../types/domain-types";
+import { AppFile, AppFileMeta, Reading, ReadingParticipant, ReadingSubmission } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import { generateRandomString } from "../util/Math";
 import UploadFileDataFeedback from "../components/file/data/UploadFileDataFeedback";
@@ -31,7 +33,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 const uploadFormProperties: UploadFileFormProperties =
   {
     title: "",
-    subtitle: "Upload the author's Word Doc with your comments",
+    subtitle: "Upload the author's Word Doc with your inline comments",
     buttonChooseFileText: "CHOOSE FILE",
     buttonUploadText: "UPLOAD",
     titleVariant: "body1",
@@ -41,48 +43,44 @@ const uploadFormProperties: UploadFileFormProperties =
 const ReadingFeedback = () => {
   const { user } = useUserContext();
   const { readingId } = useParams<{ readingId: string }>();
-  //const [feedbackreadingId, setFeedbackreadingId] = useState("");
-  const [files, setFiles] = useState<AppFile[]>([]);
-  const [reading, setReading] = useState<Reading>();
+  const { readings, isLoading: isReadingLoading } = useReadings();
+  const reading = readings.find(r => r.id === readingId);
+  const { isParticipant, myFiles } = useReadingData(reading, user);
+
   const [editFile, setEditFile] = useState<AppFile | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [previewFile, setPreviewFile] = useState<AppFileMeta | null>(null);
   const [eventTitle, setEventTitle] = useState("");
   const [reload, setReload] = useState("");
     
-  //const eventSubmissionUrl = `${import.meta.env.VITE_API_HOST}/api/readings/${readingId}/readingauthors`;
   const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}/api/readings/${readingId}/feedback`;
-  const readingUrl = `${import.meta.env.VITE_API_HOST}/api/readings/${readingId}/reading`;
-  const pdfsUrl = `${import.meta.env.VITE_API_HOST}/api/pdfs`;
-  const fileUploadsUrl = `${import.meta.env.VITE_API_HOST}/uploads`;
   
-  // Fetch uploaded files
-  useEffect(() => {
-    (async () => {
-      const res = await fetch(readingUrl, 
-      { 
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: "include"
-      });
+//   // Fetch uploaded files
+//   useEffect(() => {
+//     (async () => {
+//       const res = await fetch(readingUrl, 
+//       { 
+//         method: 'GET',
+//         headers: { 'Content-Type': 'application/json' },
+//         credentials: "include"
+//       });
       
-      if (res.ok) {
-        const data: Reading = await res.json();
-        setEventTitle(data.name);
-        if(data.readingParticipant && data.readingParticipant.length > 0){
-          setReading(data);
-          const files: AppFile[] = [];
-          data.readingParticipant.forEach((a: any) => {
-            if(a.authorAppFile){
-                files.push(a.authorAppFile.appFile);
-            }
-            setFiles(files);
-          });
-        }
-      }
-    })();
-  }, [reload]);
+//       if (res.ok) {
+//         const data: Reading = await res.json();
+//         setEventTitle(data.name);
+//         if(data.readingParticipant && data.readingParticipant.length > 0){
+//           setReading(data);
+//           const files: AppFile[] = [];
+//           data.readingParticipant.forEach((a: any) => {
+//             if(a.authorAppFile){
+//                 files.push(a.authorAppFile.appFile);
+//             }
+//             setFiles(files);
+//           });
+//         }
+//       }
+//     })();
+//   }, [reload]);
 
   const reloadFromUploadForm = async(file: AppFile, readingId?: string) => {
     const result = await fetch(eventFeedbackUrl, 
@@ -97,14 +95,15 @@ const ReadingFeedback = () => {
     }    
   }
 
-  const userHasSubmittedFeedback = (ra: ReadingParticipant, userId: string) => {
+  const userHasSubmittedFeedback = (rs: ReadingSubmission, userId: string) => {
     /*
       if a user has submitted feedback:
       readingAuthor.readingFeedback.AppFile.userid = current user id
     */
+    if(rs.readingFeedback.length === 0) return false;
     let findIndex = -1;
-    for(let i = 0; i < ra.readingFeedback.length; i++){
-      findIndex = ra.readingFeedback.findIndex(item => item.reviewerParticipantId === userId);
+    for(let i = 0; i < rs.readingFeedback.length; i++){
+      findIndex = rs.readingFeedback.findIndex(item => item.reviewerParticipantId === userId);
     }
     return findIndex !== -1;
 
@@ -114,16 +113,21 @@ const ReadingFeedback = () => {
     <Box sx={{ 
         maxWidth: 750, 
         mx: "auto", 
-        p: 4,
-        marginLeft: "100px",
+        p: 0,
+        marginLeft: "55px",
       }}>
       <Typography variant="h4" mb={3} textAlign="left">
         {eventTitle}
       </Typography>
-      <Typography variant="h6" mb={2}>
+      <Typography variant="h4" mb={2}>
         Manuscripts to Review
       </Typography>
-
+      <Typography variant="h6">
+        Reading: {reading?.name}
+      </Typography>
+      <Typography variant="h6">
+        Reading Date: {new Date(reading!.readingDate || "").toLocaleDateString()}
+      </Typography>
       {reading && reading.readingParticipant.findIndex(rp => rp.readingSubmission?.appFile.appFileMeta !== null) === -1 ? (
         <Typography variant="body1" color="text.secondary">
           No files uploaded yet.
@@ -131,45 +135,45 @@ const ReadingFeedback = () => {
       ) : (
         
         <Stack direction="column" alignItems="left" gap={1} my={1}>
-          {reading && reading.readingParticipant.map((ra: any) => (
-            <Grid size={{xs:12, md:6}} key={ra.id}>
+          {reading && reading.readingSubmission.map((rs: any) => (
+            <Grid size={{xs:12, md:6}} key={rs.id}>
               <Card>
                 <CardContent>
                   <Stack direction="column" alignItems="left" gap={1} my={1}>         
                       <Stack direction="row" alignItems="center" gap={1} mb={1}>
-                        {ra.authorAppFile?.appFile ? (
-                            <FileIcon file={(ra.authorAppFile) ? ra.authorAppFile?.appFile : undefined} />
+                        {rs.appFile ? (
+                            <FileIcon file={(rs.appFile) ? rs.appFile : undefined} />
                         ) : (
                             <CancelIcon/>
                         )}
                         
                         <Typography variant="subtitle1" fontWeight="bold">
-                          {ra.authorAppFile?.appFile ? ra.authorAppFile?.appFile.title : ""}
+                          {rs.appFile ? rs.appFile.title : ""}
                         </Typography>
                       </Stack>
-                    {ra.authorAppFile && ra.authorAppFile?.appFile.user.userProfile ? (
+                    {rs.appFile && rs.authorAppFile?.appFile.user.userProfile ? (
                       <Typography sx={{verticalAlign: "top"}} variant="body2">
-                        by {ra.authorAppFile?.appFile.user.userProfile.firstName} {ra.authorAppFile?.appFile.user.userProfile.lastName}
+                        by {rs.authorAppFile?.appFile.user.userProfile.firstName} {rs.authorAppFile?.appFile.user.userProfile.lastName}
                       </Typography>
                     ) : (
                       <div></div>
                     )}
                   </Stack>
-                  {ra.authorAppFile?.appFile ? (
+                  {rs.appFile ? (
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     sx={{ mb: 2 }}
                   >
-                    {ra.authorAppFile?.appFile.description}
+                    {rs.appFile.appFileMeta.description}
                   </Typography>
 
                     ) : (
                         <div></div>
                     )}
-                  {ra.authorAppFile?.appFile ? (
+                  {rs.appFile ? (
                       <Typography variant="caption" color="text.secondary">
-                        Uploaded on {ra.authorAppFile?.appFile ? new Date(ra.authorAppFile?.appFile.uploadedAt).toLocaleDateString() : ""}
+                        Uploaded on {rs.appFile ? new Date(rs.appFile.uploadedAt).toLocaleDateString() : ""}
                       </Typography>
                     ) : (
                       <Typography>
@@ -177,9 +181,9 @@ const ReadingFeedback = () => {
                       </Typography>
                     )}
                   <CardActions>
-                  {ra.authorAppFile?.appFile ? (
+                  {rs.appFile ? (
                   <Button 
-                      href={ra.authorAppFile?.appFile.url} download={ra.authorAppFile?.appFile.filename} 
+                      href={rs.appFile.url} download={rs.appFile.filename} 
                       size="small"
                       sx={{borderColor: "primary.main"}}
                       startIcon={<DownloadIcon />}
@@ -189,21 +193,24 @@ const ReadingFeedback = () => {
                   ) : (<div></div>)
                 }
                 </CardActions>
-                <Paper className={userHasSubmittedFeedback(ra, user.id) || ra.authorId === user.id ? "disabled" : ""}
+                <Paper className={userHasSubmittedFeedback(rs, user.id) || rs.participantId === user.id ? "disabled" : ""}
                     // to disable CardsF
                     elevation={0}
                 >
-                  {ra.authorAppFile?.appFile ? (
+                  {rs.appFile ? (
                     <>
                     <Typography variant="h5" sx={{mt: 4, mb: 2}}>
-                        Upload the author's Word Doc with your comments
+                        {uploadFormProperties.subtitle}
                     </Typography>
-                    <UploadFileDataFeedback onSendData={reloadFromUploadForm} readingAuthorId={ra.id} />
-                    <Typography 
-                        className={userHasSubmittedFeedback(ra, user.id) || ra.authorId === user.id ? "disabled" : ""}
-                        sx={{color: "green", fontWeight: "bold", mt: 2}}>
-                            You have submitted feedback for this story
-                    </Typography>
+                    <UploadFileDataFeedback onSendData={reloadFromUploadForm} readingAuthorId={rs.participantId} />
+                    {userHasSubmittedFeedback(rs, user.id) ? (
+                        <Typography 
+                            sx={{color: "green", fontWeight: "bold", mt: 2}}>
+                                You have submitted feedback for this story
+                        </Typography>
+                    ) : (
+                        <span>&nbsp;</span>
+                    )}
                     </>
                   ) : (
                   <div></div>)
@@ -246,53 +253,6 @@ const ReadingFeedback = () => {
           />
         </DialogContent>
       </Dialog>
-
-      {/* Preview dialog */}
-      {/* <Dialog
-        open={!!previewFile}
-        onClose={() => setPreviewFile(null)}
-        fullWidth
-        maxWidth="md"
-      >
-        <DialogTitle>
-          {previewFile?.title}
-          <IconButton
-            onClick={() => setPreviewFile(null)}
-            sx={{ position: "absolute", right: 8, top: 8 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "80vh",
-          }}
-        >
-          {previewFile &&
-            (previewFile.mimetype.startsWith("image/") ? (
-              <img
-                src={previewFile.url}
-                alt={previewFile.title}
-                style={{ maxWidth: "100%", maxHeight: "100%" }}
-              />
-            ) : previewFile.mimetype.startsWith("application/pdf") || previewFile.mimetype.startsWith("PDF") ? (
-              <iframe
-                src={`${pdfsUrl}?url=${previewFile.url}`}
-                title="PDF Preview"
-                width="100%"
-                height="100%"
-                style={{ border: "none" }}
-              />
-            ) : (
-              <Typography variant="body1" color="text.secondary">
-                Preview not available for this file type.
-              </Typography>
-            ))}
-        </DialogContent>
-      </Dialog> */}
     </Box>
   );
 }

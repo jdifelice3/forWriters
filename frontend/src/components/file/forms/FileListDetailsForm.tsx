@@ -1,93 +1,94 @@
 "use client";
 
-import { FileListProperties } from '../../../types/FileTypes';
+import { FileListProperties } from "../../../types/FileTypes";
 import { AppFileMeta } from "../../../types/domain-types";
-import { FileCommands, FileListFormCommands } from '../../../types/FileTypes';
+import { FileDomainCommands } from "../../../types/FileTypes";
 import {
   Button,
   Box,
-  Card,
-  CardContent,
-  CardActions,
   Typography,
   IconButton,
   Stack,
-  TextField,
 } from "@mui/material";
-import FileIcon from '../../controls/FileIcon';
 import Grid from "@mui/material/Grid";
+import FileIcon from "../../controls/FileIcon";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-interface LocalCommands {
-    edit(file: AppFileMeta): void;
-    delete(file: AppFileMeta): void;
+interface FileListDetailsFormProps {
+  fileMeta: AppFileMeta;
+  domain: Pick<FileDomainCommands, "deleteFile">;
+  onEdit(): void;
+  fileListProperties: FileListProperties;
 }
 
-interface FileListFormProps {
-    fileMeta: AppFileMeta;
-    commands: FileCommands;
-    localCommands: LocalCommands;
-    fileListProperties: FileListProperties
-}
+const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
+  fileMeta,
+  domain,
+  onEdit,
+  fileListProperties,
+}) => {
+  const currentVersion = fileMeta.appFile.find(
+    (f) => f.version === fileMeta.currentVersionId
+  );
 
-const FileListDetailsForm: React.FC<FileListFormProps> = (
-    {fileMeta, commands, localCommands, fileListProperties}) => {
-        const fileVersion = fileMeta.appFile.find(f => fileMeta.currentVersionId === f.version);
+  return (
+    <Box>
+      <Grid container spacing={2}>
+        <Stack spacing={2} sx={{ width: "500px" }}>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <FileIcon file={currentVersion} />
+            <Typography fontWeight="bold" sx={{ fontSize: 14 }}>
+              {fileMeta.title}
+            </Typography>
+          </Stack>
 
-    return (
-        <Box>
-            <Grid container spacing={2}>
-                <Stack spacing={2} sx={{width:"500px"}}> 
-                    <Stack direction="row" alignItems="center" gap={1} mb={1}>
-                        <FileIcon file={fileVersion} />
-                        <Typography fontWeight="bold"
-                            sx={{fontSize: 14}}
-                        >
-                            {fileMeta.title}
-                        </Typography>
-                    </Stack>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            align="justify"
+          >
+            {fileMeta.description || "No description"}
+          </Typography>
 
-                    <Typography
-                        variant="body1"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                        align="justify"
-                    >
-                        {fileMeta.description || "No description"}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                        Uploaded on {new Date(fileMeta.updatedAt).toLocaleDateString()}
-                    </Typography>
-                    <Box>
-                        <Button component="a" href={fileVersion?.url} download={fileVersion?.filename} size="small" 
-                            sx={{fontSize: 14}}
-                        >
-                            {fileListProperties.buttonDownloadText}
-                        </Button>
-                        {fileListProperties.showEditButton ? (
-                        <IconButton onClick={() => localCommands.edit(fileMeta)} size="small">
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                        ) : (
-                            <div></div>
-                        )}
-                        {fileListProperties.showDeleteButton ? (
-                        <IconButton
-                            onClick={() => commands.delete(fileMeta)}
-                            size="medium"
-                            color="error"
-                        >
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
-                        ) : (
-                            <div></div>
-                        )}
-                    </Box>
-                </Stack>
-            </Grid>
-        </Box>
-    )
-}
+          <Typography variant="body2" color="text.secondary">
+            Updated on{" "}
+            {new Date(fileMeta.updatedAt).toLocaleDateString()}
+          </Typography>
 
-export default FileListDetailsForm; 
+          <Box>
+            {currentVersion && (
+              <Button
+                component="a"
+                href={currentVersion.url}
+                download={currentVersion.filename}
+                size="small"
+                sx={{ fontSize: 14 }}
+              >
+                {fileListProperties.buttonDownloadText}
+              </Button>
+            )}
+
+            {fileListProperties.showEditButton && (
+              <IconButton onClick={onEdit} size="small">
+                <EditIcon fontSize="small" />
+              </IconButton>
+            )}
+
+            {fileListProperties.showDeleteButton && (
+              <IconButton
+                onClick={() => domain.deleteFile(fileMeta.id)}
+                size="small"
+                color="error"
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            )}
+          </Box>
+        </Stack>
+      </Grid>
+    </Box>
+  );
+};
+
+export default FileListDetailsForm;

@@ -30,12 +30,40 @@ export interface FileListProperties {
   showVersionHistory: boolean;
 }
 
-export interface FileCommands {
-  edit(file: AppFileMeta): void;
-  save(file: AppFileMeta): void;
-  delete(file: AppFileMeta): void;
-  onVersionChange(event:React.ChangeEvent<HTMLInputElement>, fileAppMeta: AppFileMeta, version: string): Promise<void>;
-  onVersionUpload(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, appFileMeta: AppFileMeta): Promise<void>;
+export interface FileDomainCommands {
+  /** Update title / description */
+  saveMetadata(input: {
+    fileMetaId: string;
+    title: string;
+    description?: string;
+  }): Promise<void>;
+
+  /** Soft-delete file aggregate */
+  deleteFile(fileMetaId: string): Promise<void>;
+
+  /** Upload a new version */
+  uploadVersion(
+    fileMetaId: string,
+    file: File,
+    versionComment?: string
+  ): Promise<void>;
+
+  /** Set the active version */
+  setActiveVersion(
+    fileMetaId: string,
+    version: number
+  ): Promise<void>;
+}
+
+
+export interface FileUIActions {
+  beginEdit(file: AppFileMeta): void;
+  cancelEdit(): void;
+}
+
+export interface FileViewHelpers {
+  canEdit(file: AppFileMeta): boolean;
+  canDelete(file: AppFileMeta): boolean;
 }
 
 export interface ReadingCommands {

@@ -1,333 +1,247 @@
 "use client";
+
 import { useState } from "react";
-import { AppFile, AppFileMeta } from "../types/domain-types";
-import { FileCommands } from "../types/FileTypes";
-import { DocType } from "../util/Enum";
-import { FileListProperties, UploadFileFormProperties } from "../types/FileTypes";
 import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    CircularProgress,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Grid,
-    IconButton,
-    Tab,
-    Tabs,
-    Typography
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Grid,
+  IconButton,
+  Tab,
+  Tabs,
+  Typography,
 } from "@mui/material";
 import UploadIcon from "@mui/icons-material/Upload";
 import CloseIcon from "@mui/icons-material/Close";
-import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
-import UploadFileDataManuscript from "../components/file/data/UploadFileDataManuscript";
-import { useFiles, useFilesData } from "../hooks/useFile";
+import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
+
+import { AppFileMeta } from "../types/domain-types";
+import { FileDomainCommands, FileListProperties } from "../types/FileTypes";
 import FileManagerList from "../components/file/lists/FileManagerList";
-import { useFileUpload } from "../hooks/useFile";
+import UploadFileDataManuscript from "../components/file/data/UploadFileDataManuscript";
 import UploadFileDataVersion from "../components/file/data/UploadFileDataVersion";
-import { FilesAPI } from "../api/filesApi"
-
-interface TabPanelProps {
-  value: number;
-  index: number;
-  children: React.ReactNode;
-}
-
-const TabPanel = ({ value, index, children }: TabPanelProps) => {
-  return (
-    <div hidden={value !== index} role="tabpanel">
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  );
-}
-
-const uploadFormProperties: UploadFileFormProperties =
-  {
-    title: "",
-    subtitle: "Upload a new manuscript",
-    buttonChooseFileText: "CHOOSE FILE",
-    buttonUploadText: "UPLOAD",
-    titleVariant: "h4",
-    showUploadIcon: true
-  }
-
-const manuscriptListProperties: FileListProperties =
-  {
-    showPreviewButton: true,
-    buttonDownloadText: "DOWNLOAD",
-    showDeleteButton: true,
-    showEditButton: true,
-    showVersionHistory: true
-  }
-
-  const feedbackListProperties: FileListProperties =
-  {
-    showPreviewButton: true,
-    buttonDownloadText: "DOWNLOAD",
-    showDeleteButton: true,
-    showEditButton: true,
-    showVersionHistory: false
-  }
+import { useFiles, useFilesData } from "../hooks/useFile";
+import { FilesAPI } from "../api/filesApi";
 
 const filesUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi`;
 
+const manuscriptListProperties: FileListProperties = {
+  showPreviewButton: true,
+  buttonDownloadText: "DOWNLOAD",
+  showDeleteButton: true,
+  showEditButton: true,
+  showVersionHistory: true,
+};
+
+const feedbackListProperties: FileListProperties = {
+  showPreviewButton: true,
+  buttonDownloadText: "DOWNLOAD",
+  showDeleteButton: false,
+  showEditButton: false,
+  showVersionHistory: false,
+};
+
 const FileManager = () => {
-    const [value, setValue] = useState(0); //for tabs
-    const [appFileMetaId, setAppFileMetaId] = useState("");
-    const [appFileId, setAppFileId] = useState("");
-    const [version, setVersion] = useState(0);
-    const [editFile, setEditFile] = useState<AppFileMeta | null>(null);
-    const [editTitle, setEditTitle] = useState("");
-    const [editDescription, setEditDescription] = useState("");
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [versionDialogOpen, setVersionDialogOpen] = useState(false);
-    const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [tab, setTab] = useState(0);
 
-    const pageTitle = "Files";
-    
-    const { files, isLoading, error, refresh } = useFiles(filesUrl);
-    const { myManuscripts, myFeedbackDocuments } = useFilesData(files);
+  // dialog state
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [versionDialogOpen, setVersionDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-    const uploadOnSendData = (file: AppFile) => {
-        setVersionDialogOpen(false);
-        setAppFileId(file.id);
-    }
+  const [targetFileMetaId, setTargetFileMetaId] = useState<string | null>(null);
 
-    const handleEdit = async(file: AppFileMeta) => {
-        alert('in handleEdit');
-        await refresh();
-        setEditFile(null);
-        setEditTitle(file.title);
-        setEditDescription(file.description || "");
-    };
+  const { files, isLoading, mutate } = useFiles(filesUrl);
+  const { myManuscripts, myFeedbackDocuments } = useFilesData(files);
 
-    const handleSaveEdit = async (file:AppFileMeta) => {
-        if (!file) return;
-        try {
-            const res = await fetch(`${filesUrl}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
-                    id: file.id,
-                    title: file.title,
-                    description: file.description,
-            }),
-        });
+  /**
+   * ============================
+   * DOMAIN COMMAND IMPLEMENTATION
+   * ============================
+   */
+  const domain: FileDomainCommands = {
+    async saveMetadata({ fileMetaId, title, description }) {
+      const res = await fetch(filesUrl, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: fileMetaId, title, description }),
+      });
 
-        if (!res.ok) throw new Error("Failed to update metadata");
-            await refresh();        
-        } catch (err) {
-            console.error(err);
-        alert("Failed to update file metadata");
-        }
-    };
+      if (!res.ok) throw new Error("Failed to update metadata");
+      await mutate();
+    },
 
-    const handleDelete = (file: AppFileMeta) => {
-        setCloseDialogOpen(true);
-    }
+    async deleteFile(fileMetaId: string) {
+      const res = await fetch(`${filesUrl}?id=${fileMetaId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-    const handleDeleteFile = async (file: AppFileMeta) => {
-        try {
-        const res = await fetch(`${filesUrl}?id=${file.id}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-        });
-        if (!res.ok) throw new Error("Failed to delete file");
-            await refresh();
-            setEditFile(null);
-        } catch (err) {
-        console.error(err);
-        alert("Failed to delete file");
-        }
-    };
+      if (!res.ok) throw new Error("Failed to delete file");
+      await mutate();
+    },
 
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        setValue(newValue);
-    };
-
-    const onVersionChange = async(event: React.SyntheticEvent, fileAppMeta: AppFileMeta, version: string) => {
-        const appFileMeta: AppFileMeta = await FilesAPI.updateVersion(fileAppMeta.id, version);
-        setVersion(appFileMeta.currentVersionId)
-        await refresh();
-    }
-
-    const onVersionUpload = async(event: React.SyntheticEvent, appFileMeta: AppFileMeta) => {
-        setAppFileMetaId(appFileMeta.id);
+    async uploadVersion(fileMetaId: string, file: File) {
+        setTargetFileMetaId(fileMetaId);
         setVersionDialogOpen(true);
-    }
+    //   await FilesAPI.uploadVersion(fileMetaId, file);
+    //   await mutate();
+    },
 
-    const commands: FileCommands = {
-        edit: handleEdit,   
-        save: handleSaveEdit,
-        delete: handleDelete,
-        onVersionChange: onVersionChange,
-        onVersionUpload: onVersionUpload
-    }
+    async setActiveVersion(fileMetaId: string, version: number) {
+      await FilesAPI.updateVersion(fileMetaId, version);
+      await mutate();
+    },
+  };
 
-    return (
-        <Box>
-        <Card elevation={0} className="filesComponentPanel">
-            <CardContent>
-                <Grid container >
-{/* Page Title */}
-                    <Grid size={2} >
-                        <Typography variant="h4" mb={3}>
-                        <CollectionsBookmarkIcon 
-                            sx={{ 
-                                fontSize: '40px',
-                                verticalAlign: "bottom", 
-                            }}
-                        />&nbsp;
-                            {pageTitle}
-                        </Typography>
-                    </Grid>
+  /**
+   * ============================
+   * UI ADAPTERS (EVENT-BASED)
+   * ============================
+   */
 
-{/* Upload New Manuscript Button */}
-                    <Grid size={10} sx={{verticalAlign:"middle"}}>
-                        <Button 
-                            variant="outlined"
-                            component="label"
-                            startIcon={<UploadIcon />}
-                            onClick={(e) => setDialogOpen(true)}
-                        >
-                            Upload New Manuscript
-                        </Button>
-                    </Grid>
-                </Grid>
+  const beginUploadNewVersion = (fileMetaId: string) => {
+    setTargetFileMetaId(fileMetaId);
+    setVersionDialogOpen(true);
+  };
 
-{/* Tab Control */}
-            <Box>
-                <Tabs
-                    value={value}
-                    onChange={(_, newValue) => setValue(newValue)}
-                    aria-label="Settings tabs"
-                >
-                    <Tab label="Manuscripts" />
-                    <Tab label="Feedback Submissions" />
-                </Tabs>
+  const confirmDelete = (fileMetaId: string) => {
+    setTargetFileMetaId(fileMetaId);
+    setDeleteDialogOpen(true);
+  };
 
-                <TabPanel value={value} index={0}>
-                    <Typography variant="h5" mb={2}>
-                        Your manuscripts
-                    </Typography>
-                    {isLoading   ? (
-                        <Box display="flex" justifyContent="center" p={6} ><CircularProgress /></Box>
-                    ) : (
-                        <FileManagerList 
-                            files={myManuscripts} 
-                            commands={commands} 
-                            fileListProperties={manuscriptListProperties}
-                        />
-                    )}
-                </TabPanel>
+  const executeDelete = async () => {
+    if (!targetFileMetaId) return;
+    await domain.deleteFile(targetFileMetaId);
+    setDeleteDialogOpen(false);
+    setTargetFileMetaId(null);
+  };
 
-                <TabPanel value={value} index={1}>
-                    <Typography variant="h5" mb={2}>
-                        Your Feedback Submissions
-                    </Typography>
-                    {isLoading   ? (
-                        <Box display="flex" justifyContent="center" p={6} ><CircularProgress /></Box>
-                    ) : (
-                        <FileManagerList 
-                            files={myFeedbackDocuments} 
-                            commands={commands} 
-                            fileListProperties={feedbackListProperties}
-                        />
-                    )}
-                </TabPanel>
+  return (
+    <Box>
+      <Card elevation={0} className="filesComponentPanel">
+        <CardContent>
+          {/* Header */}
+          <Grid container alignItems="center">
+            <Grid size={6}>
+              <Typography variant="h4" mb={3}>
+                <CollectionsBookmarkIcon sx={{ fontSize: 24 }} /> Files
+              </Typography>
+            </Grid>
+            <Grid size={6} textAlign="right">
+              <Button
+                variant="outlined"
+                startIcon={<UploadIcon />}
+                onClick={() => setUploadDialogOpen(true)}
+              >
+                Upload New Manuscript
+              </Button>
+            </Grid>
+          </Grid>
+
+          {/* Tabs */}
+          <Tabs value={tab} onChange={(_, v) => setTab(v)}>
+            <Tab label="Manuscripts" />
+            <Tab label="Feedback Submissions" />
+          </Tabs>
+
+          {/* Manuscripts */}
+          {tab === 0 && (
+            <>
+              {isLoading ? (
+                <Box display="flex" justifyContent="center" p={6}>
+                  <CircularProgress />
                 </Box>
-            </CardContent>
-        </Card>
-        
-    <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>
-            <IconButton
-                onClick={() => setEditFile(null)}
-                sx={{ position: "absolute", right: 8, top: 8 }}
-            >
-            <CloseIcon onClick={(e) => setDialogOpen(false)}/>
-            </IconButton>
-        </DialogTitle>
-        <DialogContent>
-            <Card sx={{ mb: 4, p: 2 }}>
-                    <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                            Upload a new manuscript
-                        </Typography>
-                        <UploadFileDataManuscript onSendData={uploadOnSendData}/>
-                    </CardContent>
-                </Card>
-        </DialogContent>
-    </Dialog>
-    
-    <Dialog open={versionDialogOpen} onClose={() => setVersionDialogOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>
-            <IconButton
-                onClick={() => setEditFile(null)}
-                sx={{ position: "absolute", right: 8, top: 8 }}
-            >
-            <CloseIcon onClick={(e) => setVersionDialogOpen(false)}/>
-            </IconButton>
-        </DialogTitle>
-        <DialogContent>
-            <Card sx={{ mb: 4, p: 2 }}>
-                    <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                            Upload a new version
-                        </Typography>
-                        <UploadFileDataVersion onSendData={uploadOnSendData} appFileMetaId={appFileMetaId}/>
-                    </CardContent>
-                </Card>
-        </DialogContent>
-    </Dialog>
-    
-    <Dialog 
-            open={closeDialogOpen} 
-            onClose={() => setCloseDialogOpen(false)} 
-            fullWidth 
-            maxWidth="xs">
-        <DialogTitle>
-            <IconButton
-                onClick={() => setEditFile(null)}
-                sx={{ position: "absolute", right: 8, top: 8 }}
-            >
-            <CloseIcon onClick={(e) => setCloseDialogOpen(false)}/>
-            </IconButton>
-        </DialogTitle>
-        <DialogContent>
-            <Card sx={{ mb: 4, p: 2 , textAlign: "center"}}>
-                    <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                            Are you sure you want to delete this file?
-                        </Typography>
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    sx={{mr: 2 }}
-                >
-                    OK 
-                </Button>
+              ) : (
+                <FileManagerList
+                  files={myManuscripts}
+                  domain={domain}
+                  variant="FILES"
+                  fileListProperties={manuscriptListProperties}
+                />
+              )}
+            </>
+          )}
 
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    onClick={(e) => setCloseDialogOpen(false)}
-                >
-                    Cancel                
-                </Button>
-                    </CardContent>
-                </Card>
-        </DialogContent>
-    </Dialog>
+          {/* Feedback */}
+          {tab === 1 && (
+            <>
+              {isLoading ? (
+                <Box display="flex" justifyContent="center" p={6}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <FileManagerList
+                  files={myFeedbackDocuments}
+                  domain={domain}
+                  variant="READINGS"
+                  fileListProperties={feedbackListProperties}
+                />
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
 
-    </Box>   
-    );
-}
+      {/* Upload manuscript dialog */}
+      <Dialog open={uploadDialogOpen} onClose={() => setUploadDialogOpen(false)}>
+        <DialogTitle>
+          Upload manuscript
+          <IconButton
+            onClick={() => setUploadDialogOpen(false)}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <UploadFileDataManuscript
+            onSendData={() => setUploadDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload version dialog */}
+      <Dialog open={versionDialogOpen} onClose={() => setVersionDialogOpen(false)}>
+        <DialogTitle>
+          Upload new version
+          <IconButton
+            onClick={() => setVersionDialogOpen(false)}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {targetFileMetaId && (
+            <UploadFileDataVersion
+              appFileMetaId={targetFileMetaId}
+              onSendData={() => setVersionDialogOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogContent sx={{ textAlign: "center", p: 4 }}>
+          <Typography mb={2}>
+            Are you sure you want to delete this file?
+          </Typography>
+          <Button onClick={executeDelete} sx={{ mr: 2 }}>
+            OK
+          </Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+        </DialogContent>
+      </Dialog>
+    </Box>
+  );
+};
 
 export default FileManager;

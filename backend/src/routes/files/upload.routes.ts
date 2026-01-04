@@ -43,6 +43,7 @@ router.post("/version", upload.single("file"), async (req, res) => {
         console.log('in upload.routes /version POST')
         if(!req.file) throw new Error("There is no file in the request");
         
+        const { comment } = req.body;
         const session = await Session.getSession(req, res);
         const authId = session.getUserId(true);
         const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
@@ -65,6 +66,7 @@ router.post("/version", upload.single("file"), async (req, res) => {
                 mimetype: mapMimeToEnum(mimeType),
                 url: s3Url,
                 userId: user ? user.id : '',
+                versionComment: comment
             },
         });
 

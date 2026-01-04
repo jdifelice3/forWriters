@@ -22,8 +22,9 @@ router.get("/", asyncHandler(async (req: Request, res: Response) => {
                         include: {
                             appFileMeta: true
                         }
-                    }
-                }
+                    },
+                    readingFeedback: true
+                },
             }
         },
         orderBy: { 

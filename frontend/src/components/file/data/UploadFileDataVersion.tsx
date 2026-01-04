@@ -1,5 +1,5 @@
 import { useFileUpload } from "../../../hooks/useFile";
-import UploadFileForm from "../forms/UploadFileForm";
+import UploadFileVersionForm from "../forms/UploadFileVersionForm";
 import { AppFileMeta, AppFile } from "../../../types/domain-types";
 import {
   Box,
@@ -32,7 +32,7 @@ const UploadFileDataVersion: React.FC<FileVersionProps> = ({
 
   return (
     <Box title="Upload a new version">
-      <UploadFileForm
+      <UploadFileVersionForm
         onSubmit={upload}
         loading={loading}
         appFileMetaId={appFileMetaId}

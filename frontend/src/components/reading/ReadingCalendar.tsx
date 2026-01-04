@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Reading, AppFile, AppFileMeta} from "../../types/domain-types";
-import { ReadingCommands } from "../../types/ReadingTypes";
 import {
     Alert,
     Box,
@@ -26,11 +25,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import { useGroupContext } from "../../context/GroupContextProvider";
+import { ReadingDomainCommands, CreateReadingInput } from "../../types/ReadingTypes";
+import { useReadingsUI } from "../../hooks/reading/useReadingsUI";
 
-interface EventsCalendarProps {
- readings: Reading[];
- isAdmin: boolean;
- commands: ReadingCommands;
+interface ReadingCalendarProps {
+  readings: Reading[];
+  isAdmin: boolean;
+  domain: ReadingDomainCommands;
+  ui: ReturnType<typeof useReadingsUI>;
+  onFeedback(readingId: string): void;
 }
 
 type FormInput = {
@@ -45,15 +48,13 @@ type FormInput = {
 
 const currentDate = new Date();
 
-export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdmin, commands}) => {
+export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({ readings, isAdmin, domain, ui, onFeedback}) => {
     const { user, isLoading, error } = useUserContext();
     
     const [reading, setReading] = useState<Reading[]>([]);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
   
-    //const { activeGroup } = useGroupContext();
-
     const [readingDate, setReadingDate] = useState("");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
@@ -101,6 +102,18 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
         }
     };
 
+    const onCreateReading = async (form: FormInput) => {
+        // UI adapter: normalize form fields into domain DTO
+        const input: CreateReadingInput = {
+            ...form,
+        // if RHF gives strings for dates, normalize here:
+            readingDate: new Date(form.readingDate),
+            submissionDeadline: new Date(form.submissionDeadline),
+    };
+
+    await domain.createReading(input);
+};
+
     if (isLoading) return <CircularProgress />;
     if (error) return <Typography color="error">{error}</Typography>;
     if (!user) return <Typography>No user found.</Typography>;
@@ -125,7 +138,14 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
             )}
             {readings && readings.length > 0 ? (
             readings.map((r, index) => (
-                <ReadingCalendarItemForm key={index} reading={r} isAdmin={isAdmin} commands={commands} />
+                <ReadingCalendarItemForm 
+                    key={index.toString()} 
+                    reading={r} 
+                    isAdmin={isAdmin} 
+                    domain={domain} 
+                    ui={ui}
+                    onFeedback={onFeedback}
+                />
             ))
             ) : (
             <span></span>
@@ -136,7 +156,7 @@ export const ReadingCalendar: React.FC<EventsCalendarProps> = ({ readings, isAdm
             onClose={() => setOpen(false)}
         >
             <DialogTitle sx={{pb: 0}}>Create a Reading</DialogTitle>
-            <Box  component="form" onSubmit={handleSubmit(commands.save)} noValidate>
+            <Box  component="form" onSubmit={handleSubmit(onCreateReading)} noValidate>
                 <DialogContent>
                     <TextField
                         label="Reading Name"

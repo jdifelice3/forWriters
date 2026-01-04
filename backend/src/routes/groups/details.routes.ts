@@ -213,8 +213,7 @@ router.get("/news", async (req: Request, res: Response) => {
             archived: false
         },
         orderBy: [
-            { postedAt: 'desc'}, 
-            { title: 'asc' }
+            { postedAt: 'desc'}
         ]
     });
 
@@ -222,11 +221,10 @@ router.get("/news", async (req: Request, res: Response) => {
 });
 
 router.post("/news", async (req: Request, res: Response) => {
-    const { title, content } = req.body;
+    const { content } = req.body;
     const newsItem = await prisma.groupNews.create({
         data: {
             groupId: req.group.id,
-            title: title,
             content: content
         }
     });

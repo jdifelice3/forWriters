@@ -110,7 +110,6 @@ export interface GroupAddress {
 export interface GroupNews {
   id: string;
   groupId: string;
-  title: string;
   content?: string;
   postedAt: string;
   archived: boolean;

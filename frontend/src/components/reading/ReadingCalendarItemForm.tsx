@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { useReadingsActions, useReadingData } from "../../hooks/useReading";
+import { useReadings } from "../../hooks/reading/useReadings";
+import { useReadingData } from "../../hooks/reading/useReadingsData";
+
 import { useGroupDetails } from "../../hooks/useGroup";
 import { 
     AppFile,
@@ -27,15 +29,20 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { getSpotsOpenText, getCardBackgroundColor } from "../../util/readingUtil";
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import { useUserContext } from "../../context/UserContext";
-import { ReadingCommands } from "../../types/ReadingTypes";
 import FileSearchBox from "../../components/file/data/FileSearchBox";
 import FileDescription from "../../components/file/data/FileDescription";
 import InfoIcon from '@mui/icons-material/Info';
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import { ReadingDomainCommands } from "../../types/ReadingTypes";
+import { useReadingsUI } from "../../hooks/reading/useReadingsUI";
 
 interface ReadingCalendarItemFormProps {
+ key: string;
  reading: Reading;
  isAdmin: boolean;
- commands: ReadingCommands;
+ domain: ReadingDomainCommands;
+ ui: ReturnType<typeof useReadingsUI>;
+ onFeedback(readingId: string): void;
 }
 
 type FormInput = {
@@ -50,14 +57,13 @@ type FormInput = {
 
 const currentDate = new Date();
 
-export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ reading, isAdmin, commands }) => {
+export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ key, reading, isAdmin, domain, ui, onFeedback }) => {
     const { user, isLoading, error } = useUserContext();
-    const {data: group, mutate: mutateGroup } = useGroupDetails<Group>();
-    
+    const { data: group, mutate: mutateGroup } = useGroupDetails<Group>();
+    const { mutate: mutateReading } = useReadings();
     const { isParticipant, myFiles } = useReadingData(reading, user);
     if(group === undefined) throw new Error("Group undefined");
         
-    const { addFile } = useReadingsActions(group.id, user.id, mutateGroup );
     const [err, setErr] = React.useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [submitManuscriptOpen, setSubmitManuscriptOpen] = useState(false);
@@ -70,11 +76,6 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
     if (error) return <Typography color="error">{error}</Typography>;
     if (!user) return <Typography>No user found.</Typography>;
 
-    const popOverOpen = Boolean(anchorEl);
-    const popoverId = popOverOpen ? 'simple-popover' : undefined;
-    const handlePopoverClose = () => {
-        setAnchorEl(null);
-    };
     //File submission details
     const getfileSubmissionDetails = () => {
         let hasSignedUp = false;
@@ -99,10 +100,6 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
         return { hasSignedUp, hasSubmitted, title, version, versionName, isPastSubmissionDeadline};
     }
 
-    const handlePopoverClick = (event: any) => {
-        setAnchorEl(event.currentTarget); // Set anchor to the clicked button
-    };
-
     const FileSubmissionDetails = () => {
         const { hasSignedUp, hasSubmitted, title, version, versionName, isPastSubmissionDeadline} = getfileSubmissionDetails();
         console.log('hasSubmitted', hasSubmitted)
@@ -124,7 +121,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 variant="text"
                                 color="primary"
                                 size="small"
-                                startIcon={<AddIcon />}
+                                startIcon={<ChangeCircleIcon />}
                                 onClick={(e) => setSubmitManuscriptOpen(true)}
                                 disabled={isPastSubmissionDeadline}
                             >
@@ -160,32 +157,62 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
  
     const { hasSignedUp, hasSubmitted, title, version, versionName} = getfileSubmissionDetails();
 
-    const handleSubmitToReading = async (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        event.preventDefault();
-        if (!selectedFile) return;
+    // const handleSubmitToReading = async (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    //     event.preventDefault();
+    //     if (!selectedFile) return;
 
-        setErr(null);
-        setConfirmation(null);
-        setLoading(true);
+    //     setErr(null);
+    //     setConfirmation(null);
+    //     setLoading(true);
 
-        try {
-            const rp: ReadingParticipant | undefined =  reading.readingParticipant.find(rp => rp.userId === user.id);
+    //     try {
+    //         const rp: ReadingParticipant | undefined =  reading.readingParticipant.find(rp => rp.userId === user.id);
             
-            if(!rp) throw new Error("Reading author not found");
+    //         if(!rp) throw new Error("Reading author not found");
 
-            const results = await addFile(group.id, reading.id, selectedFile.id);
-            mutateGroup();
+    //         const results = await addVersion(group.id, reading.id, selectedFile.id);
+    //         //mutateGroup();
             
-            setConfirmation(
-                `Your manuscript has been added to the reading.`
-            );
-        } catch (err) {
-            if (err instanceof Error) setErr(err.message);
-                else setErr("Unknown error occurred.");
-            } finally {
-            setLoading(false);
-        }
-    };
+    //         setConfirmation(
+    //             `Your manuscript has been added to the reading.`
+    //         );
+    //         //mutateReading();
+    //         setSubmitManuscriptOpen(false);
+    //     } catch (err) {
+    //         if (err instanceof Error) setErr(err.message);
+    //             else setErr("Unknown error occurred.");
+    //         } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleUpdateVersion = async (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    //     event.preventDefault();
+    //     if (!selectedFile) return;
+
+    //     setErr(null);
+    //     setConfirmation(null);
+    //     setLoading(true);
+
+    //     try {
+    //         const rp: ReadingParticipant | undefined =  reading.readingParticipant.find(rp => rp.userId === user.id);
+            
+    //         if(!rp) throw new Error("Reading author not found");
+
+    //         const results = await updateVersion(group.id, reading.id, selectedFile.id);
+            
+    //         setConfirmation(
+    //             `Your manuscript version has been updated.`
+    //         );
+    //         //mutateReading();
+    //         setSubmitManuscriptOpen(false);
+    //     } catch (err) {
+    //         if (err instanceof Error) setErr(err.message);
+    //             else setErr("Unknown error occurred.");
+    //         } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     return (
     <>
@@ -242,7 +269,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             size="small"
                             variant="contained"
                             startIcon={<EventAvailableIcon />}
-                            onClick={(event) => commands.signup(event,reading.id)}
+                            onClick={(event) => domain.signUpForReading(reading.id)}
                             sx={{ mt: 1 }}         
                             disabled={hasSignedUp}
                         >
@@ -253,7 +280,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             size="small"
                             variant="contained"
                             startIcon={<EventAvailableIcon />}
-                            onClick={(event) => commands.withdraw(event, reading.id)}
+                            onClick={(event) => domain.withdrawFromReading(reading.id)}
                             sx={{ mt: 1 }}         
                             disabled={!hasSignedUp}
                         >
@@ -264,7 +291,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             startIcon={<ReviewsIcon />}
                             size="small"
                             variant="contained"
-                            onClick={(event) => commands.feedback(event, reading.id)}
+                            onClick={(event) => onFeedback(reading.id)}
                             sx={{ mt: 1 }}
                             
                         >
@@ -312,13 +339,20 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         }}
                     >
                     <Button
-                        href=""
+                        size="small"
                         variant="contained"
-                        sx={{ mt: 2 }}
-                        disabled={loading || !selectedFile}
-                        onClick={handleSubmitToReading}
+                        startIcon={<ReviewsIcon />}
+                        onClick={() => onFeedback(reading.id)}
                     >
                         {loading ? <CircularProgress size={22} /> : "Submit"}
+                    </Button>
+                    <Button
+                    href=""
+                    variant="contained"
+                    sx={{ mt: 2, ml: 2 }}
+                    onClick={() => setSubmitManuscriptOpen(false) }
+                    >
+                        Cancel
                     </Button>
                     </Box>
                     </Box>

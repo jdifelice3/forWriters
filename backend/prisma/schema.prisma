@@ -121,6 +121,8 @@ model AppFile {
   appFileMeta    AppFileMeta        @relation("OriginalAppFile", fields: [appFileMetaId], references: [id])
   readingSubmission  ReadingSubmission[]
   readingFeedback       ReadingFeedback[]
+
+  @@unique([appFileMetaId, version])
 }
 
 model AppFileMeta {
@@ -189,7 +191,6 @@ model GroupAddress {
 model GroupNews {
   id       String   @id @default(cuid())
   groupId  String
-  title    String
   content  String?
   postedAt DateTime @default(now())
   archived Boolean  @default(false)

@@ -35,9 +35,15 @@ export const ReadingsAPI = {
     });
   },
 
-  addFile(groupId: string, readingId:string, appFileId: string) {
+  addVersion(groupId: string, readingId:string, appFileId: string) {
     return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${appFileId}/version`,{
         method: "POST"
+    });
+  },
+
+  updateVersion(groupId: string, readingId:string, appFileId: string) {
+    return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${appFileId}/version`,{
+        method: "PUT"
     });
   },
 };

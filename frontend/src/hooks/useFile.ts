@@ -11,85 +11,85 @@ interface UploadOptions {
 }
 
 export const useFiles = (url: string) => {
-  const { data, error, isLoading, mutate } = useSWR<AppFileMeta[]>(
-    url,
-    fetcher
-  );
+    const { data, error, isLoading, mutate } = useSWR<AppFileMeta[]>(
+        url,
+        fetcher
+    );
 
-  return {
-    files: data ?? [],
-    isLoading,
-    error,
-    refresh: mutate, // 👈 important
-  };
+    return {
+        files: data ?? [],
+        isLoading,
+        error,
+        mutate, // 👈 important
+    };
 };
 
 export function useFilesData(
-  files?: AppFileMeta[]
+    files?: AppFileMeta[]
 ) {
-  const myManuscripts = useMemo(() => {
-    if (!files) return [];
-    return files.filter(f => f.documentType === DocType.MANUSCRIPT);
-  }, [files]);
+    const myManuscripts = useMemo(() => {
+        if (!files) return [];
+        return files.filter(f => f.documentType === DocType.MANUSCRIPT);
+    }, [files]);
 
-  const myFeedbackDocuments = useMemo(() => {
-    if (!files) return [];
-    return files.filter(f => f.documentType === DocType.FEEDBACK);
-  }, [files]);
+    const myFeedbackDocuments = useMemo(() => {
+        if (!files) return [];
+        return files.filter(f => f.documentType === DocType.FEEDBACK);
+    }, [files]);
 
-  return { myManuscripts, myFeedbackDocuments };
+    return { myManuscripts, myFeedbackDocuments };
 }
 
 export function useFileUpload({ url, onSuccess, onError }: UploadOptions) {
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-  const upload = async (formData: FormData) => {
-    setLoading(true);
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+    const upload = async (formData: FormData) => {
+        setLoading(true);
+        try {
+        const res = await fetch(url, {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+        });
 
-      if (!res.ok) throw new Error("Upload failed");
+        if (!res.ok) throw new Error("Upload failed");
 
-      const file: AppFile = await res.json();
-      onSuccess(file);
-    } catch (err) {
-        if(err instanceof Error) onError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const file: AppFile = await res.json();
+        onSuccess(file);
+        } catch (err) {
+            if(err instanceof Error) onError(err);
+        } finally {
+        setLoading(false);
+        }
+    };
 
-  return { upload, loading };
+    return { upload, loading };
 }
 
 export function useVersionUpdate({ url, onSuccess, onError }: UploadOptions) {
-  const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-  const upload = async (formData: FormData) => {
-    setLoading(true);
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+    const upload = async (formData: FormData) => {
+        setLoading(true);
+        try {
+        const res = await fetch(url, {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+        });
 
-      if (!res.ok) throw new Error("Upload failed");
+        if (!res.ok) throw new Error("Upload failed");
 
-      const file: AppFile = await res.json();
-      onSuccess(file);
-    } catch (err) {
-        if(err instanceof Error) onError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const file: AppFile = await res.json();
+        onSuccess(file);
+        } catch (err) {
+            if(err instanceof Error) onError(err);
+        } finally {
+        setLoading(false);
+        }
+    };
 
-  return { upload, loading };
+    return { upload, loading };
 }
 
 export const useFileUpdate = (
@@ -98,25 +98,26 @@ export const useFileUpdate = (
     fileTitle: string,
     fileDescription: string
 ) => {
-  const { data, error, isLoading } = useSWR(
-    url,
-    (_url: string) => fetch(    
-        _url, 
-        { 
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-                id: fileId,
-                title: fileTitle,
-                description: fileDescription,
-            }),
-        }).then(r => r.json())
-  );
+    const { data, error, isLoading } = useSWR(
+        url,
+        (_url: string) => fetch(    
+            _url, 
+            { 
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    id: fileId,
+                    title: fileTitle,
+                    description: fileDescription,
+                }),
+            }
+        ).then(r => r.json())
+    );
 
-  return {
-    file: data as AppFileMeta,
-    isLoading,
-    error,
-  };
+    return {
+        file: data as AppFileMeta,
+        isLoading,
+        error,
+    };
 }

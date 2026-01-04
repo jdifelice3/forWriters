@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   Alert,
   Box,
+  Divider,
   Typography,
   Button,
   TextField,
@@ -9,6 +10,7 @@ import {
   CardContent,
   IconButton,
   Stack,
+  useTheme
 } from "@mui/material";
 import TipTapTextEditor from "../TipTapTextEditor";
 import ArchiveIcon from "@mui/icons-material/Archive";
@@ -17,14 +19,11 @@ import Tooltip from '@mui/material/Tooltip';
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
-  MenuButtonBold,
-  MenuButtonItalic,
-  MenuControlsContainer,
-  MenuDivider,
-  MenuSelectHeading,
   RichTextEditorProvider,
-  RichTextField,
+  RichTextReadOnly,
 } from "mui-tiptap";
+import Editor from "../richTextEditor/Editor";
+import useExtensions from "../richTextEditor/useExtensions";
 
 interface NewsFeedProps {
   groupId: string;
@@ -33,7 +32,6 @@ interface NewsFeedProps {
 
 interface NewsItem {
   id: string;
-  title: string;
   content?: string;
   postedAt: string;
   archived: boolean;
@@ -42,12 +40,16 @@ interface NewsItem {
 export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [adding, setAdding] = useState(false);
-  const [title, setTitle] = useState("");
   const [newsContent, setNewsContent] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const extensions = useExtensions({
+        placeholder: "Add your own content here...",
+  });
+
+  const theme = useTheme();
   const newsUrl = `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/news`;
-  const newsArchiveUrl = `${import.meta.env.VITE_API_HOST}/api/groups/news`;
+  const newsArchiveUrl = `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/news`;
   
   const editor = useEditor({
     extensions: [
@@ -68,38 +70,32 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
 
   }, [groupId]);
 
-  const handleAddNews = async () => {
-    setNewsContent(editor.getHTML());
+  const postContent = async (content: string) => {
+    console.log(content);
+    setNewsContent(content);
     setError("");
 
     if(newsContent === "<p></p>" || newsContent.length === 0){
         setError("You must provide content for a News post.");
         return;
     } 
-    if (title.length === 0){
-        setError("You must provide a title for a News post.");
-        return;
-    } 
-    
 
     const res = await fetch(newsUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content: newsContent }),
+      body: JSON.stringify({ content: content }),
       credentials: "include",
     });
 
     if (res.ok) {
       const newsItem = await res.json();
       setNews((prev) => [newsItem, ...prev]);
-      setTitle("");
       setNewsContent("");
       setAdding(false);
     }
   };
 
-  const handleOnCancel = async () => {
-    setTitle("");
+  const cancelPost = () => {
     setNewsContent("");
     setAdding(false);
     setError("");
@@ -131,7 +127,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
             Add News
           </Button>
         )}
-
+<Box sx={{ borderBottom: "1px solid #ccc" }}/>
         {isAdmin && adding && (
           <Box mb={3}>
              <Box mt={3}>
@@ -141,42 +137,16 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
                             </Alert>
                         )}
                     </Box>
-            <TextField
-              label="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-          />
-        <RichTextEditorProvider editor={editor}>
-      <RichTextField sx={{ height: "300px" }}
-        controls={
-          <MenuControlsContainer>
-            <MenuSelectHeading />
-            <MenuDivider />
-            <MenuButtonBold />
-            <MenuButtonItalic />
-            {/* Add more controls here */}
-          </MenuControlsContainer>
-        }
-      />
-    </RichTextEditorProvider>                   
 
-            <Stack direction="row" spacing={1}>
-              <Button variant="contained" onClick={handleAddNews}>
-                Post
-              </Button>
-              <Button onClick={handleOnCancel}>Cancel</Button>
-            </Stack>
+            <Box sx={{ maxWidth: 1207, margin: "0 auto" }}>
+                <Editor postContent={postContent} cancelPost={cancelPost}/>
+            </Box>              
           </Box>
         )}
 
         {news.map((n) => (
           <Box key={n.id} mb={2} p={1} sx={{ borderBottom: "1px solid #ccc" }}>
             <Stack direction="row" justifyContent="space-between">
-              <Typography variant="subtitle1" style={{fontWeight: "bold"}}>
-                {n.title}
-              </Typography>
               {isAdmin && (
                 <IconButton size="small" onClick={() => handleArchive(n.id)}>
                   <Tooltip title="archive">
@@ -185,7 +155,10 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
                 </IconButton>
               )}
             </Stack>
-            <TipTapTextEditor initialContent={n.content || ""} editable={false} />
+            <RichTextReadOnly
+              content={n.content}
+              extensions={extensions}
+            />
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               Posted on {new Date(n.postedAt).toLocaleDateString()}
             </Typography>
