@@ -10,7 +10,7 @@ export default function GroupSearchBox({ onSelectGroup }: Props) {
   const [options, setOptions] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
 
-const searchUrl = `${import.meta.env.VITE_API_HOST}/api/groups/search/search?query=`;
+const searchUrl = `${import.meta.env.VITE_API_HOST}/api/groups/search?query=`;
 
   const handleInput = async (query: string) => {
     if (!query) {

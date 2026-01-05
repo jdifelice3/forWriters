@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import useSWR from "swr";
-import { AppFileMeta, AppFile } from "../types/domain-types";
-import { DocType } from "../util/Enum";
-import { fetcher } from "../context/fetcher";
+import { AppFileMeta, AppFile } from "../../types/domain-types";
+import { DocType } from "../../util/Enum";
+import { apiFetch } from "../../api/client";
+import { useUserContext } from "../../context/UserContext";
 
 interface UploadOptions {
   url: string;
@@ -10,18 +11,21 @@ interface UploadOptions {
   onError: (err: Error) => void;
 }
 
-export const useFiles = (url: string) => {
-    const { data, error, isLoading, mutate } = useSWR<AppFileMeta[]>(
-        url,
-        fetcher
-    );
+export const useFiles = () => {
+  const { user } = useUserContext();
 
-    return {
-        files: data ?? [],
-        isLoading,
-        error,
-        mutate, // 👈 important
-    };
+  const key = user
+    ? "/filesApi"
+    : null;
+
+  const swr = useSWR<AppFileMeta[]>(key, apiFetch);
+
+  return {
+    files: swr.data ?? [],
+    isLoading: swr.isLoading,
+    isError: swr.error,
+    mutate: swr.mutate,
+  };
 };
 
 export function useFilesData(

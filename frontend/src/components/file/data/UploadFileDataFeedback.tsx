@@ -1,4 +1,4 @@
-import { useFileUpload } from "../../../hooks/useFile";
+import { useFileUpload } from "../../../hooks/file/useFile";
 import UploadFileFormFeedback from "../forms/UploadFileFormFeedback";
 import { AppFile, AppFileMeta } from "../../../types/domain-types";
 import {

@@ -8,10 +8,8 @@ export async function loadGroupById(
     res: Response,
     next: NextFunction
 ) {
+        
     const { groupId } = req.params;
-    console.log('in group.middleware loadGroupById')
-    console.log('req.path', req.path)
-    console.log('req.params', req.params)
     const group = await prisma.group.findUnique({
         where: { id: groupId },
     });

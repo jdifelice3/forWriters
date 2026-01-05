@@ -1,15 +1,6 @@
 import express from "express";
-import { PrismaClient, CommentSource } from "@prisma/client";
 import Session from "supertokens-node/recipe/session";
 import prisma from "../database/prisma";
-import { 
-    getFileRecords, 
-    updateFileRecord, 
-    deleteFileRecord, 
-    updateCurrentVersion,
-    getFileSearch,
-    getFileDescription
-} from "../database/dbFiles";
 
 const router = express.Router();
 
@@ -41,8 +32,21 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id/description", async(req, res) => {
-    const file = await getFileDescription(req.params.id);
-    res.json(file);
+    const appFileId = req.params.id;
+
+    const appFile = await prisma.appFile.findUnique({
+      where: {
+        id: appFileId,
+      },
+    });
+
+    const appFileMeta = await prisma.appFileMeta.findUnique({
+        where: {
+            id: appFile?.appFileMetaId
+        }
+    });
+
+    res.json(appFileMeta);
 });
 
 router.get("/search", async (req, res) => {
@@ -50,14 +54,39 @@ router.get("/search", async (req, res) => {
     if (!query.trim()) {
       return res.json([]);
     }
-    const files = await getFileSearch(query);
+    const files = await prisma.appFile.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      take: 10,
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        appFileMetaId: true
+        // add any other fields you want to show
+      },
+   });
     
     res.json(files);
-});
+}); 
 
 router.put("/", async(req, res) => {
-    const { id, title, description } = req.body;
-    const file = await updateFileRecord(id, title, description);
+    console.log('in filesApi PUT');
+    const { fileMetaId, title, description } = req.body;
+    const file = await prisma.appFileMeta.update({
+        where: {
+            id: fileMetaId, 
+        },
+        data: {
+            title: title,
+            description: description
+        },
+    });
+    
     res.json(file);
 });
 
@@ -76,19 +105,36 @@ router.put("/version", async(req, res) => {
         throw new Error("");
     }
 
-    const file = await updateCurrentVersion(id, Number(version));
+    const file = await prisma.appFileMeta.update({
+        where: {
+            id: id
+        },
+        data: {
+            currentVersionId: Number(version)
+        }
+    })
     res.status(200).json(file);
 });
 
 router.delete("/", async(req, res) => {
-  let id: string = "";
+    let id: string = "";
     if(typeof req.query.id === "string"){
         id = req.query.id;
-        const fileUrl = await deleteFileRecord(id);
+        const file = await prisma.appFile.deleteMany({
+            where: {
+                appFileMetaId: id
+            }
+        });
+
+        const fileMeta = await prisma.appFileMeta.delete({
+            where: {
+                id: id
+            }
+        });
         
         res.status(200).json({status: "OK"})
     } else {
-        throw new Error("Expecting a string data type in the query string for file id");
+        res.status(500).json({error: "Expecting a string data type in the query string for file id"});
     }
 });
 export default router;

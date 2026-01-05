@@ -17,6 +17,7 @@ interface FileListItemProps {
   fileListProperties: FileListProperties;
   onEdit(file: AppFileMeta): void;
   domain?: FileDomainCommands;
+  onUploadVersion(fileMetaId: string): void;
 }
 
 const FileListItem: React.FC<FileListItemProps> = ({
@@ -25,6 +26,7 @@ const FileListItem: React.FC<FileListItemProps> = ({
   domain,
   fileListProperties,
   onEdit,
+  onUploadVersion
 }) => {
   // Enforce invariant early
   if (variant === "FILES" && !domain) {
@@ -63,17 +65,18 @@ const FileListItem: React.FC<FileListItemProps> = ({
                 <Button
                   size="small"
                   component="label"
+                  onClick={(e) => onUploadVersion(fileMeta.id)}
                 >
                   Upload New Version
-                  <input
+                  {/* <input
                     type="file"
                     hidden
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      domain.uploadVersion(fileMeta.id, file);
+                      onUploadVersion(fileMeta.id, file);
                     }}
-                  />
+                  /> */}
                 </Button>
 
                 <FileVersionList

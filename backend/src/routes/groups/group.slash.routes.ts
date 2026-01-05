@@ -1,9 +1,7 @@
-import { Router, Request, Response, NextFunction } from "express";
+import { Router } from "express";
 import prisma from "../../database/prisma";
-import { loadGroupById, loadGroupMembership } from "./group.middleware";
 import Session from "supertokens-node/recipe/session";
-import { JoinRequestError } from "../../database/types/Error";
-import { PrismaClient, Prisma, JoinRequestStatus, GroupType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 const router = Router();
 

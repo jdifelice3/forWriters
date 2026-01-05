@@ -18,6 +18,7 @@ import { useReadings } from "../hooks/reading/useReadings";
 import { useReadingDomain } from "../hooks/reading/useReadingDomain";
 import { useReadingsData } from "../hooks/reading/useReadingsData";
 import { useReadingsUI } from "../hooks/reading/useReadingsUI";
+import { useFileUI } from "../hooks/file/useFileUI";
 
 import ReadingCalendar from "../components/reading/ReadingCalendar";
 import FileManagerList from "../components/file/lists/FileManagerList";
@@ -26,7 +27,7 @@ import { FileDomainCommands, FileListProperties } from "../types/FileTypes";
 const Readings = () => {
   const navigate = useNavigate();
   const { user } = useUserContext();
-
+  const uiFile = useFileUI();
   const { data: group, isLoading: isGroupLoading } =
     useGroupDetails<Group>();
 
@@ -70,6 +71,10 @@ const Readings = () => {
     showVersionHistory: false,
   };
 
+    const onUploadVersion = (fileMetaId: string) => {
+        uiFile.beginUploadNewVersion(fileMetaId);
+    }
+
   return (
     <Card elevation={0} className="mainComponentPanel">
       <CardContent>
@@ -93,6 +98,7 @@ const Readings = () => {
                   files={myFiles}
                   variant="READINGS"
                   fileListProperties={fileListProperties}
+                  onUploadVersion={onUploadVersion}
                 />
               </Grid>
 

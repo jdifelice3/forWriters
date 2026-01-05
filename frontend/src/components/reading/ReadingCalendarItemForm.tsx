@@ -58,6 +58,7 @@ type FormInput = {
 const currentDate = new Date();
 
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ key, reading, isAdmin, domain, ui, onFeedback }) => {
+    
     const { user, isLoading, error } = useUserContext();
     const { data: group, mutate: mutateGroup } = useGroupDetails<Group>();
     const { mutate: mutateReading } = useReadings();
@@ -67,6 +68,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
     const [err, setErr] = React.useState<string | null>(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [submitManuscriptOpen, setSubmitManuscriptOpen] = useState(false);
+    const [updateManuscriptVersionOpen, setUpdateManuscriptVersionOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<AppFile | null>(null);
     const [loading, setLoading] = useState(false);
     const [confirmation, setConfirmation] = useState<string | null>(null);
@@ -102,7 +104,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
 
     const FileSubmissionDetails = () => {
         const { hasSignedUp, hasSubmitted, title, version, versionName, isPastSubmissionDeadline} = getfileSubmissionDetails();
-        console.log('hasSubmitted', hasSubmitted)
+        
         const renderMessage = () => {
             if (hasSignedUp) {
                 if (hasSubmitted) {
@@ -122,7 +124,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 color="primary"
                                 size="small"
                                 startIcon={<ChangeCircleIcon />}
-                                onClick={(e) => setSubmitManuscriptOpen(true)}
+                                onClick={(e) => setUpdateManuscriptVersionOpen(true)}
                                 disabled={isPastSubmissionDeadline}
                             >
                                 Change
@@ -156,64 +158,17 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
     };
  
     const { hasSignedUp, hasSubmitted, title, version, versionName} = getfileSubmissionDetails();
+//e: React.MouseEventHandler<HTMLButtonElement>, 
+    const updateSubmittedVersion = (readingId: string, appFileId: string) => {
+        setUpdateManuscriptVersionOpen(false); 
+        domain.updateSubmittedVersion(readingId, appFileId);
+    }
 
-    // const handleSubmitToReading = async (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    //     event.preventDefault();
-    //     if (!selectedFile) return;
-
-    //     setErr(null);
-    //     setConfirmation(null);
-    //     setLoading(true);
-
-    //     try {
-    //         const rp: ReadingParticipant | undefined =  reading.readingParticipant.find(rp => rp.userId === user.id);
-            
-    //         if(!rp) throw new Error("Reading author not found");
-
-    //         const results = await addVersion(group.id, reading.id, selectedFile.id);
-    //         //mutateGroup();
-            
-    //         setConfirmation(
-    //             `Your manuscript has been added to the reading.`
-    //         );
-    //         //mutateReading();
-    //         setSubmitManuscriptOpen(false);
-    //     } catch (err) {
-    //         if (err instanceof Error) setErr(err.message);
-    //             else setErr("Unknown error occurred.");
-    //         } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
-    // const handleUpdateVersion = async (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    //     event.preventDefault();
-    //     if (!selectedFile) return;
-
-    //     setErr(null);
-    //     setConfirmation(null);
-    //     setLoading(true);
-
-    //     try {
-    //         const rp: ReadingParticipant | undefined =  reading.readingParticipant.find(rp => rp.userId === user.id);
-            
-    //         if(!rp) throw new Error("Reading author not found");
-
-    //         const results = await updateVersion(group.id, reading.id, selectedFile.id);
-            
-    //         setConfirmation(
-    //             `Your manuscript version has been updated.`
-    //         );
-    //         //mutateReading();
-    //         setSubmitManuscriptOpen(false);
-    //     } catch (err) {
-    //         if (err instanceof Error) setErr(err.message);
-    //             else setErr("Unknown error occurred.");
-    //         } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
+    const submitFileVersion = (readingId: string, appFileId: string) => {
+        setSubmitManuscriptOpen(false);
+        domain.submitFileVersion(readingId, appFileId);        
+    }
+    
     return (
     <>
          <Box mb={2}>
@@ -306,7 +261,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
             open={submitManuscriptOpen} 
             onClose={() => setSubmitManuscriptOpen(false)}
         >
-            <DialogTitle variant="h5" sx={{pb: 0}}>Submit a Manuscript to a Reading</DialogTitle>
+            <DialogTitle variant="h5" sx={{pb: 0}}>Submit a Manuscript Version to a Reading</DialogTitle>
                 <Box 
                     // style={styles}  
                     sx={{ 
@@ -342,7 +297,8 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         size="small"
                         variant="contained"
                         startIcon={<ReviewsIcon />}
-                        onClick={() => onFeedback(reading.id)}
+                        sx={{ mt: 2, ml: 2 }}
+                        onClick={() => submitFileVersion(reading.id, selectedFile.id)}
                     >
                         {loading ? <CircularProgress size={22} /> : "Submit"}
                     </Button>
@@ -357,17 +313,65 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                     </Box>
                     </Box>
                 )}
+                </Box>
+            </Dialog>
 
-                {error && (
-                    <Alert severity="error" sx={{ mt: 3 }}>
-                    {error}
-                    </Alert>
-                )}
+{/* Dialog - Update Manuscript Verion */}
+        <Dialog
+            open={updateManuscriptVersionOpen} 
+            onClose={() => setUpdateManuscriptVersionOpen(false)}
+        >
+            <DialogTitle variant="h5" sx={{pb: 0}}>Update Manuscript Verion</DialogTitle>
+                <Box 
+                    // style={styles}  
+                    sx={{ 
+                        width: 400, 
+                        alignContent: "center",
+                        //mx: "auto", 
+                        p: 4,
+                }}>
+                
+                <Typography variant="h6" sx={{}}>
+                    Find a Manuscript Version
+                </Typography>
 
-                {confirmation && (
-                    <Alert severity="success" sx={{ mt: 3 }}>
-                    {confirmation}
-                    </Alert>
+                <FileSearchBox onSelectFile={setSelectedFile} />
+                    
+                {selectedFile && (
+                    <Box mt={2}>
+                    <Typography sx={{mb: 2 }}>
+                        Selected version: <strong>{selectedFile.name}</strong>
+                    </Typography>
+                    <Card>
+                        <CardContent>
+                            <FileDescription appFileId={selectedFile.id}/>
+                        </CardContent>
+                    </Card>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                        }}
+                    >
+                    <Button
+                        size="small"
+                        variant="contained"
+                        startIcon={<ReviewsIcon />}
+                        sx={{ mt: 2, ml: 2 }}
+                        onClick={() => updateSubmittedVersion(reading.id, selectedFile.id)}
+                    >
+                        {loading ? <CircularProgress size={22} /> : "Submit"}
+                    </Button>
+                    <Button
+                        href=""
+                        variant="contained"
+                        sx={{ mt: 2, ml: 2 }}
+                        onClick={() => setUpdateManuscriptVersionOpen(false) }
+                    >
+                        Cancel
+                    </Button>
+                    </Box>
+                    </Box>
                 )}
                 </Box>
             </Dialog>

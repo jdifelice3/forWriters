@@ -1,7 +1,7 @@
 import { apiFetch } from "./client";
 import { FileUploadFormInput, FileFormInput } from "../types/FileTypes";
 import { AppFileMeta, AppFile } from "../types/domain-types";
-import { useFileUpload } from "../hooks/useFile";
+import { useFileUpload } from "../hooks/file/useFile";
 
 export const FilesAPI = {
     create(input: FileUploadFormInput) {

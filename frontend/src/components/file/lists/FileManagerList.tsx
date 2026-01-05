@@ -12,6 +12,7 @@ interface FileManagerListProps {
   variant: "FILES" | "READINGS";
   fileListProperties: FileListProperties;
   domain?: FileDomainCommands;
+  onUploadVersion(fileMetaId: string): void;
 }
 
 const FileManagerList: React.FC<FileManagerListProps> = ({
@@ -19,13 +20,13 @@ const FileManagerList: React.FC<FileManagerListProps> = ({
   domain,
   fileListProperties,
   variant,
+  onUploadVersion
 }) => {
 
     if (variant === "FILES" && !domain) {
         throw new Error("FileManagerList in FILES mode requires a domain");
     }
-    console.log('in FileManagerList')
-    console.log('files', files)
+
     const [editingFile, setEditingFile] = useState<AppFileMeta | null>(null);
 
   if (!files || files.length === 0) {
@@ -49,6 +50,7 @@ const FileManagerList: React.FC<FileManagerListProps> = ({
                 domain={domain}
                 fileListProperties={fileListProperties}
                 onEdit={setEditingFile}
+                onUploadVersion={onUploadVersion}
           />
         ))}
       </Box>
