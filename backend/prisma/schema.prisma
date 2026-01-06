@@ -238,6 +238,16 @@ model JoinRequest {
   @@index([status])
 }
 
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      NotificationType
+  entityId  String
+  message   String
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+}
+
 model Reading {
   id                  String   @id @default(cuid())
   name                String

@@ -7,7 +7,7 @@ export async function apiFetch<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const headers = new Headers(options.headers || {});
-
+    console.log('path', path)
   // Only set JSON Content-Type when body is NOT FormData
   if (
     options.body &&
@@ -16,7 +16,7 @@ export async function apiFetch<T>(
   ) {
     headers.set("Content-Type", "application/json");
   }
-
+console.log(`${API_BASE_URL}${path}`)
   const res = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
     ...options,

@@ -9,6 +9,7 @@ import pdfRoutes from "./pdfRoutes";
 import groupRoutes from "./groups";
 import meRoutes from "./me.routes";
 import filesApiRoutes from "./files.api.routes";
+import dashboardRoutes from "./dashboardRoutes";
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use("/users", userRoutes);
 //router.use("/userProfile", userProfileRoutes);
 router.use("/files", fileRoutes);
 router.use("/filesApi", filesApiRoutes);
+router.use("/dashboard", dashboardRoutes);
 router.use("/me", meRoutes);
 router.use("/groups", groupRoutes);
 

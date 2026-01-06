@@ -143,6 +143,11 @@
     border-width: 3px !important; */
 }
 
+/* Dashboard */
+.dashboardSubPanel {
+    width: 40%;
+}
+
 .sidebarIcon {
     filter: brightness(1.5) !important;
 }

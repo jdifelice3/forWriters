@@ -1,78 +1,84 @@
-import * as React from 'react';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import { Box, Grid, Typography, Alert, Button, CircularProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useDashboard } from "../hooks/useDashboard";
+import { useGroupContext } from "../context/GroupContextProvider";
+import AttentionCard from "../components/dashboard/AttentionCard";
+import UpcomingCard from "../components/dashboard/UpcomingCard";
+import ResumeCard from "../components/dashboard/ResumeCard";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const { activeGroup } = useGroupContext(); // { id, name, role } | null
+  const { data, isError, isLoading, mutate } = useDashboard(activeGroup?.id ?? null);
 
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+  console.log('data', data)
+  if (isLoading) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+  if (!data.group) {
+    return <Typography sx={{mt:3}}>Alas, no group was found.</Typography>;
+  }
 
-function a11yProps(index: number) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  };
-}
 
-export default function BasicTabs() {
-  const [value, setValue] = React.useState(0);
+  if (isError) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert
+          severity="error"
+          action={<Button onClick={() => mutate()}>Retry</Button>}
+        >
+          Dashboard failed to load.
+        </Alert>
+      </Box>
+    );
+  }
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
-
-  return (
-    <div>
-        <Typography sx={{mt:3}}>
-            Dashboard
+  if (!data?.group) {
+    // onboarding / no-group state
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
+          Welcome
         </Typography>
-    </div>
-    // <Box sx={{ width: '100%' }}>
-    //   <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-    //     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-    //       <Tab label="Manuscripts" {...a11yProps(0)} />
-    //       <Tab label="Groups" {...a11yProps(1)} />
-    //       <Tab label="Readings" {...a11yProps(2)} />
-    //       {/* <Tab label="Join Requests" {...a11yProps(3)} /> These would be under groups*/}
-    //       <Tab label="Collaborators" {...a11yProps(3)} />
-    //       <Tab label="Search" {...a11yProps(4)} />
-    //     </Tabs>
-    //   </Box>
-    //   <CustomTabPanel value={value} index={0}>
-    //     Item One
-    //   </CustomTabPanel>
-    //   <CustomTabPanel value={value} index={1}>
-    //     Item Two
-    //   </CustomTabPanel>
-    //   <CustomTabPanel value={value} index={2}>
-    //     Item Three
-    //   </CustomTabPanel>
-    //   <CustomTabPanel value={value} index={3}>
-    //     Item 4
-    //   </CustomTabPanel>
-    //     <CustomTabPanel value={value} index={4}>
-    //     Item 4
-    //   </CustomTabPanel>
+        <Typography sx={{ mb: 2 }}>
+          Select a group (top nav) to see what needs your attention, what’s coming up, and where you left off.
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button variant="contained" onClick={() => navigate("/groups")}>
+            Find a group
+          </Button>
+          <Button variant="outlined" onClick={() => navigate("/groups?tab=create")}>
+            Start a group
+          </Button>
+        </Box>
+      </Box>
+    );
+  }
 
-    // </Box>
+  return (
+    <Box sx={{ p: 3 }} className="mainComponentPanel">
+      <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
+        Dashboard — {data.group.name}
+      </Typography>
+
+      <Grid container spacing={2}>
+        <Grid size={12}>
+          <AttentionCard items={data.attention} />
+        </Grid>
+
+        <Grid size={12}>
+          <UpcomingCard items={data.upcoming} />
+        </Grid>
+
+        <Grid size={12}>
+          <ResumeCard items={data.resume} />
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
