@@ -31,34 +31,60 @@ router.post("/", async( req, res, next) => {
         if (!user) {
             throw new Error('User not found');
         }
-
-        const group = await prisma.group.create({
-            data: {
-                name: name,
-                description: description,
-                creatorUserId: user.id, 
-                imageUrl: (imageUrl !== undefined) ? imageUrl : "",
-                groupType: groupType,
-                groupAddress: {
-                    create: {
-                        street: address.street,
-                        city: address.city,
-                        state: address.state,
-                        zip: address.zip,            
+        let group: any = null;
+        switch (groupType) {
+            case "WRITING":
+                group = await prisma.group.create({
+                data: {
+                    name: name,
+                    description: description,
+                    creatorUserId: user.id, 
+                    imageUrl: (imageUrl !== undefined) ? imageUrl : "",
+                    groupType: groupType,
+                    groupAddress: {
+                        create: {
+                            street: address.street,
+                            city: address.city,
+                            state: address.state,
+                            zip: address.zip,            
+                        }
+                    },
+                    groupUser: {
+                        create: {
+                            userId: user.id,
+                            role: "ADMIN",
+                        }
                     }
                 },
-                groupUser: {
-                    create: {
-                        userId: user.id,
-                        role: "ADMIN",
+                include: {
+                    groupUser: true,       // REQUIRED
+                    groupAddress: true,    // REQUIRED if you include it in the type
+                },
+                });
+                break;
+            case "PERSONAL":
+                group = await prisma.group.create({
+                data: {
+                    name: name,
+                    description: description,
+                    creatorUserId: user.id, 
+                    imageUrl: (imageUrl !== undefined) ? imageUrl : "",
+                    groupType: groupType,
+                    groupUser: {
+                        create: {
+                            userId: user.id,
+                            role: "ADMIN",
+                        }
                     }
-                }
-            },
-            include: {
-                groupUser: true,       // REQUIRED
-                groupAddress: true,    // REQUIRED if you include it in the type
-            },
-        });
+                },
+                include: {
+                    groupUser: true
+                },
+                });
+                break;
+            default: 
+                res.status(403).json({error: "Invalid GroupType value"})
+        } 
 
         if(group){
             res.json(group);

@@ -5,10 +5,9 @@ import prisma from "../database/prisma";
 const router = Router();
 
 router.get("/:groupId", async(req, res) => {
-    console.log('in dashboardRoutes GET /')
+    
     const groupId = req.params.groupId;
-    console.log('groupId', groupId)
-
+    
     const session = await Session.getSession(req, res);
     const authId = session.getUserId(true);
     
@@ -17,7 +16,7 @@ router.get("/:groupId", async(req, res) => {
         superTokensId: authId,
       },
     });
-    console.log('user.id', user.id)
+
     const group = await prisma.group.findUnique({
         where: {
             id: groupId
@@ -28,8 +27,6 @@ router.get("/:groupId", async(req, res) => {
         }
     });
 
-    console.log('group', group)
-
     const groupUser = await prisma.groupUser.findUnique({
         where: {
             groupId_userId: {
@@ -39,7 +36,55 @@ router.get("/:groupId", async(req, res) => {
         }
     });
 
-    console.log('groupUser', groupUser)
+    const joinRequest = await prisma.joinRequest.findMany({
+        where: {
+            groupId: groupId,
+            status: "PENDING"
+        }
+    });
+
+    const reading = await prisma.reading.findMany({
+        where: {
+            groupId: groupId,
+            readingDate: {
+                lte: new Date()
+            }
+        },
+        orderBy: {
+            readingDate: "desc"
+        }
+    });
+
+    let attention: any = [];
+    if(joinRequest.length > 0){
+        
+        attention = 
+        [
+            {
+                id: joinRequest[0].id,
+                type: "GROUP_JOIN_REQUEST",
+                title:`${joinRequest.length} join ${joinRequest.length === 1 ? "request" : "requests"} awaiting approval`,
+                ctaLable: "Review",
+                href: "/joinadminpage"
+            }
+        ];
+    }
+        
+    let upComing: any = [];
+    if(reading.length > 0){
+        upComing = 
+                [
+            {
+                id: reading[0].id,
+                type: "READING",
+                title: reading[0].name,
+                occursAt: new Date(reading[0].readingDate || "").toLocaleDateString(),
+                subtitle: reading[0].readingStartTime,
+                href: "/readings"
+            }
+        ];
+
+    }
 
     res.status(200).json({
         group: {
@@ -47,27 +92,17 @@ router.get("/:groupId", async(req, res) => {
             name: group?.name,
             role: groupUser?.role
         },
-        attention: [{
-            id: "join-req-1",
-            type: "GROUP_JOIN_REQUEST",
-            title: "2 join requests awaiting approval",
-            ctaLabel: "Review",
-            href: "/admin/join-requests?group=abc"
-        }],
-        upcoming: [{
-            id: "reading-123",
-            type: "READING",
-            title: "Friday Night Reading",
-            occursAt: "2025-01-19T19:00:00Z",
-            href: "/readings/123"
-            }],
-        resume: [{
-            id: "file-789",
-            type: "FILE",
-            title: "Blind Study — Draft 3",
-            subtitle: "Last edited yesterday",
-            href: "/files/manuscript/789"
-        }]
+        attention: attention,
+        upcoming: upComing,
+        resume: [
+        //     {
+        //     id: "file-789",
+        //     type: "FILE",
+        //     title: "Blind Study — Draft 3",
+        //     subtitle: "Last edited yesterday",
+        //     href: "/files/manuscript/789"
+        // }
+        ]
     });
 
 });

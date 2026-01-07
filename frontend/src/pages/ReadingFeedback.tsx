@@ -126,7 +126,7 @@ const ReadingFeedback = () => {
         Reading: {reading?.name}
       </Typography>
       <Typography variant="h6">
-        Reading Date: {new Date(reading!.readingDate || "").toLocaleDateString()}
+        Date: {new Date(reading!.readingDate || "").toLocaleDateString()}
       </Typography>
       {reading && reading.readingParticipant.findIndex(rp => rp.readingSubmission?.appFile.appFileMeta !== null) === -1 ? (
         <Typography variant="body1" color="text.secondary">

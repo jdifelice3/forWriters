@@ -18,9 +18,9 @@ enum DocumentType {
   FEEDBACK
 }
 
-enum ParticipantType {
-  AUTHOR
-  REVIEWER
+enum FileType {
+  DOCX
+  PDF
 }
 
 enum EventType {
@@ -39,14 +39,14 @@ enum Genre {
   SCIENCEFICTION
 }
 
-enum FileType {
-  DOCX
-  PDF
-}
-
 enum GroupType {
   WRITING
   PERSONAL
+}
+
+enum GroupRole {
+  MEMBER
+  ADMIN
 }
 
 enum JoinRequestStatus {
@@ -55,9 +55,16 @@ enum JoinRequestStatus {
   REJECTED
 }
 
-enum GroupRole {
-  MEMBER
-  ADMIN
+enum NotificationType {
+  GROUP_JOIN_REQUEST
+  GROUP_INVITE
+  COLLAB_REQUEST
+  READING_FEEDBACK
+}
+
+enum ParticipantType {
+  AUTHOR
+  REVIEWER
 }
 
 enum ReadingScheduleType {

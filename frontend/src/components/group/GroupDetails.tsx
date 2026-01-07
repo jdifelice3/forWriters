@@ -51,6 +51,7 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
               sx={{ width: 120, height: 120 }}
             />
           </Grid>
+          {group.groupType === "WRITING" && (
           <Grid size={4}>
             <Stack >
                 <ListItem>
@@ -64,6 +65,7 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
                 </ListItem>
             </Stack>
           </Grid>
+          )}
 
           <Grid size={6}>
             <Stack >
@@ -98,12 +100,14 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
                     </Typography>
                 </Stack>
               </ListItem>
+              {group.groupType === "WRITING" && (
               <ListItem>
-              <Link href={mapUrl} target="_blank" rel="noopener">
-                View on Google Maps
-              </Link>
+                <Link href={mapUrl} target="_blank" rel="noopener">
+                    View on Google Maps
+                </Link>
               </ListItem>
-          </Stack>
+              )}
+            </Stack>
           </Grid>
         </Box>
       </CardContent>

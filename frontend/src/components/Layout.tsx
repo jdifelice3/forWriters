@@ -16,12 +16,12 @@ import GroupsCreate from "../pages/GroupsCreate";
 import ReadingSignup from "../pages/ReadingSignup";
 import ReadingFeedback from "../pages/ReadingFeedback";
 import GroupJoinRequestAdmin from "../pages/GroupJoinRequestAdmin";
-import GroupSearch from "../pages/GroupSearchPage";
+import GroupSearch from "../pages/GroupSearch";
 import MemberSearchPage from "../pages/MemberSearchPage";
 import Readings from "../pages/Readings";
 import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
 import Dashboard from "../pages/Dashboard";
-import GroupsPersonal from "../pages/GroupsPersonal";
+// import GroupsPersonal from "../pages/GroupsPersonal";
 import TopNav from "../components/nav/TopNav";
 
 export default function Layout() {
@@ -44,7 +44,7 @@ export default function Layout() {
                 <Route path="/filemanager/feedback" element={<FileManager />} />
 
                 <Route path="/groups/:groupId" element={<Groups />} />
-                <Route path="/groups/personal/:groupId" element={<GroupsPersonal />} />
+                {/* <Route path="/groups/personal" element={<GroupsPersonal />} /> */}
                 <Route path="/groupsearch" element={<GroupSearch />} />
                 <Route path="/creategroup" element={<GroupsCreate />} />
                 

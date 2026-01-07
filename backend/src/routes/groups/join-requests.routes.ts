@@ -8,6 +8,7 @@ import { SessionRequest } from "supertokens-node/framework/express";
 const router = Router();
 
 router.put("/join-requests/:id/approve", async(req: SessionRequest, res: Response) => {
+    console.log('in join-requests approve')
     const { id } = req.params;
     
     try {
@@ -131,3 +132,4 @@ router.put("/join-requests/:id/reject", async(req: SessionRequest, res: Response
         res.status(500).json({ error: "Failed to reject join request." });
     }
 });
+export default router;

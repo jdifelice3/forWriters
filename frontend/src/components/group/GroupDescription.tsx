@@ -6,41 +6,47 @@ import { Group } from "../../types/domain-types";
 import {
   Typography,
 } from "@mui/material";
+import { useGroupContext } from "../../context/GroupContextProvider";
 
 interface GroupDescriptionProps {
   groupId: string;
 }
 
 const GroupDescription: React.FC<GroupDescriptionProps> = ({groupId}) => {
-  const [groupDesc, setGroupDesc] = useState<Group | null>(null);
+    const { activeGroup } = useGroupContext();
+  const [group, setGroup] = useState<Group | null>(null);
   const groupDescriptionUrl = `${import.meta.env.VITE_API_HOST}/api/groups/join/description/${groupId}`;
   
   useEffect(() => {
         (async () => {
-          const res = await fetch(groupDescriptionUrl, 
-          { 
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          });
-          
-          if (res.ok) {
-              const data: Group = await res.json();
-              setGroupDesc(data);
-          }
+            if(!activeGroup) return;
+            const res = await fetch(groupDescriptionUrl, 
+            { 
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            
+            if (res.ok) {
+                const data: Group = await res.json();
+                setGroup(data);
+            }
         })();
-      }, [groupId, groupDescriptionUrl]);
-
+      }, [activeGroup, groupDescriptionUrl]);
+      
   return (
     <div>
         <Typography sx={{mb:2}}>
-            {groupDesc?.description}
+            {group?.description}
         </Typography>
-        <Typography sx={{mb:2}}>
-            {groupDesc?.groupAddress[0].street}, {groupDesc?.groupAddress[0].city}, {groupDesc?.groupAddress[0].state}
-        </Typography>
-        {groupDesc?.websiteUrl ? (
+        {group !== null && group.groupType === "WRITING" && (   
+            <Typography sx={{mb:2}}>
+                {group?.groupAddress[0].street}, {group?.groupAddress[0].city}, {group?.groupAddress[0].state}
+            </Typography>
+        )}
+
+        {group?.websiteUrl ? (
         <Typography >
-            <a href={groupDesc?.websiteUrl} target='_blank' rel='noopener noreferrer'>{groupDesc?.websiteUrl}</a>
+            <a href={group?.websiteUrl} target='_blank' rel='noopener noreferrer'>{group?.websiteUrl}</a>
         </Typography>
         ) : (
             <div></div>

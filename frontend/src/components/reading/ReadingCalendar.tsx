@@ -50,7 +50,7 @@ const currentDate = new Date();
 
 export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({ readings, isAdmin, domain, ui, onFeedback}) => {
     const { user, isLoading, error } = useUserContext();
-    
+    const { activeGroup } = useGroupContext();
     const [reading, setReading] = useState<Reading[]>([]);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
@@ -111,7 +111,8 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({ readings, isAd
             submissionDeadline: new Date(form.submissionDeadline),
     };
 
-    await domain.createReading(input);
+    const reading = await domain.createReading(input);
+
 };
 
     if (isLoading) return <CircularProgress />;
@@ -184,7 +185,8 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({ readings, isAd
                         error={!!errors.name}
                         helperText={errors.name?.message}            
                     />
-                    <Box className={schedule === "SCHEDULED" ? "" : "disabled"}>
+                    {activeGroup?.groupType === "WRITING" && (
+                        <>
                         <TextField
                             label="Reading Date"
                             type="date"
@@ -240,7 +242,8 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({ readings, isAd
                             error={!!errors.name}
                             helperText={errors.name?.message}            
                             />
-                    </Box>
+                            </>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button

@@ -39,7 +39,15 @@ router.post("/", async (req: Request, res: Response) => {
     if (req.groupRole !== "ADMIN") {
         return res.status(403).json({ error: "Admins only" });
     }
-
+    
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const user: any = await prisma.user.findUnique({
+            where: {
+                superTokensId: authId,
+            },
+    });
+    
     let {
         readingDate,
         submissionDeadline,
@@ -51,21 +59,43 @@ router.post("/", async (req: Request, res: Response) => {
         createdUserId,
     } = req.body;
 
-    const reading = await prisma.reading.create({
-        data: {
-            groupId: req.group.id,
-            name,
-            readingStartTime,
-            readingEndTime,
-            description,
-            scheduledType: req.group.groupType === "WRITING" ? ReadingScheduleType.SCHEDULED : ReadingScheduleType.UNSCHEDULED,
-            createdUserId,
-            readingDate: new Date(readingDate),
-            submissionDeadline: new Date(submissionDeadline),
-        },
-    });
+    return prisma.$transaction(async (tx) => {
+        const group = await tx.group.findUnique({
+            where: { id: req.group.id },
+            include: {
+                reading: {
+                    include: {
+                        readingParticipant: true        
+                    }
+                }
+            }
+        });
 
-    res.status(201).json(reading);
+        if (!group) throw new Error("Group not found");
+
+        const reading = await tx.reading.create({
+            data: {
+                groupId: req.group.id,
+                name,
+                readingStartTime,
+                readingEndTime,
+                description,
+                scheduledType: req.group.groupType === "WRITING" ? ReadingScheduleType.SCHEDULED : ReadingScheduleType.UNSCHEDULED,
+                createdUserId,
+                readingDate: new Date(readingDate),
+                submissionDeadline: new Date(submissionDeadline),
+            },
+        });
+
+        if (group.groupType === "PERSONAL") {
+            const readingParticipant = await tx.readingParticipant.create({
+                data: {
+                    readingId: reading.id,
+                    userId: user.id,
+                }
+            });
+        }
+    });
 });
 
 export default router;

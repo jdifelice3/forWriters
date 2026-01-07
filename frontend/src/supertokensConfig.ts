@@ -28,7 +28,7 @@ export const SuperTokensConfig = {
     ],
     getRedirectionURL: async (context: any) => {
         if (context.action === "SUCCESS") {
-            return "/";
+            return "/dashboard";
         }
         if (context.createdNewUser){
             // store userId in database

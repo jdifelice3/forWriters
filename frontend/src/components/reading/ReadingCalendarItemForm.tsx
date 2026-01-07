@@ -112,6 +112,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         <>
                         <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
                             You have signed up for this reading<br/>
+                            Submit your manuscript when you are ready
                         </Typography>
                         <Typography>
                             <b>Title:</b> {title}
@@ -133,9 +134,13 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                     )
                 } else {
                     return (
-                        <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
-                            You have signed up for this reading<br/>
-                            Please submit your manuscript by {new Date(reading.submissionDeadline || "").toLocaleDateString()}
+                        <>
+                        {group.groupType === "WRITING" && (
+                            <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
+                                You have signed up for this reading<br/>
+                                Please submit your manuscript by {new Date(reading.submissionDeadline || "").toLocaleDateString()}
+                            </Typography>
+                        )}
                             <Button
                                 variant="text"
                                 color="primary"
@@ -145,7 +150,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             >
                                 Submit
                             </Button>
-                        </Typography>
+                        </>
                     )
                 }
             } else {
@@ -191,27 +196,35 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                     <Typography variant="body1" fontWeight="bold">
                         {reading.name }
                     </Typography>
-                    {reading.scheduledType === "SCHEDULED" ? (
+                    <Typography variant="body2" >
+                        {reading.description }
+                    </Typography>
+                    {group.groupType === "WRITING" && (
                         <Box>
-                        <Typography variant="body2">
-                            Reading Date:{new Date(reading.readingDate || "").toLocaleDateString()}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Submit manuscripts by <b>{new Date(reading.submissionDeadline || "").toLocaleDateString()}</b>
+                            <Typography variant="body2">
+                                Reading Date:{new Date(reading.readingDate || "").toLocaleDateString()}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Submit manuscripts by <b>{new Date(reading.submissionDeadline || "").toLocaleDateString()}</b>
+                            </Typography>   
+                        </Box>
+                    )}
+                        <Box>&nbsp;</Box>
+                    {group.groupType === "WRITING" && (                        
+                        <Box>
+                        <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            sx={{
+                                fontWeight: "bold", 
+                                color:(reading.readingParticipant ? (reading.readingParticipant.length === 0 ? "green" : "red") : "green")
+                                }}>
+                                {getSpotsOpenText(reading)}
                         </Typography>
                         </Box>
-                    ) : (
-                        <Box>&nbsp;</Box>
                     )}
-                    <Typography 
-                        variant="body2" 
-                        color="text.secondary" 
-                        sx={{
-                            fontWeight: "bold", 
-                            color:(reading.readingParticipant ? (reading.readingParticipant.length === 0 ? "green" : "red") : "green")
-                            }}>
-                            {getSpotsOpenText(reading)}
-                    </Typography>
+
+
 {/* FileSubmissionDetails */}
 
                       <FileSubmissionDetails/>
@@ -219,6 +232,8 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                 </CardContent>
                 <CardActions>
                     <Box>
+                        {group.groupType === "WRITING" && (
+                        <>
                         <Button
                             id={reading.id}
                             size="small"
@@ -241,6 +256,8 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         >
                             Withdraw
                         </Button>&nbsp;
+                        </>
+                        )}
                         <Button className="readingReviewButton"
                             id={reading.id}
                             startIcon={<ReviewsIcon />}

@@ -146,6 +146,11 @@
 /* Dashboard */
 .dashboardSubPanel {
     width: 40%;
+    background-color: whitesmoke;
+}
+
+.dashboardSubPanelColors {
+    background-color: whitesmoke;
 }
 
 .sidebarIcon {

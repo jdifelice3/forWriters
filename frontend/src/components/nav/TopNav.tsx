@@ -36,7 +36,7 @@ const TopNav = () => {
                 }}
             >
                 <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-                    <img src="/forWriters-logo-black.png" alt="logo" style={{ width: 75 }} />
+                    <img src="/forWriters-logo-black.png" alt="logo" style={{ width: 75, marginLeft: -50 }} />
                     <span style={{ 
                         fontFamily: "Thebarstaindemo", 
                         fontSize: "3.0rem", 

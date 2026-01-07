@@ -32,10 +32,10 @@ import InfoIcon from '@mui/icons-material/Info';
 // Zod schema (client-side)
 // -------------------------
 const addressSchema = z.object({
-  street: z.string().min(1, "Street is required"),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(2, "State is required").max(2, "Use 2-letter code"),
-  zip: z.string().min(5, "ZIP is required").max(10, "Invalid ZIP"),
+  street: z.string().min(1, "Street is required").optional().or(z.literal("")),
+  city: z.string().min(1, "City is required").optional().or(z.literal("")),
+  state: z.string().min(2, "State is required").max(2, "Use 2-letter code").optional().or(z.literal("")),
+  zip: z.string().min(5, "ZIP is required").max(10, "Invalid ZIP").optional().or(z.literal("")),
 });
 
 const createGroupSchema = z.object({
@@ -109,9 +109,9 @@ const GroupsCreate = () => {
         credentials: "include",
         body: JSON.stringify({ 
             name: values.name,
+            groupType: groupType,
             description: values.description,
             imageUrl: values.imageUrl,
-            groupType: groupType,
             address: values.address,
             defaultMinDaysBetweenReads: values.defaultMinDaysBetweenReads,
             defaultMaxConsecutiveReads: values.defaultMaxConsecutiveReads,
@@ -172,7 +172,12 @@ const GroupsCreate = () => {
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <Box 
+                component="form" 
+                onSubmit={handleSubmit(onSubmit)} 
+                noValidate
+                
+            >
             <Grid container spacing={2}>
               <Grid size={12}>
                 <Typography variant="h6" sx={{ mt: 1 }}>
@@ -201,23 +206,26 @@ const GroupsCreate = () => {
                     }}
                     >
                     <Typography sx={{ p: 2 }}>
+                        <div style={{fontWeight: "bold", fontSize: "14pt"}}>GroupTypes</div>
+                        <div>&nbsp;</div>
                         <span style={{fontWeight: "bold"}}>Writing Group</span>
                         <ul>
-                            <li>Has multiple authors as members.</li>
+                            <li>The group has multiple authors as members.</li>
                             <li>Multiple authors can submit manuscripts to one or more readings for feedback.</li>
-                            <li>Has an administrator who creates scheduled or unscheduled readings as well as group news posts.</li>
-                            <li>Is visible to a group search.</li>
-                            <li>The administator must approve requests to join the group.</li>
+                            <li>The group has an administrator who creates scheduled readings as well as group news posts.</li>
+                            <li>The group is visible to a group search.</li>
+                            
                         </ul>
                         <span style={{fontWeight: "bold"}}>Personal Group</span>
                         <ul>
-                            <li>Has one author who is also the group administator.</li>
+                            <li>The group has one author. This author is the group administator.</li>
                             <li>The author is the only one who can submit manscripts to a reading.</li>
-                            <li>Is not visible to a group search.</li>
+                            <li>The group is not visible to a group search.</li>
                         </ul>
                         <span style={{fontWeight: "bold"}}>Both</span>
                         <ul>
-                            <li>Can invite members and non-members to join the group.</li>
+                            <li>The group administrator can invite members and non-members to join the group.</li>
+                            <li>The administator must approve requests to join the group.</li>
                         </ul>
                         <Button onClick={handleClose}>Close</Button>
                     </Typography>                
@@ -257,7 +265,9 @@ const GroupsCreate = () => {
                   helperText={errors.imageUrl?.message}
                 />
               </Grid>
-
+            <Grid container 
+                sx={{ display: groupType === "WRITING" ? 'block' : 'none', width: "100%" }}
+            >
               <Grid size={12}>
                 <Typography variant="h6" sx={{ mt: 1 }}>
                   Address
@@ -266,43 +276,43 @@ const GroupsCreate = () => {
 
               <Grid size={12}>
                 <TextField
-                  label="Street"
-                  fullWidth
-                  required
-                  {...register("address.street")}
-                  error={!!errors.address?.street}
-                  helperText={errors.address?.street?.message}
+                    label="Street"
+                    fullWidth
+                    {...register("address.street")}
+                    error={!!errors.address?.street}
+                    helperText={errors.address?.street?.message}
+                    sx={{mt:2}}
                 />
               </Grid>
               <Grid size={12}>
                 <TextField
                   label="City"
                   fullWidth
-                  required
                   {...register("address.city")}
                   error={!!errors.address?.city}
                   helperText={errors.address?.city?.message}
+                  sx={{mt:2}}
                 />
               </Grid>
               <Grid size={6}>
                 <TextField
                   label="State"
                   fullWidth
-                  required
                   inputProps={{ maxLength: 2 }}
                   {...register("address.state")}
                   error={!!errors.address?.state}
                   helperText={errors.address?.state?.message}
+                  sx={{mt:2, width: "25%"}}
                 />
               </Grid>
               <Grid size={6}>
                 <TextField
                   label="ZIP"
                   fullWidth
-                  required
                   {...register("address.zip")}
                   error={!!errors.address?.zip}
                   helperText={errors.address?.zip?.message}
+                  sx={{mt:2, width: "50%"}}
                 />
               </Grid>
 
@@ -320,33 +330,10 @@ const GroupsCreate = () => {
                   {...register("defaultMinDaysBetweenReads")}
                   error={!!errors.defaultMinDaysBetweenReads}
                   helperText={errors.defaultMinDaysBetweenReads?.message}
+                  sx={{mt:2}}
                 />
               </Grid>
-              {/* <Grid size={12}>
-                <TextField
-                  type="number"
-                  label="Max number of contiguous readings for a member"
-                  fullWidth
-                  {...register("defaultMaxConsecutiveReads")}
-                  error={!!errors.defaultMaxConsecutiveReads}
-                  helperText={errors.defaultMaxConsecutiveReads?.message}
-                />
-              </Grid> */}
-
-              {/* <Grid size={12}>
-                <Typography variant="h6" sx={{ mt: 2 }}>
-                  Initial Invites (optional)
-                </Typography>
-                <TextField
-                  label="Member Emails (comma-separated)"
-                  placeholder="alice@example.com, bob@example.com"
-                  fullWidth
-                  {...register("inviteEmailsCsv")}
-                  error={!!errors.inviteEmailsCsv}
-                  helperText={errors.inviteEmailsCsv?.message}
-                />
-              </Grid> */}
-
+              </Grid>
               <Grid size={12}>
                 <Button
                   type="submit"

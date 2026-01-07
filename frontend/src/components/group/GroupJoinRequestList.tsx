@@ -1,3 +1,4 @@
+import { useGroupContext } from "../../context/GroupContextProvider";
 import {
   Box,
   Button,
@@ -16,28 +17,33 @@ interface JoinRequest {
 }
 
 interface Props {
+  groupId: string;
   requests: JoinRequest[];
   onAction: (message: string) => void;
   onError: (error: string) => void;
 }
 
 export default function GroupJoinRequestList({
+  groupId,
   requests,
   onAction,
   onError,
 }: Props) {
+
   const handleAction = async (
     requestId: string,
     action: "approve" | "reject"
   ) => {
+
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}/api/groups/admin/requests/${requestId}/${action}`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+        console.log(`${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/join-requests/${requestId}/${action}`)
+        const res = await fetch(
+            `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/join/join-requests/${requestId}/${action}`,
+            {
+                method: "PUT",
+                credentials: "include",
+            }
+        );
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || "Request failed");

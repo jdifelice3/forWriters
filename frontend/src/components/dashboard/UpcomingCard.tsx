@@ -12,7 +12,7 @@ export default function UpcomingCard({ items }: { items: DashboardUpcomingItem[]
 
   return (
     <Card className="dashboardSubPanel">
-      <CardContent>
+      <CardContent className="dashboardSubPanelColors">
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 1}}>
           📅Coming up
         </Typography>

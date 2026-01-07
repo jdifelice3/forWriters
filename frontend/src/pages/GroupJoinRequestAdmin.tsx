@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
+    Box,
   Typography,
   Paper,
   Alert,
   CircularProgress,
 } from "@mui/material";
 import GroupJoinRequestList from '../components/group/GroupJoinRequestList';
+import { useGroupContext } from "../context/GroupContextProvider";
 
 interface JoinRequest {
   id: string;
@@ -16,17 +18,18 @@ interface JoinRequest {
 }
 
 export default function GroupJoinRequestAdmin() {
-  const [requests, setRequests] = useState<JoinRequest[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+    const { activeGroup } = useGroupContext();
+    const [requests, setRequests] = useState<JoinRequest[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [msg, setMsg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-  const loadRequests = async () => {
+const loadRequests = async (groupId: string) => {
     setError(null);
     setLoading(true);
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}/api/groups/admin/requests`,
+        `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/join-requests`,
         { credentials: "include" }
       );
       const data = await res.json();
@@ -39,8 +42,17 @@ export default function GroupJoinRequestAdmin() {
   };
 
   useEffect(() => {
-    loadRequests();
-  }, []);
+    if(!activeGroup) return;
+    loadRequests(activeGroup.id);
+  }, [activeGroup]);
+    
+    if (!activeGroup) {
+        return (
+        <Box display="flex" justifyContent="center" p={6}>
+            <CircularProgress size={24} />
+        </Box>
+        );
+    } 
 
   return (
     <Paper 
@@ -48,7 +60,8 @@ export default function GroupJoinRequestAdmin() {
             maxWidth: 900, 
             mx: "auto", 
             p: 4,
-            marginLeft: "100px",
+            ml: "50px",
+            mt: 3   
         }}
     >
       <Typography variant="h4" mb={3}>
@@ -62,10 +75,11 @@ export default function GroupJoinRequestAdmin() {
 
       {!loading && (
         <GroupJoinRequestList
+          groupId={activeGroup.id}
           requests={requests}
           onAction={(message) => {
             setMsg(message);
-            loadRequests();
+            loadRequests(activeGroup.id);
           }}
           onError={(e) => setError(e)}
         />

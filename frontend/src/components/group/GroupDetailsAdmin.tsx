@@ -94,37 +94,44 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
         )}
 
         <Grid container spacing={2}>
-          <Grid size={12}>
-            <Avatar
-              src={form.imageUrl}
-              alt={form.name}
-              sx={{ width: 120, height: 120 }}
-            />
-          </Grid>
-
-          <Grid size={12}>
-            <TextField
-              label="Group Name"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              fullWidth
-              disabled={!editing}
-              sx={{ mb: 2 }}
-            />
-
-            {["street","city", "state", "zip"].map((field) => (
-              <TextField
-                key={field}
-                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                name={field}
-                value={(form as any)[field]}
-                onChange={handleChange}
-                fullWidth
-                disabled={!editing}
-                sx={{ mb: 2 }}
-              />
-            ))}
+            <Grid size={12}>
+                <Avatar
+                src={form.imageUrl}
+                alt={form.name}
+                sx={{ width: 120, height: 120 }}
+                />
+            </Grid>
+            
+            <Grid size={12}>
+                <TextField
+                    label="Group Name"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    fullWidth
+                    disabled={!editing}
+                    sx={{ mb: 2 }}
+                />
+            </Grid>
+            <>
+            {group.groupType === "WRITING" && (               
+            <Grid size={12}>
+                {["street","city", "state", "zip"].map((field) => (
+                    <TextField
+                        key={field}
+                        label={field.charAt(0).toUpperCase() + field.slice(1)}
+                        name={field}
+                        value={(form as any)[field]}
+                        onChange={handleChange}
+                        fullWidth
+                        disabled={!editing}
+                        sx={{ mb: 2 }}
+                    />
+                ))}
+            </Grid>
+            )}
+            </>
+            <Grid size={12}>
               <TextField
                 label="Description"
                 name={"description"}
@@ -144,29 +151,32 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
                 sx={{ mb: 2 }}
               />
               <UrlList isDisabled={!editing}/>
-            {editing && (
-              <div>
-              <div>&nbsp;</div>
+                {editing && (
+                <div>
+                    <div>&nbsp;</div>
 
-              <Button
-                variant="contained"
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? <CircularProgress size={20} /> : "Save"}
-              </Button>
-              &nbsp;&nbsp;
-              <Button
-                variant="contained"
-                startIcon={<CancelIcon />}
-                onClick={() => setEditing(false)}
-              >
-                Cancel
-              </Button>
+                    <Button
+                        variant="contained"
+                        startIcon={<SaveIcon />}
+                        onClick={handleSave}
+                        disabled={saving}
+                    >
+                        {saving ? <CircularProgress size={20} /> : "Save"}
+                    </Button>
+                    &nbsp;&nbsp;
+                    <Button
+                        variant="contained"
+                        startIcon={<CancelIcon />}
+                        onClick={() => setEditing(false)}
+                    >
+                    Cancel
+                    </Button>
               </div>
             )}
-          </Grid>
+            </Grid>
+          
+                    
+
         </Grid>
 
       </CardContent>

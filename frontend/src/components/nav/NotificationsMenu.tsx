@@ -9,7 +9,7 @@ import {
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useNotifications } from "../../hooks/useNotifications";
+import { useNotifications } from "../../hooks/notification/useNotifications";
 import { useGroupContext } from "../../context/GroupContextProvider";
 
 export default function NotificationsMenu() {

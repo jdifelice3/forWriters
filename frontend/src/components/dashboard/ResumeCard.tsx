@@ -7,9 +7,9 @@ export default function ResumeCard({ items }: { items: DashboardResumeItem[] }) 
 
   return (
     <Card className="dashboardSubPanel">
-      <CardContent>
+      <CardContent className="dashboardSubPanelColors">
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-          📅Continue
+          ↩️Continue
         </Typography>
 
         {items.length === 0 ? (

@@ -14,15 +14,17 @@ import Grid from "@mui/material/Grid";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 import { useGroupDetails } from "../hooks/useGroup";
+
 import { useReadings } from "../hooks/reading/useReadings";
 import { useReadingDomain } from "../hooks/reading/useReadingDomain";
 import { useReadingsData } from "../hooks/reading/useReadingsData";
 import { useReadingsUI } from "../hooks/reading/useReadingsUI";
+
 import { useFileUI } from "../hooks/file/useFileUI";
 
 import ReadingCalendar from "../components/reading/ReadingCalendar";
 import FileManagerList from "../components/file/lists/FileManagerList";
-import { FileDomainCommands, FileListProperties } from "../types/FileTypes";
+import { FileListProperties } from "../types/FileTypes";
 
 const Readings = () => {
   const navigate = useNavigate();

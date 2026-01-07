@@ -1,5 +1,6 @@
 import { apiFetch } from "./client";
 import { FormInput } from "../types/ReadingTypes";
+import { ReadingParticipant, Reading } from "@/types/domain-types";
 
 export const ReadingsAPI = {
     get(groupId: string) {
