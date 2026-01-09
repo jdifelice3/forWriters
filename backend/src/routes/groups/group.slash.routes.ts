@@ -1,9 +1,31 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import prisma from "../../database/prisma";
 import Session from "supertokens-node/recipe/session";
 import { Prisma } from "@prisma/client";
 
 const router = Router();
+
+router.get("/groupcount", async(req: Request, res: Response) => {
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const user: any = await prisma.user.findUnique({where: {superTokensId: authId}});
+    
+    const group = await prisma.group.findMany({
+        include: {
+            groupUser: {
+                where: {
+                    userId: user.id
+                }
+            }
+        }
+    });
+
+    let groupCount = {
+        count: group.length
+    }
+
+    res.json(groupCount);
+});
 
 router.post("/", async( req, res, next) => {
     const session = await Session.getSession(req, res);

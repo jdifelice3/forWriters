@@ -17,18 +17,18 @@ router.use(loadGroupMembership);
 router.get("/", async (req: Request, res: Response) => {
     const group = await prisma.group.findUnique({
         where: { id: req.group.id },
-            include: {
-                groupAddress: true,
-                groupUrl: true,
-                groupUser: {
-                    include: {
-                        user: {
-                            include: { userProfile: true },
-                        },
+        include: {
+            groupAddress: true,
+            groupUrl: true,
+            groupUser: {
+                include: {
+                    user: {
+                        include: { userProfile: true },
                     },
                 },
             },
-        });
+        },
+    });
 
     res.json(group);
 });

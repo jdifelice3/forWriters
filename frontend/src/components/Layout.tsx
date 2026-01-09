@@ -36,8 +36,7 @@ export default function Layout() {
         <Box component="main" sx={{ flexGrow: 1, mt: 10, ml:0 }}>
             <Routes>
                 <Route path="/dashboard" element={<Dashboard />} />
-
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/userprofile" element={<UserProfile />} />
                 <Route path="/files" element={<FileManager/>} />
                 <Route path="/filemanager/manuscript" element={<FileManager/>} />

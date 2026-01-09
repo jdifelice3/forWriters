@@ -1,4 +1,4 @@
-import { Card, CardContent, Grid, Typography, List, ListItem, ListItemText, Button, Box } from "@mui/material";
+import { Card, CardContent, Grid, Stack, Typography, List, ListItem, ListItemText, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { DashboardAttentionItem } from "../../types/DashboardTypes";
 
@@ -15,24 +15,21 @@ export default function AttentionCard({ items }: { items: DashboardAttentionItem
         {items.length === 0 ? (
           <Typography sx={{ml:3}} color="text.secondary">You’re caught up.</Typography>
         ) : (
-          <Grid container sx={{ml:3}}>
-            {items.slice(0, 5).map((it) => (
             <>
+            {items.slice(0, 5).map((it) => (
+            
                 <Box key={it.id} >
-              <Grid size={6}>
                     <Typography>
                         {it.title}
                     </Typography>
-                </Grid>
-                <Grid size={6}>
+                
                     <Button size="small" onClick={() => navigate(it.href)}>
                         {it.ctaLabel}
                     </Button>
-                </Grid>
                 </Box>
-              </>
+              
             ))}
-          </Grid>
+            </>
         )}
 
         {items.length > 0 && (

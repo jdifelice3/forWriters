@@ -12,10 +12,14 @@ export const useReadings = () => {
 
   const swr = useSWR<Reading[]>(key, apiFetch);
 
+  const refresh = async () => {
+    await swr.mutate(); // same instance every time
+  };
+
   return {
     readings: swr.data ?? [],
     isLoading: swr.isLoading,
     isError: swr.error,
-    mutate: swr.mutate,
+    refresh,
   };
 };

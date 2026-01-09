@@ -5,6 +5,7 @@ import { loadGroupById, loadGroupMembership } from "../groups/group.middleware";
 import { loadReadingById, loadSubmissionById } from "./readings.middleware";
 import { SessionRequest } from "supertokens-node/framework/express";
 import Session from "supertokens-node/recipe/session";
+import { extractCommentsWithTargetsFromS3 } from "../../services/streamFromS3";
 
 const router = Router({ mergeParams: true });
 
@@ -107,9 +108,24 @@ router.post("/submissions", async (req: Request, res: Response) => {
     res.status(200).json(submissions);
 });
 
-router.post("/submissions/:submissionId/feedback",
-  loadSubmissionById,
-  async (req: SessionRequest, res: Response) => {
+router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (req: SessionRequest, res: Response) => {
+    const submissionId = req.params.submissionId;
+    const readingSubmission = await prisma.readingSubmission.findUnique({
+        where: {
+            id: submissionId
+        },
+        include: {
+            appFile: true
+        }
+    });
+
+    const extractionResults = 
+        extractCommentsWithTargetsFromS3(
+            process.env.AWS_S3_BUCKET!,
+            readingSubmission?.appFile.filename!,
+            process.env.AWS_S3_REGION!
+        );
+    
     const reviewerUserId = req.session!.getUserId();
 
     const reviewer = await prisma.readingParticipant.findUnique({
@@ -122,7 +138,7 @@ router.post("/submissions/:submissionId/feedback",
     });
 
     if (!reviewer) {
-      return res.status(403).json({ error: "Not a participant" });
+      return res.status(403).json({ error: "User did not review this manuscript" });
     }
 
     const feedback = await prisma.readingFeedback.create({
@@ -132,6 +148,20 @@ router.post("/submissions/:submissionId/feedback",
         appFileId: req.body.appFileId,
       },
     });
+
+    const feedbackComments = (await extractionResults).map((c) => {
+        return {
+            reviewerParticipantId: reviewerUserId,
+            readingFeedbackId: feedback.id,
+            // source - use default
+            commentText: c.commentText,
+            targetText: c.targetText
+        }
+    });
+
+    const readingFeedbackComments = await prisma.readingFeedbackComment.createMany({
+        data: feedbackComments
+    })
 
     res.json(feedback);
   }

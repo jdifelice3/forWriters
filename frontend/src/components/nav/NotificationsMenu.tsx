@@ -10,15 +10,26 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from "../../hooks/notification/useNotifications";
+import { useNotificationDomain } from "../../hooks/notification/useNotificationDomain";
 import { useGroupContext } from "../../context/GroupContextProvider";
+import { useUserContext } from "../../context/UserContext";
 
 export default function NotificationsMenu() {
+  const { user } = useUserContext();
   const navigate = useNavigate();
   const { activeGroup } = useGroupContext();
-  const { data: notifications = [] } = useNotifications(activeGroup?.id ?? null);
+  const { data: notifications = [] } = useNotifications();
+  const { updateNotification } = useNotificationDomain(activeGroup?.id ?? null, user?.id ?? null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const unreadCount = notifications.length;
+  
+  const onClick = (notificationId: string, href: string) => {
+    console.log('in onClick', notificationId, href)
+    updateNotification(notificationId);
+    navigate(href);
+    setAnchorEl(null);
+  }
 
   return (
     <>
@@ -47,10 +58,7 @@ export default function NotificationsMenu() {
           notifications.slice(0, 5).map((n) => (
             <MenuItem
               key={n.id}
-              onClick={() => {
-                navigate(n.href);
-                setAnchorEl(null);
-              }}
+              onClick={() => onClick(n.id, n.href)}
             >
               <ListItemText
                 primary={n.message}

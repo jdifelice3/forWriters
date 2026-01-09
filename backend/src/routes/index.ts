@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { verifySession } from
-  "supertokens-node/recipe/session/framework/express";
+import { verifySession } from "supertokens-node/recipe/session/framework/express";
 
 import userRoutes from "./users";
 //import userProfileRoutes from "./userProfileRoutes";

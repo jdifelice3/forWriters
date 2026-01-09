@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useReadings } from "../../hooks/reading/useReadings";
-import { useReadingData } from "../../hooks/reading/useReadingsData";
-
+import { useReadingDomain } from "../../hooks/reading/useReadingDomain";
 import { useGroupDetails } from "../../hooks/useGroup";
 import { 
     AppFile,
@@ -22,37 +21,36 @@ import {
     Stack,
     Dialog,
     DialogTitle,
-    Popover
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import { getSpotsOpenText, getCardBackgroundColor } from "../../util/readingUtil";
+import { getSpotsOpenText } from "../../util/readingUtil";
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import { useUserContext } from "../../context/UserContext";
 import FileSearchBox from "../../components/file/data/FileSearchBox";
 import FileDescription from "../../components/file/data/FileDescription";
-import InfoIcon from '@mui/icons-material/Info';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import { ReadingDomainCommands } from "../../types/ReadingTypes";
 import { useReadingsUI } from "../../hooks/reading/useReadingsUI";
+import { useGroupContext } from "../../context/GroupContextProvider";
 
 interface ReadingCalendarItemFormProps {
- key: string;
- reading: Reading;
- isAdmin: boolean;
- domain: ReadingDomainCommands;
- ui: ReturnType<typeof useReadingsUI>;
- onFeedback(readingId: string): void;
+    key: string;
+    reading: Reading;
+    isAdmin: boolean;
+    domain: ReadingDomainCommands;
+    ui: ReturnType<typeof useReadingsUI>;
+    onFeedback(readingId: string): void;
 }
 
 type FormInput = {
-  name: string,
-  readingDate: Date,
-  readingStartTime: string,
-  readingEndTime: string,
-  submissionDeadline: Date,
-  description: string,
-  schedule: string
+    name: string,
+    readingDate: Date,
+    readingStartTime: string,
+    readingEndTime: string,
+    submissionDeadline: Date,
+    description: string,
+    schedule: string
 }
 
 const currentDate = new Date();
@@ -60,18 +58,16 @@ const currentDate = new Date();
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ key, reading, isAdmin, domain, ui, onFeedback }) => {
     
     const { user, isLoading, error } = useUserContext();
-    const { data: group, mutate: mutateGroup } = useGroupDetails<Group>();
-    const { mutate: mutateReading } = useReadings();
-    const { isParticipant, myFiles } = useReadingData(reading, user);
-    if(group === undefined) throw new Error("Group undefined");
+    const { activeGroup } = useGroupContext();
+    const { refresh } = useReadings();
+    
+    if (!activeGroup) return <CircularProgress />;
         
     const [err, setErr] = React.useState<string | null>(null);
-    const [anchorEl, setAnchorEl] = useState(null);
     const [submitManuscriptOpen, setSubmitManuscriptOpen] = useState(false);
     const [updateManuscriptVersionOpen, setUpdateManuscriptVersionOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<AppFile | null>(null);
     const [loading, setLoading] = useState(false);
-    const [confirmation, setConfirmation] = useState<string | null>(null);
   
 
     if (isLoading) return <CircularProgress />;
@@ -112,7 +108,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         <>
                         <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
                             You have signed up for this reading<br/>
-                            Submit your manuscript when you are ready
+                            
                         </Typography>
                         <Typography>
                             <b>Title:</b> {title}
@@ -135,7 +131,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                 } else {
                     return (
                         <>
-                        {group.groupType === "WRITING" && (
+                        {activeGroup.groupType === "WRITING" && (
                             <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
                                 You have signed up for this reading<br/>
                                 Please submit your manuscript by {new Date(reading.submissionDeadline || "").toLocaleDateString()}
@@ -199,7 +195,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                     <Typography variant="body2" >
                         {reading.description }
                     </Typography>
-                    {group.groupType === "WRITING" && (
+                    {activeGroup.groupType === "WRITING" && (
                         <Box>
                             <Typography variant="body2">
                                 Reading Date:{new Date(reading.readingDate || "").toLocaleDateString()}
@@ -210,7 +206,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         </Box>
                     )}
                         <Box>&nbsp;</Box>
-                    {group.groupType === "WRITING" && (                        
+                    {activeGroup.groupType === "WRITING" && (                        
                         <Box>
                         <Typography 
                             variant="body2" 
@@ -232,7 +228,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                 </CardContent>
                 <CardActions>
                     <Box>
-                        {group.groupType === "WRITING" && (
+                        {activeGroup.groupType === "WRITING" && (
                         <>
                         <Button
                             id={reading.id}
@@ -241,7 +237,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             startIcon={<EventAvailableIcon />}
                             onClick={(event) => domain.signUpForReading(reading.id)}
                             sx={{ mt: 1 }}         
-                            disabled={hasSignedUp}
+                            disabled={!domain.canSignup(reading.id, user.id)}
                         >
                             Sign Up
                         </Button>&nbsp;
@@ -252,7 +248,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             startIcon={<EventAvailableIcon />}
                             onClick={(event) => domain.withdrawFromReading(reading.id)}
                             sx={{ mt: 1 }}         
-                            disabled={!hasSignedUp}
+                            disabled={!domain.canWithdraw(reading.id, user.id)}
                         >
                             Withdraw
                         </Button>&nbsp;
@@ -265,7 +261,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             variant="contained"
                             onClick={(event) => onFeedback(reading.id)}
                             sx={{ mt: 1 }}
-                            
+                            // disabled={domain.canReview(reading.id, user.id)}
                         >
                             Review            
                         </Button>

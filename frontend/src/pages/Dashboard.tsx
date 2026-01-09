@@ -11,7 +11,6 @@ export default function Dashboard() {
   const { activeGroup } = useGroupContext(); // { id, name, role } | null
   const { data, isError, isLoading, mutate } = useDashboard(activeGroup?.id ?? null);
 
-  console.log('data', data)
   if (isLoading) {
     return (
       <Box sx={{ p: 3 }}>

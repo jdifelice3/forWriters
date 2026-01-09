@@ -45,8 +45,10 @@ enum GroupType {
 }
 
 enum GroupRole {
+  OWNER
   MEMBER
   ADMIN
+  READER
 }
 
 enum JoinRequestStatus {
@@ -181,6 +183,7 @@ model Group {
   groupUrl     GroupUrl[]
   user         User           @relation(fields: [creatorUserId], references: [id])
   joinRequests JoinRequest[]
+  groupInvite  GroupInvite[]
 }
 
 model GroupAddress {
@@ -193,6 +196,21 @@ model GroupAddress {
   groupId String
   group   Group?   @relation(fields: [groupId], references: [id])
   reading Reading? 
+}
+
+model GroupInvite {
+  id          String   @id @default(uuid())
+  groupId     String
+  email       String
+  role        GroupRole
+  tokenHash   String
+  expiresAt   DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id])
+
+  @@unique([groupId, email])
 }
 
 model GroupNews {
@@ -294,7 +312,7 @@ model ReadingFeedback {
 
 model ReadingFeedbackComment {
   id                String        @id @default(cuid())
-  readingAuthorId   String
+  reviewerParticipantId   String
   readingFeedbackId String
   source            CommentSource @default(DOCX)
   commentText       String

@@ -72,10 +72,37 @@ router.post("/:groupId", async (req: Request, res: Response) => {
             status: JoinRequestStatus.PENDING,
             },
             include: {
-            user: true,
+            user: {
+                include: {
+                    userProfile: {
+                        where: {
+                            id: user.id
+                        }
+                    }
+                }
+            },
             group: true
             }
         });
+
+        let requestor = "";
+        
+        if(!joinRequest.user.userProfile?.firstName || !joinRequest.user.userProfile?.lastName){
+            requestor = joinRequest.user.email;
+        } else {
+            requestor = `${joinRequest.user.userProfile?.firstName} ${joinRequest.user.userProfile?.lastName}`;
+        }
+
+        let notificationMessage = `${requestor} has submitted a request to join`;
+        const notification = await prisma.notification.create({
+            data: {
+                userId: user.id,
+                type: "GROUP_JOIN_REQUEST",
+                entityId: groupId,
+                message: notificationMessage,
+            }
+        });
+
         res.json(joinRequest);
        
     } catch (err) {

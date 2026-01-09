@@ -1,5 +1,6 @@
 import { Router, Response } from "express";
 import prisma from "../../database/prisma";
+import Session from "supertokens-node/recipe/session";
 import { loadReadingParticipantById } from "./participant.middleware";
 import { loadSubmissionById } from "./readings.middleware";
 import { SessionRequest } from "supertokens-node/framework/express";
@@ -10,8 +11,13 @@ import { loadAppFileMetaById } from "../files/fileMeta.middleware";
 
 const router = Router({ mergeParams: true });
 
-const upload = multer({ dest: "uploads/" });
+router.use((req, res, next) => {
+    console.log('Received URL:', req.originalUrl);
+    next(); // Pass the request to the next middleware/route handler
+});
 
+const upload = multer({ dest: "uploads/" });
+console.log('in participantsRoutes')
 router.get(
   "/",
   async (req: SessionRequest, res: Response) => {
@@ -63,13 +69,14 @@ router.get(
   }
 );
 
-router.post(
-  "/:participantId/withdraw",
-  loadReadingParticipantById,
-  async (req: SessionRequest, res: Response) => {
-    const actingUserId = req.session!.getUserId();
-
-    if (req.readingParticipant.userId !== actingUserId) {
+// /api/groups/:groupId/readings/:readingId/participants/:participantId/withdraw
+router.delete("/withdraw", loadReadingParticipantById, async (req: SessionRequest, res: Response) => {
+    
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const actingUser: any = await prisma.user.findUnique({where: {superTokensId: authId}});
+    
+    if (req.readingParticipant.userId !== actingUser.id) {
       return res.status(403).json({ error: "Cannot withdraw another participant" });
     }
 
@@ -82,10 +89,13 @@ router.post(
 );
 
 router.post(
-  "/:participantId/submissions",
+  "/submissions",
   loadReadingParticipantById,
   async (req: SessionRequest, res: Response) => {
-    const actingUserId = req.session!.getUserId();
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const actingUser: any = await prisma.user.findUnique({where: {superTokensId: authId}});
+    const actingUserId = actingUser.id;
     const { appFileId } = req.body;
 
     if (req.readingParticipant.userId !== actingUserId) {
@@ -105,13 +115,16 @@ router.post(
 );
 
 router.post(
-  "/:participantId/submissions/:submissionId/feedback",
+  "/submissions/:submissionId/feedback",
   loadReadingParticipantById,
   loadSubmissionById,
   loadAppFileMetaById,
   upload.single("file"),
   async (req: SessionRequest, res: Response) => {
-    const actingUserId = req.session!.getUserId();
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const actingUser: any = await prisma.user.findUnique({where: {superTokensId: authId}});
+    const actingUserId = actingUser.id;
 
     // Authorization
     if (req.readingParticipant.userId !== actingUserId) {

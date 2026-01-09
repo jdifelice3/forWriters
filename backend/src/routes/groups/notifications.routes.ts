@@ -9,23 +9,32 @@ router.use(loadGroupById);
 router.use(loadGroupMembership);
 
 router.get("/", async(req, res) => {
-    const joinRequest = await prisma.joinRequest.findMany({
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const user: any = await prisma.user.findUnique({where: {superTokensId: authId}});
+
+    const notifications = await prisma.notification.findMany({
         where: {
-            groupId: req.group.id,
-            status: "PENDING"
+            entityId: req.group.id,
+            readAt: null
         }
     });
 
-    res.status(200).json([
-        {
-            id: "123456789",//joinRequest[0].id,
-            type: "GROUP_JOIN_REQUEST",
-            message:`${joinRequest.length} join ${joinRequest.length === 1 ? "request" : "requests"} awaiting approval`,
-            entityId: "group-id",
-            createdAt: new Date().toLocaleDateString(),//joinRequest[0].createdAt,
-            href: "/joinadminpage"
+    res.status(200).json(notifications);
+});
+
+router.put("/:notificationId", async(req, res) => {
+    const notificationId = req.params.notificationId;
+    const notification = await prisma.notification.update({
+        data: {
+            readAt: new Date()
+        },
+        where: {
+            id: notificationId
         }
-    ]);
+    });
+
+    res.status(200).json(notification);
 });
 
 export default router;

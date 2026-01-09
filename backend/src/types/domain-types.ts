@@ -5,19 +5,21 @@ export type CommentSource = "DOCX" | "MANUAL";
 
 export type DocumentType = "MANUSCRIPT" | "FEEDBACK";
 
-export type ParticipantType = "AUTHOR" | "REVIEWER";
+export type FileType = "DOCX" | "PDF";
 
 export type EventType = "READING" | "RETREAT";
 
 export type Genre = "FANTASY" | "HISTORICAL" | "HORROR" | "LITERARY" | "MYSTERY" | "POEM" | "ROMANCE" | "SCIENCEFICTION";
 
-export type FileType = "DOCX" | "PDF";
-
 export type GroupType = "WRITING" | "PERSONAL";
+
+export type GroupRole = "OWNER" | "MEMBER" | "ADMIN" | "READER";
 
 export type JoinRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
-export type GroupRole = "MEMBER" | "ADMIN";
+export type NotificationType = "GROUP_JOIN_REQUEST" | "GROUP_INVITE" | "COLLAB_REQUEST" | "READING_FEEDBACK";
+
+export type ParticipantType = "AUTHOR" | "REVIEWER";
 
 export type ReadingScheduleType = "SCHEDULED" | "UNSCHEDULED";
 
@@ -94,6 +96,7 @@ export interface Group {
   groupUrl: GroupUrl[];
   user: User;
   joinRequests: JoinRequest[];
+  groupInvite: GroupInvite[];
 }
 
 export interface GroupAddress {
@@ -105,6 +108,18 @@ export interface GroupAddress {
   groupId: string;
   group?: Group;
   reading?: Reading;
+}
+
+export interface GroupInvite {
+  id: string;
+  groupId: string;
+  email: string;
+  role: GroupRole;
+  tokenHash: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  createdAt: string;
+  group: Group;
 }
 
 export interface GroupNews {
@@ -147,6 +162,16 @@ export interface JoinRequest {
   group: Group;
 }
 
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  entityId: string;
+  message: string;
+  createdAt: string;
+  readAt?: string;
+}
+
 export interface Reading {
   id: string;
   name: string;
@@ -184,7 +209,7 @@ export interface ReadingFeedback {
 
 export interface ReadingFeedbackComment {
   id: string;
-  readingAuthorId: string;
+  reviewerParticipantId: string;
   readingFeedbackId: string;
   source: CommentSource;
   commentText: string;

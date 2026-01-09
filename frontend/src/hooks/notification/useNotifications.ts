@@ -1,10 +1,13 @@
 import useSWR  from "swr";
+import { useGroupContext } from "../../context/GroupContextProvider";
 import { Notification } from "../../types/NotificationTypes";
 import { apiFetch } from "../../api/client"
 
-export const useNotifications = (activeGroupId: string | null) => {
-    const key = activeGroupId
-        ? `/groups/${activeGroupId}/notifications`
+export const useNotifications = () => {
+    const { activeGroup } = useGroupContext();
+
+    const key = activeGroup
+        ? `/groups/${activeGroup.id}/notifications`
         : null;
 
     return useSWR<Notification[]>(key, apiFetch, {

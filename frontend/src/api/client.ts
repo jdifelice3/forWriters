@@ -22,7 +22,7 @@ export async function apiFetch<T>(
     ...options,
     headers,
   });
-
+  
   if (!res.ok) {
     const text = await res.text();
     throw new Error(text || res.statusText);

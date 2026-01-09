@@ -1,7 +1,7 @@
 import { AppFile } from "../../types/domain-types";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 // import pdfIcon from "../../assets/icons/icons8-pdf-48.png";
-// import wordIcon from "../../assets/images/icons8-word-file-48.png"
+import wordIcon from "../../assets/icons/icons8-word-file-48.png";
 // import { Avatar } from "@mui/material";  
   
 
@@ -20,7 +20,8 @@ const FileIcon: React.FC<FileIconProps> = ({file}) => {
     // if (file.mimetype === "PDF") return <img src={pdfIcon} className='icon' alt="PDF" />;
     // if (file.mimetype === "DOCX") return <img src={wordIcon} className='icon' alt="DOCX" />;
     
-    return <InsertDriveFileIcon color="action" />;
-};
+    //return <InsertDriveFileIcon color="action" />;
+    return <img src={wordIcon} className='icon' alt="DOCX" />;
+}
 
 export default FileIcon;

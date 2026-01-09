@@ -6,7 +6,7 @@ export function useDashboard(activeGroupId: string | null) {
 
   const key = activeGroupId 
     ? `/dashboard/${activeGroupId}` 
-    : `dashboard`;
+    : `/dashboard`;
 
   const swr = useSWR<DashboardResponse>(key, apiFetch, {
     keepPreviousData: true

@@ -13,7 +13,7 @@ import {
 import Grid from "@mui/material/Grid";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 
-import { useGroupDetails } from "../hooks/useGroup";
+import { useGroupDetails, useGroupGetCount } from "../hooks/useGroup";
 
 import { useReadings } from "../hooks/reading/useReadings";
 import { useReadingDomain } from "../hooks/reading/useReadingDomain";
@@ -25,26 +25,30 @@ import { useFileUI } from "../hooks/file/useFileUI";
 import ReadingCalendar from "../components/reading/ReadingCalendar";
 import FileManagerList from "../components/file/lists/FileManagerList";
 import { FileListProperties } from "../types/FileTypes";
+import { CreateReadingInput } from "../types/ReadingTypes";
+
+type FormInput = {
+  name: string,
+  readingDate: Date,
+  readingStartTime: string,
+  readingEndTime: string,
+  submissionDeadline: Date,
+  description: string,
+  schedule: string
+}
 
 const Readings = () => {
   const navigate = useNavigate();
   const { user } = useUserContext();
   const uiFile = useFileUI();
-  const { data: group, isLoading: isGroupLoading } =
-    useGroupDetails<Group>();
-
-  const {
-    readings,
-    isLoading: isReadingLoading,
-  } = useReadings();
-
+  const { data: group, isLoading: isGroupLoading } = useGroupDetails<Group>();
+  //const { groupcount } = useGroupGetCount();
+  const { readings, isLoading: isReadingLoading, refresh } = useReadings();
   const ui = useReadingsUI();
+  const domain = useReadingDomain(group?.id ?? null, user?.id ?? null, refresh);
+  const { myFiles } = useReadingsData(readings, user);
 
-  const domain = useReadingDomain(group?.id ?? null, user?.id ?? null);
-  
-  const { myReadings, myFiles } = useReadingsData(readings, user);
-
-  if (isGroupLoading || !group) {
+  if ( isGroupLoading || !group) {
     return (
       <Box display="flex" justifyContent="center" p={6}>
         <CircularProgress size={24} />
@@ -60,7 +64,7 @@ const Readings = () => {
     );
   }
 
-  const membership = group.groupUser.find(
+  const membership = group?.groupUser.find(
     (m) => m.userId === user.id
   );
   const isAdmin = membership?.role === "ADMIN";
@@ -76,6 +80,15 @@ const Readings = () => {
     const onUploadVersion = (fileMetaId: string) => {
         uiFile.beginUploadNewVersion(fileMetaId);
     }
+
+    const onCreateReading = async (form: FormInput) => {
+        const input: CreateReadingInput = {
+            ...form,
+            readingDate: new Date(form.readingDate),
+            submissionDeadline: new Date(form.submissionDeadline),
+        };
+        await domain.createReading(input);
+    };
 
   return (
     <Card elevation={0} className="mainComponentPanel">
@@ -118,6 +131,7 @@ const Readings = () => {
                   onFeedback={(readingId) =>
                     navigate(`/readingfeedback/${readingId}`)
                   }
+                  onCreateReading={onCreateReading}
                 />
               </Grid>
             </Grid>

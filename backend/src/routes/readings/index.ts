@@ -16,6 +16,5 @@ router.use(loadGroupMembership);
 router.use("/:readingId", loadReadingById, readingsRoutes);
 router.use("/", readingsSlashRoutes);
 // Sub-resources
-router.use("/:readingId/participants", participantsRoutes);
-router.use("/:readingId/participants/:participantId", loadReadingParticipantById);
+router.use("/:readingId/participants/:participantId", participantsRoutes);
 export default router;

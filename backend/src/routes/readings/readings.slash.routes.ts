@@ -5,7 +5,7 @@ import Session from "supertokens-node/recipe/session";
 import { ReadingScheduleType } from "@prisma/client";
 
 const router = Router({mergeParams: true});
-
+console.log('in readings.routes')
 const asyncHandler = (fn: any) => (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -31,7 +31,7 @@ router.get("/", asyncHandler(async (req: Request, res: Response) => {
             readingDate: "asc" 
         },
     });
-    console.log('readings', readings)
+    
     res.json(readings);
 }));
 
