@@ -46,4 +46,11 @@ export const ReadingsAPI = {
             method: "PUT"
         });
     },
+
+    loadExtractedComments(groupId: string, readingId:string, submissionId: string) {
+        return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${submissionId}/feedback`,{
+            method: "POST"
+        });
+    },
+
 };

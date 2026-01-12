@@ -1,14 +1,15 @@
-export const DocType = {
-	MANUSCRIPT: "MANUSCRIPT",
-	FEEDBACK: "FEEDBACK"
+export const DocumentEnum = {
+	FEEDBACK: "FEEDBACK",
+    MANUSCRIPT: "MANUSCRIPT",
+    VERSION: "VERSION"
 }
-Object.freeze(DocType);
+Object.freeze(DocumentEnum);
 
-export const FileType = {
+export const FileEnum = {
     DOCX: "DOCX",
     PDF: "PDF"
 }
-Object.freeze(FileType);
+Object.freeze(FileEnum);
 
 export const UrlType = {
     "AUDIO":"AUDIO",

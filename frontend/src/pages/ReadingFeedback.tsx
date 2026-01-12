@@ -1,13 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useGroupContext } from "../context/GroupContextProvider";
+import { useFiles } from "../hooks/file/useFiles";
+import { useFileDomain } from "../hooks/file/useFileDomain";
+import { useFilesData } from "../hooks/file/useFilesData";
+import { useFileUI } from "../hooks/file/useFileUI";
 import { useReadings } from "../hooks/reading/useReadings";
+import { useReadingDomain } from "../hooks/reading/useReadingDomain";
 import { useReadingData } from "../hooks/reading/useReadingsData";
 import { UploadFileFormProperties } from "../types/FileTypes";
 import { AppFile, AppFileMeta, Reading, ReadingParticipant, ReadingSubmission } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import { generateRandomString } from "../util/Math";
-import UploadFileDataFeedback from "../components/file/data/UploadFileDataFeedback";
 import FileIcon from "../components/controls/FileIcon";
 import {
   Paper,
@@ -16,6 +21,7 @@ import {
   Card,
   CardContent,
   CardActions,
+  CircularProgress,
   TextField,
   Typography,
   IconButton,
@@ -29,6 +35,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from '@mui/icons-material/Download';
 import { useUserContext } from "../context/UserContext";
 import CancelIcon from '@mui/icons-material/Cancel';
+import { FileDomainCommands } from "../types/FileTypes";
+import { UploadFileFormFeedback } from "../components/file/forms/UploadFileFormFeedback";
 
 const uploadFormProperties: UploadFileFormProperties =
   {
@@ -41,73 +49,50 @@ const uploadFormProperties: UploadFileFormProperties =
   }
 
 const ReadingFeedback = () => {
-  const { user } = useUserContext();
-  const { readingId } = useParams<{ readingId: string }>();
-  const { readings, isLoading: isReadingLoading } = useReadings();
-  const reading = readings.find(r => r.id === readingId);
-  const { isParticipant, myFiles } = useReadingData(reading, user);
+    const { user } = useUserContext();
+    const { 
+        saveMetadata, 
+        deleteFile, 
+        uploadVersion, 
+        uploadManuscript,
+        uploadFeedback, 
+        setActiveVersion 
+      } = useFileDomain();
+    const { activeGroup } = useGroupContext();
+    const { readingId } = useParams<{ readingId: string }>();
+    const { readings, isLoading: isReadingLoading, refresh } = useReadings();
+    const reading = readings.find(r => r.id === readingId);
+    const { canReview, loadExtractedComments } = useReadingDomain(activeGroup?.id, user, refresh);
 
-  const [editFile, setEditFile] = useState<AppFile | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [eventTitle, setEventTitle] = useState("");
-  const [reload, setReload] = useState("");
-    
-  const eventFeedbackUrl = `${import.meta.env.VITE_API_HOST}/api/readings/${readingId}/feedback`;
-  
-//   // Fetch uploaded files
-//   useEffect(() => {
-//     (async () => {
-//       const res = await fetch(readingUrl, 
-//       { 
-//         method: 'GET',
-//         headers: { 'Content-Type': 'application/json' },
-//         credentials: "include"
-//       });
+    const [editFile, setEditFile] = useState<AppFile | null>(null);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+    const [eventTitle, setEventTitle] = useState("");
       
-//       if (res.ok) {
-//         const data: Reading = await res.json();
-//         setEventTitle(data.name);
-//         if(data.readingParticipant && data.readingParticipant.length > 0){
-//           setReading(data);
-//           const files: AppFile[] = [];
-//           data.readingParticipant.forEach((a: any) => {
-//             if(a.authorAppFile){
-//                 files.push(a.authorAppFile.appFile);
-//             }
-//             setFiles(files);
-//           });
-//         }
-//       }
-//     })();
-//   }, [reload]);
-
-  const reloadFromUploadForm = async(file: AppFile, readingId?: string) => {
-    const result = await fetch(eventFeedbackUrl, 
-        { 
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ readingId: readingId, userId: user.id, appFileId: file.id }),
-          credentials: "include"
-        });
-    if(result.ok){
-      setReload(generateRandomString(8));
-    }    
-  }
-
-  const userHasSubmittedFeedback = (rs: ReadingSubmission, userId: string) => {
-    /*
-      if a user has submitted feedback:
-      readingAuthor.readingFeedback.AppFile.userid = current user id
-    */
-    if(rs.readingFeedback.length === 0) return false;
-    let findIndex = -1;
-    for(let i = 0; i < rs.readingFeedback.length; i++){
-      findIndex = rs.readingFeedback.findIndex(item => item.reviewerParticipantId === userId);
+    if ( !activeGroup || !reading || isReadingLoading) {
+        return (
+      <Box display="flex" justifyContent="center" p={6}>
+        <CircularProgress size={24} />
+      </Box>
+    )};
+    
+    const onUploadFeedback = async(formData: FormData) => {
+        const appFile = await uploadFeedback(formData);
+        const submissionId = formData.get("submissionId")?.toString();
+        if(!reading || !submissionId) return;
+        
+        loadExtractedComments(reading.id, submissionId);
     }
-    return findIndex !== -1;
 
-  }
+    const domain: FileDomainCommands = {
+        saveMetadata:saveMetadata,
+        deleteFile: deleteFile,
+        uploadVersion: uploadVersion,
+        uploadManuscript: uploadManuscript,
+        uploadFeedback: onUploadFeedback,
+        setActiveVersion: setActiveVersion,
+    }
+ 
 
   return (
     <Box sx={{ 
@@ -135,6 +120,7 @@ const ReadingFeedback = () => {
       ) : (
         
         <Stack direction="column" alignItems="left" gap={1} my={1}>
+{/* Reading Submissions MAP */}
           {reading && reading.readingSubmission.map((rs: any) => (
             <Grid size={{xs:12, md:6}} key={rs.id}>
               <Card>
@@ -193,7 +179,7 @@ const ReadingFeedback = () => {
                   ) : (<div></div>)
                 }
                 </CardActions>
-                <Paper className={userHasSubmittedFeedback(rs, user.id) || rs.participantId === user.id ? "disabled" : ""}
+                <Paper className={canReview(reading.id, user.id) ? "" : "disabled"}
                     // to disable CardsF
                     elevation={0}
                 >
@@ -202,15 +188,11 @@ const ReadingFeedback = () => {
                     <Typography variant="h5" sx={{mt: 4, mb: 2}}>
                         {uploadFormProperties.subtitle}
                     </Typography>
-                    <UploadFileDataFeedback onSendData={reloadFromUploadForm} readingAuthorId={rs.participantId} />
-                    {userHasSubmittedFeedback(rs, user.id) ? (
-                        <Typography 
-                            sx={{color: "green", fontWeight: "bold", mt: 2}}>
-                                You have submitted feedback for this story
-                        </Typography>
-                    ) : (
-                        <span>&nbsp;</span>
-                    )}
+{/* UploadFileFormFeedback */}
+                    <UploadFileFormFeedback
+                        domain={domain}
+                        submissionId={rs.id}
+                    />
                     </>
                   ) : (
                   <div></div>)

@@ -12,12 +12,12 @@ import { loadAppFileMetaById } from "../files/fileMeta.middleware";
 const router = Router({ mergeParams: true });
 
 router.use((req, res, next) => {
-    console.log('Received URL:', req.originalUrl);
+    
     next(); // Pass the request to the next middleware/route handler
 });
 
 const upload = multer({ dest: "uploads/" });
-console.log('in participantsRoutes')
+
 router.get(
   "/",
   async (req: SessionRequest, res: Response) => {

@@ -23,6 +23,7 @@ export interface UploadFileFormProperties {
 
 export interface FileListProperties {
   fileType?: string;
+  noFilesMessage: string;
   showPreviewButton: boolean;
   showEditButton: boolean;
   showDeleteButton: boolean;
@@ -41,17 +42,29 @@ export interface FileDomainCommands {
   /** Soft-delete file aggregate */
   deleteFile(fileMetaId: string): Promise<void>;
 
+  uploadManuscript(
+    formData: FormData
+  ): Promise<void>;
+
   /** Upload a new version */
   uploadVersion(
     fileMetaId: string,
-    file: File,
-    versionComment?: string
+    formData: FormData,
+  ): Promise<void>;
+
+  uploadFeedback(
+    formData: FormData
   ): Promise<void>;
 
   /** Set the active version */
   setActiveVersion(
     fileMetaId: string,
     version: number
+  ): Promise<void>;
+
+  loadExtractedComments?(
+    readingId: string,
+    submissionId: string
   ): Promise<void>;
 }
 

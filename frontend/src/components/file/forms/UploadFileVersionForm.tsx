@@ -7,10 +7,11 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
+import { FileDomainCommands } from "@/types/FileTypes";
 
 interface UploadFileVersionFormProps {
-    onSubmit: (data: FormData) => void;
-    appFileMetaId?: string;
+    domain: FileDomainCommands;
+    appFileMetaId: string;
     loading?: boolean;
     disabled?: boolean;
     submitLabel?: boolean;
@@ -18,7 +19,7 @@ interface UploadFileVersionFormProps {
 }
 
 const UploadFileVersionForm: React.FC<UploadFileVersionFormProps> = ({
-    onSubmit,
+    domain,
     appFileMetaId,
     loading = false,
     disabled = false,
@@ -43,10 +44,8 @@ const UploadFileVersionForm: React.FC<UploadFileVersionFormProps> = ({
         const formData = new FormData();
         formData.append("file", file);
         formData.append("comment", comment);
-        if(appFileMetaId){
-            formData.append("appFileMetaId", appFileMetaId);
-        }
-        onSubmit(formData);
+        
+        domain.uploadVersion(appFileMetaId, formData);
     };
 
   return (

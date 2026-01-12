@@ -40,7 +40,7 @@ const upload = multer({
 // POST /files/:appFileMetaId/upload/version
 router.post("/version", upload.single("file"), async (req, res) => {
         const currentDate = new Date();
-        console.log('in upload.routes /version POST')
+        
         if(!req.file) throw new Error("There is no file in the request");
         
         const { comment } = req.body;

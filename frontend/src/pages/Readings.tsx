@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Card,
   CardContent,
+  Stack,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -39,16 +40,14 @@ type FormInput = {
 
 const Readings = () => {
   const navigate = useNavigate();
-  const { user } = useUserContext();
+  const { user, isLoading: isUserLoading } = useUserContext();
   const uiFile = useFileUI();
   const { data: group, isLoading: isGroupLoading } = useGroupDetails<Group>();
-  //const { groupcount } = useGroupGetCount();
   const { readings, isLoading: isReadingLoading, refresh } = useReadings();
   const ui = useReadingsUI();
-  const domain = useReadingDomain(group?.id ?? null, user?.id ?? null, refresh);
-  const { myFiles } = useReadingsData(readings, user);
-
-  if ( isGroupLoading || !group) {
+  const domain = useReadingDomain(group?.id ?? undefined, user?.id ?? null, refresh);
+  
+  if ( isUserLoading || isGroupLoading || !group) {
     return (
       <Box display="flex" justifyContent="center" p={6}>
         <CircularProgress size={24} />
@@ -70,6 +69,7 @@ const Readings = () => {
   const isAdmin = membership?.role === "ADMIN";
 
   const fileListProperties: FileListProperties = {
+    noFilesMessage: "",
     showPreviewButton: false,
     buttonDownloadText: "DOWNLOAD",
     showDeleteButton: false,
@@ -102,23 +102,8 @@ const Readings = () => {
 
         <Card>
           <CardContent>
-            <Grid container spacing={3}>
-              {/* My submitted manuscripts */}
-              <Grid size={4} className="readingSubPanel" sx={{ width: 500 }}>
-                <Typography variant="h6" mb={2} fontWeight="bold">
-                  My Submitted Manuscripts
-                </Typography>
-
-                <FileManagerList
-                  files={myFiles}
-                  variant="READINGS"
-                  fileListProperties={fileListProperties}
-                  onUploadVersion={onUploadVersion}
-                />
-              </Grid>
-
+            <Stack className="readingSubPanel">
               {/* Reading calendar */}
-              <Grid size={4} className="readingSubPanel">
                 <Typography variant="h6" mb={2} fontWeight="bold">
                   Group Reading Calendar
                 </Typography>
@@ -133,8 +118,7 @@ const Readings = () => {
                   }
                   onCreateReading={onCreateReading}
                 />
-              </Grid>
-            </Grid>
+            </Stack>
           </CardContent>
         </Card>
       </CardContent>

@@ -1,7 +1,6 @@
 import { apiFetch } from "./client";
 import { FileUploadFormInput, FileFormInput } from "../types/FileTypes";
 import { AppFileMeta, AppFile } from "../types/domain-types";
-import { useFileUpload } from "../hooks/file/useFile";
 
 export const FilesAPI = {
     create(input: FileUploadFormInput) {
@@ -31,21 +30,36 @@ export const FilesAPI = {
         });
     },
 
-    uploadVersion(
-        fileMetaId: string,
-        file: File,
-        versionComment?: string
+    uploadManuscript(
+        formData: FormData
     ){
-        const formData = new FormData();
-        formData.append("file", file);
-        if (versionComment) {
-            formData.append("versionComment", versionComment);
-        }
-
-        return apiFetch<void>(`/files/${fileMetaId}/versions`, {
+        return apiFetch<void>("/files", {
             method: "POST",
             credentials: "include",
             body: formData,
         });
+    },
+
+    uploadVersion(
+        fileMetaId: string,
+        formData: FormData
+    ){
+
+        return apiFetch<void>(`/files/${fileMetaId}/upload/version`, {
+            method: "POST",
+            credentials: "include",
+            body: formData,
+        });
+    },
+
+    uploadFeedback(
+        formData: FormData
+    ){
+        return apiFetch("/files", {
+            method: "POST",
+            credentials: "include",
+            body: formData,
+        });
+
     }
 }

@@ -2,15 +2,16 @@ import { useCallback } from "react";
 import { useReadings } from "../../hooks/reading/useReadings";
 import { ReadingsAPI } from "../../api/readingsApi";
 import { CreateReadingInput } from "../../types/ReadingTypes";
-import { Reading, ReadingParticipant, ReadingSubmission } from "../../types/domain-types";
+import { Reading, ReadingFeedback, ReadingParticipant, ReadingSubmission, User } from "../../types/domain-types";
 
 export function useReadingDomain(
-  groupId: string | null,
-  userId: string | null,
+  groupId: string | undefined,
+  user: User | undefined,
   refresh: () => Promise<any>
 ) {
   const { readings } = useReadings();
-  const disabled = !groupId || !userId;
+  const disabled = !groupId || !user;
+  const userId = user?.id;
 
     const createReading = useCallback(async (input: CreateReadingInput) => {
         if (disabled) return;
@@ -48,18 +49,28 @@ export function useReadingDomain(
         await refresh();
     }, [groupId, disabled]);
 
+    const loadExtractedComments = useCallback(async (readingId: string, submissionId: string) => {
+        if (disabled) return;
+        await ReadingsAPI.loadExtractedComments(groupId!, readingId, submissionId);
+        await refresh();
+    }, [groupId, disabled]);
+
+
 /** PERMISSIONS **/
     const canSignup = (readingId: string, userId: string) => {
+        if (disabled) return;
         const foundReading: Reading | undefined = readings.find(r => r.id === readingId);
         const rp: ReadingParticipant | undefined =  foundReading?.readingParticipant.find(rp => rp.userId === userId);
         return rp === undefined;
     }
 
     const canWithdraw = (readingId: string, userId: string) => {
+        if (disabled) return;
         return !canSignup(readingId, userId);
     }
 
     const canSubmit = (readingId: string, userId: string) => {
+        if (disabled) return;
         const foundReading: Reading | undefined = readings.find(r => r.id === readingId);
         const rp: ReadingParticipant | undefined =  foundReading?.readingParticipant.find(rp => rp.userId === userId);
         const rs: ReadingSubmission | undefined = foundReading?.readingSubmission.find(item => item.participantId === rp?.id)
@@ -67,9 +78,25 @@ export function useReadingDomain(
     }
 
     const canReview = (readingId: string, userId: string) => {
+        if (disabled) return;
+        //Check if the user has already submitted feedback
         const foundReading: Reading | undefined = readings.find(r => r.id === readingId);
-        const foundSubmission = foundReading?.readingSubmission.find(s => s.participantId === userId);
-        return !foundSubmission;
+        const foundParticipant: ReadingParticipant | undefined = foundReading?.readingParticipant.find(p => p.userId === userId);
+        const foundSubmission: ReadingSubmission | undefined = foundReading?.readingSubmission.find(s => s.participantId === foundParticipant?.id);
+        const foundFeedback: ReadingFeedback | undefined = foundSubmission?.readingFeedback.find(f => f.reviewerParticipantId === userId);
+        const userHasSubmitted = foundFeedback !== undefined;
+
+        //Check if the user is also the author of the submission
+        let authorId: string = "";
+        if(foundSubmission){
+            authorId = foundSubmission?.appFile.userId;
+        }
+        const userIsAuthor = authorId === userId;
+        if (!userHasSubmitted && !userIsAuthor){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     return {
@@ -79,6 +106,7 @@ export function useReadingDomain(
         deleteReading,
         submitFileVersion,
         updateSubmittedVersion,
+        loadExtractedComments,
         canSignup,
         canReview,
         canSubmit,

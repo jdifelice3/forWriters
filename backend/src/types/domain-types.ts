@@ -3,7 +3,7 @@
 
 export type CommentSource = "DOCX" | "MANUAL";
 
-export type DocumentType = "MANUSCRIPT" | "FEEDBACK";
+export type DocumentType = "MANUSCRIPT" | "VERSION" | "FEEDBACK";
 
 export type FileType = "DOCX" | "PDF";
 
@@ -213,8 +213,16 @@ export interface ReadingFeedbackComment {
   readingFeedbackId: string;
   source: CommentSource;
   commentText: string;
-  targetText: string;
+  targets: ReadingFeedbackCommentTarget[];
   readingFeedback: ReadingFeedback;
+}
+
+export interface ReadingFeedbackCommentTarget {
+  id: string;
+  commentId: string;
+  targetText: string;
+  ordinal: number;
+  comment: ReadingFeedbackComment;
 }
 
 export interface ReadingParticipant {

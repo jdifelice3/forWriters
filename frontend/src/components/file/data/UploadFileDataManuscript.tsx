@@ -1,38 +1,27 @@
-import { useFileUpload } from "../../../hooks/file/useFile";
+import { useFileDomain } from "../../../hooks/file/useFileDomain";
 import UploadFileForm from "../forms/UploadFileForm";
 import { AppFileMeta, AppFile } from "../../../types/domain-types";
 import {
   Box,
 } from "@mui/material";
+import { FileDomainCommands } from "@/types/FileTypes";
 
 interface ManuscriptProps {
-  onSendData: (data: AppFile) => void;
+  domain: FileDomainCommands;
   disabled?: boolean;
 }
 
 const UploadFileDataManuscript: React.FC<ManuscriptProps> = ({
-  onSendData,
+  domain,
   disabled,
 }) => {
-  const url = `${import.meta.env.VITE_API_HOST}/api/files`;
+    const { uploadManuscript } = useFileDomain();
 
-  const { upload, loading } = useFileUpload({
-    url,
-    onSuccess: (file: AppFile) => {
-        alert("Your file has been uploaded");
-        onSendData(file);
-    },
-    onError: (err: Error) => {
-        console.error(err);
-        alert(err.message);
-    }
-  });
 
   return (
     <Box title="Upload a new manuscript">
       <UploadFileForm
-        onSubmit={upload}
-        loading={loading}
+        domain={domain}
       />
     </Box>
   );

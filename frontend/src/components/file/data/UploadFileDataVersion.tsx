@@ -1,41 +1,25 @@
-import { useFileUpload } from "../../../hooks/file/useFile";
 import UploadFileVersionForm from "../forms/UploadFileVersionForm";
 import { AppFileMeta, AppFile } from "../../../types/domain-types";
 import {
   Box,
 } from "@mui/material";
+import { FileDomainCommands } from "@/types/FileTypes";
 
 interface FileVersionProps {
-  onSendData: (data: AppFile) => void;
+  domain: FileDomainCommands;
   appFileMetaId: string;
-  disabled?: boolean;
 }
 
 const UploadFileDataVersion: React.FC<FileVersionProps> = ({
-  onSendData,
-  appFileMetaId,
-  disabled,
+  domain, appFileMetaId
 }) => {
-  const url = `${import.meta.env.VITE_API_HOST}/api/files/${appFileMetaId}/upload/version`;
-
-  const { upload, loading } = useFileUpload({
-    url,
-    onSuccess: (file: AppFile) => {
-        alert("Your file has been uploaded");
-        onSendData(file);
-    },
-    onError: (err: Error) => {
-        console.error(err);
-        alert(err.message);
-    }
-  });
+  //const url = `${import.meta.env.VITE_API_HOST}/api/files/${appFileMetaId}/upload/version`;
 
   return (
     <Box title="Upload a new version">
       <UploadFileVersionForm
-        onSubmit={upload}
-        loading={loading}
         appFileMetaId={appFileMetaId}
+        domain={domain}
       />
     </Box>
   );

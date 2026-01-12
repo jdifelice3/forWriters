@@ -15,6 +15,7 @@ enum CommentSource {
 
 enum DocumentType {
   MANUSCRIPT
+  VERSION
   FEEDBACK
 }
 
@@ -311,14 +312,26 @@ model ReadingFeedback {
 }
 
 model ReadingFeedbackComment {
-  id                String        @id @default(cuid())
-  reviewerParticipantId   String
-  readingFeedbackId String
-  source            CommentSource @default(DOCX)
-  commentText       String
-  targetText        String
+  id                     String        @id @default(cuid())
+  reviewerParticipantId  String
+  readingFeedbackId      String
+  source                 CommentSource @default(DOCX)
+  commentText            String
 
-  readingFeedback ReadingFeedback @relation(fields: [readingFeedbackId], references: [id])
+  targets                ReadingFeedbackCommentTarget[]
+
+  readingFeedback        ReadingFeedback @relation(fields: [readingFeedbackId], references: [id])
+}
+
+model ReadingFeedbackCommentTarget {
+  id              String @id @default(cuid())
+  commentId       String
+  targetText      String
+  ordinal         Int    // preserves document order
+
+  comment         ReadingFeedbackComment @relation(fields: [commentId], references: [id])
+
+  @@index([commentId])
 }
 
 model ReadingParticipant {

@@ -1,21 +1,14 @@
 import express from "express";
 import Session from "supertokens-node/recipe/session";
 import prisma from "../database/prisma";
+import { getUser } from "../database/util/user";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
     const session = await Session.getSession(req, res);
     const authId = session.getUserId(true);
-    const user: any = await prisma.user.findUnique({
-        where: 
-            {
-                superTokensId: authId,
-            },
-            include: {
-                userProfile: true,
-            }
-    });
+    const user: any = await getUser(authId);
 
     const files = await prisma.appFileMeta.findMany({
         include: {
@@ -75,7 +68,7 @@ router.get("/search", async (req, res) => {
 }); 
 
 router.put("/", async(req, res) => {
-    console.log('in filesApi PUT');
+   
     const { fileMetaId, title, description } = req.body;
     const file = await prisma.appFileMeta.update({
         where: {

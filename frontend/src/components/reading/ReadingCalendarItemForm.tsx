@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { useReadings } from "../../hooks/reading/useReadings";
-import { useReadingDomain } from "../../hooks/reading/useReadingDomain";
-import { useGroupDetails } from "../../hooks/useGroup";
 import { 
     AppFile,
-    Group,
     Reading, 
     ReadingParticipant,
     ReadingSubmission,
@@ -216,6 +213,9 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 color:(reading.readingParticipant ? (reading.readingParticipant.length === 0 ? "green" : "red") : "green")
                                 }}>
                                 {getSpotsOpenText(reading)}
+                        </Typography>
+                        <Typography variant="body2">
+                            {/* Authors: */}
                         </Typography>
                         </Box>
                     )}

@@ -7,18 +7,19 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
+import { FileDomainCommands } from "../../../types/FileTypes";
 
 interface UploadFeedbackFileFormProps {
-    onSubmit: (data: FormData) => void;
-    loading?: boolean;
+    domain: FileDomainCommands;
+    submissionId: string;
     disabled?: boolean;
     submitLabel?: boolean;
     selectFileLabel?: boolean;
 }
 
-const UploadFileFormFeedback: React.FC<UploadFeedbackFileFormProps> = ({
-    onSubmit,
-    loading = false,
+export const UploadFileFormFeedback: React.FC<UploadFeedbackFileFormProps> = ({
+    domain,
+    submissionId,
     disabled = false,
     submitLabel = "Upload",
     selectFileLabel: selectFileLable = "CHOOSE FILE"
@@ -45,8 +46,12 @@ const UploadFileFormFeedback: React.FC<UploadFeedbackFileFormProps> = ({
         formData.append("title", title);
         formData.append("description", description);
         formData.append("additionalFeedback", additionalFeedback.replace(/\r\n/g,"\n"));
-
-        onSubmit(formData);
+        formData.append("submissionId", submissionId);
+        
+        // for (const [key, value] of formData.entries()) {
+        //     console.log(key, value);
+        // }
+        domain.uploadFeedback(formData);
     };
 
   return (
@@ -96,14 +101,13 @@ const UploadFileFormFeedback: React.FC<UploadFeedbackFileFormProps> = ({
                     type="submit"
                     variant="contained"
                     color="primary"
-                    disabled={loading}
+                    // disabled={loading}
                     startIcon={<UploadIcon />}
                 >
-                    {loading ? <CircularProgress size={24} /> : submitLabel}
+                    {/* {loading ? <CircularProgress size={24} /> : submitLabel} */}
                 </Button>
             </Grid>
         </Grid>
     </Box>
   );
 };
-export default UploadFileFormFeedback;

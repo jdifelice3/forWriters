@@ -11,10 +11,6 @@ const prisma = new PrismaClient({
   ],
 });
 
-// prisma.$on('query', e => {
-//   //console.log(e.query);
-// });
-
 //#region GET
 export const getFileRecords = async(authId: string) => {
     const user: any = await prisma.user.findUnique({

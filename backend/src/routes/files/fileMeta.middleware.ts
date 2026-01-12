@@ -7,9 +7,6 @@ export async function loadAppFileMetaById(
   res: Response,
   next: NextFunction
 ) {
-    console.log('in fileMeta.middleware loadAppFileMetaById')
-    console.log('req.path', req.path)
-    console.log('req.params', req.params)
   const { appFileMetaId } = req.params;
 
   if (!appFileMetaId) {

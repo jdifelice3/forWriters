@@ -28,60 +28,91 @@ import { FileDomainCommands, FileListProperties } from "../types/FileTypes";
 import FileManagerList from "../components/file/lists/FileManagerList";
 import UploadFileDataManuscript from "../components/file/data/UploadFileDataManuscript";
 import UploadFileDataVersion from "../components/file/data/UploadFileDataVersion";
-import { useFiles, useFilesData } from "../hooks/file/useFile";
+import { useFiles } from "../hooks/file/useFiles";
+import { useFilesData } from "../hooks/file/useFilesData";
 import { useFileUI } from "../hooks/file/useFileUI";
 import { useFileDomain } from "../hooks/file/useFileDomain";
+import { useReadings } from "../hooks/reading/useReadings";
+import { useReadingsData } from "../hooks/reading/useReadingsData";
+import { useUserContext } from "../context/UserContext";
+import UploadFileForm from "../components/file/forms/UploadFileForm";
 
 const manuscriptListProperties: FileListProperties = {
-  showPreviewButton: true,
-  buttonDownloadText: "DOWNLOAD",
-  showDeleteButton: true,
-  showEditButton: true,
-  showVersionHistory: true,
+    noFilesMessage: "You have not uploaded manuscripts",
+    showPreviewButton: true,
+    buttonDownloadText: "DOWNLOAD",
+    showDeleteButton: true,
+    showEditButton: true,
+    showVersionHistory: true,
 };
 
 const feedbackListProperties: FileListProperties = {
-  showPreviewButton: true,
-  buttonDownloadText: "DOWNLOAD",
-  showDeleteButton: false,
-  showEditButton: false,
-  showVersionHistory: false,
+    noFilesMessage: "You have not submitted feedback for any manuscripts",
+    showPreviewButton: true,
+    buttonDownloadText: "DOWNLOAD",
+    showDeleteButton: false,
+    showEditButton: false,
+    showVersionHistory: false,
 };
 
+const mySubmissionsListProperties: FileListProperties = {
+    noFilesMessage: "You have not submitted manuscripts to any readings",
+    showPreviewButton: false,
+    buttonDownloadText: "DOWNLOAD",
+    showDeleteButton: false,
+    showEditButton: false,
+    showVersionHistory: false,
+}
+
 const FileManager = () => {
-    const { saveMetadata, deleteFile, uploadVersion, setActiveVersion } = useFileDomain();
+    const { user, isLoading: isUserLoading } = useUserContext();
+    const { 
+        saveMetadata, 
+        deleteFile, 
+        uploadVersion, 
+        uploadManuscript,
+        uploadFeedback, 
+        setActiveVersion 
+    } = useFileDomain();
     const ui = useFileUI();
     const { files, isLoading, mutate } = useFiles();
+    const { myManuscripts, myFeedbackDocuments } = useFilesData(files);
+    const { readings } = useReadings();
+    const { myFiles } = useReadingsData(readings, user);
+    
+    const [tab, setTab] = useState(0);
+    
+    const onBeginUploadVersion = (fileMetaId: string) => {
+        ui.beginUploadNewVersion(fileMetaId);
+    }
+
+    const onUploadManuscript = async(formData: FormData) => {
+        await uploadManuscript(formData);
+        ui.closeDialogs();
+        mutate();
+    }
+
+    const onUploadVersion = async(fileMetaId: string, formData: FormData) => {
+        await uploadVersion(ui.targetFileMetaId ?? "", formData);
+        ui.closeDialogs();
+    }
+
+    const handleSave = async() => {
+        const fileMetaId: string = ui.targetFileMetaId!;
+        const title: string = ui.title;
+        const description: string = ui.description;
+        await saveMetadata({fileMetaId, title, description});
+        ui.closeDialogs();
+        mutate();
+    }
 
     const domain: FileDomainCommands = {
         saveMetadata: saveMetadata,
         deleteFile: deleteFile,
-        uploadVersion: uploadVersion,
+        uploadVersion: onUploadVersion,
+        uploadManuscript: onUploadManuscript,
+        uploadFeedback: uploadFeedback,
         setActiveVersion: setActiveVersion
-    }
-    
-    const [tab, setTab] = useState(0);
-
-    // dialog state
-    const { myManuscripts, myFeedbackDocuments } = useFilesData(files);
-
-    const onUploadVersion = (fileMetaId: string) => {
-        ui.beginUploadNewVersion(fileMetaId);
-    }
-
-    const onSendData = (data: AppFile) => {
-        ui.closeDialogs();
-        mutate();
-    }
-
-    const handleSave = async() => {
-        console.log('ui.targetMetaDataId', ui.targetFileMetaId)
-        const fileMetaId: string = ui.targetFileMetaId!;
-        const title: string = ui.title;
-        const description: string = ui.description;
-        saveMetadata({fileMetaId, title, description});
-        ui.closeDialogs();
-        mutate();
     }
   
   return (
@@ -107,7 +138,7 @@ const FileManager = () => {
           </Grid>
 
           {/* Tabs */}
-          <Tabs value={tab} onChange={(_, v) => setTab(v)}>
+          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{mb: 2}}>
             <Tab label="Manuscripts" />
             <Tab label="Feedback Sent" />
             <Tab label="My Reading Submissions" />
@@ -126,13 +157,13 @@ const FileManager = () => {
                   domain={domain}
                   variant="FILES"
                   fileListProperties={manuscriptListProperties}
-                  onUploadVersion={onUploadVersion}
+                  onUploadVersion={onBeginUploadVersion}
                 />
               )}
             </>
           )}
 
-          {/* Feedback */}
+          {/* Feedback Sent */}
           {tab === 1 && (
             <>
               {isLoading ? (
@@ -145,11 +176,29 @@ const FileManager = () => {
                   domain={domain}
                   variant="READINGS"
                   fileListProperties={feedbackListProperties}
-                  onUploadVersion={onUploadVersion}
+                  onUploadVersion={onBeginUploadVersion}
                 />
               )}
             </>
           )}
+
+          {/* My Reading Submissions */}
+          {tab == 2 && (
+            <>
+              {isLoading ? (
+                <Box display="flex" justifyContent="center" p={6}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <FileManagerList
+                  files={myFiles}
+                  variant="READINGS"
+                  fileListProperties={mySubmissionsListProperties}
+                  onUploadVersion={onBeginUploadVersion}
+                />
+              )}
+            </>
+          )} 
         </CardContent>
       </Card>
 
@@ -204,9 +253,12 @@ const FileManager = () => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <UploadFileDataManuscript
-            onSendData={onSendData}
-          />
+            <UploadFileForm
+                domain={domain}
+            />
+          {/* <UploadFileDataManuscript
+            domain={domain}
+          /> */}
         </DialogContent>
       </Dialog>
 
@@ -224,8 +276,8 @@ const FileManager = () => {
         <DialogContent>
           {ui.targetFileMetaId && (
             <UploadFileDataVersion
+              domain={domain}
               appFileMetaId={ui.targetFileMetaId}
-              onSendData={onSendData}
             />
           )}
         </DialogContent>

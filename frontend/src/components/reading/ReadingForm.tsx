@@ -32,7 +32,8 @@ const fileListProperties: FileListProperties =
     buttonDownloadText: "DOWNLOAD",
     showDeleteButton: true,
     showEditButton: true,
-    showVersionHistory: false
+    showVersionHistory: false,
+    noFilesMessage: "There are no files to display"
   }
 
 const styles = {

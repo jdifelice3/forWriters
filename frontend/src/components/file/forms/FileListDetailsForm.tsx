@@ -50,9 +50,11 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
           >
             {fileMeta.description || "No description"}
           </Typography>
-
           <Typography variant="body2" color="text.secondary">
-            Updated on{" "}
+            Uploaded on{" "}
+            {new Date(fileMeta.createdAt).toLocaleDateString()}
+            <br/>
+            Modified on{" "}
             {new Date(fileMeta.updatedAt).toLocaleDateString()}
           </Typography>
 

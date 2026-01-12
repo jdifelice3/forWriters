@@ -32,8 +32,8 @@ const FileManagerList: React.FC<FileManagerListProps> = ({
   if (!files || files.length === 0) {
     return (
       <Box>
-        <Typography color="text.secondary">
-          There are no uploaded files.
+        <Typography color="textPrimary">
+          {fileListProperties.noFilesMessage}
         </Typography>
       </Box>
     );

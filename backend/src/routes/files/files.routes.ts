@@ -1,5 +1,5 @@
 import express, { NextFunction} from "express";
-import { PrismaClient, CommentSource } from "@prisma/client";
+import prisma from "../../database/prisma";
 import multer from "multer";
 import multerS3 from "multer-s3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
@@ -8,14 +8,8 @@ import { S3Client } from "@aws-sdk/client-s3";
 import Session from "supertokens-node/recipe/session";
 import { extractCommentsWithTargetsFromS3 } from "../../services/streamFromS3";
 import { mapMimeToEnum } from "../../util/Enum";
-
-type ExtractedComment = {
-  commentId: string;
-  commentText: string;
-  targetText: string;
-};
-
-const prisma = new PrismaClient();
+import { getUser } from "../../database/util/user";
+import { ExtractedComment } from "../../types/Feedback";
 
 const router = express.Router();
 
@@ -46,7 +40,6 @@ const currentDate = new Date();
 router.get("/:fileId/download", async (req, res, next) => {
     try {
         const fileId = req.params.fileId;
-        const prisma = new PrismaClient();
         const file = await prisma.appFile.findUnique({ where: { id: fileId } });
         if (!file) return res.status(404).send("File not found");
 
@@ -77,10 +70,11 @@ router.get("/:fileId/download", async (req, res, next) => {
 });
 
 router.post("/", upload.single("file"), async (req, res) => {
+    
     // Get the SuperTokens session
     const session = await Session.getSession(req, res);
     const authId = session.getUserId(true);
-    const { title, description } = req.body;
+    const { title, description, documentType } = req.body;
 
     // File metadata from multer-s3
     const s3Url = (req.file as any).location; // full URL: https://bucket.s3.amazonaws.com/file.pdf
@@ -88,32 +82,35 @@ router.post("/", upload.single("file"), async (req, res) => {
     const mimeType = req.file?.mimetype;
 
     // Create DB entry
-    const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
+    const user = await getUser(authId);
     
-    const file = await prisma.appFileMeta.create({
+    const appFileMeta = await prisma.appFileMeta.create({
         data: {
             title: title,
             description: description,
             userId: user ? user.id : '',
             currentVersionId: 1,
-        },
+            documentType: documentType
+        },  
     });
 
-    const version = await prisma.appFile.create({
+    const appFile = await prisma.appFile.create({
         data: {
-            appFileMetaId: file.id,
+            appFileMetaId: appFileMeta.id,
             version: 1,
             name: `1-${title}-${currentDate.toLocaleDateString()}`,
             filename: key,
             mimetype: mapMimeToEnum(mimeType),
             url: s3Url,
             userId: user ? user.id : '',
+            documentType: documentType
         },
     });
 
     res.json({
       ok: true,
-      file,
+      appFileMeta,
+      appFile
     });
 });
 

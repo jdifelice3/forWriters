@@ -6,6 +6,7 @@ import { loadReadingById, loadSubmissionById } from "./readings.middleware";
 import { SessionRequest } from "supertokens-node/framework/express";
 import Session from "supertokens-node/recipe/session";
 import { extractCommentsWithTargetsFromS3 } from "../../services/streamFromS3";
+import { saveReadingFeedbackComments } from "../../services/Feedback";
 
 const router = Router({ mergeParams: true });
 
@@ -109,6 +110,14 @@ router.post("/submissions", async (req: Request, res: Response) => {
 });
 
 router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (req: SessionRequest, res: Response) => {
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const user: any = await prisma.user.findUnique({
+        where: {
+            superTokensId: authId,
+        },
+    });
+
     const submissionId = req.params.submissionId;
     const readingSubmission = await prisma.readingSubmission.findUnique({
         where: {
@@ -119,51 +128,26 @@ router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (re
         }
     });
 
+    if(!readingSubmission) return res.json({error: "Reading submission did not contain a file"});
+
+    const feedback = await prisma.readingFeedback.create({
+        data: {
+            reviewerParticipantId: readingSubmission.participantId,
+            submissionId: req.submission.id,
+            appFileId: readingSubmission.appFileId
+        },
+    });
+
     const extractionResults = 
-        extractCommentsWithTargetsFromS3(
+        await extractCommentsWithTargetsFromS3(
             process.env.AWS_S3_BUCKET!,
             readingSubmission?.appFile.filename!,
             process.env.AWS_S3_REGION!
         );
     
-    const reviewerUserId = req.session!.getUserId();
+    const comments = saveReadingFeedbackComments(feedback.id, readingSubmission.participantId, extractionResults);
 
-    const reviewer = await prisma.readingParticipant.findUnique({
-      where: {
-        readingId_userId: {
-          readingId: req.reading.id,
-          userId: reviewerUserId,
-        },
-      },
-    });
-
-    if (!reviewer) {
-      return res.status(403).json({ error: "User did not review this manuscript" });
-    }
-
-    const feedback = await prisma.readingFeedback.create({
-      data: {
-        reviewerParticipantId: reviewer.id,
-        submissionId: req.submission.id,
-        appFileId: req.body.appFileId,
-      },
-    });
-
-    const feedbackComments = (await extractionResults).map((c) => {
-        return {
-            reviewerParticipantId: reviewerUserId,
-            readingFeedbackId: feedback.id,
-            // source - use default
-            commentText: c.commentText,
-            targetText: c.targetText
-        }
-    });
-
-    const readingFeedbackComments = await prisma.readingFeedbackComment.createMany({
-        data: feedbackComments
-    })
-
-    res.json(feedback);
+    res.json(comments);
   }
 );
 

@@ -7,9 +7,10 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import UploadIcon from "@mui/icons-material/Upload";
+import { FileDomainCommands } from "@/types/FileTypes";
 
 interface UploadFileFormProps {
-    onSubmit: (data: FormData) => void;
+    domain: FileDomainCommands;
     appFileMetaId?: string;
     loading?: boolean;
     disabled?: boolean;
@@ -18,8 +19,7 @@ interface UploadFileFormProps {
 }
 
 const UploadFileForm: React.FC<UploadFileFormProps> = ({
-    onSubmit,
-    appFileMetaId,
+    domain,
     loading = false,
     disabled = false,
     submitLabel = "Upload",
@@ -45,10 +45,7 @@ const UploadFileForm: React.FC<UploadFileFormProps> = ({
         formData.append("file", file);
         formData.append("title", title);
         formData.append("description", description);
-        if(appFileMetaId){
-            formData.append("appFileMetaId", appFileMetaId);
-        }
-        onSubmit(formData);
+        domain.uploadManuscript(formData);
     };
 
   return (
@@ -63,7 +60,7 @@ const UploadFileForm: React.FC<UploadFileFormProps> = ({
                     {file ? file.name : selectFileLable}
                     <input type="file" hidden onChange={handleFileChange} />
                 </Button>
-                        </Grid>
+            </Grid>
             <Grid size={5}>
                 <TextField
                     label="Title"
