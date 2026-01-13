@@ -1,6 +1,10 @@
 import { apiFetch } from "./client";
 import { FormInput } from "../types/ReadingTypes";
 
+type FeedbackResponse = {
+  html: string;
+};
+
 export const ReadingsAPI = {
     get(groupId: string) {
         return apiFetch(`/groups/${groupId}/readings`,{
@@ -47,8 +51,8 @@ export const ReadingsAPI = {
         });
     },
 
-    loadExtractedComments(groupId: string, readingId:string, submissionId: string) {
-        return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${submissionId}/feedback`,{
+    getManuscriptHTML(groupId: string, readingId:string, submissionId: string) {
+        return apiFetch<FeedbackResponse>(`/groups/${groupId}/readings/${readingId}/submissions/${submissionId}/feedback`,{
             method: "POST"
         });
     },

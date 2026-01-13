@@ -29,8 +29,8 @@ export function useFileDomain(): FileDomainCommands {
         );
 
         await FilesAPI.updateMetaData(fileMetaId, {
-        title,
-        description,
+            title,
+            description,
         });
         
         await mutate?.(); // revalidate

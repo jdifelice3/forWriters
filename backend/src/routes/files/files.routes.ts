@@ -6,10 +6,8 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import { S3Client } from "@aws-sdk/client-s3";
 import Session from "supertokens-node/recipe/session";
-import { extractCommentsWithTargetsFromS3 } from "../../services/streamFromS3";
 import { mapMimeToEnum } from "../../util/Enum";
 import { getUser } from "../../database/util/user";
-import { ExtractedComment } from "../../types/Feedback";
 
 const router = express.Router();
 

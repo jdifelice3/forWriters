@@ -5,8 +5,8 @@ import { loadGroupById, loadGroupMembership } from "../groups/group.middleware";
 import { loadReadingById, loadSubmissionById } from "./readings.middleware";
 import { SessionRequest } from "supertokens-node/framework/express";
 import Session from "supertokens-node/recipe/session";
-import { extractCommentsWithTargetsFromS3 } from "../../services/streamFromS3";
 import { saveReadingFeedbackComments } from "../../services/Feedback";
+import { loadDocxFromS3AsHtml, addParagraphIds } from "../../services/streamFromS3";
 
 const router = Router({ mergeParams: true });
 
@@ -110,14 +110,6 @@ router.post("/submissions", async (req: Request, res: Response) => {
 });
 
 router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (req: SessionRequest, res: Response) => {
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
-    const user: any = await prisma.user.findUnique({
-        where: {
-            superTokensId: authId,
-        },
-    });
-
     const submissionId = req.params.submissionId;
     const readingSubmission = await prisma.readingSubmission.findUnique({
         where: {
@@ -129,6 +121,9 @@ router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (re
     });
 
     if(!readingSubmission) return res.json({error: "Reading submission did not contain a file"});
+    if(!process.env.AWS_S3_BUCKET || !process.env.AWS_S3_REGION) {
+        return res.status(403).json({error: "Invalid S3 values"});
+    }
 
     const feedback = await prisma.readingFeedback.create({
         data: {
@@ -138,16 +133,19 @@ router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (re
         },
     });
 
-    const extractionResults = 
-        await extractCommentsWithTargetsFromS3(
-            process.env.AWS_S3_BUCKET!,
-            readingSubmission?.appFile.filename!,
-            process.env.AWS_S3_REGION!
-        );
-    
-    const comments = saveReadingFeedbackComments(feedback.id, readingSubmission.participantId, extractionResults);
+    const html = await loadDocxFromS3AsHtml(
+        process.env.AWS_S3_BUCKET, 
+        readingSubmission?.appFile.filename, 
+        process.env.AWS_S3_REGION
+    );
 
-    res.json(comments);
+    const htmlWithIds = addParagraphIds(html);
+    //console.log('htmlWithIds', htmlWithIds);
+    //const comments = saveReadingFeedbackComments(feedback.id, readingSubmission.participantId, extractionResults);
+
+    res.json({
+        html: htmlWithIds,
+    });
   }
 );
 

@@ -35,4 +35,3 @@ export interface CreateReadingInput {
   description: string;
   schedule: string;
 }
-

@@ -3,6 +3,7 @@ import { useReadings } from "../../hooks/reading/useReadings";
 import { ReadingsAPI } from "../../api/readingsApi";
 import { CreateReadingInput } from "../../types/ReadingTypes";
 import { Reading, ReadingFeedback, ReadingParticipant, ReadingSubmission, User } from "../../types/domain-types";
+import { ReviewHTML } from "../../types/ReviewTypes";
 
 export function useReadingDomain(
   groupId: string | undefined,
@@ -12,7 +13,7 @@ export function useReadingDomain(
   const { readings } = useReadings();
   const disabled = !groupId || !user;
   const userId = user?.id;
-
+  
     const createReading = useCallback(async (input: CreateReadingInput) => {
         if (disabled) return;
         await ReadingsAPI.create(groupId!, input, userId!, input.schedule);
@@ -49,10 +50,13 @@ export function useReadingDomain(
         await refresh();
     }, [groupId, disabled]);
 
-    const loadExtractedComments = useCallback(async (readingId: string, submissionId: string) => {
+    const getManuscriptHtml = useCallback(async(readingId: string, submissionId: string) => {
         if (disabled) return;
-        await ReadingsAPI.loadExtractedComments(groupId!, readingId, submissionId);
+    
+        const { html } = await ReadingsAPI.getManuscriptHTML(groupId!, readingId, submissionId);
+
         await refresh();
+        return html;
     }, [groupId, disabled]);
 
 
@@ -106,7 +110,7 @@ export function useReadingDomain(
         deleteReading,
         submitFileVersion,
         updateSubmittedVersion,
-        loadExtractedComments,
+        getManuscriptHtml,
         canSignup,
         canReview,
         canSubmit,
