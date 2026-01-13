@@ -31,7 +31,7 @@ export function ManuscriptReview({
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [focusedCommentId, setFocusedCommentId] = useState<string | null>(null);
-
+  const [coordsTop, setCoordsTop] = useState<number | null>(null);
     const commentRanges = comments.map(c => ({
         commentId: c.id,
         from: c.from,
@@ -53,6 +53,7 @@ const editor = useEditor(
     onSelectionUpdate({ editor }) {
       const { from, to, empty } = editor.state.selection;
       const coords = editor.view.coordsAtPos(from);
+      setCoordsTop(coords.top);
       console.log("selection:", from, to, empty);
 
       if (empty) return;
@@ -93,8 +94,10 @@ if (!editor) {
             elevation={4}
             sx={{
                 position: "absolute",
-                top: activeRange.top + 8,
-                left: activeRange.left + 16,
+                // top: activeRange.top + 8,
+                // left: activeRange.left + 16,
+                top: coordsTop,//activeRange.top,
+                left: 550,//activeRange.left-16,
                 right: -320,
                 width: 300,
                 p: 2,

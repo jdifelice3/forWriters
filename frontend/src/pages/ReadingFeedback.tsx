@@ -139,7 +139,7 @@ const ReadingFeedback = () => {
   return (
     <Box 
         sx={{ 
-            maxWidth: 750, 
+            maxWidth: 900, 
             mx: "auto", 
             p: 0,
             marginLeft: "55px",
@@ -169,43 +169,36 @@ const ReadingFeedback = () => {
                     <Card>
                         <CardContent>
                             <Grid container>
-                                <Grid size={{xs:12, md:6}} key={rs.id}>
+                                <Grid size={{xs:12, md:9}} key={rs.id}>
+                                    <Typography variant="h4" fontWeight="bold">
+                                        {rs.appFile.appFileMeta.title}
+                                    </Typography>
+                                    {/* <Typography sx={{verticalAlign: "top"}} variant="body2">
+                                        by {rs.appFile.appFileMeta.user.userProfile?.firstName} {rs.appFile.appFileMeta.user.userProfile?.lastName}
+                                    </Typography> */}
+                                    <Typography
+                                            variant="body1"
+                                            color="text.secondary"
+                                            sx={{ mb: 2, mt: 2, }}
+                                    >
+                                        {rs.appFile.appFileMeta.description}
+                                    </Typography>
+                                            {manuscriptHtmlBySubmission[rs.id] ? (
+                                            <ManuscriptReview
+                                                html={manuscriptHtmlBySubmission[rs.id]}
+                                                initialComments={[]}
+                                            />
+                                            ) : (
+                                                <CircularProgress size={20} />
+                                            )}
 
-                                {/* {rs.appFile ? (
-                                    <FileIcon file={(rs.appFile) ? rs.appFile : undefined} />
-                                ) : (
-                                    <CancelIcon/>
-                                )} */}
-                                
-                                <Typography variant="h4" fontWeight="bold">
-                                    {rs.appFile.appFileMeta.title}
-                                </Typography>
-                                {/* <Typography sx={{verticalAlign: "top"}} variant="body2">
-                                    by {rs.appFile.appFileMeta.user.userProfile?.firstName} {rs.appFile.appFileMeta.user.userProfile?.lastName}
-                                </Typography> */}
-                                <Typography
-                                        variant="body1"
-                                        color="text.secondary"
-                                        sx={{ mb: 2, mt: 2 }}
-                                >
-                                    {rs.appFile.appFileMeta.description}
-                                </Typography>
-                                        {manuscriptHtmlBySubmission[rs.id] ? (
-                                        <ManuscriptReview
-                                            html={manuscriptHtmlBySubmission[rs.id]}
-                                            initialComments={[]}
-                                        />
+                                        {/* {rs.appFile && rs.appFile.user.userProfile ? (
+                                            <Typography sx={{verticalAlign: "top"}} variant="body2">
+                                                by {rs.appFile.user.userProfile.firstName} {rs.appFile.user.userProfile.lastName}
+                                            </Typography>
                                         ) : (
-                                            <CircularProgress size={20} />
-                                        )}
-
-                                    {/* {rs.appFile && rs.appFile.user.userProfile ? (
-                                        <Typography sx={{verticalAlign: "top"}} variant="body2">
-                                            by {rs.appFile.user.userProfile.firstName} {rs.appFile.user.userProfile.lastName}
-                                        </Typography>
-                                    ) : (
-                                        <div></div>
-                                    )} */}
+                                            <div></div>
+                                        )} */}
                                     </Grid>
                                 </Grid>
                         </CardContent>
