@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useReadings } from "../../hooks/reading/useReadings";
 import { ReadingsAPI } from "../../api/readingsApi";
 import { CreateReadingInput } from "../../types/ReadingTypes";
-import { Reading, ReadingFeedback, ReadingParticipant, ReadingSubmission, User } from "../../types/domain-types";
+import { Reading, FileFeedback, ReadingParticipant, ReadingSubmission, User } from "../../types/domain-types"
 import { ReviewHTML } from "../../types/ReviewTypes";
 
 export function useReadingDomain(
@@ -87,7 +87,7 @@ export function useReadingDomain(
         const foundReading: Reading | undefined = readings.find(r => r.id === readingId);
         const foundParticipant: ReadingParticipant | undefined = foundReading?.readingParticipant.find(p => p.userId === userId);
         const foundSubmission: ReadingSubmission | undefined = foundReading?.readingSubmission.find(s => s.participantId === foundParticipant?.id);
-        const foundFeedback: ReadingFeedback | undefined = foundSubmission?.readingFeedback.find(f => f.reviewerParticipantId === userId);
+        const foundFeedback: FileFeedback | undefined = foundSubmission?.fileFeedback.find(f => f.reviewerParticipantId === userId);
         const userHasSubmitted = foundFeedback !== undefined;
 
         //Check if the user is also the author of the submission

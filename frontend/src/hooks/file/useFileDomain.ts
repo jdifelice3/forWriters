@@ -83,16 +83,6 @@ export function useFileDomain(): FileDomainCommands {
 /**
  * UPLOAD VERSION (no optimistic shortcut)
  */
-    const uploadFeedback = useCallback<FileDomainCommands["uploadFeedback"]>(
-        async (formData) => {
-            formData.append("documentType", DocumentEnum.FEEDBACK);
-            const results: any = await FilesAPI.uploadFeedback(formData);
-            const appFile: AppFile = results.appFile;
-            await mutate?.();
-            return results.appFile;
-        },
-        [mutate]
-    );
 
     /**
      * SET ACTIVE VERSION (optimistic)
@@ -121,7 +111,6 @@ export function useFileDomain(): FileDomainCommands {
         deleteFile,
         uploadManuscript,
         uploadVersion,
-        uploadFeedback,
         setActiveVersion,
     };
 }

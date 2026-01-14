@@ -52,10 +52,6 @@ export interface FileDomainCommands {
     formData: FormData,
   ): Promise<void>;
 
-  uploadFeedback(
-    formData: FormData
-  ): Promise<void>;
-
   /** Set the active version */
   setActiveVersion(
     fileMetaId: string,

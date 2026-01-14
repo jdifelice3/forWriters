@@ -31,7 +31,7 @@ router.get("/", asyncHandler(async (req: Request, res: Response) => {
                             appFileMeta: true
                         }
                     },
-                    readingFeedback: true
+                    fileFeedback: true
                 },
             },
         },

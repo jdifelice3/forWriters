@@ -2,11 +2,7 @@
 
 import { ReadingParticipant } from "../../types/domain-types";
 import { generateRandomString } from "../../util/Math";
-import {
-    Divider,
-    Typography,
-    Box
-} from "@mui/material";
+import { Divider, Typography, Box } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import ReviewsIcon from '@mui/icons-material/Reviews';
 import EditIcon from '@mui/icons-material/Edit';
@@ -19,7 +15,7 @@ const FeedbackCommentList: React.FC<FeedbackCommentListProps> = ({readingAuthor}
    
   return (
     <Box>
-        {readingAuthor.readingFeedback.map((fb => (
+        {/* {readingAuthor.fileFeedback.map((fb => (
             <div key={generateRandomString(5)}>
             <Grid key={generateRandomString(5)}
                 container
@@ -35,9 +31,9 @@ const FeedbackCommentList: React.FC<FeedbackCommentListProps> = ({readingAuthor}
                 }}
             >
                 <Typography key={generateRandomString(10)} sx={{fontWeight:"bold"}}>
-                    {/* {fb.user.userProfile?.firstName} {fb.user.userProfile?.lastName} */}
+                    {fb.user.userProfile?.firstName} {fb.user.userProfile?.lastName}
                 </Typography>
-                {fb.readingFeedbackComment.map((com => (
+                {fb.fileFeedbackComment.map((com => (
                 <>
                 {com.source === "DOCX" ? (  
                     <>
@@ -64,7 +60,7 @@ const FeedbackCommentList: React.FC<FeedbackCommentListProps> = ({readingAuthor}
             </Grid>
             <Divider key={generateRandomString(10)} sx={{ my: 4 }} />
             </div>
-        )))}
+        )))} */}
     </Box>
   )
 }

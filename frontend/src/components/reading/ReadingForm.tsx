@@ -202,7 +202,7 @@ const ReadingAuthorForm: React.FC<ReadingAuthorFormProps> = ({readingParticipant
                 <Typography variant="body1" fontWeight="bold">
                     Feedback:
                 </Typography>
-                {readingParticipant.readingFeedback.length > 0 ? (
+                {readingParticipant.fileFeedback.length > 0 ? (
                     <FeedbackCommentList readingAuthor={readingParticipant}/>
                 ) : (
                     <Typography>

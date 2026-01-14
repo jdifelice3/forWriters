@@ -52,14 +52,10 @@ export const FilesAPI = {
         });
     },
 
-    uploadFeedback(
-        formData: FormData
-    ){
-        return apiFetch("/files", {
-            method: "POST",
-            credentials: "include",
-            body: formData,
+    addVersion(groupId: string, readingId:string, appFileId: string) {
+        return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${appFileId}/version`,{
+            method: "POST"
         });
-
-    }
+    },
+    
 }

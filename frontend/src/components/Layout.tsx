@@ -13,7 +13,7 @@ import UserProfile from "../pages/UserProfile";
 import FileManager from "../pages/FileManager";
 import Groups from "../pages/Groups";
 import GroupsCreate from "../pages/GroupsCreate";
-import ReadingFeedback from "../pages/ReadingFeedback";
+import FileFeedback from "../pages/FileFeedback";
 import GroupJoinRequestAdmin from "../pages/GroupJoinRequestAdmin";
 import GroupSearch from "../pages/GroupSearch";
 import MemberSearchPage from "../pages/MemberSearchPage";
@@ -47,7 +47,7 @@ export default function Layout() {
                 <Route path="/creategroup" element={<GroupsCreate />} />
                 
                 <Route path="/readings" element={<Readings />} />
-                <Route path="/readingfeedback/:readingId" element={<ReadingFeedback />} />
+                <Route path="/readingfeedback/:readingId" element={<FileFeedback />} />
                 <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
 
                 <Route path="/membersearch" element={<MemberSearchPage />} />

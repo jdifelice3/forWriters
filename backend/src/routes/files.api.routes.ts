@@ -1,9 +1,32 @@
-import express from "express";
 import Session from "supertokens-node/recipe/session";
 import prisma from "../database/prisma";
 import { getUser } from "../database/util/user";
+import { Router } from "express";
+import { z } from "zod";
 
-const router = express.Router();
+const router = Router();
+
+const TargetInput = z.object({
+  paragraphId: z.string().min(1),
+  from: z.number().int().nonnegative(),
+  to: z.number().int().nonnegative(),
+  targetText: z.string().default(""),
+});
+
+const CreateCommentInput = z.object({
+  reviewerParticipantId: z.string().min(1),
+  commentText: z.string().min(1),
+  source: z.enum(["DOCX", "MANUAL"]).default("DOCX"),
+  targets: z.array(TargetInput).min(1),
+});
+
+const UpdateCommentInput = z.object({
+  commentText: z.string().min(1),
+});
+
+const ResolveInput = z.object({
+  isResolved: z.boolean(),
+});
 
 router.get("/", async (req, res) => {
     const session = await Session.getSession(req, res);
@@ -130,4 +153,174 @@ router.delete("/", async(req, res) => {
         res.status(500).json({error: "Expecting a string data type in the query string for file id"});
     }
 });
+
+// FEEDBACK
+router.get("/feedback/:fileFeedbackId/comments", async (req, res) => {
+    const { fileFeedbackId } = req.params;
+
+    const comments = await prisma.fileFeedbackComment.findMany({
+      where: { fileFeedbackId },
+      orderBy: { createdAt: "asc" },
+      include: {
+        targets: { orderBy: { from: "asc" } },
+        // adjust this include to your actual relations:
+        readingParticipant: {
+          include: {
+            user: {
+              include: { userProfile: true },
+            },
+          },
+        },
+      },
+    });
+
+    const dto = comments.map((c) => ({
+      id: c.id,
+      readingFeedbackId: c.fileFeedbackId,
+      reviewerParticipantId: c.reviewerParticipantId,
+      reviewerDisplayName:
+        c.readingParticipant?.user?.userProfile
+          ? `${c.readingParticipant.user.userProfile.firstName} ${c.readingParticipant.user.userProfile.lastName}`
+          : "Reviewer",
+      reviewerAvatarUrl:
+        c.readingParticipant?.user?.userProfile?.avatarUrl ?? null,
+      commentText: c.commentText,
+      isResolved: c.isResolved,
+      createdAt: c.createdAt.toISOString(),
+      updatedAt: c.updatedAt.toISOString(),
+      targets: c.targets.map((t) => ({
+        id: t.id,
+        paragraphId: t.paragraphId,
+        from: t.from,
+        to: t.to,
+        targetText: t.targetText,
+      })),
+    }));
+
+    res.json(dto);
+  }
+);
+
+// POST create
+router.post("/feedback/:fileFeedbackId/comments", async (req, res) => {
+    const { fileFeedbackId } = req.params;
+    const input = CreateCommentInput.parse(req.body);
+
+    const created = await prisma.$transaction(async (tx) => {
+      const comment = await tx.fileFeedbackComment.create({
+        data: {
+          fileFeedbackId,
+          reviewerParticipantId: input.reviewerParticipantId,
+          source: input.source,
+          commentText: input.commentText,
+        },
+      });
+
+      await tx.fileFeedbackCommentTarget.createMany({
+        data: input.targets.map((t) => ({
+          commentId: comment.id,
+          paragraphId: t.paragraphId,
+          from: t.from,
+          to: t.to,
+          targetText: t.targetText ?? "",
+        })),
+      });
+
+      return tx.fileFeedbackComment.findUniqueOrThrow({
+        where: { id: comment.id },
+        include: {
+          targets: { orderBy: { from: "asc" } },
+          readingParticipant: {
+            include: { user: { include: { userProfile: true } } },
+          },
+        },
+      });
+    });
+
+    const dto = {
+      id: created.id,
+      readingFeedbackId: created.fileFeedbackId,
+      reviewerParticipantId: created.reviewerParticipantId,
+      reviewerDisplayName:
+        created.readingParticipant?.user?.userProfile
+          ? `${created.readingParticipant.user.userProfile.firstName} ${created.readingParticipant.user.userProfile.lastName}`
+          : "Reviewer",
+      reviewerAvatarUrl:
+        created.readingParticipant?.user?.userProfile?.avatarUrl ?? null,
+      commentText: created.commentText,
+      isResolved: created.isResolved,
+      createdAt: created.createdAt.toISOString(),
+      updatedAt: created.updatedAt.toISOString(),
+      targets: created.targets.map((t) => ({
+        id: t.id,
+        paragraphId: t.paragraphId,
+        from: t.from,
+        to: t.to,
+        targetText: t.targetText,
+      })),
+    };
+
+    res.status(201).json(dto);
+  }
+);
+
+// PATCH update text
+router.patch("/feedback/:fileFeedbackId/comments/:commentId", async (req, res) => {
+    const { commentId } = req.params;
+    const input = UpdateCommentInput.parse(req.body);
+
+    const updated = await prisma.fileFeedbackComment.update({
+      where: { id: commentId },
+      data: { commentText: input.commentText },
+      include: {
+        targets: { orderBy: { from: "asc" } },
+        readingParticipant: {
+          include: { user: { include: { userProfile: true } } },
+        },
+      },
+    });
+
+    res.json({
+      id: updated.id,
+      readingFeedbackId: updated.fileFeedbackId,
+      reviewerParticipantId: updated.reviewerParticipantId,
+      reviewerDisplayName:
+        updated.readingParticipant?.user?.userProfile
+          ? `${updated.readingParticipant.user.userProfile.firstName} ${updated.readingParticipant.user.userProfile.lastName}`
+          : "Reviewer",
+      reviewerAvatarUrl:
+        updated.readingParticipant?.user?.userProfile?.avatarUrl ?? null,
+      commentText: updated.commentText,
+      isResolved: updated.isResolved,
+      createdAt: updated.createdAt.toISOString(),
+      updatedAt: updated.updatedAt.toISOString(),
+      targets: updated.targets.map((t) => ({
+        id: t.id,
+        paragraphId: t.paragraphId,
+        from: t.from,
+        to: t.to,
+        targetText: t.targetText,
+      })),
+    });
+  }
+);
+
+// PATCH resolve
+router.patch("/feedback/:fileFeedbackId/comments/:commentId/resolve", async (req, res) => {
+    const { commentId } = req.params;
+    const input = ResolveInput.parse(req.body);
+
+    const updated = await prisma.fileFeedbackComment.update({
+      where: { id: commentId },
+      data: { isResolved: input.isResolved },
+    });
+
+    res.json({
+      id: updated.id,
+      isResolved: updated.isResolved,
+      updatedAt: updated.updatedAt.toISOString(),
+    });
+  }
+);
+
 export default router;

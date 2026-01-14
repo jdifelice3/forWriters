@@ -1,17 +1,6 @@
 import express from "express";
 import { PrismaClient, Role } from "@prisma/client";
-import Session from "supertokens-node/recipe/session";
 import {deleteUser} from "supertokens-node";
-import { 
-    updateUserProfile, 
-    getUserProfile, 
-
-
-} from "../database/dbUsers";
-import Multitenancy from "supertokens-node/recipe/multitenancy";
-import { 
-  JoinRequestError
-} from "../database/types/Error";
 
 const router = express.Router();
 

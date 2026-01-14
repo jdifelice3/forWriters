@@ -51,7 +51,7 @@ export const UploadFileFormFeedback: React.FC<UploadFeedbackFileFormProps> = ({
         // for (const [key, value] of formData.entries()) {
         //     console.log(key, value);
         // }
-        domain.uploadFeedback(formData);
+        //domain.uploadFeedback(formData);
     };
 
   return (

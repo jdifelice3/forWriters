@@ -130,7 +130,7 @@ model AppFile {
 
   appFileMeta    AppFileMeta        @relation("OriginalAppFile", fields: [appFileMetaId], references: [id])
   readingSubmission  ReadingSubmission[]
-  readingFeedback       ReadingFeedback[]
+  fileFeedback       FileFeedback[]
 
   @@unique([appFileMetaId, version])
 }
@@ -298,40 +298,63 @@ model Reading {
   readingSubmission         ReadingSubmission[]
 }
 
-model ReadingFeedback {
+model FileFeedback {
   id                    String   @id @default(cuid())
+
   reviewerParticipantId String
-  submissionId          String
-  appFileId                String
+  appFileId             String
+
+  // optional contextual link
+  submissionId          String?  
+
   createdAt             DateTime @default(now())
 
-  reviewerParticipant ReadingParticipant @relation(fields: [reviewerParticipantId], references: [id])
-  submission           ReadingSubmission  @relation(fields: [submissionId], references: [id])
-  appFile                 AppFile            @relation(fields: [appFileId], references: [id])
-  readingFeedbackComment    ReadingFeedbackComment[]
+  reviewerParticipant   ReadingParticipant @relation(fields: [reviewerParticipantId], references: [id])
+  appFile               AppFile            @relation(fields: [appFileId], references: [id])
+  submission            ReadingSubmission? @relation(fields: [submissionId], references: [id])
+
+  fileFeedbackComment   FileFeedbackComment[]
+
+  @@unique([appFileId, reviewerParticipantId]) // 🔒 canonical identity
+  @@index([submissionId])
 }
 
-model ReadingFeedbackComment {
-  id                     String        @id @default(cuid())
-  reviewerParticipantId  String
-  readingFeedbackId      String
-  source                 CommentSource @default(DOCX)
-  commentText            String
 
-  targets                ReadingFeedbackCommentTarget[]
 
-  readingFeedback        ReadingFeedback @relation(fields: [readingFeedbackId], references: [id])
+model FileFeedbackComment {
+  id                   String   @id @default(cuid())
+  fileFeedbackId       String   // rename from readingFeedbackId
+  reviewerParticipantId String
+  source               CommentSource @default(DOCX)
+  commentText          String
+  isResolved           Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  fileFeedback         FileFeedback @relation(fields: [fileFeedbackId], references: [id])
+  readingParticipant   ReadingParticipant @relation(fields: [reviewerParticipantId], references: [id])
+  targets              FileFeedbackCommentTarget[]
+
+  @@index([fileFeedbackId])
+  @@index([reviewerParticipantId])
 }
 
-model ReadingFeedbackCommentTarget {
-  id              String @id @default(cuid())
-  commentId       String
-  targetText      String
-  ordinal         Int    // preserves document order
 
-  comment         ReadingFeedbackComment @relation(fields: [commentId], references: [id])
+model FileFeedbackCommentTarget {
+  id                 String   @id @default(cuid())
+  commentId           String
+  paragraphId         String
+  from                Int
+  to                  Int
+  targetText          String
+
+  createdAt           DateTime @default(now())
+
+  comment             FileFeedbackComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@index([commentId])
+  @@index([paragraphId])
+  @@index([from])
 }
 
 model ReadingParticipant {
@@ -344,7 +367,8 @@ model ReadingParticipant {
   user      User    @relation("ReadingParticipantUser", fields: [userId], references: [id])
 
   readingSubmission ReadingSubmission?
-  readingFeedback   ReadingFeedback[]
+  fileFeedback   FileFeedback[]
+  fileFeedbackComment FileFeedbackComment[]
 
   @@unique([readingId, userId])
 }
@@ -359,7 +383,7 @@ model ReadingSubmission {
   reading       Reading   @relation(fields: [readingId], references: [id])
   participant   ReadingParticipant    @relation(fields: [participantId], references: [id])
   appFile       AppFile  @relation(fields: [appFileId], references: [id])
-  readingFeedback       ReadingFeedback[]
+  fileFeedback       FileFeedback[]
   @@unique([readingId, participantId, appFileId])
 }
 
@@ -406,6 +430,7 @@ model UserProfile {
   lastName  String?
   phone     String?
   bio       String?
+  avatarUrl String?
 }
 
 model UserSearch {

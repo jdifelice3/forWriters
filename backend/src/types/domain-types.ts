@@ -51,7 +51,7 @@ export interface AppFile {
   createdAt: string;
   appFileMeta: AppFileMeta;
   readingSubmission: ReadingSubmission[];
-  readingFeedback: ReadingFeedback[];
+  fileFeedback: FileFeedback[];
 }
 
 export interface AppFileMeta {
@@ -195,34 +195,41 @@ export interface Reading {
   readingSubmission: ReadingSubmission[];
 }
 
-export interface ReadingFeedback {
+export interface FileFeedback {
   id: string;
   reviewerParticipantId: string;
-  submissionId: string;
   appFileId: string;
+  submissionId?: string;
   createdAt: string;
   reviewerParticipant: ReadingParticipant;
-  submission: ReadingSubmission;
   appFile: AppFile;
-  readingFeedbackComment: ReadingFeedbackComment[];
+  submission?: ReadingSubmission;
+  fileFeedbackComment: FileFeedbackComment[];
 }
 
-export interface ReadingFeedbackComment {
+export interface FileFeedbackComment {
   id: string;
+  fileFeedbackId: string;
   reviewerParticipantId: string;
-  readingFeedbackId: string;
   source: CommentSource;
   commentText: string;
-  targets: ReadingFeedbackCommentTarget[];
-  readingFeedback: ReadingFeedback;
+  isResolved: boolean;
+  createdAt: string;
+  updatedAt: string;
+  fileFeedback: FileFeedback;
+  readingParticipant: ReadingParticipant;
+  targets: FileFeedbackCommentTarget[];
 }
 
-export interface ReadingFeedbackCommentTarget {
+export interface FileFeedbackCommentTarget {
   id: string;
   commentId: string;
+  paragraphId: string;
+  from: number;
+  to: number;
   targetText: string;
-  ordinal: number;
-  comment: ReadingFeedbackComment;
+  createdAt: string;
+  comment: FileFeedbackComment;
 }
 
 export interface ReadingParticipant {
@@ -233,7 +240,8 @@ export interface ReadingParticipant {
   reading: Reading;
   user: User;
   readingSubmission?: ReadingSubmission;
-  readingFeedback: ReadingFeedback[];
+  fileFeedback: FileFeedback[];
+  fileFeedbackComment: FileFeedbackComment[];
 }
 
 export interface ReadingSubmission {
@@ -245,7 +253,7 @@ export interface ReadingSubmission {
   reading: Reading;
   participant: ReadingParticipant;
   appFile: AppFile;
-  readingFeedback: ReadingFeedback[];
+  fileFeedback: FileFeedback[];
 }
 
 export interface User {
@@ -287,6 +295,7 @@ export interface UserProfile {
   lastName?: string;
   phone?: string;
   bio?: string;
+  avatarUrl?: string;
 }
 
 export interface UserSearch {

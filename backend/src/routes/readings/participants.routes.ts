@@ -149,7 +149,7 @@ router.post(
     });
 
     // 2️⃣ Create feedback (workflow)
-    const feedback = await prisma.readingFeedback.create({
+    const feedback = await prisma.fileFeedback.create({
         data: {
             reviewerParticipantId: req.readingParticipant.id,
             submissionId: req.submission.id,

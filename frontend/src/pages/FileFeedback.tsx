@@ -6,7 +6,7 @@ import { useFileDomain } from "../hooks/file/useFileDomain";
 import { useReadings } from "../hooks/reading/useReadings";
 import { useReadingDomain } from "../hooks/reading/useReadingDomain";
 import { UploadFileFormProperties } from "../types/FileTypes";
-import { AppFile, ReadingSubmission } from "../types/domain-types";
+import { AppFile, Reading, ReadingSubmission } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import FileIcon from "../components/controls/FileIcon";
 import {
@@ -31,14 +31,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import { useUserContext } from "../context/UserContext";
 import CancelIcon from '@mui/icons-material/Cancel';
 import { FileDomainCommands } from "../types/FileTypes";
-import { UploadFileFormFeedback } from "../components/file/forms/UploadFileFormFeedback";
-//import Editor from "../components/richTextEditor/Editor";
-import useExtensions from "../components/richTextEditor/useExtensions";
-import { RichTextReadOnly } from "mui-tiptap";
-import { Editor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import { ManuscriptReview } from "../components/review/ManuscriptReview";
-import { ReviewHTML } from "../types/ReviewTypes";
 
 const uploadFormProperties: UploadFileFormProperties =
   {
@@ -50,23 +43,21 @@ const uploadFormProperties: UploadFileFormProperties =
     showUploadIcon: false
   }
 
-const ReadingFeedback = () => {
+const FileFeedback = () => {
     const { user } = useUserContext();
     const { 
         saveMetadata, 
         deleteFile, 
         uploadVersion, 
         uploadManuscript,
-        uploadFeedback, 
         setActiveVersion 
       } = useFileDomain();
 
     const { activeGroup } = useGroupContext();
     const { readingId } = useParams<{ readingId: string }>();
     const { readings, isLoading: isReadingLoading, refresh } = useReadings();
-    const reading = readings.find(r => r.id === readingId);
+    const reading: Reading | undefined = readings.find(r => r.id === readingId);
     const { canReview, getManuscriptHtml } = useReadingDomain(activeGroup?.id, user, refresh);
-    const extensions = useExtensions({placeholder: ""});
     const [editFile, setEditFile] = useState<AppFile | null>(null);
     const [editTitle, setEditTitle] = useState("");
     const [editDescription, setEditDescription] = useState("");
@@ -84,7 +75,7 @@ const ReadingFeedback = () => {
     for (const rs of reading!.readingSubmission) {
       if (!rs.appFile) continue;
 
-      // 🔒 guard: already loaded
+      // guard: already loaded
       if (manuscriptHtmlBySubmission[rs.id]) continue;
 
       const html = await getManuscriptHtml(reading!.id, rs.id);
@@ -93,7 +84,6 @@ const ReadingFeedback = () => {
       }
     }
 
-    // 🔒 only update state if we actually added something
     if (!cancelled && Object.keys(updates).length > 0) {
       setManuscriptHtmlBySubmission(prev => ({
         ...prev,
@@ -121,18 +111,11 @@ const ReadingFeedback = () => {
             </Box>
     )};
     
-    const onUploadFeedback = async(formData: FormData) => {
-        const appFile = await uploadFeedback(formData);
-        const submissionId = formData.get("submissionId")?.toString();
-        if(!reading || !submissionId) return;
-    }
-
     const domain: FileDomainCommands = {
         saveMetadata:saveMetadata,
         deleteFile: deleteFile,
         uploadVersion: uploadVersion,
         uploadManuscript: uploadManuscript,
-        uploadFeedback: onUploadFeedback,
         setActiveVersion: setActiveVersion,
     }
 
@@ -173,9 +156,6 @@ const ReadingFeedback = () => {
                                     <Typography variant="h4" fontWeight="bold">
                                         {rs.appFile.appFileMeta.title}
                                     </Typography>
-                                    {/* <Typography sx={{verticalAlign: "top"}} variant="body2">
-                                        by {rs.appFile.appFileMeta.user.userProfile?.firstName} {rs.appFile.appFileMeta.user.userProfile?.lastName}
-                                    </Typography> */}
                                     <Typography
                                             variant="body1"
                                             color="text.secondary"
@@ -187,18 +167,12 @@ const ReadingFeedback = () => {
                                             <ManuscriptReview
                                                 html={manuscriptHtmlBySubmission[rs.id]}
                                                 initialComments={[]}
+                                                readingFeedbackId={""}
+                                                reviewerParticipantId={user.id}
                                             />
                                             ) : (
                                                 <CircularProgress size={20} />
                                             )}
-
-                                        {/* {rs.appFile && rs.appFile.user.userProfile ? (
-                                            <Typography sx={{verticalAlign: "top"}} variant="body2">
-                                                by {rs.appFile.user.userProfile.firstName} {rs.appFile.user.userProfile.lastName}
-                                            </Typography>
-                                        ) : (
-                                            <div></div>
-                                        )} */}
                                     </Grid>
                                 </Grid>
                         </CardContent>
@@ -240,4 +214,4 @@ const ReadingFeedback = () => {
   );
 }
 
-export default ReadingFeedback;
+export default FileFeedback;

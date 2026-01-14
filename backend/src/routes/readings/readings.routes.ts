@@ -2,10 +2,9 @@
 import { Router, Request, Response, NextFunction } from "express";
 import prisma from "../../database/prisma";
 import { loadGroupById, loadGroupMembership } from "../groups/group.middleware";
-import { loadReadingById, loadSubmissionById } from "./readings.middleware";
+import { loadSubmissionById } from "./readings.middleware";
 import { SessionRequest } from "supertokens-node/framework/express";
 import Session from "supertokens-node/recipe/session";
-import { saveReadingFeedbackComments } from "../../services/Feedback";
 import { loadDocxFromS3AsHtml, addParagraphIds } from "../../services/streamFromS3";
 
 const router = Router({ mergeParams: true });
@@ -125,7 +124,7 @@ router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (re
         return res.status(403).json({error: "Invalid S3 values"});
     }
 
-    const feedback = await prisma.readingFeedback.create({
+    const feedback = await prisma.fileFeedback.create({
         data: {
             reviewerParticipantId: readingSubmission.participantId,
             submissionId: req.submission.id,
