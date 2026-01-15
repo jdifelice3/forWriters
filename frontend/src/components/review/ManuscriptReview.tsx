@@ -1,12 +1,13 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Box, Paper, TextField, Typography, Button, Chip } from "@mui/material";
 
 import { ParagraphWithId } from "../../extensions/ParagraphWithId";
 import { CommentHighlightExtension } from "../../extensions/CommentHighlightExtension";
-import { Comment } from "../../types/FeedbackTypes";
+import { Comment, CommentDTO } from "../../types/FeedbackTypes";
 import { CommentsAPI } from "../../api/comments";
+import { Editor } from "@tiptap/core";
 
 type ActiveRange = {
   from: number;
@@ -23,8 +24,8 @@ type Pin = {
 
 type Props = {
   html: string;
-  readingFeedbackId: string;
-  reviewerParticipantId: string;
+  fileFeedbackId: string;
+  reviewerUserId: string;
   initialComments: Comment[];
 };
 
@@ -37,12 +38,6 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-/**
- * Stacking algorithm:
- * - Sort pins by top
- * - Assign lane so pins that overlap vertically get different lanes
- * - If all lanes are occupied, push pin down (minimal displacement)
- */
 function stackPins(pins: Array<{ commentId: string; top: number }>): Pin[] {
   const sorted = [...pins].sort((a, b) => a.top - b.top);
   const laneBottoms = new Array(LANES_MAX).fill(-Infinity);
@@ -50,7 +45,6 @@ function stackPins(pins: Array<{ commentId: string; top: number }>): Pin[] {
   const result: Pin[] = [];
 
   for (const p of sorted) {
-    // try to place in a lane without overlap
     let placedLane = -1;
     for (let lane = 0; lane < LANES_MAX; lane++) {
       if (p.top >= laneBottoms[lane] + PIN_GAP) {
@@ -62,17 +56,15 @@ function stackPins(pins: Array<{ commentId: string; top: number }>): Pin[] {
     let top = p.top;
 
     if (placedLane === -1) {
-      // all lanes overlap; pick lane with smallest bottom and push down
       let bestLane = 0;
       for (let lane = 1; lane < LANES_MAX; lane++) {
         if (laneBottoms[lane] < laneBottoms[bestLane]) bestLane = lane;
       }
       placedLane = bestLane;
-      top = laneBottoms[bestLane] + PIN_GAP; // push down
+      top = laneBottoms[bestLane] + PIN_GAP;
     }
 
     laneBottoms[placedLane] = top + PIN_HEIGHT;
-
     result.push({ commentId: p.commentId, top, lane: placedLane });
   }
 
@@ -81,8 +73,8 @@ function stackPins(pins: Array<{ commentId: string; top: number }>): Pin[] {
 
 export function ManuscriptReview({
   html,
-  readingFeedbackId,
-  reviewerParticipantId,
+  fileFeedbackId,
+  reviewerUserId,
   initialComments,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -93,13 +85,28 @@ export function ManuscriptReview({
   const [focusedCommentId, setFocusedCommentId] = useState<string | null>(null);
   const [draftComment, setDraftComment] = useState("");
 
+  // Keep state in a ref so editor callbacks aren't stale (important when using useEditor(..., []))
+  const editingCommentIdRef = useRef<string | null>(null);
+  const activeRangeRef = useRef<ActiveRange | null>(null);
+
+  useEffect(() => {
+    editingCommentIdRef.current = editingCommentId;
+  }, [editingCommentId]);
+
+  useEffect(() => {
+    activeRangeRef.current = activeRange;
+  }, [activeRange]);
+
+  const tempId = () => {
+  return `tmp_${Math.random().toString(36).slice(2)}`;
+}
   const sortedComments = useMemo(() => {
-    // order by first target position
-    return [...comments].sort((a, b) => (a.targets[0]?.from ?? 0) - (b.targets[0]?.from ?? 0));
+    return [...comments].sort(
+      (a, b) => (a.targets[0]?.from ?? 0) - (b.targets[0]?.from ?? 0)
+    );
   }, [comments]);
 
   const commentRanges = useMemo(() => {
-    // highlight every target
     return comments.flatMap((c) =>
       c.targets.map((t) => ({
         commentId: c.id,
@@ -109,49 +116,225 @@ export function ManuscriptReview({
     );
   }, [comments]);
 
+  function resetEditorUI() {
+    setActiveRange(null);
+    setEditingCommentId(null);
+    setDraftComment("");
+  }
+
+function openEditForComment(commentId: string) {
+  if (!editor) return;
+
+  const comment = comments.find(c => c.id === commentId);
+  if (!comment) return;
+
+  const first = comment.targets[0];
+  if (!first) return;
+
+  const coords = editor.view.coordsAtPos(first.from);
+
+  const editorEl = editor.view.dom as HTMLElement;
+  const editorRect = editorEl.getBoundingClientRect();
+
+  setActiveRange({
+    from: first.from,
+    to: first.to,
+    paragraphId: first.paragraphId,
+    top: getEditorRelativeTop(editor, first.from),
+  });
+
+  editor.commands.setTextSelection({
+    from: first.from,
+    to: first.to,
+  });
+
+  editor.commands.scrollIntoView();
+}
+
+
+  function focusNextComment(dir: 1 | -1) {
+    if (!editor) return;
+    if (sortedComments.length === 0) return;
+
+    const idx = focusedCommentId
+      ? sortedComments.findIndex((c) => c.id === focusedCommentId)
+      : -1;
+
+    const nextIdx =
+      idx === -1
+        ? dir === 1
+          ? 0
+          : sortedComments.length - 1
+        : clamp(idx + dir, 0, sortedComments.length - 1);
+
+    const next = sortedComments[nextIdx];
+    setFocusedCommentId(next.id);
+
+    const first = next.targets[0];
+    if (first) {
+      editor.commands.setTextSelection({ from: first.from, to: first.to });
+      editor.commands.scrollIntoView();
+    }
+  }
+
+async function handleSave() {
+  if (!draftComment.trim() || !activeRange) return;
+
+  // EDIT EXISTING COMMENT (no optimistic needed)
+  if (editingCommentId) {
+    const prev = comments;
+
+    setComments((cs) =>
+      cs.map((c) =>
+        c.id === editingCommentId
+          ? { ...c, commentText: draftComment }
+          : c
+      )
+    );
+
+    try {
+      const updated = await CommentsAPI.updateText(
+        fileFeedbackId,
+        editingCommentId,
+        draftComment
+      );
+
+      setComments((cs) =>
+        cs.map((c) => (c.id === updated.id ? updated : c))
+      );
+    } catch (e) {
+      setComments(prev);
+      alert("Failed to update comment");
+    }
+
+    resetEditorUI();
+    return;
+  }
+
+  // CREATE NEW COMMENT (optimistic)
+  const optimisticId = tempId();
+
+const optimisticComment: CommentDTO = {
+  id: optimisticId,
+  fileFeedbackId: fileFeedbackId,
+  reviewerUserId: reviewerUserId,
+  reviewerDisplayName: "You",
+  reviewerAvatarUrl: null,
+  commentText: draftComment,
+  isResolved: false,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  targets: [
+    {
+      id: tempId(),
+      paragraphId: activeRange.paragraphId,
+      from: activeRange.from,
+      to: activeRange.to,
+      targetText: "",
+    },
+  ],
+};
+
+  setComments((cs) => [...cs, optimisticComment]);
+  setFocusedCommentId(optimisticId);
+  resetEditorUI();
+
+  try {
+    const created = await CommentsAPI.create(fileFeedbackId, {
+      reviewerUserId: reviewerUserId,
+      commentText: optimisticComment.commentText,
+      source: "DOCX",
+      targets: optimisticComment.targets.map((t) => ({
+        paragraphId: t.paragraphId,
+        from: t.from,
+        to: t.to,
+        targetText: t.targetText,
+      })),
+    });
+
+    // Replace optimistic with real
+    setComments((cs) =>
+      cs.map((c) => (c.id === optimisticId ? created : c))
+    );
+
+    setFocusedCommentId(created.id);
+  } catch (e) {
+    // Roll back
+    setComments((cs) => cs.filter((c) => c.id !== optimisticId));
+    alert("Failed to create comment");
+  }
+}
+
+  const getEditorRelativeTop = (editor: Editor, pos: number) =>{
+  const coords = editor.view.coordsAtPos(pos);
+
+  const editorEl = editor.view.dom as HTMLElement;
+  const editorRect = editorEl.getBoundingClientRect();
+
+  return coords.top - editorRect.top + editorEl.scrollTop;
+}
+
+  // --- ✅ Selection-safe read-only editor config ---
+  // Key points:
+  // - editable: true (so selection works)
+  // - block mutation via beforeinput/paste/drop
+  // - avoid autofocus; your UI has textfields & overlays
+  // - do NOT intercept mouse events that would affect drag-selection
   const editor = useEditor(
     {
-      editable: false,
-      autofocus: true,
+      editable: true,
+      autofocus: false,
+
       extensions: [
         StarterKit.configure({ paragraph: false }),
         ParagraphWithId,
         CommentHighlightExtension.configure({
           comments: commentRanges,
           onClickComment: (commentId: string) => {
+            // This should only run on simple clicks (not drag selection).
             setFocusedCommentId(commentId);
             openEditForComment(commentId);
           },
         }),
       ],
+
       content: html,
 
-      onSelectionUpdate({ editor }) {
-        if (editingCommentId) return;
+onSelectionUpdate({ editor }) {
+  if (editingCommentIdRef.current) return;
 
-        const { from, to, empty } = editor.state.selection;
-        if (empty) return;
+  const { from, to, empty } = editor.state.selection;
+  if (empty) {
+    setActiveRange(null);
+    return;
+  }
 
-        const container = containerRef.current;
-        if (!container) return;
+  const paragraphId = editor.state.doc.resolve(from).parent.attrs.paragraphId;
+  if (!paragraphId) return;
 
-        const paragraphId = editor.state.doc.resolve(from).parent.attrs.paragraphId;
-        if (!paragraphId) return;
+  const coords = editor.view.coordsAtPos(from);
 
-        const coords = editor.view.coordsAtPos(from);
-        const rect = container.getBoundingClientRect();
+  const editorEl = editor.view.dom as HTMLElement;
+  const editorRect = editorEl.getBoundingClientRect();
 
-        setActiveRange({
-          from,
-          to,
-          paragraphId,
-          top: coords.top - rect.top,
-        });
-      },
+  setActiveRange({
+    from,
+    to,
+    paragraphId,
+    top: getEditorRelativeTop(editor, from),
+  });
+},
+
 
       editorProps: {
+        // Block text mutation while still allowing selection/cursor movement
+        handleDOMEvents: {
+          beforeinput: () => true,
+          paste: () => true,
+          drop: () => true,
+        },
+
         handleKeyDown: (_view, event) => {
-          // keyboard navigation between comments
           if (event.altKey && event.key === "ArrowDown") {
             event.preventDefault();
             focusNextComment(+1);
@@ -163,14 +346,18 @@ export function ManuscriptReview({
             return true;
           }
           if (event.key === "Escape") {
-            if (editingCommentId || activeRange) {
+            if (editingCommentIdRef.current || activeRangeRef.current) {
               event.preventDefault();
               resetEditorUI();
               return true;
             }
           }
-          if (event.key === "Enter" && focusedCommentId && !editingCommentId && !activeRange) {
-            // Enter edits the focused comment
+          if (
+            event.key === "Enter" &&
+            focusedCommentId &&
+            !editingCommentIdRef.current &&
+            !activeRangeRef.current
+          ) {
             event.preventDefault();
             openEditForComment(focusedCommentId);
             return true;
@@ -182,107 +369,21 @@ export function ManuscriptReview({
     []
   );
 
-  function resetEditorUI() {
-    setActiveRange(null);
-    setEditingCommentId(null);
-    setDraftComment("");
-  }
-
-  function openEditForComment(commentId: string) {
-    if (!editor || !containerRef.current) return;
-    const comment = comments.find((c) => c.id === commentId);
-    if (!comment) return;
-
-    // anchor to first target
-    const first = comment.targets[0];
-    if (!first) return;
-
-    const coords = editor.view.coordsAtPos(first.from);
-    const rect = containerRef.current.getBoundingClientRect();
-
-    setEditingCommentId(commentId);
-    setDraftComment(comment.commentText);
-    setActiveRange({
-      from: first.from,
-      to: first.to,
-      paragraphId: first.paragraphId,
-      top: coords.top - rect.top,
-    });
-
-    // also move selection for context
-    editor.commands.setTextSelection({ from: first.from, to: first.to });
-    editor.commands.scrollIntoView();
-  }
-
-  function focusNextComment(dir: 1 | -1) {
-    if (!editor) return;
-    if (sortedComments.length === 0) return;
-
-    const idx = focusedCommentId
-      ? sortedComments.findIndex((c) => c.id === focusedCommentId)
-      : -1;
-
-    const nextIdx = idx === -1
-      ? (dir === 1 ? 0 : sortedComments.length - 1)
-      : clamp(idx + dir, 0, sortedComments.length - 1);
-
-    const next = sortedComments[nextIdx];
-    setFocusedCommentId(next.id);
-
-    // scroll to first target
-    const first = next.targets[0];
-    if (first) {
-      editor.commands.setTextSelection({ from: first.from, to: first.to });
-      editor.commands.scrollIntoView();
-    }
-  }
-
-  async function handleSave() {
-    if (!draftComment.trim() || !activeRange) return;
-
-    if (editingCommentId) {
-      // update comment text
-      const updated = await CommentsAPI.updateText(readingFeedbackId, editingCommentId, draftComment);
-
-      setComments((prev) =>
-        prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
-      );
-    } else {
-      // create comment w/ one target from selection
-      const created = await CommentsAPI.create(readingFeedbackId, {
-        reviewerParticipantId,
-        commentText: draftComment,
-        source: "NATIVE",
-        targets: [
-          {
-            paragraphId: activeRange.paragraphId,
-            from: activeRange.from,
-            to: activeRange.to,
-            targetText: "", // optional: populate by extracting from HTML later if you want
-          },
-        ],
-      });
-
-      setComments((prev) => [...prev, created]);
-      setFocusedCommentId(created.id);
-    }
-
-    resetEditorUI();
-  }
-
   const pinsRaw = useMemo(() => {
     if (!editor || !containerRef.current) return [];
-    const rect = containerRef.current.getBoundingClientRect();
+    const editorEl = editor.view.dom as HTMLElement;
+const editorRect = editorEl.getBoundingClientRect();
 
-    // one pin per comment, positioned at first target
     return comments
       .map((c) => {
         const first = c.targets[0];
         if (!first) return null;
+
         const coords = editor.view.coordsAtPos(first.from);
+        const top = coords.top - editorRect.top + editorEl.scrollTop;
         return {
           commentId: c.id,
-          top: coords.top - rect.top,
+          top: top,
         };
       })
       .filter(Boolean) as Array<{ commentId: string; top: number }>;
@@ -294,12 +395,13 @@ export function ManuscriptReview({
 
   return (
     <Box
-      ref={containerRef}
-      sx={{
-        position: "relative",
-        width: "550px",
-      }}
-    >
+  ref={containerRef}
+  sx={{
+    position: "relative",
+    width: "550px",
+    overflow: "visible", // 👈 REQUIRED
+  }}
+>
       <Paper variant="outlined" sx={{ p: 2 }}>
         <EditorContent editor={editor} />
       </Paper>
@@ -318,7 +420,7 @@ export function ManuscriptReview({
             sx={{
               position: "absolute",
               top: Math.max(8, p.top),
-              left: -360 - p.lane * LANE_WIDTH, // lane stacks horizontally
+              left: -360 - p.lane * LANE_WIDTH,
               width: 330,
               p: 1.25,
               zIndex: isFocused ? 40 : 10,
@@ -341,9 +443,15 @@ export function ManuscriptReview({
               {c.commentText}
             </Typography>
 
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 0.75 }}
+            >
               {new Date(c.createdAt).toLocaleString()}{" "}
-              {c.updatedAt !== c.createdAt ? `(edited ${new Date(c.updatedAt).toLocaleString()})` : ""}
+              {c.updatedAt !== c.createdAt
+                ? `(edited ${new Date(c.updatedAt).toLocaleString()})`
+                : ""}
             </Typography>
           </Paper>
         );
@@ -351,17 +459,17 @@ export function ManuscriptReview({
 
       {/* Create/Edit panel */}
       {activeRange && (
-        <Paper
-          elevation={4}
-          sx={{
-            position: "absolute",
-            top: Math.max(8, activeRange.top),
-            left: -720,
-            width: 330,
-            p: 2,
-            zIndex: 50,
-          }}
-        >
+<Paper
+  elevation={4}
+  sx={{
+    position: "absolute",
+    top: Math.max(8, activeRange.top),
+    left: 550, // 👈 fixed pin position
+    width: 330,
+    p: 2,
+    zIndex: 50,
+  }}
+>
           <Typography variant="subtitle2" gutterBottom>
             {editingCommentId ? "Edit comment" : "New comment"}
           </Typography>
@@ -392,3 +500,4 @@ export function ManuscriptReview({
     </Box>
   );
 }
+

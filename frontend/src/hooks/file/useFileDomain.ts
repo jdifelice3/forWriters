@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { FileDomainCommands } from "../../types/FileTypes";
 import { FilesAPI } from "../../api/filesApi";
 import { useFiles } from "./useFiles";
-import { AppFile } from "../../types/domain-types";
+import { AppFile, FileFeedback, Reading } from "../../types/domain-types";
 import { DocumentEnum } from "../../util/Enum";
 
 const filesUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi`;
@@ -106,11 +106,31 @@ export function useFileDomain(): FileDomainCommands {
         [mutate]
     );
 
+/**
+ * FEEDBACK
+ */
+
+    const getFileFeedback = useCallback<FileDomainCommands["getFileFeedback"]>(
+        async (reading: Reading | null) => {
+            if(!reading) return {};
+            const fileFeedbackRecords: Record<string, string> = {};
+            //create FileFeed records if they do not exist
+            for(let i = 0; i < reading.readingSubmission.length; i++){
+                let f:FileFeedback = await FilesAPI.getFileFeedback(reading.readingSubmission[i].appFile.id);
+                fileFeedbackRecords[reading.readingSubmission[i].id] = f.id;
+            }
+            await mutate?.();
+            return fileFeedbackRecords;
+        },
+        [mutate]
+    );
+
     return {
         saveMetadata,
         deleteFile,
         uploadManuscript,
         uploadVersion,
         setActiveVersion,
+        getFileFeedback
     };
 }

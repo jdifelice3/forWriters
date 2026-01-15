@@ -197,27 +197,25 @@ export interface Reading {
 
 export interface FileFeedback {
   id: string;
-  reviewerParticipantId: string;
+  reviewerUserId: string;
   appFileId: string;
-  submissionId?: string;
   createdAt: string;
-  reviewerParticipant: ReadingParticipant;
+  reviewerUser: User;
   appFile: AppFile;
-  submission?: ReadingSubmission;
   fileFeedbackComment: FileFeedbackComment[];
 }
 
 export interface FileFeedbackComment {
   id: string;
   fileFeedbackId: string;
-  reviewerParticipantId: string;
+  reviewerUserId: string;
   source: CommentSource;
   commentText: string;
   isResolved: boolean;
   createdAt: string;
   updatedAt: string;
   fileFeedback: FileFeedback;
-  readingParticipant: ReadingParticipant;
+  reviewerUser: User;
   targets: FileFeedbackCommentTarget[];
 }
 
@@ -240,8 +238,6 @@ export interface ReadingParticipant {
   reading: Reading;
   user: User;
   readingSubmission?: ReadingSubmission;
-  fileFeedback: FileFeedback[];
-  fileFeedbackComment: FileFeedbackComment[];
 }
 
 export interface ReadingSubmission {
@@ -253,7 +249,6 @@ export interface ReadingSubmission {
   reading: Reading;
   participant: ReadingParticipant;
   appFile: AppFile;
-  fileFeedback: FileFeedback[];
 }
 
 export interface User {
@@ -276,6 +271,8 @@ export interface User {
   userCollaborator: UserCollaborator[];
   userRequestor: CollaboratorRequest[];
   collaboratorUserRequestor: CollaboratorRequest[];
+  fileFeedback: FileFeedback[];
+  fileFeedbackComment: FileFeedbackComment[];
 }
 
 export interface UserCollaborator {

@@ -53,7 +53,7 @@ export const ReadingsAPI = {
 
     getManuscriptHTML(groupId: string, readingId:string, submissionId: string) {
         return apiFetch<FeedbackResponse>(`/groups/${groupId}/readings/${readingId}/submissions/${submissionId}/feedback`,{
-            method: "POST"
+            method: "GET"
         });
     },
 

@@ -114,7 +114,7 @@ const Readings = () => {
                   domain={domain}
                   ui={ui}
                   onFeedback={(readingId) =>
-                    navigate(`/readingfeedback/${readingId}`)
+                    navigate(`/filefeedback/${readingId}`)
                   }
                   onCreateReading={onCreateReading}
                 />

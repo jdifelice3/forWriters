@@ -2,26 +2,26 @@ import { apiFetch } from "./client";
 import { CommentDTO } from "../types/FeedbackTypes"
 
 export const CommentsAPI = {
-  list(readingFeedbackId: string) {
-    return apiFetch<CommentDTO[]>(`/feedback/${readingFeedbackId}/comments`, {
+  list(fileFeedbackId: string) {
+    return apiFetch<CommentDTO[]>(`/feedback/${fileFeedbackId}/comments`, {
       method: "GET",
     });
   },
 
-  create(readingFeedbackId: string, payload: {
-    reviewerParticipantId: string;
+  create(fileFeedbackId: string, payload: {
+    reviewerUserId: string;
     commentText: string;
     source?: "DOCX" | "NATIVE";
     targets: Array<{ paragraphId: string; from: number; to: number; targetText: string; }>;
   }) {
-    return apiFetch<CommentDTO>(`/feedback/${readingFeedbackId}/comments`, {
+    return apiFetch<CommentDTO>(`/feedback/${fileFeedbackId}/comments`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
-  updateText(readingFeedbackId: string, commentId: string, commentText: string) {
-    return apiFetch<CommentDTO>(`/feedback/${readingFeedbackId}/comments/${commentId}`, {
+  updateText(fileFeedbackId: string, commentId: string, commentText: string) {
+    return apiFetch<CommentDTO>(`/feedback/${fileFeedbackId}/comments/${commentId}`, {
       method: "PATCH",
       body: JSON.stringify({ commentText }),
     });

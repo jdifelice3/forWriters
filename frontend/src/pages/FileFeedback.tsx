@@ -50,7 +50,8 @@ const FileFeedback = () => {
         deleteFile, 
         uploadVersion, 
         uploadManuscript,
-        setActiveVersion 
+        setActiveVersion, 
+        getFileFeedback
       } = useFileDomain();
 
     const { activeGroup } = useGroupContext();
@@ -63,46 +64,49 @@ const FileFeedback = () => {
     const [editDescription, setEditDescription] = useState("");
     const [eventTitle, setEventTitle] = useState("");
     const [manuscriptHtmlBySubmission, setManuscriptHtmlBySubmission] = useState<Record<string, string>>({});
+    const [fileFeedbackIds, setFileFeedbackIds] = useState<Record<string, string>>({});
     
+    //getFileFeedback()
     useEffect(() => {
-  if (!reading) return;
+        if (!reading) return;
+        
+        let cancelled = false;
 
-  let cancelled = false;
+        async function loadMissing() {
+            const updates: Record<string, string> = {};
+            const ids = await getFileFeedback(reading ?? null);
+            console.log('ids', ids)
+            setFileFeedbackIds(ids);
+            for (const rs of reading!.readingSubmission) {
+                if (!rs.appFile) continue;
 
-  async function loadMissing() {
-    const updates: Record<string, string> = {};
+                // guard: already loaded
+                if (manuscriptHtmlBySubmission[rs.id]) continue;
 
-    for (const rs of reading!.readingSubmission) {
-      if (!rs.appFile) continue;
+                const html = await getManuscriptHtml(reading!.id, rs.id);
+                if (html) {
+                    updates[rs.id] = html;
+                }
+            }
 
-      // guard: already loaded
-      if (manuscriptHtmlBySubmission[rs.id]) continue;
+            if (!cancelled && Object.keys(updates).length > 0) {
+                setManuscriptHtmlBySubmission(prev => ({
+                    ...prev,
+                    ...updates,
+                }));
+            }
+        }
 
-      const html = await getManuscriptHtml(reading!.id, rs.id);
-      if (html) {
-        updates[rs.id] = html;
-      }
-    }
+        loadMissing();
 
-    if (!cancelled && Object.keys(updates).length > 0) {
-      setManuscriptHtmlBySubmission(prev => ({
-        ...prev,
-        ...updates,
-      }));
-    }
-  }
-
-  loadMissing();
-
-  return () => {
-    cancelled = true;
-  };
-}, [
-  reading?.id,                       
-  reading?.readingSubmission.length, 
-  manuscriptHtmlBySubmission,        
-]);
-
+        return () => {
+            cancelled = true;
+        };
+    }, [
+        reading?.id,                       
+        reading?.readingSubmission.length, 
+        manuscriptHtmlBySubmission,        
+    ]);
 
     if ( !activeGroup || !reading ) {
         return (
@@ -117,6 +121,7 @@ const FileFeedback = () => {
         uploadVersion: uploadVersion,
         uploadManuscript: uploadManuscript,
         setActiveVersion: setActiveVersion,
+        getFileFeedback: getFileFeedback
     }
 
   return (
@@ -167,8 +172,8 @@ const FileFeedback = () => {
                                             <ManuscriptReview
                                                 html={manuscriptHtmlBySubmission[rs.id]}
                                                 initialComments={[]}
-                                                readingFeedbackId={""}
-                                                reviewerParticipantId={user.id}
+                                                fileFeedbackId={fileFeedbackIds[rs.id]}
+                                                reviewerUserId={user.id}
                                             />
                                             ) : (
                                                 <CircularProgress size={20} />

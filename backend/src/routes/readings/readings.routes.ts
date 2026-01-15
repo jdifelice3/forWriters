@@ -108,8 +108,37 @@ router.post("/submissions", async (req: Request, res: Response) => {
     res.status(200).json(submissions);
 });
 
-router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (req: SessionRequest, res: Response) => {
+router.get("/submissions/:submissionId/feedback", loadSubmissionById, async (req: SessionRequest, res: Response) => {
     const submissionId = req.params.submissionId;
+    const readingSubmission = await getSubmission(submissionId);
+   
+    if(!readingSubmission) return res.json({error: "Reading submission did not contain a file"});
+    if(!process.env.AWS_S3_BUCKET || !process.env.AWS_S3_REGION) {
+        return res.status(403).json({error: "Invalid S3 values"});
+    }
+
+    const html = await getDocxAsHtml(
+        process.env.AWS_S3_BUCKET, 
+        readingSubmission?.appFile.filename, 
+        process.env.AWS_S3_REGION
+    );
+
+    res.json({
+        html: html,
+    });
+});
+
+const getDocxAsHtml = async (awsS3bucket: string, filename: string, awsS3region: string) => {
+    const html = await loadDocxFromS3AsHtml(
+        awsS3bucket, 
+        filename, 
+        awsS3region
+    );
+
+    return addParagraphIds(html);
+}
+
+const getSubmission = async(submissionId: string) => {
     const readingSubmission = await prisma.readingSubmission.findUnique({
         where: {
             id: submissionId
@@ -119,34 +148,8 @@ router.post("/submissions/:submissionId/feedback", loadSubmissionById, async (re
         }
     });
 
-    if(!readingSubmission) return res.json({error: "Reading submission did not contain a file"});
-    if(!process.env.AWS_S3_BUCKET || !process.env.AWS_S3_REGION) {
-        return res.status(403).json({error: "Invalid S3 values"});
-    }
-
-    const feedback = await prisma.fileFeedback.create({
-        data: {
-            reviewerParticipantId: readingSubmission.participantId,
-            submissionId: req.submission.id,
-            appFileId: readingSubmission.appFileId
-        },
-    });
-
-    const html = await loadDocxFromS3AsHtml(
-        process.env.AWS_S3_BUCKET, 
-        readingSubmission?.appFile.filename, 
-        process.env.AWS_S3_REGION
-    );
-
-    const htmlWithIds = addParagraphIds(html);
-    //console.log('htmlWithIds', htmlWithIds);
-    //const comments = saveReadingFeedbackComments(feedback.id, readingSubmission.participantId, extractionResults);
-
-    res.json({
-        html: htmlWithIds,
-    });
-  }
-);
+    return readingSubmission;
+}
 
 router.post("/submissions/:appFileId/version", async (req: Request, res: Response) => {
     const session = await Session.getSession(req, res);

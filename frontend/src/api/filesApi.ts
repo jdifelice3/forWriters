@@ -1,12 +1,13 @@
 import { apiFetch } from "./client";
 import { FileUploadFormInput, FileFormInput } from "../types/FileTypes";
-import { AppFileMeta, AppFile } from "../types/domain-types";
+import { AppFileMeta, AppFile, FileFeedback } from "../types/domain-types";
 
 export const FilesAPI = {
     create(input: FileUploadFormInput) {
         return apiFetch("/files", {
             method: "POST",
             body: JSON.stringify({ ...input}),
+            credentials: "include",
         });
     },
 
@@ -15,18 +16,21 @@ export const FilesAPI = {
         return apiFetch(`/filesApi`, {
             method: "PUT",
             body: JSON.stringify({ fileMetaId, title, description }),
+            credentials: "include",
         });
     },
 
     deleteFile(fileId: string) {
         return apiFetch(`/filesApi?id=${fileId}`, {
             method: "DELETE",
+            credentials: "include",
         });
     },
 
     updateVersion(id: string, version: number) {
         return apiFetch<AppFileMeta>(`/filesApi/version?id=${id}&version=${version.toString()}`, {
-            method: "PUT"
+            method: "PUT",
+            credentials: "include",
         });
     },
 
@@ -54,8 +58,16 @@ export const FilesAPI = {
 
     addVersion(groupId: string, readingId:string, appFileId: string) {
         return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${appFileId}/version`,{
-            method: "POST"
+            method: "POST",
+            credentials: "include",
         });
     },
+
+    getFileFeedback(appFile: string){
+        return apiFetch<FileFeedback>(`/filesApi/${appFile}/feedback`, {
+            method: "GET",
+            credentials: "include",
+        })
+    }
     
 }

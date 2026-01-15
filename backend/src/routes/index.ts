@@ -7,7 +7,7 @@ import fileRoutes from "./files/index";
 import pdfRoutes from "./pdfRoutes";
 import groupRoutes from "./groups";
 import meRoutes from "./me.routes";
-import filesApiRoutes from "./files.api.routes";
+import filesApiRoutes from "./filesApi/filesApi.routes";
 import dashboardRoutes from "./dashboardRoutes";
 
 const router = Router();

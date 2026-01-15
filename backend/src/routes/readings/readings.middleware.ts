@@ -36,9 +36,6 @@ export async function loadSubmissionById(
   const submission = await prisma.readingSubmission.findUnique({
     where: { id: req.params.submissionId },
   });
-  console.log('submission', submission, 'submission.readingId', submission?.readingId, 'req.reading.id', req.reading.id)
-  console.log('submission exists', submission !== undefined)
-  console.log('submission.readingId === req.reading.id',submission?.readingId === req.reading.id)
   if (submission && submission?.readingId === req.reading.id) {
     req.submission = submission;
     next();

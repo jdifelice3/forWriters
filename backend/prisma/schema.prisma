@@ -298,47 +298,40 @@ model Reading {
   readingSubmission         ReadingSubmission[]
 }
 
+// maps reviewer to the manuscript version (appFileId) in the context of a reading submission
 model FileFeedback {
-  id                    String   @id @default(cuid())
+  id           String   @id @default(cuid())
+  reviewerUserId String
+  appFileId    String
+  createdAt    DateTime @default(now())
 
-  reviewerParticipantId String
-  appFileId             String
+  reviewerUser User   @relation(fields: [reviewerUserId], references: [id])
+  appFile      AppFile @relation(fields: [appFileId], references: [id])
 
-  // optional contextual link
-  submissionId          String?  
+  fileFeedbackComment FileFeedbackComment[]
 
-  createdAt             DateTime @default(now())
-
-  reviewerParticipant   ReadingParticipant @relation(fields: [reviewerParticipantId], references: [id])
-  appFile               AppFile            @relation(fields: [appFileId], references: [id])
-  submission            ReadingSubmission? @relation(fields: [submissionId], references: [id])
-
-  fileFeedbackComment   FileFeedbackComment[]
-
-  @@unique([appFileId, reviewerParticipantId]) // 🔒 canonical identity
-  @@index([submissionId])
+  @@unique([appFileId, reviewerUserId])
+  @@index([appFileId])
 }
-
-
 
 model FileFeedbackComment {
-  id                   String   @id @default(cuid())
-  fileFeedbackId       String   // rename from readingFeedbackId
-  reviewerParticipantId String
-  source               CommentSource @default(DOCX)
-  commentText          String
-  isResolved           Boolean  @default(false)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id             String   @id @default(cuid())
+  fileFeedbackId String
+  reviewerUserId String
+  source         CommentSource @default(DOCX)
+  commentText    String
+  isResolved     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  fileFeedback         FileFeedback @relation(fields: [fileFeedbackId], references: [id])
-  readingParticipant   ReadingParticipant @relation(fields: [reviewerParticipantId], references: [id])
-  targets              FileFeedbackCommentTarget[]
+  fileFeedback   FileFeedback @relation(fields: [fileFeedbackId], references: [id])
+  reviewerUser   User         @relation(fields: [reviewerUserId], references: [id])
+
+  targets        FileFeedbackCommentTarget[]
 
   @@index([fileFeedbackId])
-  @@index([reviewerParticipantId])
+  @@index([reviewerUserId])
 }
-
 
 model FileFeedbackCommentTarget {
   id                 String   @id @default(cuid())
@@ -367,8 +360,6 @@ model ReadingParticipant {
   user      User    @relation("ReadingParticipantUser", fields: [userId], references: [id])
 
   readingSubmission ReadingSubmission?
-  fileFeedback   FileFeedback[]
-  fileFeedbackComment FileFeedbackComment[]
 
   @@unique([readingId, userId])
 }
@@ -383,7 +374,6 @@ model ReadingSubmission {
   reading       Reading   @relation(fields: [readingId], references: [id])
   participant   ReadingParticipant    @relation(fields: [participantId], references: [id])
   appFile       AppFile  @relation(fields: [appFileId], references: [id])
-  fileFeedback       FileFeedback[]
   @@unique([readingId, participantId, appFileId])
 }
 
@@ -409,6 +399,8 @@ model User {
   userCollaborator    UserCollaborator[]                    @relation("UserCollaborator")
   userRequestor       CollaboratorRequest[]                 @relation("UserRequest")
   collaboratorUserRequestor    CollaboratorRequest[]        @relation("UserCollaboratorRequest")
+  fileFeedback   FileFeedback[]
+  fileFeedbackComment FileFeedbackComment[]
 }
 
 model UserCollaborator {

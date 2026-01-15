@@ -1,5 +1,5 @@
 import { Variant } from "./Style";
-import { AppFile, AppFileMeta } from "./domain-types";
+import { AppFile, AppFileMeta, FileFeedback, Reading } from "./domain-types";
 
 export type FileUploadFormInput = {
   title: string;
@@ -32,38 +32,41 @@ export interface FileListProperties {
 }
 
 export interface FileDomainCommands {
-  /** Update title / description */
-  saveMetadata(input: {
-    fileMetaId: string;
-    title: string;
-    description?: string;
-  }): Promise<void>;
+    /** Update title / description */
+    saveMetadata(input: {
+        fileMetaId: string;
+        title: string;
+        description?: string;
+    }): Promise<void>;
 
-  /** Soft-delete file aggregate */
-  deleteFile(fileMetaId: string): Promise<void>;
+    /** Soft-delete file aggregate */
+    deleteFile(fileMetaId: string): Promise<void>;
 
-  uploadManuscript(
-    formData: FormData
-  ): Promise<void>;
+    uploadManuscript(
+        formData: FormData
+    ): Promise<void>;
 
-  /** Upload a new version */
-  uploadVersion(
-    fileMetaId: string,
-    formData: FormData,
-  ): Promise<void>;
+    /** Upload a new version */
+    uploadVersion(
+        fileMetaId: string,
+        formData: FormData,
+    ): Promise<void>;
 
-  /** Set the active version */
-  setActiveVersion(
-    fileMetaId: string,
-    version: number
-  ): Promise<void>;
+    /** Set the active version */
+    setActiveVersion(
+        fileMetaId: string,
+        version: number
+    ): Promise<void>;
 
-  loadExtractedComments?(
-    readingId: string,
-    submissionId: string
-  ): Promise<void>;
+    loadExtractedComments?(
+        readingId: string,
+        submissionId: string
+    ): Promise<void>;
+
+    getFileFeedback(
+        reading: Reading | null
+    ): Promise<Record<string, string>>;
 }
-
 
 export interface FileUIActions {
   beginEdit(file: AppFileMeta): void;

@@ -51,5 +51,6 @@ export async function loadGroupMembership(
     }
 
     req.groupRole = membership.role;
+    req.user = user;
     next();
 }
