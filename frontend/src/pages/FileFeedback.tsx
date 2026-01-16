@@ -31,7 +31,9 @@ import DownloadIcon from '@mui/icons-material/Download';
 import { useUserContext } from "../context/UserContext";
 import CancelIcon from '@mui/icons-material/Cancel';
 import { FileDomainCommands } from "../types/FileTypes";
+import { CommentDTO } from "../types/FeedbackTypes";
 import { ManuscriptReview } from "../components/review/ManuscriptReview";
+import { getUtilityComponentName } from "node_modules/mui-tiptap/dist/cjs/styles";
 
 const uploadFormProperties: UploadFileFormProperties =
   {
@@ -51,7 +53,8 @@ const FileFeedback = () => {
         uploadVersion, 
         uploadManuscript,
         setActiveVersion, 
-        getFileFeedback
+        getFileFeedback,
+        getComments
       } = useFileDomain();
 
     const { activeGroup } = useGroupContext();
@@ -65,6 +68,7 @@ const FileFeedback = () => {
     const [eventTitle, setEventTitle] = useState("");
     const [manuscriptHtmlBySubmission, setManuscriptHtmlBySubmission] = useState<Record<string, string>>({});
     const [fileFeedbackIds, setFileFeedbackIds] = useState<Record<string, string>>({});
+    const [initialComments, setInititalComments] = useState<Record<string, CommentDTO[]>>({});
     
     //getFileFeedback()
     useEffect(() => {
@@ -75,8 +79,16 @@ const FileFeedback = () => {
         async function loadMissing() {
             const updates: Record<string, string> = {};
             const ids = await getFileFeedback(reading ?? null);
-            console.log('ids', ids)
+
+            const initComments: Record<string, CommentDTO[]> = {};
+            const entries = Object.entries(ids);
+
+            for (let i = 0; i < entries.length; i++) {
+                let [key, value] = entries[i];
+                initComments[key] = await getComments(value);
+            }
             setFileFeedbackIds(ids);
+            setInititalComments(initComments);
             for (const rs of reading!.readingSubmission) {
                 if (!rs.appFile) continue;
 
@@ -121,7 +133,8 @@ const FileFeedback = () => {
         uploadVersion: uploadVersion,
         uploadManuscript: uploadManuscript,
         setActiveVersion: setActiveVersion,
-        getFileFeedback: getFileFeedback
+        getFileFeedback: getFileFeedback,
+        getComments: getComments
     }
 
   return (
@@ -171,7 +184,7 @@ const FileFeedback = () => {
                                             {manuscriptHtmlBySubmission[rs.id] ? (
                                             <ManuscriptReview
                                                 html={manuscriptHtmlBySubmission[rs.id]}
-                                                initialComments={[]}
+                                                initialComments={initialComments[rs.id]}
                                                 fileFeedbackId={fileFeedbackIds[rs.id]}
                                                 reviewerUserId={user.id}
                                             />

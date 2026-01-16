@@ -3,7 +3,7 @@ import { CommentDTO } from "../types/FeedbackTypes"
 
 export const CommentsAPI = {
   list(fileFeedbackId: string) {
-    return apiFetch<CommentDTO[]>(`/feedback/${fileFeedbackId}/comments`, {
+    return apiFetch<CommentDTO[]>(`/filesApi/feedback/${fileFeedbackId}/comments`, {
       method: "GET",
     });
   },
@@ -14,22 +14,22 @@ export const CommentsAPI = {
     source?: "DOCX" | "NATIVE";
     targets: Array<{ paragraphId: string; from: number; to: number; targetText: string; }>;
   }) {
-    return apiFetch<CommentDTO>(`/feedback/${fileFeedbackId}/comments`, {
+    return apiFetch<CommentDTO>(`/filesApi/feedback/${fileFeedbackId}/comments`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   updateText(fileFeedbackId: string, commentId: string, commentText: string) {
-    return apiFetch<CommentDTO>(`/feedback/${fileFeedbackId}/comments/${commentId}`, {
+    return apiFetch<CommentDTO>(`/filesApi/feedback/${fileFeedbackId}/comments/${commentId}`, {
       method: "PATCH",
       body: JSON.stringify({ commentText }),
     });
   },
 
-  setResolved(readingFeedbackId: string, commentId: string, isResolved: boolean) {
+  setResolved(fileFeedbackId: string, commentId: string, isResolved: boolean) {
     return apiFetch<{ id: string; isResolved: boolean; updatedAt: string }>(
-      `/feedback/${readingFeedbackId}/comments/${commentId}/resolve`,
+      `/filesApi/feedback/${fileFeedbackId}/comments/${commentId}/resolve`,
       { method: "PATCH", body: JSON.stringify({ isResolved }) }
     );
   },

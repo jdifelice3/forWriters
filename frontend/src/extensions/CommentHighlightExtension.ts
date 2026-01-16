@@ -1,91 +1,68 @@
-import { Extension } from '@tiptap/core';
-import { Decoration, DecorationSet } from 'prosemirror-view';
-import { Plugin, PluginKey } from 'prosemirror-state';
-import { CommentRange } from "../types/ReviewTypes";
+// src/extensions/CommentHighlightExtension.ts
+import { Extension } from "@tiptap/core";
+import { Plugin, PluginKey } from "prosemirror-state";
+import { Decoration, DecorationSet } from "prosemirror-view";
 
-export const CommentHighlightKey = new PluginKey('commentHighlight');
+/* ---------- types ---------- */
 
-export interface CommentHighlightOptions {
-  comments: CommentRange[];
-  onHoverComment?: (commentId: string | null) => void;
+export type CommentRange = {
+  commentId: string;
+  from: number;
+  to: number;
+};
+
+export type CommentHighlightOptions = {
+  ranges: CommentRange[];
   onClickComment?: (commentId: string) => void;
-}
+};
+
+const CommentHighlightKey = new PluginKey<CommentRange[]>("commentHighlight");
+
+/* ---------- extension ---------- */
 
 export const CommentHighlightExtension = Extension.create<CommentHighlightOptions>({
-  name: 'commentHighlight',
+  name: "commentHighlight",
 
   addOptions() {
     return {
-      comments: [],
-      onHoverComment: undefined,
+      ranges: [],
       onClickComment: undefined,
     };
   },
 
   addProseMirrorPlugins() {
-    const { onHoverComment, onClickComment } = this.options;
-
     return [
-      new Plugin({
+      new Plugin<CommentRange[]>({
         key: CommentHighlightKey,
 
         state: {
-          init: (_, { doc }) => {
-            return DecorationSet.create(doc, []);
-          },
-
-          apply: (tr, oldDecorations, oldState, newState) => {
-            // If document changed, remap decorations
-            if (tr.docChanged) {
-              return oldDecorations.map(tr.mapping, tr.doc);
-            }
-            return oldDecorations;
-          },
+          init: () => this.options.ranges,
+          apply: (_tr, prev) => prev,
         },
 
         props: {
-          decorations: state => {
-            const { comments } = this.options;
-            if (!comments || comments.length === 0) {
-              return null;
-            }
+          decorations: (state) => {
+            if (!this.options.ranges.length) return null;
 
-            const decorations = comments.map(comment =>
-              Decoration.inline(comment.from, comment.to, {
-                class: 'comment-highlight',
-                'data-comment-id': comment.commentId,
-              })
+            return DecorationSet.create(
+              state.doc,
+              this.options.ranges.map((r) =>
+                Decoration.inline(r.from, r.to, {
+                  class: "comment-highlight",
+                  "data-comment-id": r.commentId,
+                })
+              )
             );
-
-            return DecorationSet.create(state.doc, decorations);
           },
 
-          handleDOMEvents: {
-            mouseover: (view, event) => {
-              const target = event.target as HTMLElement;
-              const el = target.closest('[data-comment-id]') as HTMLElement | null;
-              if (el && onHoverComment) {
-                onHoverComment(el.dataset.commentId ?? null);
-              }
-              return false;
-            },
-
-            mouseout: (_, event) => {
-              if (onHoverComment) {
-                onHoverComment(null);
-              }
-              return false;
-            },
-
-            click: (_, event) => {
-              const target = event.target as HTMLElement;
-              const el = target.closest('[data-comment-id]') as HTMLElement | null;
-              if (el && onClickComment) {
-                onClickComment(el.dataset.commentId!);
-                return true;
-              }
-              return false;
-            },
+          handleClick: (_view, _pos, event) => {
+            const target = event.target as HTMLElement | null;
+            const id = target?.getAttribute("data-comment-id");
+            if (id && this.options.onClickComment) {
+              this.options.onClickComment(id);
+              return true;
+            }
+            return false;
           },
         },
       }),

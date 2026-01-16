@@ -1,5 +1,12 @@
 import { Variant } from "./Style";
-import { AppFile, AppFileMeta, FileFeedback, Reading } from "./domain-types";
+import { 
+    AppFile, 
+    AppFileMeta,
+    FileFeedback, 
+    Reading 
+} from "./domain-types";
+
+import { CommentDTO } from "./FeedbackTypes";
 
 export type FileUploadFormInput = {
   title: string;
@@ -66,6 +73,10 @@ export interface FileDomainCommands {
     getFileFeedback(
         reading: Reading | null
     ): Promise<Record<string, string>>;
+
+    getComments(
+        fileFeedbackId: string
+    ): Promise<CommentDTO[]>;
 }
 
 export interface FileUIActions {

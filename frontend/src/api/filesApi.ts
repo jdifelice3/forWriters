@@ -1,7 +1,7 @@
 import { apiFetch } from "./client";
 import { FileUploadFormInput, FileFormInput } from "../types/FileTypes";
 import { AppFileMeta, AppFile, FileFeedback } from "../types/domain-types";
-
+import { CommentDTO } from "../types/FeedbackTypes";
 export const FilesAPI = {
     create(input: FileUploadFormInput) {
         return apiFetch("/files", {
@@ -63,11 +63,17 @@ export const FilesAPI = {
         });
     },
 
-    getFileFeedback(appFile: string){
-        return apiFetch<FileFeedback>(`/filesApi/${appFile}/feedback`, {
+    getFileFeedback(appFileId: string){
+        return apiFetch<FileFeedback>(`/filesApi/${appFileId}/feedback`, {
+            method: "GET",
+            credentials: "include",
+        })
+    },
+
+    getComments(fileFeedbackId: string){
+        return apiFetch<CommentDTO[]>(`/filesApi/feedback/${fileFeedbackId}/comments`, {
             method: "GET",
             credentials: "include",
         })
     }
-    
 }

@@ -165,3 +165,26 @@
   width: 500px;
   height:auto;
 }
+
+.fw-draft-highlight {
+  background: rgba(255, 215, 0, 0.35); /* draft highlight */
+  border-radius: 2px;
+}
+
+.fw-comment-highlight {
+  background: rgba(0, 140, 255, 0.22); /* persisted comment highlight */
+  border-radius: 2px;
+}
+
+.draft-highlight {
+  background:cornflowerblue;
+  /* rgba(255, 235, 59, 0.55); */
+}
+
+.comment-highlight {
+  background: rgba(30, 144, 255, 0.25);
+}
+
+.ProseMirror {
+    width: 650px;
+}

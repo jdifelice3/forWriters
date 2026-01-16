@@ -39,3 +39,11 @@ export type Comment = {
     targetText: string;
   }>;
 };
+
+export type CommentsAction =
+  | { type: "load"; comments: CommentDTO[] }
+  | { type: "add_optimistic"; comment: CommentDTO }
+  | { type: "replace"; tempId: string; comment: CommentDTO }
+  | { type: "update_text"; id: string; text: string }
+  | { type: "resolve"; id: string; isResolved: boolean }
+  | { type: "remove"; id: string };

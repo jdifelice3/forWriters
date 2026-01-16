@@ -3,6 +3,7 @@ import { FileDomainCommands } from "../../types/FileTypes";
 import { FilesAPI } from "../../api/filesApi";
 import { useFiles } from "./useFiles";
 import { AppFile, FileFeedback, Reading } from "../../types/domain-types";
+import { CommentDTO } from "../../types/FeedbackTypes";
 import { DocumentEnum } from "../../util/Enum";
 
 const filesUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi`;
@@ -125,12 +126,24 @@ export function useFileDomain(): FileDomainCommands {
         [mutate]
     );
 
+    const getComments = useCallback<FileDomainCommands["getComments"]>(
+        async (fileFeedbackId: string) => {
+            let comments: CommentDTO[] = await FilesAPI.getComments(fileFeedbackId);
+            await mutate?.();
+            console.log('in useFileDomain.getComments')
+            console.log('comments', comments)
+            return comments;
+        },
+        [mutate]
+    )
+
     return {
         saveMetadata,
         deleteFile,
         uploadManuscript,
         uploadVersion,
         setActiveVersion,
-        getFileFeedback
+        getFileFeedback,
+        getComments
     };
 }
