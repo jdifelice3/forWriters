@@ -144,6 +144,7 @@ const FileFeedback = () => {
             mx: "auto", 
             p: 0,
             marginLeft: "55px",
+            
         }}>
         <Typography variant="h4" mb={3} textAlign="left">
             {eventTitle}
@@ -175,9 +176,10 @@ const FileFeedback = () => {
                                         {rs.appFile.appFileMeta.title}
                                     </Typography>
                                     <Typography
+                                            align="justify"
                                             variant="body1"
                                             color="text.secondary"
-                                            sx={{ mb: 2, mt: 2, }}
+                                            sx={{ mb: 2, mt: 2, mr:-4}}
                                     >
                                         {rs.appFile.appFileMeta.description}
                                     </Typography>
