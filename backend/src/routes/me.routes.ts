@@ -27,6 +27,15 @@ router.get("/", verifySession(), async (req: SessionRequest, res) => {
             },
         });
 
+        if (!user) {
+            console.error("User NOT found in DB for authId:", authId);
+
+            return res.status(404).json({
+                error: "User not found",
+                code: "USER_RECORD_MISSING",
+            });
+        }
+
         return res.json(user);
     } catch (err) {
         console.error("ME ROUTE CRASH", err);
