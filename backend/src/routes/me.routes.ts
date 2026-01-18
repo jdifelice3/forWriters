@@ -2,16 +2,17 @@ import express from "express";
 import Session from "supertokens-node/recipe/session";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
 import { PrismaClient } from "@prisma/client";
+import { SessionRequest } from "supertokens-node/framework/express";
 const prisma = new PrismaClient();
 const router = express.Router();
 
-router.get("/", verifySession(), async (req, res) => {
+router.get("/", verifySession(), async (req: SessionRequest, res) => {
   
   // 1. Get the session
-  let session = await Session.getSession(req, res);
+  const session = req.session!;
 
   // 2. Extract Supertokens userId
-  const authId = session.getUserId(true);
+  const authId = session.getUserId();
   
   // 3. Do ONLY this prisma lookup
   const user = await prisma.user.findUnique({

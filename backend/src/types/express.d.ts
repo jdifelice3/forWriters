@@ -21,21 +21,4 @@ declare global {
   }
 }
 
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       reading: Reading;
-//       readingParticipant: ReadingParticipant;
-//       submission: ReadingSubmission;
-//     }
-//   }
-// }
-
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       appFileMeta: AppFileMeta;
-//     }
-//   }
-// }
 export {};

@@ -1,4 +1,5 @@
 import "dotenv/config";
+import "supertokens-node/recipe/session/framework/express";
 import path from "path";
 import express from "express";
 import cors from "cors";
