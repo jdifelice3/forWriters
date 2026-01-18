@@ -37,6 +37,10 @@ supertokens.init(SuperTokensConfig);
 const app = express();
 app.set("trust proxy", true);
 
+app.use((req, _res, next) => {
+  console.log("REQ:", req.method, req.path);
+  next();
+});
 // -----------------------------------------------------------------------------
 // CORS
 // -----------------------------------------------------------------------------
@@ -52,6 +56,10 @@ app.use(
     exposedHeaders: ["Content-Disposition"],
   })
 );
+
+app.get("/__health", (req, res) => {
+  res.json({ ok: true, time: Date.now() });
+});
 
 // -----------------------------------------------------------------------------
 // SuperTokens core middleware (auth plumbing)
