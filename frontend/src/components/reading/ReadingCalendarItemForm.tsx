@@ -40,16 +40,6 @@ interface ReadingCalendarItemFormProps {
     onFeedback(readingId: string): void;
 }
 
-type FormInput = {
-    name: string,
-    readingDate: Date,
-    readingStartTime: string,
-    readingEndTime: string,
-    submissionDeadline: Date,
-    description: string,
-    schedule: string
-}
-
 const currentDate = new Date();
 
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ key, reading, isAdmin, domain, ui, onFeedback }) => {
@@ -119,7 +109,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 size="small"
                                 startIcon={<ChangeCircleIcon />}
                                 onClick={(e) => setUpdateManuscriptVersionOpen(true)}
-                                disabled={isPastSubmissionDeadline}
+                                disabled={!domain.canChangeSubmission(reading.id, activeGroup.groupType)}
                             >
                                 Change
                             </Button>
@@ -261,7 +251,8 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             variant="contained"
                             onClick={(event) => onFeedback(reading.id)}
                             sx={{ mt: 1 }}
-                            // disabled={domain.canReview(reading.id, user.id)}
+                            disabled={!domain.canReviewReading(reading.id, user.id)}
+
                         >
                             Review            
                         </Button>
@@ -285,7 +276,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                 }}>
                 
                 <Typography variant="h6" sx={{}}>
-                    Find a Manuscript Version
+                    Find Your Manuscript Version
                 </Typography>
 
                 <FileSearchBox onSelectFile={setSelectedFile} />
@@ -345,7 +336,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                 }}>
                 
                 <Typography variant="h6" sx={{}}>
-                    Find a Manuscript Version
+                    Find Your Manuscript Version
                 </Typography>
 
                 <FileSearchBox onSelectFile={setSelectedFile} />

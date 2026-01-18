@@ -2,8 +2,7 @@ import { useCallback } from "react";
 import { useReadings } from "../../hooks/reading/useReadings";
 import { ReadingsAPI } from "../../api/readingsApi";
 import { CreateReadingInput } from "../../types/ReadingTypes";
-import { Reading, FileFeedback, ReadingParticipant, ReadingSubmission, User } from "../../types/domain-types"
-import { ReviewHTML } from "../../types/ReviewTypes";
+import { AppFile, GroupType, Reading, ReadingParticipant, ReadingSubmission, User } from "../../types/domain-types"
 
 export function useReadingDomain(
   groupId: string | undefined,
@@ -61,16 +60,31 @@ export function useReadingDomain(
 
 
 /** PERMISSIONS **/
-    const canSignup = (readingId: string, userId: string) => {
+    const canSignup = (readingId: string, userId: string, maxParticipants: number = 2) => {
         if (disabled) return;
         const foundReading: Reading | undefined = readings.find(r => r.id === readingId);
+        console.log('userId', userId)
+        console.log('foundReading', foundReading)
         const rp: ReadingParticipant | undefined =  foundReading?.readingParticipant.find(rp => rp.userId === userId);
-        return rp === undefined;
+        console.log('rp', rp)
+
+        if(foundReading?.readingParticipant.length === maxParticipants){
+            return false;
+        }
+        if(rp === undefined){
+            return true;
+        };
+        
+        return false; //default        
     }
 
     const canWithdraw = (readingId: string, userId: string) => {
         if (disabled) return;
-        return !canSignup(readingId, userId);
+        const reading: Reading | undefined = readings.find(r => r.id === readingId);
+        if(!reading) return undefined;
+        if(!reading.submissionDeadline) return undefined;
+
+        return new Date() < new Date(reading.submissionDeadline);
     }
 
     const canSubmit = (readingId: string, userId: string) => {
@@ -81,25 +95,35 @@ export function useReadingDomain(
         return rs === undefined;
     }
 
-    const canReview = (readingId: string, userId: string) => {
+    const canReviewReading = (readingId: string, userId: string) => {
         if (disabled) return;
-        //Check if the user has already submitted feedback
-        const foundReading: Reading | undefined = readings.find(r => r.id === readingId);
-        const foundParticipant: ReadingParticipant | undefined = foundReading?.readingParticipant.find(p => p.userId === userId);
-        const foundSubmission: ReadingSubmission | undefined = foundReading?.readingSubmission.find(s => s.participantId === foundParticipant?.id);
-        const foundFeedback: FileFeedback | undefined = foundSubmission?.fileFeedback.find(f => f.reviewerParticipantId === userId);
-        const userHasSubmitted = foundFeedback !== undefined;
+        const reading: Reading | undefined = readings.find(r => r.id === readingId);
+        if(!reading) return undefined;
+        if(!reading.submissionDeadline) return undefined;
 
-        //Check if the user is also the author of the submission
-        let authorId: string = "";
-        if(foundSubmission){
-            authorId = foundSubmission?.appFile.userId;
-        }
-        const userIsAuthor = authorId === userId;
-        if (!userHasSubmitted && !userIsAuthor){
-            return true;
-        } else {
-            return false;
+        return new Date() >= new Date(reading.submissionDeadline);
+    }
+
+    const canReviewFile = (appFile: AppFile , userId: string) => {
+        //users cannot review their own file
+        return appFile.userId !== userId;
+    }
+
+    const canChangeSubmission = (readingId: string, groupType: GroupType) => {
+        const reading: Reading | undefined = readings.find(r => r.id === readingId);
+        if(!reading) return undefined;
+        console.log('groupType', groupType)    
+        switch (groupType) {
+            case "WRITING":
+                if(!reading.submissionDeadline) return undefined;
+                return new Date() >= new Date(reading.submissionDeadline);
+                break;
+            case "PERSONAL":
+                console.log('in PERSONAL case')
+                return true;
+                break;
+            default:
+                return undefined;
         }
     }
 
@@ -112,8 +136,10 @@ export function useReadingDomain(
         updateSubmittedVersion,
         getManuscriptHtml,
         canSignup,
-        canReview,
+        canReviewReading,
+        canReviewFile,
         canSubmit,
-        canWithdraw
+        canWithdraw,
+        canChangeSubmission
     };
 }

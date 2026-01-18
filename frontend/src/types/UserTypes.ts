@@ -15,3 +15,13 @@ export interface UserProfile {
   phone: string;
   bio: string;
 }
+
+export type ProfileFormInputs = {
+    firstName: string,
+    lastName: string,
+    email: string,
+    bio: string,
+    title: string,
+    description: string,
+    avatar: File,
+}

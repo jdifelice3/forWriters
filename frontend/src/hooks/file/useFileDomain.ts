@@ -130,8 +130,6 @@ export function useFileDomain(): FileDomainCommands {
         async (fileFeedbackId: string) => {
             let comments: CommentDTO[] = await FilesAPI.getComments(fileFeedbackId);
             await mutate?.();
-            console.log('in useFileDomain.getComments')
-            console.log('comments', comments)
             return comments;
         },
         [mutate]

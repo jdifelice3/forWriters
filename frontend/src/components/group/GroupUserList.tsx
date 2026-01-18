@@ -20,7 +20,7 @@ const GroupUserList: React.FC<Props> = ({groupUsers}) => {
             <Card>
                 <CardContent sx={{p:2, backgroundColor:"whitesmoke"}}>
                     <Typography >
-                        {gu.user.userProfile ? gu.user.userProfile.firstName : ""} &nbsp;
+                        {gu.user.userProfile ? gu.user.userProfile.firstName : ""}&nbsp;
                         {gu.user.userProfile ? gu.user.userProfile.lastName : ""}                            
                         {gu.role === "ADMIN" ? (
                             <span>&nbsp;(Admin)</span>

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { User } from "../types/UserTypes";
-import { useUserContext } from "../context/UserContext";
 import {
   Box,
   Button,
@@ -13,28 +12,15 @@ import {
 } from "@mui/material";
 import FileUploadField from "./FileUploadField";
 import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { updateUserProfile, getUserProfile } from "../services/srvUserProfiles";
 import { useEffect } from 'react';
 import Session from "supertokens-auth-react/recipe/session";
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import { useSessionContext } from "supertokens-auth-react/recipe/session";
-
+import { ProfileFormInputs } from "../types/UserTypes";
 
 const styles = {
     marginLeft: '75px' // or a responsive value
 };
-
-type ProfileFormInputs = {
-    firstName: string,
-    lastName: string,
-    email: string,
-    bio: string,
-    title: string,
-    description: string,
-    avatar: File,
-}
 
 const UserProfile = () => {
     const [userId, setUserId] = useState<string>("");
@@ -48,7 +34,7 @@ const UserProfile = () => {
         reset
     } = useForm<ProfileFormInputs>({
         defaultValues: {
-            firstName: "John",
+            firstName: "",
             lastName: "",
             email: "",
             bio: "",

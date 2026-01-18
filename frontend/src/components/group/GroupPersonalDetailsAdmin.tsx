@@ -33,18 +33,13 @@ interface FormType {
 
 const groupsUrl = `${import.meta.env.VITE_API_HOST}/api/groups`;
 
-export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
+export const GroupPersonalDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
   
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     name: group.name || "",
     imageUrl: group.imageUrl || "",
     websiteUrl: group.websiteUrl || "",
-    street: group.groupAddress[0].street || "",
-    city: group.groupAddress[0].city || "",
-    state: group.groupAddress[0].state || "",
-    zip: group.groupAddress[0].zip || "",
-    addressId: group.groupAddress[0].id,
     description: group.description || ""
   });
 
@@ -113,24 +108,7 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
                     sx={{ mb: 2 }}
                 />
             </Grid>
-            <>
-            {group.groupType === "WRITING" && (               
-            <Grid size={12}>
-                {["street","city", "state", "zip"].map((field) => (
-                    <TextField
-                        key={field}
-                        label={field.charAt(0).toUpperCase() + field.slice(1)}
-                        name={field}
-                        value={(form as any)[field]}
-                        onChange={handleChange}
-                        fullWidth
-                        disabled={!editing}
-                        sx={{ mb: 2 }}
-                    />
-                ))}
-            </Grid>
-            )}
-            </>
+            
             <Grid size={12}>
               <TextField
                 label="Description"
@@ -141,6 +119,7 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
                 disabled={!editing}
                 sx={{ mb: 2 }}
               />
+
               <TextField
                 label="Website"
                 name={"websiteUrl"}
@@ -150,6 +129,7 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
                 disabled={!editing}
                 sx={{ mb: 2 }}
               />
+
               <UrlList isDisabled={!editing}/>
                 {editing && (
                 <div>

@@ -53,12 +53,17 @@ const Sidebar = () => {
         !item.roles || item.roles.includes(activeGroup ? activeGroup?.role : "MEMBER")
       ).map(item => (
         <ListItemButton
-          key={item.path}
-          selected={pathname.startsWith(item.path)}
-          onClick={() => navigate(item.path.includes("groups") ? item.path + "/" + groupId : item.path)}
-        >
-          <ListItemIcon className="sidebarIcon" color="white">{item.icon}</ListItemIcon>
-          <ListItemText primary={item.label} />
+                key={item.path}
+                selected={pathname.startsWith(item.path)}
+                onClick={() => navigate(item.path.includes("groups") ? item.path + "/" + groupId : item.path)}
+                disabled={!activeGroup && 
+                    (item.label === "Group" || 
+                    item.label === "Readings" ||
+                    item.label === "Members")
+                    ? true : false }
+            >
+            <ListItemIcon className="sidebarIcon" color="white">{item.icon}</ListItemIcon>
+            <ListItemText primary={item.label} />
         </ListItemButton>
       ))}
     </List>

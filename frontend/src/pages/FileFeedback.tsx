@@ -61,7 +61,7 @@ const FileFeedback = () => {
     const { readingId } = useParams<{ readingId: string }>();
     const { readings, isLoading: isReadingLoading, refresh } = useReadings();
     const reading: Reading | undefined = readings.find(r => r.id === readingId);
-    const { canReview, getManuscriptHtml } = useReadingDomain(activeGroup?.id, user, refresh);
+    const { canReviewFile, getManuscriptHtml } = useReadingDomain(activeGroup?.id, user, refresh);
     const [editFile, setEditFile] = useState<AppFile | null>(null);
     const [editTitle, setEditTitle] = useState("");
     const [editDescription, setEditDescription] = useState("");
@@ -69,8 +69,7 @@ const FileFeedback = () => {
     const [manuscriptHtmlBySubmission, setManuscriptHtmlBySubmission] = useState<Record<string, string>>({});
     const [fileFeedbackIds, setFileFeedbackIds] = useState<Record<string, string>>({});
     const [initialComments, setInititalComments] = useState<Record<string, CommentDTO[]>>({});
-    
-    //getFileFeedback()
+
     useEffect(() => {
         if (!reading) return;
         
@@ -158,6 +157,12 @@ const FileFeedback = () => {
         <Typography variant="h6">
             Date: {new Date(reading!.readingDate || "").toLocaleDateString()}
         </Typography>
+        <Typography  variant="h6" sx={{mb:2}}>
+            There&nbsp;
+            {reading!.readingSubmission.length === 1 ? "is" : "are"}&nbsp;
+            <b>{reading!.readingSubmission.length}</b> manuscript
+            {reading!.readingSubmission.length === 1 ? "" : "s"}&nbsp;to review
+        </Typography>
             {reading && reading.readingParticipant.findIndex(rp => rp.readingSubmission?.appFile.appFileMeta !== null) === -1 ? (
                 <Card>
                     <CardContent>
@@ -168,33 +173,46 @@ const FileFeedback = () => {
                 </Card>
             ) : (
                 reading.readingSubmission.map((rs: ReadingSubmission) => (
-                    <Card>
+                    <Card key={rs.id} sx={{mb:4}}>
                         <CardContent>
                             <Grid container>
-                                <Grid size={{xs:12, md:9}} key={rs.id}>
+                                <Grid size={{xs:12, md:9 }} key={rs.id} >
                                     <Typography variant="h4" fontWeight="bold">
                                         {rs.appFile.appFileMeta.title}
+                                    </Typography>
+                                    <Typography fontWeight="bold">
+                                        by &nbsp;
+                                        {rs.appFile.appFileMeta.user.userProfile?.firstName}&nbsp;
+                                        {rs.appFile.appFileMeta.user.userProfile?.lastName} 
                                     </Typography>
                                     <Typography
                                             align="justify"
                                             variant="body1"
                                             color="text.secondary"
-                                            sx={{ mb: 2, mt: 2, mr:-4}}
+                                            sx={{ mb: 2, mt: 2, mr:-4, width: "550px"}}
                                     >
                                         {rs.appFile.appFileMeta.description}
                                     </Typography>
-                                            {manuscriptHtmlBySubmission[rs.id] ? (
-                                            <ManuscriptReview
-                                                html={manuscriptHtmlBySubmission[rs.id]}
-                                                initialComments={initialComments[rs.id]}
-                                                fileFeedbackId={fileFeedbackIds[rs.id]}
-                                                reviewerUserId={user.id}
-                                            />
+                                            {!canReviewFile(rs.appFile, user.id) ? (
+                                                <Typography variant="h6">
+                                                    You are the author of this manuscript and cannot review it
+                                                </Typography>
                                             ) : (
-                                                <CircularProgress size={20} />
-                                            )}
-                                    </Grid>
+                                                <>
+                                                {manuscriptHtmlBySubmission[rs.id] ? (
+                                                    <ManuscriptReview
+                                                        html={manuscriptHtmlBySubmission[rs.id]}
+                                                        initialComments={initialComments[rs.id]}
+                                                        fileFeedbackId={fileFeedbackIds[rs.id]}
+                                                        reviewerUserId={user.id}
+                                                    />
+                                                ) : (
+                                                    <CircularProgress size={20} />
+                                                )}
+                                                </>
+                                        )}
                                 </Grid>
+                            </Grid>
                         </CardContent>
                     </Card>
                 )

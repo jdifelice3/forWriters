@@ -28,7 +28,15 @@ router.get("/", asyncHandler(async (req: Request, res: Response) => {
                 include: {
                     appFile: {
                         include: {
-                            appFileMeta: true
+                            appFileMeta: {
+                                include: {
+                                    user: {
+                                        include: {
+                                            userProfile: true
+                                        }
+                                    }
+                                }
+                            }
                         }
                     },
                 },
@@ -88,7 +96,7 @@ router.post("/", async (req: Request, res: Response) => {
                 readingEndTime,
                 description,
                 scheduledType: req.group.groupType === "WRITING" ? ReadingScheduleType.SCHEDULED : ReadingScheduleType.UNSCHEDULED,
-                createdUserId,
+                createdUserId: user.id,
                 readingDate: new Date(readingDate),
                 submissionDeadline: new Date(submissionDeadline),
             },

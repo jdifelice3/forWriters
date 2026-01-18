@@ -1,25 +1,21 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Box,
-  Divider,
   Typography,
   Button,
-  TextField,
   Card,
   CardContent,
   IconButton,
   Stack,
   useTheme
 } from "@mui/material";
-import TipTapTextEditor from "../TipTapTextEditor";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import AddIcon from "@mui/icons-material/Add";
 import Tooltip from '@mui/material/Tooltip';
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
-  RichTextEditorProvider,
   RichTextReadOnly,
 } from "mui-tiptap";
 import Editor from "../richTextEditor/Editor";
@@ -114,7 +110,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
     <Card>
       <CardContent>
         <Typography variant="h6" mb={2}>
-          Group News
+          News
         </Typography>
 
         {isAdmin && !adding && (
@@ -127,7 +123,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
             Add News
           </Button>
         )}
-<Box sx={{ borderBottom: "1px solid #ccc" }}/>
+        <Box sx={{ borderBottom: "1px solid #ccc" }}/>
         {isAdmin && adding && (
           <Box mb={3}>
              <Box mt={3}>
@@ -143,7 +139,12 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
             </Box>              
           </Box>
         )}
-
+        {news.length === 0 ? (
+            <Typography variant="body1" color="text.primary" sx={{ mb: 1 }}>
+              No news is good news
+            </Typography>
+        ) : ( 
+            <>
         {news.map((n) => (
           <Box key={n.id} mb={2} p={1} sx={{ borderBottom: "1px solid #ccc" }}>
             <Stack direction="row" justifyContent="space-between">
@@ -164,6 +165,8 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
             </Typography>
           </Box>
         ))}
+        </>
+)}
       </CardContent>
     </Card>
   );

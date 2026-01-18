@@ -41,8 +41,8 @@ export default function GroupSelector() {
             selected={activeGroup?.id === g.id}
             onClick={() => {
               setActiveGroup(g);
-              //navigate(`/groups/details`);
               setAnchorEl(null);
+              navigate(`/groups/${g.id}`);
             }}
           >
             <ListItemText

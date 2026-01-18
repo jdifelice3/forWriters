@@ -35,29 +35,35 @@ const prisma = new PrismaClient();
 
 //#region CREATE
 export const createUser = async(superTokensId: string, email: string, role: Role)  => {
-    const newUser: any = await prisma.user.create({
-        data: {
-            email: email,
-            superTokensId: superTokensId,
-            role: role,
-            username: email,
+    console.log('in dbUser.createUser')
+    try{
+        const newUser: any = await prisma.user.create({
+            data: {
+                email: email,
+                superTokensId: superTokensId,
+                role: role,
+                username: email,
 
-            userProfile: {
-                create: {}
+                userProfile: {
+                    create: {}
+                }
             }
-        }
-    });
+        });
 
-    const userSearch: any = await prisma.userSearch.create({
-        data: {
-            userId: newUser.id,
-            fullName: `${newUser.userProfile.firstName} ${newUser.userProfile.lastName}`,
-            bio: `${newUser.userProfile.bio}`
-        }
-    })
+        // const userSearch: any = await prisma.userSearch.create({
+        //     data: {
+        //         userId: newUser.id,
+        //         fullName: `${newUser.userProfile.firstName} ${newUser.userProfile.lastName}`,
+        //         bio: `${newUser.userProfile.bio}`
+        //     }
+        // })
 
-  
-    return newUser;
+    
+        return newUser;
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
 }
 
 

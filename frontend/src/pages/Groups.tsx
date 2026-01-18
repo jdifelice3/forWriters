@@ -16,7 +16,9 @@ import { useGroupContext } from "../context/GroupContextProvider";
 import GroupUserList from "../components/group/GroupUserList";
 import { NewsFeed } from "../components/news/NewsFeed";
 import { GroupDetailsAdmin } from "../components/group/GroupDetailsAdmin";
+import { GroupPersonalDetailsAdmin } from "../components/group/GroupPersonalDetailsAdmin";
 import { GroupDetails } from "../components/group/GroupDetails";
+import { GroupPersonalDetails } from "../components/group/GroupPersonalDetails";
 
 
 const styles = {
@@ -42,7 +44,8 @@ const Groups = () => {
 
   const userIndex: number = group.groupUser.findIndex(item => item.userId === user.id);
   const isAdmin = (group.groupUser[userIndex].role === "ADMIN");
-
+  console.log('isAdmin', isAdmin)
+  console.log('groupType', group.groupType)
 
   return (
     <Card elevation={0} className="mainComponentPanel">
@@ -60,8 +63,9 @@ const Groups = () => {
       <Grid container spacing={3} className="groupSubPanel">
         <Grid size={12}>
            {isAdmin ? (
-              <GroupDetailsAdmin group={group} />
-           ) : (<GroupDetails group={group}/>
+              group.groupType === "WRITING" ? <GroupDetailsAdmin group={group} /> : <GroupPersonalDetailsAdmin group={group} />
+           ) : (
+              group.groupType === "WRITING" ? <GroupDetails group={group} /> : <GroupPersonalDetails group={group} />
            )}
         </Grid>
       </Grid>
@@ -79,7 +83,7 @@ const Groups = () => {
             <Card>
                 <CardContent>
                     <Typography variant="h6" mb={2}>
-                        Group Members
+                        Members
                     </Typography>
                     <GroupUserList groupUsers={group.groupUser} />
                 </CardContent>

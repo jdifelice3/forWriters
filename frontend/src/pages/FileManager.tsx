@@ -71,7 +71,9 @@ const FileManager = () => {
         deleteFile, 
         uploadVersion, 
         uploadManuscript,
-        setActiveVersion 
+        setActiveVersion,
+        getFileFeedback,
+        getComments
     } = useFileDomain();
     const ui = useFileUI();
     const { files, isLoading, mutate } = useFiles();
@@ -110,7 +112,9 @@ const FileManager = () => {
         deleteFile: deleteFile,
         uploadVersion: onUploadVersion,
         uploadManuscript: onUploadManuscript,
-        setActiveVersion: setActiveVersion
+        setActiveVersion: setActiveVersion,
+        getFileFeedback: getFileFeedback,
+        getComments: getComments
     }
   
   return (

@@ -1,6 +1,5 @@
 import "dotenv/config";
 import EmailPassword from "supertokens-node/recipe/emailpassword";
-//import Session from "supertokens-node/recipe/session";
 import Session from "supertokens-node/recipe/session/index.js";
 import Dashboard from "supertokens-node/recipe/dashboard";
 import UserRoles from "supertokens-node/recipe/userroles";
@@ -38,7 +37,6 @@ const sessionInit = process.env.NODE_ENV === 'production' ?
             cookieSameSite: "none",
             cookieSecure: true,
             antiCsrf: "VIA_TOKEN",
-            //cookieDomain: ".forwriters.ink",
         })
 
 export const SuperTokensConfig: TypeInput = {
@@ -81,14 +79,6 @@ export const SuperTokensConfig: TypeInput = {
         }),
         Dashboard.init(),
         UserRoles.init(),
-        sessionInit
-        // Session.init({
-        //     useDynamicAccessTokenSigningKey: false,
-        //     cookieSameSite: "none",
-        //     cookieSecure: true,
-        //     antiCsrf: "VIA_TOKEN",
-        //     //cookieDomain: ".forwriters.ink",
-        // }),
-        
+        sessionInit        
     ],
 };

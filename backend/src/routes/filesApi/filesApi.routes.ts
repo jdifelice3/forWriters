@@ -67,12 +67,17 @@ router.get("/:id/description", async(req, res) => {
 });
 
 router.get("/search", async (req, res) => {
+    const session = await Session.getSession(req, res);
+    const authId = session.getUserId(true);
+    const user: any = await getUser(authId);
+
     const query:string = (req.query.query as string) || "";
     if (!query.trim()) {
       return res.json([]);
     }
     const files = await prisma.appFile.findMany({
       where: {
+        userId: user.id, 
         name: {
           contains: query,
           mode: "insensitive",

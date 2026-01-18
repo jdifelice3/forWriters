@@ -1,5 +1,4 @@
-import { Reading } from "./domain-types";
-
+import { GroupType } from "../types/domain-types"
 export type FormInput = {
   name: string,
   readingDate: Date,
@@ -20,9 +19,10 @@ export interface ReadingDomainCommands {
   updateSubmittedVersion(readingId: string, appFileId: string): Promise<void>;
 
   canSignup(readingId: string, userId:string): boolean | undefined;
-  canReview(readingId: string, userId:string): boolean | undefined;
+  canReviewReading(readingId: string, userId:string): boolean | undefined;
   canWithdraw(readingId: string, userId:string): boolean | undefined;
   canSubmit(readingId: string, userId:string): boolean | undefined;
+  canChangeSubmission(readingId: string, groupType: GroupType): boolean | undefined;
 }
 
 

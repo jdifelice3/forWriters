@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   Avatar,
-  Link,
   ListItem,
   Stack,
 } from "@mui/material";
@@ -17,23 +16,15 @@ interface GroupDetailsProps {
   group: Group;
 }
 
-export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
+export const GroupPersonalDetails: React.FC<GroupDetailsProps> = ({ group }) => {
 
   const [form, setForm] = useState({
     name: group.name || "",
     description: group.description || "",
     websiteUrl: group.websiteUrl || "",
     imageUrl: group.imageUrl || "",
-    street: (group.groupAddress) ?  group.groupAddress[0].street : "",
-    city: (group.groupAddress) ?  group.groupAddress[0].city : "",
-    state: (group.groupAddress) ?  group.groupAddress[0].state : "",
-    zip: (group.groupAddress) ?  group.groupAddress[0].zip : "",
     urls: (group.groupUrl) ? group.groupUrl : []  
   });
-
-  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${form.street}, ${form.city}, ${form.state} ${form.zip}`
-  )}`;
 
   return (
     <Card sx={{ height: "100%" }}>
@@ -51,21 +42,14 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
               sx={{ width: 120, height: 120 }}
             />
           </Grid>
-          {group.groupType === "WRITING" && (
+
           <Grid size={4}>
             <Stack >
-                <ListItem>
-                    <Typography sx={{fontWeight: "bold"}}>Address:</Typography>
-                </ListItem>
-                <ListItem>
-                    <Typography>{form.street}<br/>{`${form.city}, ${form.state} ${form.zip}`}</Typography>
-                </ListItem>
                 <ListItem>
                     <Typography><a href={form.websiteUrl} target='_blank' rel='noopener noreferrer'>{form.websiteUrl}</a></Typography>
                 </ListItem>
             </Stack>
           </Grid>
-          )}
 
           <Grid size={6}>
             <Stack >
@@ -100,13 +84,6 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
                     </Typography>
                 </Stack>
               </ListItem>
-              {group.groupType === "WRITING" && (
-              <ListItem>
-                <Link href={mapUrl} target="_blank" rel="noopener">
-                    View on Google Maps
-                </Link>
-              </ListItem>
-              )}
             </Stack>
           </Grid>
         </Box>
