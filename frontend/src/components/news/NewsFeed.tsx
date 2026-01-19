@@ -70,8 +70,8 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
     console.log(content);
     setNewsContent(content);
     setError("");
-
-    if(newsContent === "<p></p>" || newsContent.length === 0){
+    
+    if(content === "<p></p>" || content.length === 0){
         setError("You must provide content for a News post.");
         return;
     } 
