@@ -71,10 +71,10 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
     setNewsContent(content);
     setError("");
     
-    if(content === "<p></p>" || content.length === 0){
-        setError("You must provide content for a News post.");
-        return;
-    } 
+    // if(content === "<p></p>" || content.length === 0){
+    //     setError("You must provide content for a News post.");
+    //     return;
+    // } 
 
     const res = await fetch(newsUrl, {
       method: "POST",
