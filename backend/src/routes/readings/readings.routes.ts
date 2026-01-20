@@ -6,11 +6,22 @@ import { loadSubmissionById } from "./readings.middleware";
 import { SessionRequest } from "supertokens-node/framework/express";
 import Session from "supertokens-node/recipe/session";
 import { loadDocxFromS3AsHtml, addParagraphIds } from "../../services/streamFromS3";
+import { loadReadingById } from "./readings.middleware";
 
 const router = Router({ mergeParams: true });
 
 router.use(loadGroupById);
 router.use(loadGroupMembership);
+
+type CreateReadingInput = {
+  name: string;
+  readingDate: Date;
+  readingStartTime: string;
+  readingEndTime: string;
+  submissionDeadline: Date;
+  description: string;
+  schedule: string;
+}
 
 router.get("/", async (req: Request, res: Response) => {
     const reading: any = await prisma.reading.findUnique({
@@ -23,6 +34,59 @@ router.get("/", async (req: Request, res: Response) => {
         }
     });
     res.json(reading);
+});
+
+router.put("/", async (req: Request, res: Response) => {
+    const readingId = req.reading.id;
+
+    const {
+        name,
+        readingDate,
+        readingStartTime,
+        readingEndTime,
+        submissionDeadline,
+        description
+    } = req.body;
+
+    const reading = prisma.reading.update({
+        data: {
+            name,
+            readingDate,
+            readingStartTime,
+            readingEndTime,
+            submissionDeadline,
+            description
+        },
+        where: {
+            id: readingId
+        }
+    });
+
+    return reading;
+});
+
+router.delete("/", loadReadingById, async (req, res) => {
+    
+    const readingId = req.reading.id;
+    const { count: submissionCount } = await prisma.readingSubmission.deleteMany({
+        where: {
+            readingId: readingId
+        }
+    });
+    
+    const { count } = await prisma.readingParticipant.deleteMany({
+        where: {
+            readingId: readingId
+        }
+    });
+    
+    
+    await prisma.reading.delete({
+        where: {
+            id: readingId
+        }
+    })
+    res.json({"ok": "true"})
 });
 
 // /api/groups/:groupId/readings/:readingId/signup

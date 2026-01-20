@@ -60,8 +60,7 @@ export default function Dashboard() {
             if(userProfile){
                 setUserProfile(result);
             }
-            console.log('in useEffect')
-            console.log('userProfile', userProfile)
+            
         }
         
         load();
@@ -86,128 +85,54 @@ export default function Dashboard() {
         }
     }
 
-    if ( !data?.group && userProfile.firstName === "") {
-        // onboarding / no-group state
-        return (
-        <>
-        <Box sx={{ maxWidth: 750, mx: "auto", p: 4}}
-            component="form"
-            onSubmit={handleSubmit(onSubmit)}
-        >    
+       
+        return(
             <Box>
-                <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
-                    Welcome for forWriters!
-                </Typography>
-                <Typography sx={{ mb: 2 }}>
-                    Please enter your first and last name.
-                </Typography>
-                <Stack spacing={2}>
-                    
-                    {/* Basic info */}
-                    <Controller
-                        name="firstName"
-                        control={control}
-                        render={({ field }) => (
-                            <TextField
-                                label="First Name"
-                                required
-                                {...field}
-                                value={field.value ?? ""}
-                                error={!!errors.firstName}
-                                helperText={errors.firstName?.message}
-                                fullWidth
-                            />
-                        )}
-                    />
-                    <Controller
-                        name="lastName"
-                        control={control}
-                        render={({ field }) => (
-                            <TextField
-                                label="Last Name"
-                                required
-                                {...field}
-                                value={field.value ?? ""}
-                                error={!!errors.lastName}
-                                helperText={errors.lastName?.message}
-                                fullWidth
-                            />
-                        )}
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        sx={{ mt: 2, alignSelf: "flex-end" }}
-                    >
-                        Save Changes
-                    </Button>
-                </Stack>
-            </Box>
-        </Box>
-        </>
-        );
-    } else if (!data?.group && userProfile){
-        return (
-            <Box sx={{mt: 4, ml: 6, width:"45%"}}>
-
-                <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
-                    One more thing...
-                </Typography>
-                <Card sx={{mb: 3}}>
-                    <CardContent>
-                        <Typography >
-                            Find a writing group to join or create your own. This will allow you to review the 
-                        </Typography>
-                        <Typography>
-                            work of other writers and to have your work reviewed.
-                        </Typography>
-                    </CardContent>
-                </Card>
-                <Card sx={{mb: 3}}>
-                    <CardContent>
-                        <Typography sx={{ mb: 0 }}>
-                            When you find a group you like, a request will be sent to the group owner who must
-                        </Typography>
-                        <Typography sx={{ mb: 0 }}>
-                            approve it. While you wait, upload manuscripts by clicking on the "Files"
-                        </Typography>
-                        <Typography>
-                            link on the left-hand-side.
-                        </Typography>
-                    </CardContent>
-                </Card>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                    <Button variant="contained" onClick={() => navigate("/groupsearch")}>
-                        Find a group
+                {!data?.group ? (
+            <Box sx={{mt: 4, ml: 6, width:"75%"}}>
+                <Box sx={{ p: 3, gap: 1  }}>
+                    <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
+                    Welcome
+                    </Typography>
+                    <Typography sx={{ mb: 2 }}>
+                    To get started, join a writing group or create your own. 
+                    </Typography>
+        <Button variant="contained" onClick={() => navigate("/groupsearch")}  sx={{mr: 2}}>
+                        Join a group
                     </Button>
                     <Button variant="outlined" onClick={() => navigate("/creategroup")}>
                         Start a group
-                    </Button>   
+                    </Button> 
                 </Box>
             </Box>
-        )
-    } else {
-        return (
-            <Box sx={{ p: 3 }} className="mainComponentPanel">
-            <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
-                Dashboard — {data.group!.name}
-            </Typography>
+                    
+                ) : (
+                <Box sx={{ p: 3 }} className="mainComponentPanel">
+                <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
+                    Dashboard — {data.group!.name}
+                </Typography>
 
-            <Grid container spacing={2}>
-                <Grid size={12}>
-                <AttentionCard items={data.attention} />
-                </Grid>
+                <Grid container spacing={2}>
+                    <Grid size={12}>
+                    <AttentionCard items={data.attention} />
+                    </Grid>
 
-                <Grid size={12}>
-                <UpcomingCard items={data.upcoming} />
-                </Grid>
+                    <Grid size={12}>
+                    <UpcomingCard items={data.upcoming} />
+                    </Grid>
 
-                <Grid size={12}>
-                <ResumeCard items={data.resume} />
+                    <Grid size={12}>
+                    <ResumeCard items={data.resume} />
+                    </Grid>
                 </Grid>
-            </Grid>
+                </Box> 
+                )}
             </Box>
-        );
-    }
+            
+        )
+
+            
+        // )};
+        // </div>
+        // )
 } 

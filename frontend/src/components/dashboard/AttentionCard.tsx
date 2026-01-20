@@ -4,7 +4,7 @@ import { DashboardAttentionItem } from "../../types/DashboardTypes";
 
 export default function AttentionCard({ items }: { items: DashboardAttentionItem[] }) {
   const navigate = useNavigate();
-    console.log('Attention Items', items)
+    
   return (
     <Card className="dashboardSubPanel">
       <CardContent className="dashboardSubPanelColors">

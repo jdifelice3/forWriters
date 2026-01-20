@@ -25,7 +25,7 @@ export default function NotificationsMenu() {
   const unreadCount = notifications.length;
   
   const onClick = (notificationId: string, href: string) => {
-    console.log('in onClick', notificationId, href)
+    
     updateNotification(notificationId);
     navigate(href);
     setAnchorEl(null);

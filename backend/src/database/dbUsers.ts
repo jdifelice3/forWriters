@@ -35,7 +35,7 @@ const prisma = new PrismaClient();
 
 //#region CREATE
 export const createUser = async(superTokensId: string, email: string, role: Role)  => {
-    console.log('in dbUser.createUser')
+    
     try{
         const newUser: any = await prisma.user.create({
             data: {
@@ -61,7 +61,7 @@ export const createUser = async(superTokensId: string, email: string, role: Role
     
         return newUser;
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return null;
     }
 }

@@ -1,14 +1,14 @@
 "use client";
-
+import { useState } from "react";
 import { FileListProperties } from "../../../types/FileTypes";
 import { AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands } from "../../../types/FileTypes";
 import {
-  Button,
-  Box,
-  Typography,
-  IconButton,
-  Stack,
+    Button,
+    Box,
+    Typography,
+    IconButton,
+    Stack,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import FileIcon from "../../controls/FileIcon";
@@ -28,9 +28,10 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
   onEdit,
   fileListProperties,
 }) => {
-  const currentVersion = fileMeta.appFile.find(
-    (f) => f.version === fileMeta.currentVersionId
-  );
+    
+    const currentVersion = fileMeta.appFile.find(
+        (f) => f.version === fileMeta.currentVersionId
+    );
 
   return (
     <Box>

@@ -68,15 +68,6 @@ const FileListItem: React.FC<FileListItemProps> = ({
                   onClick={(e) => onUploadVersion(fileMeta.id)}
                 >
                   Upload New Version
-                  {/* <input
-                    type="file"
-                    hidden
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      onUploadVersion(fileMeta.id, file);
-                    }}
-                  /> */}
                 </Button>
 
                 <FileVersionList

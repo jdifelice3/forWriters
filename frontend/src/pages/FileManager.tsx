@@ -36,6 +36,7 @@ import { useReadings } from "../hooks/reading/useReadings";
 import { useReadingsData } from "../hooks/reading/useReadingsData";
 import { useUserContext } from "../context/UserContext";
 import UploadFileForm from "../components/file/forms/UploadFileForm";
+import ConfirmDialog from "../components/dialogs/ConfirmDialog";
 
 const manuscriptListProperties: FileListProperties = {
     noFilesMessage: "You have not uploaded manuscripts",
@@ -66,6 +67,9 @@ const mySubmissionsListProperties: FileListProperties = {
 
 const FileManager = () => {
     const { user, isLoading: isUserLoading } = useUserContext();
+    const [open, setOpen] = useState(false);
+    const [appFileMetaIdToDelete, setAppFileMetaIdToDelete] = useState("");
+    const [deletionDialogMessage, setDeletionDialogMessage] = useState("");
     const { 
         saveMetadata, 
         deleteFile, 
@@ -73,7 +77,8 @@ const FileManager = () => {
         uploadManuscript,
         setActiveVersion,
         getFileFeedback,
-        getComments
+        getComments,
+        getDeletionIds
     } = useFileDomain();
     const ui = useFileUI();
     const { files, isLoading, mutate } = useFiles();
@@ -106,19 +111,51 @@ const FileManager = () => {
         ui.closeDialogs();
         mutate();
     }
+    
+    const onDeleteFile = async(appFileMetaId: string) => {
+        const deletionIds = await getDeletionIds(appFileMetaId);
+        
+        const fileLine: string = deletionIds.appFileIds.length > 0 ? `${deletionIds.appFileIds.length} file versions\n` : "";
+        const submissionLine: string = deletionIds.readingSubmissionIds.length > 0 ? `${deletionIds.readingSubmissionIds.length} reading submissions\n` : "";
+        const commentLine: string = deletionIds.fileFeedbackCommentIds.length > 0 ? `${deletionIds.fileFeedbackCommentIds.length}  reviewer comments` : "";
+
+        setDeletionDialogMessage(`
+            Deleting it will cause the deletion of:\n
+            ${fileLine}
+            ${submissionLine}
+            ${commentLine}`
+        );
+        setAppFileMetaIdToDelete(appFileMetaId);
+        setOpen(true);
+       
+    }
+
+    const onConfirmDelete = async(appFileMetaId: string) => {
+        setOpen(false);
+        await deleteFile(appFileMetaId)
+    }
 
     const domain: FileDomainCommands = {
         saveMetadata: saveMetadata,
-        deleteFile: deleteFile,
+        deleteFile: onDeleteFile,
         uploadVersion: onUploadVersion,
         uploadManuscript: onUploadManuscript,
         setActiveVersion: setActiveVersion,
         getFileFeedback: getFileFeedback,
-        getComments: getComments
+        getComments: getComments,
+        getDeletionIds: getDeletionIds
     }
   
   return (
     <Box>
+        <ConfirmDialog
+            open={open}
+            title="Are you sure you want to delete this manuscript?"
+            message={deletionDialogMessage}
+            onConfirm={() => onConfirmDelete(appFileMetaIdToDelete)}
+            onClose={() => setOpen(false)            
+        }
+      />
       <Card elevation={0} className="filesComponentPanel">
         <CardContent>
           {/* Header */}

@@ -44,9 +44,7 @@ const Groups = () => {
 
   const userIndex: number = group.groupUser.findIndex(item => item.userId === user.id);
   const isAdmin = (group.groupUser[userIndex].role === "ADMIN");
-  console.log('isAdmin', isAdmin)
-  console.log('groupType', group.groupType)
-
+  
   return (
     <Card elevation={0} className="mainComponentPanel">
         <CardContent>

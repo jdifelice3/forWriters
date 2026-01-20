@@ -45,7 +45,7 @@ const Readings = () => {
   const { data: group, isLoading: isGroupLoading } = useGroupDetails<Group>();
   const { readings, isLoading: isReadingLoading, refresh } = useReadings();
   const ui = useReadingsUI();
-  const domain = useReadingDomain(group?.id ?? undefined, user?.id ?? null, refresh);
+  const domain = useReadingDomain(group?.id ?? undefined, user, readings, refresh);
   
   if ( isUserLoading || isGroupLoading || !group) {
     return (
@@ -76,10 +76,6 @@ const Readings = () => {
     showEditButton: false,
     showVersionHistory: false,
   };
-
-    const onUploadVersion = (fileMetaId: string) => {
-        uiFile.beginUploadNewVersion(fileMetaId);
-    }
 
     const onCreateReading = async (form: FormInput) => {
         const input: CreateReadingInput = {

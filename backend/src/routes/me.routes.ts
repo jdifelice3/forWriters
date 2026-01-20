@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", verifySession(), async (req: SessionRequest, res) => {
     try{
-        console.log("ME route entered")
+        
         // 1. Get the session
         const session = req.session!;
 

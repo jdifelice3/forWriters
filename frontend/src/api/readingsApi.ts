@@ -1,5 +1,6 @@
 import { apiFetch } from "./client";
 import { FormInput } from "../types/ReadingTypes";
+import { CreateReadingInput } from "../types/ReadingTypes";
 
 type FeedbackResponse = {
   html: string;
@@ -8,7 +9,8 @@ type FeedbackResponse = {
 export const ReadingsAPI = {
     get(groupId: string) {
         return apiFetch(`/groups/${groupId}/readings`,{
-            method: "GET"
+            method: "GET",
+            credentials: "include"
         });
     },
 
@@ -16,13 +18,23 @@ export const ReadingsAPI = {
         return apiFetch(`/groups/${groupId}/readings`, {
             method: "POST",
             body: JSON.stringify({ ...input, createdUserId: userId, schedule }),
+            credentials: "include"
         });
+    },
+
+    update(groupId: string, readingId: string, input: CreateReadingInput) {
+        return apiFetch(`/groups/${groupId}/readings/${readingId}`, {
+            method: "PUT",
+            body: JSON.stringify(input),
+            credentials: "include"
+        })
     },
 
     signup(groupId: string, readingId: string, userId: string) {
         return apiFetch(`/groups/${groupId}/readings/${readingId}/signup`, {
             method: "POST",
             body: JSON.stringify({ userId }),
+            credentials: "include"
         });
     },
 
@@ -30,30 +42,35 @@ export const ReadingsAPI = {
         return apiFetch(`/groups/${groupId}/readings/${readingId}/participants/${userId}/withdraw`, {
             method: "DELETE",
             body: JSON.stringify({ userId }),
+            credentials: "include"
         });
     },
 
     remove(groupId: string, readingId: string) {
-        return apiFetch(`/readings/${readingId}/group/${groupId}`, {
+        return apiFetch(`/groups/${groupId}/readings/${readingId}`, {
             method: "DELETE",
+            credentials: "include"
         });
     },
 
     addVersion(groupId: string, readingId:string, appFileId: string) {
         return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${appFileId}/version`,{
-            method: "POST"
+            method: "POST",
+            credentials: "include"
         });
     },
 
     updateVersion(groupId: string, readingId:string, appFileId: string) {
         return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${appFileId}/version`,{
-            method: "PUT"
+            method: "PUT",
+            credentials: "include"
         });
     },
 
     getManuscriptHTML(groupId: string, readingId:string, submissionId: string) {
         return apiFetch<FeedbackResponse>(`/groups/${groupId}/readings/${readingId}/submissions/${submissionId}/feedback`,{
-            method: "GET"
+            method: "GET",
+            credentials: "include"
         });
     },
 

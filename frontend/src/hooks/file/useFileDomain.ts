@@ -5,6 +5,7 @@ import { useFiles } from "./useFiles";
 import { AppFile, FileFeedback, Reading } from "../../types/domain-types";
 import { CommentDTO } from "../../types/FeedbackTypes";
 import { DocumentEnum } from "../../util/Enum";
+import { ObjectIdsForDeletion } from "../../types/FileTypes";
 
 const filesUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi`;
 
@@ -135,6 +136,15 @@ export function useFileDomain(): FileDomainCommands {
         [mutate]
     )
 
+    const getDeletionIds = useCallback<FileDomainCommands["getDeletionIds"]>(
+        async (appFileMetaId: string) => {
+            let deletionIds: ObjectIdsForDeletion = await FilesAPI.getDeletionIds(appFileMetaId);
+            await mutate?.();
+            return deletionIds;
+        },
+        [mutate]
+    )
+
     return {
         saveMetadata,
         deleteFile,
@@ -142,6 +152,7 @@ export function useFileDomain(): FileDomainCommands {
         uploadVersion,
         setActiveVersion,
         getFileFeedback,
-        getComments
+        getComments,
+        getDeletionIds
     };
 }

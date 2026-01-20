@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import { FileUploadFormInput, FileFormInput } from "../types/FileTypes";
+import { FileUploadFormInput, FileFormInput, ObjectIdsForDeletion } from "../types/FileTypes";
 import { AppFileMeta, AppFile, FileFeedback } from "../types/domain-types";
 import { CommentDTO } from "../types/FeedbackTypes";
 export const FilesAPI = {
@@ -74,6 +74,13 @@ export const FilesAPI = {
         return apiFetch<CommentDTO[]>(`/filesApi/feedback/${fileFeedbackId}/comments`, {
             method: "GET",
             credentials: "include",
+        })
+    },
+
+    getDeletionIds(appFileMetaId: string){
+        return apiFetch<ObjectIdsForDeletion>(`/filesApi/${appFileMetaId}/ids/fordeletion`, {
+            method: "GET",
+            credentials: "include"
         })
     }
 }

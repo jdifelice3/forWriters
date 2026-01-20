@@ -51,66 +51,78 @@ router.get("/", asyncHandler(async (req: Request, res: Response) => {
 }));
 
 router.post("/", async (req: Request, res: Response) => {
-    if (req.groupRole !== "ADMIN") {
-        return res.status(403).json({ error: "Admins only" });
-    }
-    
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
-    const user: any = await prisma.user.findUnique({
-            where: {
-                superTokensId: authId,
-            },
-    });
-    
-    let {
-        readingDate,
-        submissionDeadline,
-        name,
-        readingStartTime,
-        readingEndTime,
-        description,
-        schedule,
-        createdUserId,
-    } = req.body;
+  if (req.groupRole !== "ADMIN") {
+    return res.status(403).json({ error: "Admins only" });
+  }
 
-    return prisma.$transaction(async (tx) => {
-        const group = await tx.group.findUnique({
-            where: { id: req.group.id },
-            include: {
-                reading: {
-                    include: {
-                        readingParticipant: true        
-                    }
-                }
-            }
+  const session = await Session.getSession(req, res);
+  const authId = session.getUserId(true);
+
+  const user = await prisma.user.findUnique({
+    where: { superTokensId: authId },
+  });
+
+  if (!user) {
+    return res.status(401).json({ error: "User not found" });
+  }
+
+  const {
+    readingDate,
+    submissionDeadline,
+    name,
+    readingStartTime,
+    readingEndTime,
+    description,
+  } = req.body;
+
+  try {
+    const reading = await prisma.$transaction(async (tx) => {
+      const group = await tx.group.findUnique({
+        where: { id: req.group.id },
+      });
+
+      if (!group) {
+        throw new Error("Group not found");
+      }
+
+      const reading = await tx.reading.create({
+        data: {
+          groupId: req.group.id,
+          name,
+          readingStartTime,
+          readingEndTime,
+          description,
+          scheduledType:
+            group.groupType === "WRITING"
+              ? ReadingScheduleType.SCHEDULED
+              : ReadingScheduleType.UNSCHEDULED,
+          createdUserId: user.id,
+          readingDate: new Date(readingDate),
+          submissionDeadline: new Date(submissionDeadline),
+        },
+      });
+
+      if (group.groupType === "PERSONAL") {
+        await tx.readingParticipant.create({
+          data: {
+            readingId: reading.id,
+            userId: user.id,
+          },
         });
+      }
 
-        if (!group) throw new Error("Group not found");
-
-        const reading = await tx.reading.create({
-            data: {
-                groupId: req.group.id,
-                name,
-                readingStartTime,
-                readingEndTime,
-                description,
-                scheduledType: req.group.groupType === "WRITING" ? ReadingScheduleType.SCHEDULED : ReadingScheduleType.UNSCHEDULED,
-                createdUserId: user.id,
-                readingDate: new Date(readingDate),
-                submissionDeadline: new Date(submissionDeadline),
-            },
-        });
-
-        if (group.groupType === "PERSONAL") {
-            const readingParticipant = await tx.readingParticipant.create({
-                data: {
-                    readingId: reading.id,
-                    userId: user.id,
-                }
-            });
-        }
+      // 🔑 THIS IS CRITICAL
+      return reading;
     });
+
+    // 🔑 ALSO CRITICAL
+    return res.status(201).json(reading);
+  } catch (err) {   
+    console.error("Create reading failed:", err);
+    return res.status(500).json({ error: "Failed to create reading" });
+  }
 });
+
+
 
 export default router;

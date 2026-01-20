@@ -67,7 +67,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
   }, [groupId]);
 
   const postContent = async (content: string) => {
-    console.log(content);
+    
     setNewsContent(content);
     setError("");
     

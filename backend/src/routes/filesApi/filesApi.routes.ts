@@ -5,7 +5,16 @@ import { Router } from "express";
 import { z } from "zod";
 //import { resolveReviewerParticipant } from "./filesApi.middleware";
 import { fullFeedbackInclude } from "./filesApi.feedback.includes";
+import { AppFileMeta } from "@prisma/client";
 const router = Router();
+
+type ObjectIdsForDeletion = {
+    appFileIds: string[],
+    fileFeedbackIds: string[],
+    fileFeedbackCommentIds: string[],
+    fileFeedbackCommentTargetIds: string[],
+    readingSubmissionIds: string[]
+}
 
 const TargetInput = z.object({
   paragraphId: z.string().min(1),
@@ -140,26 +149,153 @@ router.put("/version", async(req, res) => {
 });
 
 router.delete("/", async(req, res) => {
-    let id: string = "";
+    let fileMetaId: string = "";
     if(typeof req.query.id === "string"){
-        id = req.query.id;
-        const file = await prisma.appFile.deleteMany({
-            where: {
-                appFileMetaId: id
-            }
-        });
+        fileMetaId = req.query.id;
 
-        const fileMeta = await prisma.appFileMeta.delete({
+        const deletionIds: ObjectIdsForDeletion = await getDeletionIds(fileMetaId, );
+
+        console.log('deleteIds', deletionIds)
+
+        //Deleting
+        const { count: targetCount} = await prisma.fileFeedbackCommentTarget.deleteMany({
             where: {
-                id: id
+                id: {
+                    in: deletionIds.fileFeedbackCommentTargetIds
+                }
             }
         });
+        console.log(`${targetCount} targets deleted`)
+        
+        const { count: commentCount } = await prisma.fileFeedbackComment.deleteMany({
+            where: {
+                id: {
+                    in: deletionIds.fileFeedbackCommentIds
+                }
+            }
+        });
+        console.log(`${commentCount} comments deleted`)
+        
+        const { count: feedbackCount } = await prisma.fileFeedback.deleteMany({
+            where: {
+                id: {
+                    in: deletionIds.fileFeedbackIds
+                }
+            }
+        })
+        console.log(`${feedbackCount} feedbackfile records deleted`)
+        
+        const { count: submissionCount } = await prisma.readingSubmission.deleteMany({
+            where: {
+                appFileId: {
+                    in: deletionIds.appFileIds
+                }
+            }
+        })
+
+        const { count: fileCount } = await prisma.appFile.deleteMany({
+            where: {
+                id: {
+                    in: deletionIds.appFileIds
+                }
+            }
+        });
+        console.log(`${fileCount} appFiles deleted`)
+        
+        await prisma.appFileMeta.delete({
+            where: {
+                id: fileMetaId
+            }
+        });
+        console.log('appMeta deleted')
+
         
         res.status(200).json({status: "OK"})
     } else {
         res.status(500).json({error: "Expecting a string data type in the query string for file id"});
     }
 });
+
+router.get("/:appFileMetaId/ids/fordeletion", async(req, res) => {
+    const appFileMetaId = req.params.appFileMetaId;
+    if(!appFileMetaId) res.status(404).json({error: "AppFileMetaId not sent"});
+
+    const deletionIds: ObjectIdsForDeletion = await getDeletionIds(appFileMetaId);
+    res.status(200).json(deletionIds);
+});
+
+const getDeletionIds = async(appFileMetaId: string): Promise<ObjectIdsForDeletion> => {
+    //Retrieving ids
+    console.log('Retrieving ids')
+    console.log("appFileMetaId", appFileMetaId)
+
+    const appFileMeta = await prisma.appFileMeta.findUnique({
+        where: {
+            id: appFileMetaId
+        },
+        include: {
+            appFile: true
+        }
+    });
+    if(!appFileMeta) throw new Error(`AppFileMeta not found for id ${appFileMetaId}`)
+
+    const appFileIds: string[] | undefined = appFileMeta?.appFile.map((f) => (
+        f.id
+    ));
+
+    const feedback = await prisma.fileFeedback.findMany({
+        where: {
+            appFileId: {
+                in: appFileIds
+            }
+        }
+    });
+    const fileFeedbackIds: string[] | undefined = feedback.map((f) => (
+        f.id
+    ));
+
+    const comments = await prisma.fileFeedbackComment.findMany({
+        where: {
+            fileFeedbackId: {
+                in: fileFeedbackIds
+            }
+        }
+    });
+    const commentIds: string[] | undefined = comments.map((c) => (
+        c.id
+    ));
+
+    const targets = await prisma.fileFeedbackCommentTarget.findMany({
+        where: {
+            commentId: {
+                in: commentIds
+            }
+        }
+    });
+    const targetIds: string[] | undefined = targets.map((t) => (
+        t.id
+    ));
+
+    const readingSubmissions = await prisma.readingSubmission.findMany({
+        where: {
+            appFileId: {
+                in: appFileIds
+            }
+        }
+    });
+    const submissionIds: string[] | undefined = targets.map((s) => (
+        s.id
+    ));
+
+
+    return {
+        appFileIds: appFileIds,
+        fileFeedbackIds: fileFeedbackIds,
+        fileFeedbackCommentIds: commentIds,
+        fileFeedbackCommentTargetIds: targetIds,
+        readingSubmissionIds: submissionIds
+    }
+}
 
 // FEEDBACK
 router.get("/feedback/:fileFeedbackId/comments", async (req, res) => {

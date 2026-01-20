@@ -24,7 +24,7 @@ export default function GroupSelector() {
         onClick={(e) => setAnchorEl(e.currentTarget)}
         endIcon={<ExpandMoreIcon />}
         variant="outlined"
-        //disabled={groups.length === 0}
+
         sx={{ textTransform: "none", minWidth: 220 }}
       >
         {activeGroup ? activeGroup.name : "Select a group"}

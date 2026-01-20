@@ -13,7 +13,7 @@ export const useFilesData = (
 
     const myFeedbackDocuments: AppFileMeta[] = useMemo(() => {
         if(!files) return [];
-        console.log(files)
+        
         return files.filter(f => f.documentType === DocumentEnum.FEEDBACK);
     }, [files]);
 

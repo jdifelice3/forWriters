@@ -47,11 +47,6 @@ export const UploadFileFormFeedback: React.FC<UploadFeedbackFileFormProps> = ({
         formData.append("description", description);
         formData.append("additionalFeedback", additionalFeedback.replace(/\r\n/g,"\n"));
         formData.append("submissionId", submissionId);
-        
-        // for (const [key, value] of formData.entries()) {
-        //     console.log(key, value);
-        // }
-        //domain.uploadFeedback(formData);
     };
 
   return (

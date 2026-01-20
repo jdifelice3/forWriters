@@ -17,11 +17,7 @@ interface FileListSummaryFormProps {
 const FileListSummaryForm: React.FC<FileListSummaryFormProps> = ({
   fileMeta,
 }) => {
-    console.log('in FileListSummaryForm')
-  console.log('fileMeta', fileMeta)
-//   const currentVersion = fileMeta.appFile.find(
-//     (v) => v.version === fileMeta.currentVersionId
-//   );
+    
   
   return (
     <Box>

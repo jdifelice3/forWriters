@@ -15,9 +15,11 @@ import {
     CardActions,
     CardContent,
     CircularProgress,
+    IconButton,
     Stack,
     Dialog,
     DialogTitle,
+    Tooltip
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
@@ -30,6 +32,8 @@ import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import { ReadingDomainCommands } from "../../types/ReadingTypes";
 import { useReadingsUI } from "../../hooks/reading/useReadingsUI";
 import { useGroupContext } from "../../context/GroupContextProvider";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface ReadingCalendarItemFormProps {
     key: string;
@@ -157,6 +161,11 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
         domain.submitFileVersion(readingId, appFileId);        
     }
     
+    const handleDelete = (readingId: string) => {
+        const answer = confirm('Are you sure you want to delete this reading?')
+        if(answer) domain.deleteReading(readingId);
+    }
+
     return (
     <>
          <Box mb={2}>
@@ -223,7 +232,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         <Button
                             id={reading.id}
                             size="small"
-                            variant="contained"
+                            variant="text"
                             startIcon={<EventAvailableIcon />}
                             onClick={(event) => domain.signUpForReading(reading.id)}
                             sx={{ mt: 1 }}         
@@ -234,7 +243,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         <Button
                             id={reading.id}
                             size="small"
-                            variant="contained"
+                            variant="text"
                             startIcon={<EventAvailableIcon />}
                             onClick={(event) => domain.withdrawFromReading(reading.id)}
                             sx={{ mt: 1 }}         
@@ -248,7 +257,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             id={reading.id}
                             startIcon={<ReviewsIcon />}
                             size="small"
-                            variant="contained"
+                            variant="text"
                             onClick={(event) => onFeedback(reading.id)}
                             sx={{ mt: 1 }}
                             disabled={!domain.canReviewReading(reading.id, user.id)}
@@ -256,9 +265,49 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         >
                             Review            
                         </Button>
+                        {activeGroup.groupType == "WRITING" && isAdmin && (
+                        <>
+                        <Box>
+                        <IconButton onClick={()=> alert('Edit')} size="small">
+                            <Tooltip title="edit">
+                                <EditIcon fontSize="small" />
+                            </Tooltip>
+                        </IconButton>
+                        <IconButton
+                            onClick={() => handleDelete(reading.id)}
+                            size="small"
+                            color="error"
+                        >
+                            <Tooltip title="delete">
+                                <DeleteIcon fontSize="small" />
+                            </Tooltip>
+                        </IconButton>
+                        </Box>
+                        </>
+                        )}
+                        {activeGroup.groupType === "PERSONAL" && isAdmin && (
+                            <>
+                            <IconButton onClick={()=> alert('Edit')} size="small">
+                                <Tooltip title="edit">
+                                    <EditIcon fontSize="small" />
+                                </Tooltip>
+                            </IconButton>
+                            <IconButton
+                                onClick={() => handleDelete(reading.id)}
+                                size="small"
+                                color="error"
+                            >
+                                <Tooltip title="delete">
+                                    <DeleteIcon fontSize="small" />
+                                </Tooltip>
+                            </IconButton>
+                            </>
+                        )}
                     </Box>      
+
                 </CardActions>
               </Card>
+
 
 {/* Dialog - Submit Manuscript to Reading */}
         <Dialog

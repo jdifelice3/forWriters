@@ -19,6 +19,14 @@ export type FileFormInput = {
     description: string;
 }
 
+export type ObjectIdsForDeletion = {
+    appFileIds: string[],
+    fileFeedbackIds: string[],
+    fileFeedbackCommentIds: string[],
+    fileFeedbackCommentTargetIds: string[],
+    readingSubmissionIds: string[]
+}
+
 export interface UploadFileFormProperties {
   title: string;
   subtitle: string;
@@ -77,6 +85,10 @@ export interface FileDomainCommands {
     getComments(
         fileFeedbackId: string
     ): Promise<CommentDTO[]>;
+
+    getDeletionIds(
+        appFileMetaId: string
+    ): Promise<ObjectIdsForDeletion>;
 }
 
 export interface FileUIActions {

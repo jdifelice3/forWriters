@@ -13,6 +13,7 @@ export const useReadings = () => {
   const swr = useSWR<Reading[]>(key, apiFetch);
 
   const refresh = async () => {
+   
     await swr.mutate(); // same instance every time
   };
 

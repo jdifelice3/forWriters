@@ -36,7 +36,7 @@ export default function GroupJoinRequestList({
   ) => {
 
     try {
-        console.log(`${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/join-requests/${requestId}/${action}`)
+        
         const res = await fetch(
             `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}/join/join-requests/${requestId}/${action}`,
             {
