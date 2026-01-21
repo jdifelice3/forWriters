@@ -8,6 +8,7 @@ const FileUploadField = ({ onChange }: { onChange: (file: File | null) => void }
       variant="outlined"
       startIcon={<UploadIcon />}
       sx={{width: "225px"}}
+      disabled
     >
       Upload Profile Pic
       <input

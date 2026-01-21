@@ -17,9 +17,12 @@ export function useReadingsData(
 
   const myFiles = useMemo(() => {
     return myReadings.flatMap((r) =>
-      r.readingSubmission?.map((rs) => rs.appFile?.appFileMeta).filter(Boolean) ?? []
+        r.readingSubmission
+        ?.filter(rs => rs.appFile.userId === userId) // Filter by userId
+        .map(rs => rs.appFile?.appFileMeta) // Then map to appFileMeta
+        .filter(Boolean) ?? []
     );
-  }, [myReadings]);
+  }, [myReadings, userId]);
 
   return { myReadings, myFiles };
 }
@@ -42,7 +45,7 @@ export function useReadingData(
         ?.map((rp) => rp.readingSubmission?.appFile?.appFileMeta)
         .filter(Boolean) ?? []
     );
-  }, [reading, isParticipant]);
+  }, [reading, isParticipant]); 
 
   return { isParticipant, myFiles };
 }

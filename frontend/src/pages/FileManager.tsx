@@ -179,7 +179,7 @@ const FileManager = () => {
           {/* Tabs */}
           <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{mb: 2}}>
             <Tab label="Manuscripts" />
-            <Tab label="Feedback Sent" />
+            {/* <Tab label="Feedback Sent" /> */}
             <Tab label="My Reading Submissions" />
           </Tabs>
 
@@ -203,7 +203,7 @@ const FileManager = () => {
           )}
 
           {/* Feedback Sent */}
-          {tab === 1 && (
+          {/* {tab === 1 && (
             <>
               {isLoading ? (
                 <Box display="flex" justifyContent="center" p={6}>
@@ -219,10 +219,10 @@ const FileManager = () => {
                 />
               )}
             </>
-          )}
+          )} */}
 
           {/* My Reading Submissions */}
-          {tab == 2 && (
+          {tab == 1 && (
             <>
               {isLoading ? (
                 <Box display="flex" justifyContent="center" p={6}>
@@ -231,6 +231,7 @@ const FileManager = () => {
               ) : (
                 <FileManagerList
                   files={myFiles}
+                  domain={domain}
                   variant="READINGS"
                   fileListProperties={mySubmissionsListProperties}
                   onUploadVersion={onBeginUploadVersion}
