@@ -287,7 +287,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         )}
                         {activeGroup.groupType === "PERSONAL" && isAdmin && (
                             <>
-                            <IconButton onClick={()=> alert('Edit')} size="small">
+                            <IconButton onClick={()=> alert('Edit')} size="small" disabled>
                                 <Tooltip title="edit">
                                     <EditIcon fontSize="small" />
                                 </Tooltip>

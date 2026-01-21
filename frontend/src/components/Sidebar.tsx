@@ -11,6 +11,12 @@ import {
     ThemeProvider, 
 } from "@mui/material";
 import { Group } from "../types/domain-types";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import KeyboardIcon from "@mui/icons-material/Keyboard";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import GroupIcon from "@mui/icons-material/Group";
+import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 
 
 const Sidebar = () => {
@@ -49,23 +55,56 @@ const Sidebar = () => {
     <br/>
     <br/>
     <List>
-      {NAV_ITEMS.filter(item =>
+      {/* {NAV_ITEMS.filter(item =>
         !item.roles || item.roles.includes(activeGroup ? activeGroup?.role : "MEMBER")
-      ).map(item => (
+      ).map(item => ( */}
         <ListItemButton
-                key={item.path}
-                selected={pathname.startsWith(item.path)}
-                onClick={() => navigate(item.path.includes("groups") ? item.path + "/" + groupId : item.path)}
-                disabled={!activeGroup && 
-                    (item.label === "Group" || 
-                    item.label === "Readings" ||
-                    item.label === "Members")
-                    ? true : false }
+                key={"/dashboard"}
+                selected={pathname.startsWith("/dashboard")}
+                onClick={() => navigate("/dashboard")}
             >
-            <ListItemIcon className="sidebarIcon" color="white">{item.icon}</ListItemIcon>
-            <ListItemText primary={item.label} />
+            <ListItemIcon className="sidebarIcon" color="white">{<DashboardIcon htmlColor="white"/>}</ListItemIcon>
+            <ListItemText primary={"Dashboard"} />
         </ListItemButton>
-      ))}
+
+        <ListItemButton
+                key={"/groups"}
+                selected={pathname.startsWith("/groups")}
+                onClick={() => navigate(`/groups/${groupId}`)}
+                disabled={!activeGroup}
+            >
+            <ListItemIcon className="sidebarIcon" color="white">{<GroupIcon htmlColor="white"/>}</ListItemIcon>
+            <ListItemText primary={"Group"} />
+        </ListItemButton>
+
+        <ListItemButton
+                key={"/readings"}
+                selected={pathname.startsWith("/readings")}
+                onClick={() => navigate(`/groups/${groupId}/readings`)}
+                disabled={!activeGroup}
+            >
+            <ListItemIcon className="sidebarIcon" color="white">{<MenuBookIcon htmlColor="white"/>}</ListItemIcon>
+            <ListItemText primary={"Readings"} />
+        </ListItemButton>
+
+        <ListItemButton
+                key={"/files"}
+                selected={pathname.startsWith("/files")}
+                onClick={() => navigate("/files")}
+            >
+            <ListItemIcon className="sidebarIcon" color="white">{<CollectionsBookmarkIcon htmlColor="white"/>}</ListItemIcon>
+            <ListItemText primary={"Files"} />
+        </ListItemButton>
+
+        <ListItemButton
+                key={"/members"}
+                selected={pathname.startsWith("/members")}
+                onClick={() => navigate("/members")}
+                disabled={!activeGroup}
+            >
+            <ListItemIcon className="sidebarIcon" color="white">{<ConnectWithoutContactIcon htmlColor="white"/>}</ListItemIcon>
+            <ListItemText primary={"Members"} />
+        </ListItemButton>
     </List>
     </Drawer>
     </ThemeProvider>

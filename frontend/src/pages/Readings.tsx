@@ -1,5 +1,5 @@
 import { useUserContext } from "../context/UserContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Group,
 } from "../types/domain-types";
@@ -39,11 +39,13 @@ type FormInput = {
 }
 
 const Readings = () => {
+    const { groupId } = useParams();
   const navigate = useNavigate();
   const { user, isLoading: isUserLoading } = useUserContext();
   const uiFile = useFileUI();
-  const { data: group, isLoading: isGroupLoading } = useGroupDetails<Group>();
+  const { data: group, isLoading: isGroupLoading } = useGroupDetails<Group>(groupId);
   const { readings, isLoading: isReadingLoading, refresh } = useReadings();
+  //console.log("refresh", refresh)
   const ui = useReadingsUI();
   const domain = useReadingDomain(group?.id ?? undefined, user, readings, refresh);
   

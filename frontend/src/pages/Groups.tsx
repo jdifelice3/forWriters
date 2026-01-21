@@ -1,6 +1,7 @@
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { useGroupDetails } from "../hooks/useGroup";
+import { useParams } from "react-router";
 import { Group } from "../types/domain-types";
 import {
   Box,
@@ -26,11 +27,12 @@ const styles = {
 };
 
 const Groups = () => {
+    const { groupId } = useParams();
     const { user } = useUserContext();
     const navigate = useNavigate();
-    const { data : group, isLoading } = useGroupDetails<Group>();
-  
-  if (isLoading) {
+    const { data : group, isLoading } = useGroupDetails<Group>(groupId);
+
+    if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" p={6} >
         <CircularProgress />

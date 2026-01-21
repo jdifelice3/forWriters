@@ -1,8 +1,8 @@
 "use client";
-
+import { mutate } from "swr";
 import * as React from "react";
 
-import { Group } from "../types/domain-types";
+import { Group, GroupRole } from "../types/domain-types";
 import {
   Box,
   Button,
@@ -27,6 +27,9 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import InfoIcon from '@mui/icons-material/Info';
+import { useGroupContext } from "../context/GroupContextProvider";
+import { GroupSummary } from "../types/ContextTypes";
+
 
 // -------------------------
 // Zod schema (client-side)
@@ -61,6 +64,7 @@ const styles = {
 
 const GroupsCreate = () => {
   const navigate = useNavigate();
+  const { setActiveGroup } = useGroupContext();
   const [groupType, setGroupType] = React.useState("WRITING");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [submitting, setSubmitting] = React.useState(false);
@@ -121,18 +125,26 @@ const GroupsCreate = () => {
 
     if (!res.ok) {
         const text = await res.text();
+        console.log(text)
         let message = JSON.parse(text);
-        setError(message.err);
+        console.log(message)
+        setError(message.error);
         return;
     }
 
-      const group: Group = await res.json();
-      setSuccess("Group created successfully.");
-      // Navigate to the new group's page (adjust route as needed)
-      console.log('new group.id', group.id)
-      
-      setTimeout(() => navigate(`/groups/${group.id}`), 600);
-      
+        const group: Group = await res.json();
+        setSuccess("Group created successfully.");
+        const g: GroupSummary = getGroupSummary(group);
+        const admin: GroupRole = "ADMIN";
+        mutate(
+            `/me/groups`,
+            (prev: GroupSummary[] | undefined) =>
+                prev
+                ? [...prev, { id: group.id, name: group.name, groupType: group.groupType, role: admin }]
+                : [{ id: group.id, name: group.name, groupType: group.groupType, role: admin }],
+            false // 👈 do NOT revalidate yet
+        );
+        navigate(`/groups/${group.id}`);
     } catch (e: any) {
       setError(e?.message ?? "Failed to create group");
     } finally {
@@ -353,6 +365,15 @@ const GroupsCreate = () => {
       </Card>
     </Box>
   );
+}
+
+const getGroupSummary = (group: Group): GroupSummary => {
+    return {
+        id: group.id,
+        name: group.name,
+        role: "ADMIN",
+        groupType: group.groupType
+    }
 }
 
 export default GroupsCreate;

@@ -46,7 +46,7 @@ export default function Layout() {
                 <Route path="/groupsearch" element={<GroupSearch />} />
                 <Route path="/creategroup" element={<GroupsCreate />} />
                 
-                <Route path="/readings" element={<Readings />} />
+                <Route path="/groups/:groupId/readings" element={<Readings />} />
                 <Route path="/filefeedback/:readingId" element={<FileFeedback />} />
                 <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
 

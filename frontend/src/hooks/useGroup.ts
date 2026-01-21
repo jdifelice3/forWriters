@@ -2,19 +2,18 @@ import useSWR, { mutate } from "swr";
 import { useGroupContext } from "../context/GroupContextProvider";
 import { fetcher } from "../context/fetcher";
 
-const BASE_URL = import.meta.env.VITE_API_HOST;
 
-export const useGroupDetails = <T>() => {
+export const useGroupDetails = <T>(groupId: string | undefined) => {
   const { activeGroup } = useGroupContext();
   
-  return useSWR<T>(
-    activeGroup ? `${BASE_URL}/api/groups/${activeGroup.id}` : null,
-    fetcher 
+    return useSWR<T>(
+        activeGroup ? `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}` : null,
+        fetcher
   );
 }
 
 export const useGroupGetCount = () => {
-  const url = `${BASE_URL}/api/groups/groupcount`;
+  const url = `${import.meta.env.VITE_API_HOST}/api/groups/groupcount`;
   const { data, error, isLoading } = useSWR(
     url,
     (_url) => fetch(_url, { credentials: "include" }).then(r => r.json())

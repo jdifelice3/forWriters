@@ -1,56 +1,68 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, matchPath } from "react-router-dom";
+// src/context/GroupContext.tsx
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useLocation, matchPath } from "react-router-dom";
 import useSWR from "swr";
-import { fetcher } from "../context/fetcher";
+import { apiFetch } from "../api/client";
 import { GroupContextValue, GroupSummary } from "../types/ContextTypes";
 
 const GroupContext = createContext<GroupContextValue | undefined>(undefined);
+
 const GROUP_STORAGE_KEY = "fw:activeGroupId";
 
-const extractGroupIdFromPath = (pathname: string): string | null => {
+/**
+ * Extracts groupId ONLY if the route is explicitly group-scoped.
+ */
+function extractGroupIdFromPath(pathname: string): string | null {
   const match =
-    matchPath("/groups/:groupId", pathname) ||
-    matchPath("/groups/personal/:groupId", pathname);
+    matchPath("/groups/:groupId/*", pathname) ||
+    matchPath("/groups/:groupId", pathname);
 
   return match?.params?.groupId ?? null;
 }
 
 export const GroupContextProvider = ({ children }: { children: React.ReactNode }) => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { data, isLoading } = useSWR<GroupSummary[]>(
-        `${import.meta.env.VITE_API_HOST}/api/me/groups`,
-        fetcher
-    );
-    const groups = data ?? [];
-    const [activeGroup, setActiveGroupState] = useState<GroupSummary | null>(null);
-  // 1️⃣ Sync active group from URL or storage when groups load
+  const location = useLocation();
+
+  const { data, isLoading } = useSWR<GroupSummary[]>(
+    `/me/groups`,
+    apiFetch,
+     {
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+        dedupingInterval: 10_000,
+    }
+  );
+
+  const groups = data ?? [];
+  const [activeGroup, setActiveGroup] = useState<GroupSummary | null>(null);
+
   useEffect(() => {
-    if (isLoading || groups === undefined ) return ;//|| groups.length === 0) return;
+    if (!groups.length) return;
+
     const urlGroupId = extractGroupIdFromPath(location.pathname);
     const storedGroupId = localStorage.getItem(GROUP_STORAGE_KEY);
     const candidateId = urlGroupId ?? storedGroupId;
-    const found = groups.find(g => g.id === candidateId) ?? groups[0];
-    setActiveGroupState(found);
-  }, [isLoading, groups, location.pathname]);
 
-  // 2️⃣ Persist active group
+    const found =
+      groups.find(g => g.id === candidateId) ??
+      groups[0];
+
+    setActiveGroup(found);
+  }, [groups, location.pathname]);
+
   useEffect(() => {
     if (activeGroup) {
       localStorage.setItem(GROUP_STORAGE_KEY, activeGroup.id);
     }
   }, [activeGroup]);
 
-  // 3️⃣ Setter used by GroupSelector
-  const setActiveGroup = (group: GroupSummary) => {
-    setActiveGroupState(group);
-
-    // Only navigate if not already in a group-scoped route
-    if (!location.pathname.startsWith(`/groups/${group.id}`)) {
-    }
-  }
-
-  const value = useMemo<GroupContextValue>(
+  const value = useMemo(
     () => ({
       groups,
       activeGroup,
@@ -65,10 +77,15 @@ export const GroupContextProvider = ({ children }: { children: React.ReactNode }
       {children}
     </GroupContext.Provider>
   );
-}
+};
+
 
 export function useGroupContext() {
   const ctx = useContext(GroupContext);
-  if (!ctx) throw new Error("useGroupContext must be used inside GroupContextProvider");
+  if (!ctx) {
+    throw new Error(
+      "useGroupContext must be used within GroupContextProvider"
+    );
+  }
   return ctx;
 }

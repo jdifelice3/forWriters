@@ -54,14 +54,15 @@ const FileFeedback = () => {
         uploadManuscript,
         setActiveVersion, 
         getFileFeedback,
-        getComments
+        getComments,
+        getDeletionIds
       } = useFileDomain();
 
     const { activeGroup } = useGroupContext();
     const { readingId } = useParams<{ readingId: string }>();
     const { readings, isLoading: isReadingLoading, refresh } = useReadings();
     const reading: Reading | undefined = readings.find(r => r.id === readingId);
-    const { canReviewFile, getManuscriptHtml } = useReadingDomain(activeGroup?.id, user, refresh);
+    const { canReviewFile, getManuscriptHtml } = useReadingDomain(activeGroup?.id, user, readings, refresh);
     const [editFile, setEditFile] = useState<AppFile | null>(null);
     const [editTitle, setEditTitle] = useState("");
     const [editDescription, setEditDescription] = useState("");
@@ -133,7 +134,8 @@ const FileFeedback = () => {
         uploadManuscript: uploadManuscript,
         setActiveVersion: setActiveVersion,
         getFileFeedback: getFileFeedback,
-        getComments: getComments
+        getComments: getComments,
+        getDeletionIds: getDeletionIds
     }
 
   return (

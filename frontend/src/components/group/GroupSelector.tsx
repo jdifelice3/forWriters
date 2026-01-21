@@ -6,6 +6,8 @@ import {
   Divider,
   Typography,
 } from "@mui/material";
+import { GroupSummary } from "../../types/ContextTypes";
+import { mutate } from "swr";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +19,17 @@ export default function GroupSelector() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
+
+  const handleMenuClick = (g: GroupSummary) => {
+    setActiveGroup(g);
+    setAnchorEl(null);
+    mutate(
+        key => typeof key === "string" && key.includes("/api/groups/"),
+        undefined,
+        { revalidate: false }
+    );
+    navigate(`/groups/${g.id}`);
+  }
 
   return (
     <>
@@ -39,11 +52,7 @@ export default function GroupSelector() {
           <MenuItem
             key={g.id}
             selected={activeGroup?.id === g.id}
-            onClick={() => {
-              setActiveGroup(g);
-              setAnchorEl(null);
-              navigate(`/groups/${g.id}`);
-            }}
+            onClick={() => handleMenuClick(g)}
           >
             <ListItemText
               primary={g.name}
