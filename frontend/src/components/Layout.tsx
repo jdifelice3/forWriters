@@ -20,7 +20,7 @@ import MemberSearchPage from "../pages/MemberSearchPage";
 import Readings from "../pages/Readings";
 import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
 import Dashboard from "../pages/Dashboard";
-// import GroupsPersonal from "../pages/GroupsPersonal";
+import FileFeedbackDetail from "../pages/FileFeedbackDetail";
 import TopNav from "../components/nav/TopNav";
 
 export default function Layout() {
@@ -42,12 +42,12 @@ export default function Layout() {
                 <Route path="/filemanager/feedback" element={<FileManager />} />
 
                 <Route path="/groups/:groupId" element={<Groups />} />
-                {/* <Route path="/groups/personal" element={<GroupsPersonal />} /> */}
                 <Route path="/groupsearch" element={<GroupSearch />} />
                 <Route path="/creategroup" element={<GroupsCreate />} />
                 
                 <Route path="/groups/:groupId/readings" element={<Readings />} />
                 <Route path="/filefeedback/:readingId" element={<FileFeedback />} />
+                <Route path="/filefeedbackdetail/:appFileId" element={<FileFeedbackDetail />} />
                 <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
 
                 <Route path="/membersearch" element={<MemberSearchPage />} />

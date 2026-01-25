@@ -40,6 +40,13 @@ export type Comment = {
   }>;
 };
 
+export type ParagraphFeedback = {
+    paragraphId: string;
+    targetText: string;
+    commentText: string;
+    reviewerDisplayName: string;
+}
+
 export type CommentsAction =
   | { type: "load"; comments: CommentDTO[] }
   | { type: "add_optimistic"; comment: CommentDTO }

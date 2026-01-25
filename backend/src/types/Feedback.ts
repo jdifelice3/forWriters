@@ -1,3 +1,5 @@
+import { resolveReviewerParticipant } from "../routes/filesApi/filesApi.middleware";
+
 export type ExtractedComment = {
   commentId: string;
   commentText: string;
@@ -26,3 +28,39 @@ export type CommentDTO = {
     targetText: string;
   }>;
 };
+
+
+
+// const data: CommentDTO[] = [{
+//     id: "",
+//     readingFeedbackId: "",
+//     reviewerParticipantId: "",
+
+//     reviewerDisplayName: "",
+//     reviewerAvatarUrl?: "",
+
+//     commentText: "",
+//     isResolved: true,
+
+//     createdAt: "",
+//     updatedAt: "",
+
+//     targets: [{
+//         id: "",
+//         paragraphId: "",
+//         from: 0,
+//         to: 0,
+//         targetText: ""
+//     }]
+// }]
+
+
+
+// const p: ParagraphFeedback[] = data.flatMap(c => 
+//     c.targets.map(t => ({
+//         paragraphId: t.paragraphId,
+//         targetText: t.targetText,
+//         commentText: c.commentText,
+//         reviewerParticipantId: c.reviewerParticipantId
+//   }))
+// );

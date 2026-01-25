@@ -115,6 +115,8 @@ router.get("/participants", async (req, res) => {
 
 router.post("/participants/:participantId/withdraw",
   async (req: SessionRequest, res) => {
+
+
     const actingUserId = req.session!.getUserId();
     const participant = req.readingParticipant;
 

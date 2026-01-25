@@ -44,6 +44,7 @@ export interface FileListProperties {
   showDeleteButton: boolean;
   buttonDownloadText: string; 
   showVersionHistory: boolean;
+  showDescription: boolean;
 }
 
 export interface FileDomainCommands {
@@ -79,8 +80,12 @@ export interface FileDomainCommands {
     ): Promise<void>;
 
     getFileFeedback(
-        reading: Reading | null
+        reading: Reading | undefined
     ): Promise<Record<string, string>>;
+
+    getFileFeedbackUnique(
+        appFileId: string | undefined
+    ): Promise<CommentDTO[]>;
 
     getComments(
         fileFeedbackId: string

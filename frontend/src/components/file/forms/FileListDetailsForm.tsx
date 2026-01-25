@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FileListProperties } from "../../../types/FileTypes";
 import { AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands } from "../../../types/FileTypes";
@@ -28,11 +29,11 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
   onEdit,
   fileListProperties,
 }) => {
-    
+    const navigate = useNavigate();
     const currentVersion = fileMeta.appFile.find(
         (f) => f.version === fileMeta.currentVersionId
     );
-
+    
   return (
     <Box>
       <Grid container spacing={2}>
@@ -49,7 +50,9 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
             color="text.secondary"
             align="justify"
           >
-            {fileMeta.description || "No description"}
+            {
+                (!fileMeta.description || !fileListProperties.showDescription) ? "No description" : fileMeta.description 
+            }
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Uploaded on{" "}
@@ -88,6 +91,19 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
               </IconButton>
             )}
           </Box>
+          {fileListProperties.showDeleteButton && (
+            <Box>
+                <Button
+                    component="a"
+                    href=""
+                    onClick={() => navigate(`/filefeedbackdetail/${currentVersion?.id}`)}
+                    size="small"
+                    sx={{ fontSize: 14 }}
+                  >
+                View Feedback
+              </Button>
+            </Box>
+            )}
         </Stack>
       </Grid>
     </Box>

@@ -27,23 +27,10 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from '@mui/icons-material/Download';
 import { useUserContext } from "../context/UserContext";
-import CancelIcon from '@mui/icons-material/Cancel';
 import { FileDomainCommands } from "../types/FileTypes";
 import { CommentDTO } from "../types/FeedbackTypes";
 import { ManuscriptReview } from "../components/review/ManuscriptReview";
-import { getUtilityComponentName } from "node_modules/mui-tiptap/dist/cjs/styles";
-
-const uploadFormProperties: UploadFileFormProperties =
-  {
-    title: "",
-    subtitle: "Upload the author's Word Doc with your inline comments",
-    buttonChooseFileText: "CHOOSE FILE",
-    buttonUploadText: "UPLOAD",
-    titleVariant: "body1",
-    showUploadIcon: false
-  }
 
 const FileFeedback = () => {
     const { user } = useUserContext();
@@ -54,8 +41,9 @@ const FileFeedback = () => {
         uploadManuscript,
         setActiveVersion, 
         getFileFeedback,
+        getFileFeedbackUnique,
         getComments,
-        getDeletionIds
+        getDeletionIds,
       } = useFileDomain();
 
     const { activeGroup } = useGroupContext();
@@ -78,7 +66,7 @@ const FileFeedback = () => {
 
         async function loadMissing() {
             const updates: Record<string, string> = {};
-            const ids = await getFileFeedback(reading ?? null);
+            const ids = await getFileFeedback(reading ?? undefined);
 
             const initComments: Record<string, CommentDTO[]> = {};
             const entries = Object.entries(ids);
@@ -134,8 +122,9 @@ const FileFeedback = () => {
         uploadManuscript: uploadManuscript,
         setActiveVersion: setActiveVersion,
         getFileFeedback: getFileFeedback,
+        getFileFeedbackUnique: getFileFeedbackUnique,
         getComments: getComments,
-        getDeletionIds: getDeletionIds
+        getDeletionIds: getDeletionIds,
     }
 
   return (

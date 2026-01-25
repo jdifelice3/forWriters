@@ -1,8 +1,9 @@
-import { useCallback } from "react";
+import { use, useCallback } from "react";
 import { useReadings } from "../../hooks/reading/useReadings";
 import { ReadingsAPI } from "../../api/readingsApi";
 import { CreateReadingInput } from "../../types/ReadingTypes";
 import { AppFile, GroupType, Reading, ReadingParticipant, ReadingSubmission, User } from "../../types/domain-types"
+import { useIsomorphicLayoutEffect } from "swr/_internal";
 
 export function useReadingDomain(
   groupId: string | undefined,
@@ -86,8 +87,13 @@ export function useReadingDomain(
         const reading: Reading | undefined = readings.find(r => r.id === readingId);
         if(!reading) return undefined;
         if(!reading.submissionDeadline) return undefined;
-
-        return new Date() < new Date(reading.submissionDeadline);
+        //check if before deadline
+        const beforeDeadline = new Date() < new Date(reading.submissionDeadline) 
+        const result = reading.readingParticipant.filter(
+            rp => rp.userId === userId);
+        const userIsParticipant = result.length > 0;
+        const canWithdraw = userIsParticipant && beforeDeadline;
+        return canWithdraw; 
     }
 
     const canSubmit = (readingId: string, userId: string) => {
@@ -118,7 +124,8 @@ export function useReadingDomain(
         switch (groupType) {
             case "WRITING":
                 if(!reading.submissionDeadline) return undefined;
-                return new Date() >= new Date(reading.submissionDeadline);
+
+                return new Date() <= new Date(reading.submissionDeadline);
                 break;
             case "PERSONAL":
                 return true;

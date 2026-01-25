@@ -125,9 +125,9 @@ const GroupsCreate = () => {
 
     if (!res.ok) {
         const text = await res.text();
-        console.log(text)
+        
         let message = JSON.parse(text);
-        console.log(message)
+        
         setError(message.error);
         return;
     }

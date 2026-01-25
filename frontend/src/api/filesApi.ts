@@ -63,7 +63,7 @@ export const FilesAPI = {
         });
     },
 
-    getFileFeedback(appFileId: string){
+    getFileFeedback(appFileId: string | undefined){
         return apiFetch<FileFeedback>(`/filesApi/${appFileId}/feedback`, {
             method: "GET",
             credentials: "include",
@@ -72,6 +72,13 @@ export const FilesAPI = {
 
     getComments(fileFeedbackId: string){
         return apiFetch<CommentDTO[]>(`/filesApi/feedback/${fileFeedbackId}/comments`, {
+            method: "GET",
+            credentials: "include",
+        })
+    },
+
+    getFileComments(appFileId: string){
+        return apiFetch<CommentDTO[]>(`/filesApi/${appFileId}/feedback/comments`, {
             method: "GET",
             credentials: "include",
         })

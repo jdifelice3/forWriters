@@ -337,6 +337,63 @@ router.get("/feedback/:fileFeedbackId/comments", async (req, res) => {
   res.json(dto);
 });
 
+router.get("/:appFileId/feedback/comments", async (req, res) => {
+  const { appFileId } = req.params;
+    console.log('appFileId', appFileId);
+
+    const results = await prisma.fileFeedback.findMany({
+        where: {
+            appFileId: appFileId
+        },
+        select: {
+            id: true
+        }
+    });
+
+    const fileFeedbackIds: string[] | undefined = results.map((f) => (
+        f.id
+    ));
+
+  const comments = await prisma.fileFeedbackComment.findMany({
+    where: { 
+        fileFeedbackId: {
+            in: fileFeedbackIds
+        }
+    },
+    orderBy: { createdAt: "asc" },
+    include: {
+      targets: { orderBy: { from: "asc" } },
+      reviewerUser: {
+        include: { userProfile: true },
+      },
+    },
+  });
+
+  const dto = comments.map((c) => ({
+    id: c.id,
+    fileFeedbackId: c.fileFeedbackId,
+    reviewerUserId: c.reviewerUserId,
+    reviewerDisplayName:
+      c.reviewerUser.userProfile
+        ? `${c.reviewerUser.userProfile.firstName} ${c.reviewerUser.userProfile.lastName}`
+        : "Reviewer",
+    reviewerAvatarUrl: c.reviewerUser.userProfile?.avatarUrl ?? null,
+    commentText: c.commentText,
+    isResolved: c.isResolved,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+    targets: c.targets.map((t) => ({
+      id: t.id,
+      paragraphId: t.paragraphId,
+      from: t.from,
+      to: t.to,
+      targetText: t.targetText,
+    })),
+  }));
+
+  res.json(dto);
+});
+
 // POST create
 router.post("/feedback/:fileFeedbackId/comments", async (req, res) => {
   const { fileFeedbackId } = req.params;

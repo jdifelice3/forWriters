@@ -3,19 +3,18 @@ import { FileDomainCommands } from "../../types/FileTypes";
 import { FilesAPI } from "../../api/filesApi";
 import { useFiles } from "./useFiles";
 import { AppFile, FileFeedback, Reading } from "../../types/domain-types";
-import { CommentDTO } from "../../types/FeedbackTypes";
+import { CommentDTO, ParagraphFeedback } from "../../types/FeedbackTypes";
 import { DocumentEnum } from "../../util/Enum";
 import { ObjectIdsForDeletion } from "../../types/FileTypes";
 
-const filesUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi`;
-
 export function useFileDomain(): FileDomainCommands {
     const { mutate } = useFiles();
-
-    /**
+    
+        /**
      * UPDATE METADATA (optimistic)
      */
-    const saveMetadata = useCallback<FileDomainCommands["saveMetadata"]>(async ({ fileMetaId, title, description }) => {
+    const saveMetadata = useCallback<FileDomainCommands["saveMetadata"]>(
+        async ({ fileMetaId, title, description }) => {
         await mutate?.(
             (current) =>
                 current?.map((f) =>
@@ -112,8 +111,17 @@ export function useFileDomain(): FileDomainCommands {
  * FEEDBACK
  */
 
+    const getComments = useCallback<FileDomainCommands["getComments"]>(
+        async (fileFeedbackId: string) => {
+            let comments: CommentDTO[] = await FilesAPI.getComments(fileFeedbackId);
+            await mutate?.();
+            return comments;
+        },
+        [mutate]
+    )
+
     const getFileFeedback = useCallback<FileDomainCommands["getFileFeedback"]>(
-        async (reading: Reading | null) => {
+        async (reading: Reading | undefined) => {
             if(!reading) return {};
             const fileFeedbackRecords: Record<string, string> = {};
             //create FileFeed records if they do not exist
@@ -127,14 +135,17 @@ export function useFileDomain(): FileDomainCommands {
         [mutate]
     );
 
-    const getComments = useCallback<FileDomainCommands["getComments"]>(
-        async (fileFeedbackId: string) => {
-            let comments: CommentDTO[] = await FilesAPI.getComments(fileFeedbackId);
+    const getFileFeedbackUnique = useCallback<FileDomainCommands["getFileFeedbackUnique"]>(
+        async (appFileId: string | undefined) => {
+            if(!appFileId) return [];
+            const commentDTO: CommentDTO[] = await FilesAPI.getFileComments(appFileId);
+            
             await mutate?.();
-            return comments;
+            return commentDTO;
         },
         [mutate]
-    )
+    );
+
 
     const getDeletionIds = useCallback<FileDomainCommands["getDeletionIds"]>(
         async (appFileMetaId: string) => {
@@ -152,7 +163,8 @@ export function useFileDomain(): FileDomainCommands {
         uploadVersion,
         setActiveVersion,
         getFileFeedback,
+        getFileFeedbackUnique,
         getComments,
-        getDeletionIds
+        getDeletionIds,
     };
 }

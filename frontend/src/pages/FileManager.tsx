@@ -37,6 +37,7 @@ import { useReadingsData } from "../hooks/reading/useReadingsData";
 import { useUserContext } from "../context/UserContext";
 import UploadFileForm from "../components/file/forms/UploadFileForm";
 import ConfirmDialog from "../components/dialogs/ConfirmDialog";
+import ReadingSubmissionList from "../components/reading/ReadingSubmissionList";
 
 const manuscriptListProperties: FileListProperties = {
     noFilesMessage: "You have not uploaded manuscripts",
@@ -45,15 +46,7 @@ const manuscriptListProperties: FileListProperties = {
     showDeleteButton: true,
     showEditButton: true,
     showVersionHistory: true,
-};
-
-const feedbackListProperties: FileListProperties = {
-    noFilesMessage: "You have not submitted feedback for any manuscripts",
-    showPreviewButton: true,
-    buttonDownloadText: "DOWNLOAD",
-    showDeleteButton: false,
-    showEditButton: false,
-    showVersionHistory: false,
+    showDescription: true
 };
 
 const mySubmissionsListProperties: FileListProperties = {
@@ -63,6 +56,7 @@ const mySubmissionsListProperties: FileListProperties = {
     showDeleteButton: false,
     showEditButton: false,
     showVersionHistory: false,
+    showDescription: false
 }
 
 const FileManager = () => {
@@ -77,14 +71,15 @@ const FileManager = () => {
         uploadManuscript,
         setActiveVersion,
         getFileFeedback,
+        getFileFeedbackUnique,
         getComments,
         getDeletionIds
     } = useFileDomain();
     const ui = useFileUI();
     const { files, isLoading, mutate } = useFiles();
-    const { myManuscripts, myFeedbackDocuments } = useFilesData(files);
+    const { myManuscripts } = useFilesData(files);
     const { readings } = useReadings();
-    const { myFiles } = useReadingsData(readings, user);
+    const { myFiles, myReadings } = useReadingsData(readings, user);
     
     const [tab, setTab] = useState(0);
     
@@ -142,6 +137,7 @@ const FileManager = () => {
         uploadManuscript: onUploadManuscript,
         setActiveVersion: setActiveVersion,
         getFileFeedback: getFileFeedback,
+        getFileFeedbackUnique: getFileFeedbackUnique,
         getComments: getComments,
         getDeletionIds: getDeletionIds
     }
@@ -202,42 +198,27 @@ const FileManager = () => {
             </>
           )}
 
-          {/* Feedback Sent */}
-          {/* {tab === 1 && (
-            <>
-              {isLoading ? (
-                <Box display="flex" justifyContent="center" p={6}>
-                  <CircularProgress />
-                </Box>
-              ) : (
-                <FileManagerList
-                  files={myFeedbackDocuments}
-                  domain={domain}
-                  variant="READINGS"
-                  fileListProperties={feedbackListProperties}
-                  onUploadVersion={onBeginUploadVersion}
-                />
-              )}
-            </>
-          )} */}
-
           {/* My Reading Submissions */}
           {tab == 1 && (
-            <>
+            <Card className="readingCardSignup">
+                <CardContent>
               {isLoading ? (
                 <Box display="flex" justifyContent="center" p={6}>
                   <CircularProgress />
                 </Box>
               ) : (
-                <FileManagerList
-                  files={myFiles}
-                  domain={domain}
-                  variant="READINGS"
-                  fileListProperties={mySubmissionsListProperties}
-                  onUploadVersion={onBeginUploadVersion}
+                <ReadingSubmissionList 
+                    files={myFiles}
+                    myReadings={myReadings}
+                    domain={domain}
+                    variant="READINGS"
+                    fileListProperties={mySubmissionsListProperties}
+                    onUploadVersion={onBeginUploadVersion}
                 />
               )}
-            </>
+            
+            </CardContent>
+            </Card>
           )} 
         </CardContent>
       </Card>
