@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { AppFileMeta, Reading, User } from "../../types/domain-types";
 import { DocumentEnum } from "../../util/Enum";
-import { ParagraphFeedback } from "@/types/FeedbackTypes";
+import { CommentsForDisplay } from "@/types/FeedbackTypes";
 
 export const useFilesData = (
     files: AppFileMeta[] | undefined

@@ -2,6 +2,11 @@ import { apiFetch } from "./client";
 import { FileUploadFormInput, FileFormInput, ObjectIdsForDeletion } from "../types/FileTypes";
 import { AppFileMeta, AppFile, FileFeedback } from "../types/domain-types";
 import { CommentDTO } from "../types/FeedbackTypes";
+
+type FeedbackResponse = {
+  html: string;
+};
+
 export const FilesAPI = {
     create(input: FileUploadFormInput) {
         return apiFetch("/files", {
@@ -86,6 +91,13 @@ export const FilesAPI = {
 
     getDeletionIds(appFileMetaId: string){
         return apiFetch<ObjectIdsForDeletion>(`/filesApi/${appFileMetaId}/ids/fordeletion`, {
+            method: "GET",
+            credentials: "include"
+        })
+    },
+
+    getHTML(appFileId: string){
+        return apiFetch<FeedbackResponse>(`/filesApi/${appFileId}/html`, {
             method: "GET",
             credentials: "include"
         })

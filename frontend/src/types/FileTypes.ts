@@ -94,6 +94,10 @@ export interface FileDomainCommands {
     getDeletionIds(
         appFileMetaId: string
     ): Promise<ObjectIdsForDeletion>;
+
+    getHTML(
+        appFileId: string
+    ): Promise<string>;
 }
 
 export interface FileUIActions {

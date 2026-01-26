@@ -3,7 +3,7 @@ import prisma from "../../database/prisma";
 import { getUser } from "../../database/util/user";
 import { Router } from "express";
 import { z } from "zod";
-//import { resolveReviewerParticipant } from "./filesApi.middleware";
+import { loadDocxFromS3AsHtml, addParagraphIds } from "../../services/streamFromS3";
 import { fullFeedbackInclude } from "./filesApi.feedback.includes";
 import { AppFileMeta } from "@prisma/client";
 const router = Router();
@@ -339,7 +339,6 @@ router.get("/feedback/:fileFeedbackId/comments", async (req, res) => {
 
 router.get("/:appFileId/feedback/comments", async (req, res) => {
   const { appFileId } = req.params;
-    console.log('appFileId', appFileId);
 
     const results = await prisma.fileFeedback.findMany({
         where: {
@@ -560,5 +559,45 @@ router.get("/:appFileId/feedback", async (req, res) => {
 
   res.status(201).json(feedback);
 });
+
+router.get("/:appFileId/html", async (req, res) => {
+    const appFileId = req.params.appFileId;
+    console.log('appFileId', appFileId)
+
+    const appFile = await prisma.appFile.findUnique({
+        where: {
+            id: appFileId
+        }
+    });
+
+    console.log('appFile', appFile)
+
+    if(!appFile){
+        res.status(403).json({error: "File not found"});
+    } 
+    if(!process.env.AWS_S3_BUCKET || !process.env.AWS_S3_REGION) {
+        return res.status(403).json({error: "Invalid S3 values"});
+    }
+
+    const html = await getDocxAsHtml(
+        process.env.AWS_S3_BUCKET, 
+        appFile!.filename, 
+        process.env.AWS_S3_REGION
+    );
+
+    res.json({
+        html: html,
+    });
+});
+
+const getDocxAsHtml = async (awsS3bucket: string, filename: string, awsS3region: string) => {
+    const html = await loadDocxFromS3AsHtml(
+        awsS3bucket, 
+        filename, 
+        awsS3region
+    );
+
+    return addParagraphIds(html);
+}
 
 export default router;

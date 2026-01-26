@@ -40,11 +40,15 @@ export type Comment = {
   }>;
 };
 
-export type ParagraphFeedback = {
+export type CommentsForDisplay = {
     paragraphId: string;
     targetText: string;
     commentText: string;
     reviewerDisplayName: string;
+}
+
+export type CommentsByUser = {
+    
 }
 
 export type CommentsAction =

@@ -3,7 +3,7 @@ import { FileDomainCommands } from "../../types/FileTypes";
 import { FilesAPI } from "../../api/filesApi";
 import { useFiles } from "./useFiles";
 import { AppFile, FileFeedback, Reading } from "../../types/domain-types";
-import { CommentDTO, ParagraphFeedback } from "../../types/FeedbackTypes";
+import { CommentDTO, CommentsForDisplay } from "../../types/FeedbackTypes";
 import { DocumentEnum } from "../../util/Enum";
 import { ObjectIdsForDeletion } from "../../types/FileTypes";
 
@@ -154,6 +154,15 @@ export function useFileDomain(): FileDomainCommands {
             return deletionIds;
         },
         [mutate]
+    );
+
+    const getHTML = useCallback<FileDomainCommands["getHTML"]>(
+        async(appFileId: string) => {
+            const { html } = await FilesAPI.getHTML(appFileId);
+            await mutate?.();
+            return html
+        },
+        [mutate]
     )
 
     return {
@@ -166,5 +175,6 @@ export function useFileDomain(): FileDomainCommands {
         getFileFeedbackUnique,
         getComments,
         getDeletionIds,
+        getHTML
     };
 }

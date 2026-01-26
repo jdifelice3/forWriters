@@ -44,6 +44,7 @@ const FileFeedback = () => {
         getFileFeedbackUnique,
         getComments,
         getDeletionIds,
+        getHTML
       } = useFileDomain();
 
     const { activeGroup } = useGroupContext();
@@ -125,6 +126,7 @@ const FileFeedback = () => {
         getFileFeedbackUnique: getFileFeedbackUnique,
         getComments: getComments,
         getDeletionIds: getDeletionIds,
+        getHTML: getHTML
     }
 
   return (
@@ -196,6 +198,7 @@ const FileFeedback = () => {
                                                         initialComments={initialComments[rs.id]}
                                                         fileFeedbackId={fileFeedbackIds[rs.id]}
                                                         reviewerUserId={user.id}
+                                                        readOnly={false}
                                                     />
                                                 ) : (
                                                     <CircularProgress size={20} />

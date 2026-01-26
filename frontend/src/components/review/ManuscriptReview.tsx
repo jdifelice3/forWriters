@@ -13,7 +13,7 @@ import {
   DraftHighlightKey,
 } from "../../extensions/DraftHighlightExtension";
 
-import { Comment } from "../../types/FeedbackTypes";
+import { Comment, CommentDTO } from "../../types/FeedbackTypes";
 import { CommentsAPI } from "../../api/comments";
 
 /* =========================
@@ -29,10 +29,12 @@ type ActiveRange = {
 
 type Props = {
   html: string;
-  fileFeedbackId: string;
-  reviewerUserId: string;
-  initialComments: Comment[];
+  fileFeedbackId: string | undefined;
+  reviewerUserId: string | undefined;
+  initialComments: CommentDTO[];
+  readOnly: boolean;
 };
+
 
 type CommentRange = {
   commentId: string;
@@ -51,7 +53,8 @@ export function ManuscriptReview({
   initialComments,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-
+    //console.log('initialComments', initialComments)
+    console.log('html', html)
   // We lock after mouseup captures the FINAL selection
   const draftLockedRef = useRef(false);
 
@@ -217,13 +220,14 @@ export function ManuscriptReview({
   }
 
   async function handleSave() {
+    console.log('in handleSave')
     if (!editor || !activeRange || !draftText.trim()) return;
     if (activeRange.to <= activeRange.from) return;
 
     try {
       if (editingCommentId) {
         const updated = await CommentsAPI.updateText(
-          fileFeedbackId,
+          fileFeedbackId!,
           editingCommentId,
           draftText
         );
@@ -239,8 +243,8 @@ export function ManuscriptReview({
           " "
         );
 
-        const created = await CommentsAPI.create(fileFeedbackId, {
-          reviewerUserId,
+        const created = await CommentsAPI.create(fileFeedbackId!, {
+          reviewerUserId: reviewerUserId!,
           commentText: draftText,
           source: "DOCX",
           targets: [
