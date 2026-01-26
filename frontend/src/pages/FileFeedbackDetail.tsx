@@ -23,7 +23,7 @@ import {
     ReadingSubmission 
 } from "../types/domain-types";
 import { FileDomainCommands } from "../types/FileTypes";
-import { CommentDTO } from "../types/FeedbackTypes";
+import { CommentDTO, CommentsForDisplay } from "../types/FeedbackTypes";
 
 import { useState, useEffect } from "react";
 import { useReadings } from "../hooks/reading/useReadings"
@@ -34,6 +34,7 @@ import { useUserContext } from "../context/UserContext";
 import { useFiles } from "../hooks/file/useFiles";
 import { useParams } from "react-router-dom";
 import { ManuscriptReview } from "../components/review/ManuscriptReview";
+import ReviewerRadioList from "../components/review/ReviewerRadioList";
 
 const FileFeedbackDetail = () => {
     const { appFileId } = useParams<{ appFileId: string }>();
@@ -52,7 +53,7 @@ const FileFeedbackDetail = () => {
     const [appFileMeta, setAppFileMeta] = useState<AppFileMeta | undefined>(undefined);
     const [appFile, setAppFile] = useState<AppFile | undefined>(undefined);
     const [manuscriptHtml, setManuscriptHtml] = useState<string>("");
-    const [initialComments, setInititalComments] = useState<Record<string, CommentDTO[]>>({});
+    const [initialComments, setInititalComments] = useState<CommentDTO[] | undefined>([]);
  
     useEffect(() => {
         if (!appFileId || files.length === 0) return;
@@ -74,6 +75,7 @@ const FileFeedbackDetail = () => {
         const load = async () => {
             const result = await getFileFeedbackUnique(appFileId);
             setComments(result);
+            //setInititalComments(result)
             setCommentCount(result.length);
 
             if (result.length > 0) {
@@ -88,6 +90,12 @@ const FileFeedbackDetail = () => {
     const { commentsByParagraph } = useFilesDataFeedback(comments);
     const { commentsByReviewer } = useFilesDataFeedback(comments);
     console.log('manuscriptHtml', manuscriptHtml)
+
+    const handleReviewerOnClick = (reviewerDisplayName: string) => {
+        //alert(reviewer);
+        const reviewerComments: CommentDTO[] | undefined = comments?.filter(c => c.reviewerDisplayName === reviewerDisplayName); 
+        setInititalComments(reviewerComments);    
+    }
   return (
     <Box 
         sx={{ 
@@ -134,13 +142,19 @@ const FileFeedbackDetail = () => {
           </Tabs>
 
             {tab === 0 && commentCount > 0 && manuscriptHtml && (
+                <>
+                <ReviewerRadioList
+                    reviewers={commentsByReviewer}
+                    onClick={handleReviewerOnClick}
+                />
                 <ManuscriptReview
                     html={manuscriptHtml}
-                    initialComments={comments!}
+                    initialComments={initialComments!}
                     fileFeedbackId={undefined}
                     reviewerUserId={undefined}
                     readOnly
                 />
+                </>
             )}
 
           {tab === 1 && (
@@ -154,7 +168,7 @@ const FileFeedbackDetail = () => {
                             {value.map(v => (
                                 <Box>
                                 <Typography sx={{backgroundColor: "#fdeee3", p:2}}>
-                                    "{v.targetText}"
+                                    {v.targetText}
                                 </Typography>
                                 <Typography sx={{backgroundColor: "#e3fdfb", p:2}}>
                                     {v.commentText}
@@ -184,7 +198,7 @@ const FileFeedbackDetail = () => {
                                         Paragraph {v.paragraphId.split("-")[1]}
                                     </Typography>
                                     <Typography sx={{backgroundColor: "#fdeee3", p:2}}>
-                                        "{v.targetText}"
+                                        {v.targetText}
                                     </Typography>
                                     <Typography sx={{backgroundColor: "#e3fdfb", p:2}}>
                                         {v.commentText}
