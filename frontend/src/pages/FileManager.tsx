@@ -73,7 +73,8 @@ const FileManager = () => {
         getFileFeedback,
         getFileFeedbackUnique,
         getComments,
-        getDeletionIds
+        getDeletionIds,
+        getHTML
     } = useFileDomain();
     const ui = useFileUI();
     const { files, isLoading, mutate } = useFiles();
@@ -139,7 +140,8 @@ const FileManager = () => {
         getFileFeedback: getFileFeedback,
         getFileFeedbackUnique: getFileFeedbackUnique,
         getComments: getComments,
-        getDeletionIds: getDeletionIds
+        getDeletionIds: getDeletionIds,
+        getHTML: getHTML
     }
   
   return (
