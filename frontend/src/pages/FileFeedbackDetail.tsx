@@ -60,7 +60,6 @@ const FileFeedbackDetail = () => {
         const load = async () => {
             const result = await getFileFeedbackUnique(appFileId);
             setComments(result);
-            //setInititalComments(result)
             setCommentCount(result.length);
 
             if (result.length > 0) {
@@ -76,7 +75,13 @@ const FileFeedbackDetail = () => {
     const { commentsByReviewer } = useFilesDataFeedback(comments);
 
     const handleReviewerOnChange = (reviewerDisplayName: string) => {
-        const reviewerComments: CommentDTO[] | undefined = comments?.filter(c => c.reviewerDisplayName === reviewerDisplayName); 
+        console.log(reviewerDisplayName);
+        let reviewerComments: CommentDTO[] | undefined = undefined;
+        if(reviewerDisplayName === "selectall"){
+            reviewerComments = comments;
+        } else {
+            reviewerComments = comments?.filter(c => c.reviewerDisplayName === reviewerDisplayName); 
+        }
         setInititalComments(reviewerComments);    
         setSelectedReviewer(reviewerDisplayName);
     }
@@ -90,6 +95,7 @@ const FileFeedbackDetail = () => {
             marginLeft: "55px",
             
         }}>
+            
         <Typography variant="h4" mb={3} textAlign="left">
             Feedback for {manuscriptTitle}
         </Typography>
@@ -116,7 +122,7 @@ const FileFeedbackDetail = () => {
                 </CardContent>
             </Card>
         ) : (
-     <Card elevation={0} className="filesComponentPanel">
+     <Card elevation={0} className="filesComponentPanel" sx={{width: "1000px"}}>
         <CardContent>
         
           <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{mb: 2}}>
@@ -137,7 +143,7 @@ const FileFeedbackDetail = () => {
                     initialComments={initialComments!}
                     fileFeedbackId={undefined}
                     reviewerUserId={undefined}
-                    readOnly
+                    readOnly={true}
                 />
                 </>
             )}

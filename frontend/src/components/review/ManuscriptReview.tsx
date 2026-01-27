@@ -15,6 +15,7 @@ import {
 
 import { Comment, CommentDTO } from "../../types/FeedbackTypes";
 import { CommentsAPI } from "../../api/comments";
+import { readonly } from "zod";
 
 /* =========================
    Types
@@ -51,6 +52,7 @@ export function ManuscriptReview({
   fileFeedbackId,
   reviewerUserId,
   initialComments,
+  readOnly
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   // We lock after mouseup captures the FINAL selection
@@ -61,6 +63,7 @@ export function ManuscriptReview({
   const [draftText, setDraftText] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [focusedCommentId, setFocusedCommentId] = useState<string | null>(null);
+  const [zIndex, setZindex] = useState<Record<string, number>>({});
 
   /* =========================
      Hydrate from props
@@ -68,6 +71,8 @@ export function ManuscriptReview({
 
   useEffect(() => {
     setComments(initialComments);
+    //Initialize elevation state variable
+    resetExistingZindeces(undefined);
   }, [initialComments]);
 
   /* =========================
@@ -111,6 +116,7 @@ export function ManuscriptReview({
       editorProps: {
         handleDOMEvents: {
           mouseup: (_view, _event) => {
+            if(readOnly) return;
             if (!editor) return false;
             if (editingCommentId) return false;
             if (draftLockedRef.current) return false;
@@ -131,7 +137,7 @@ export function ManuscriptReview({
             const coords = editor.view.coordsAtPos(from);
             const rect = container.getBoundingClientRect();
 
-            // 🔒 Lock ONLY after mouseup captures final selection
+            // Lock ONLY after mouseup captures final selection
             draftLockedRef.current = true;
 
             setActiveRange({
@@ -170,6 +176,7 @@ export function ManuscriptReview({
   ========================= */
 
   function clearDraft() {
+    if(readOnly) return;
     if (!editor) return;
 
     editor.view.dispatch(editor.state.tr.setMeta(DraftHighlightKey, "clear"));
@@ -181,6 +188,10 @@ export function ManuscriptReview({
   }
 
   function openEditForComment(commentId: string) {
+    if(readOnly){
+        resetExistingZindeces(commentId);
+        return;
+    }
     if (!editor || !containerRef.current) return;
 
     const comment = comments.find((c) => c.id === commentId);
@@ -218,6 +229,7 @@ export function ManuscriptReview({
   }
 
   async function handleSave() {
+    if(readOnly) return;
     if (!editor || !activeRange || !draftText.trim()) return;
     if (activeRange.to <= activeRange.from) return;
 
@@ -268,7 +280,18 @@ export function ManuscriptReview({
     ? containerRef.current.getBoundingClientRect()
     : null;
 
-  /* =========================
+  const resetExistingZindeces = (commentId: string | undefined) => {
+    let tempZindeces: Record<string, number> = ({});
+    for(let i = 0; i < initialComments.length; i++){
+        tempZindeces[initialComments[i].id] = 10;
+    }
+    if(commentId !== undefined){
+        tempZindeces[commentId!] = 99;
+    }
+    console.log('tempZindeces', tempZindeces)
+    setZindex(tempZindeces);
+  }
+    /* =========================
      Render
   ========================= */
 
@@ -297,9 +320,11 @@ export function ManuscriptReview({
                 p: 1.25,
                 opacity: c.isResolved ? 0.6 : 1,
                 cursor: "pointer",
-                zIndex: focusedCommentId === c.id ? 30 : 10,
+                //zIndex: focusedCommentId === c.id ? 30 : 10,
+                zIndex: zIndex[c.id] 
               }}
               elevation={focusedCommentId === c.id ? 6 : 2}
+              //elevation={elevation[c.id]}
               onClick={() => openEditForComment(c.id)}
             >
               <Box display="flex" justifyContent="space-between">
@@ -336,6 +361,7 @@ export function ManuscriptReview({
             p: 2,
             zIndex: 50,
           }}
+          
         >
           <Typography variant="subtitle2" gutterBottom>
             {editingCommentId ? "Edit comment" : "New comment"}

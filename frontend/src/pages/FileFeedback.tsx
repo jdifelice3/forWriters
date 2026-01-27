@@ -5,17 +5,12 @@ import { useGroupContext } from "../context/GroupContextProvider";
 import { useFileDomain } from "../hooks/file/useFileDomain";
 import { useReadings } from "../hooks/reading/useReadings";
 import { useReadingDomain } from "../hooks/reading/useReadingDomain";
-import { UploadFileFormProperties } from "../types/FileTypes";
 import { AppFile, Reading, ReadingSubmission } from "../types/domain-types";
 import { useParams } from "react-router-dom";
-import FileIcon from "../components/controls/FileIcon";
 import {
-  Paper,
   Box,
-  Button,
   Card,
   CardContent,
-  CardActions,
   CircularProgress,
   TextField,
   Typography,
@@ -23,7 +18,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  Stack,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import CloseIcon from "@mui/icons-material/Close";

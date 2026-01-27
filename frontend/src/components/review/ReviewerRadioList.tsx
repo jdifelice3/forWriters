@@ -10,6 +10,7 @@ interface ReviewerRadioListProps {
 const ReviewerRadioList: React.FC<ReviewerRadioListProps> = ({ reviewers, selectedReviewer, onChange }) => {
 
 const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('event.target.value', event.target.value)
     onChange(event.target.value);
 };
 
@@ -20,6 +21,12 @@ return (
             value={selectedReviewer ?? ""}
             onChange={handleChange}
         >
+            <FormControlLabel
+                key="selectall"
+                value="selectall"
+                control={<Radio />}
+                label={"Select All"}
+            />
             {Object.entries(reviewers).map(([key, value]) => (
                 <FormControlLabel
                     key={key}

@@ -123,16 +123,15 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
             Add News
           </Button>
         )}
-        <Box sx={{ borderBottom: "1px solid #ccc" }}/>
         {isAdmin && adding && (
           <Box mb={3}>
              <Box mt={3}>
-                        {error && (
-                             <Alert severity="error" sx={{ mt: 3 }}>
-                                {error}
-                            </Alert>
-                        )}
-                    </Box>
+                {error && (
+                        <Alert severity="error" sx={{ mt: 3 }}>
+                        {error}
+                    </Alert>
+                )}
+            </Box>
 
             <Box sx={{ maxWidth: 1207, margin: "0 auto" }}>
                 <Editor postContent={postContent} cancelPost={cancelPost}/>
@@ -141,7 +140,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
         )}
         {news.length === 0 ? (
             <Typography variant="body1" color="text.primary" sx={{ mb: 1 }}>
-              No news is good news
+                No news is good news
             </Typography>
         ) : ( 
             <>
@@ -157,11 +156,11 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
               )}
             </Stack>
             <RichTextReadOnly
-              content={n.content}
-              extensions={extensions}
+                content={n.content}
+                extensions={extensions}
             />
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Posted on {new Date(n.postedAt).toLocaleDateString()}
+                Posted on {new Date(n.postedAt).toLocaleDateString()}
             </Typography>
           </Box>
         ))}

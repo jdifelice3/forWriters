@@ -80,7 +80,7 @@ router.get("/:groupId", async(req, res) => {
                 title: reading[0].name,
                 occursAt: new Date(reading[0].readingDate || "").toLocaleDateString(),
                 subtitle: reading[0].readingStartTime,
-                href: "/readings"
+                href: `/groups/${groupId}/readings`
             }
         ];
 

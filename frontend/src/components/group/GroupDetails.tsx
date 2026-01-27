@@ -3,6 +3,7 @@ import { Group } from "../../types/domain-types";
 import { getUrlLabel } from "../../types/UrlTypes";
 import {
   Box,
+  Button,
   Typography,
   Card,
   CardContent,
@@ -18,7 +19,6 @@ interface GroupDetailsProps {
 }
 
 export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
-
   const [form, setForm] = useState({
     name: group.name || "",
     description: group.description || "",
@@ -44,46 +44,46 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
 
         <Grid container spacing={2}>
 
-          <Grid size={2}>  
+        <Grid size={2}>  
             <Avatar
-              src={form.imageUrl}
-              alt={form.name}
-              sx={{ width: 120, height: 120 }}
+                src={form.imageUrl}
+                alt={form.name}
+                sx={{ width: 120, height: 120 }}
             />
-          </Grid>
-          {group.groupType === "WRITING" && (
-          <Grid size={4}>
-            <Stack >
-                <ListItem>
-                    <Typography sx={{fontWeight: "bold"}}>Address:</Typography>
-                </ListItem>
-                <ListItem>
-                    <Typography>{form.street}<br/>{`${form.city}, ${form.state} ${form.zip}`}</Typography>
-                </ListItem>
-                <ListItem>
-                    <Typography><a href={form.websiteUrl} target='_blank' rel='noopener noreferrer'>{form.websiteUrl}</a></Typography>
-                </ListItem>
-            </Stack>
-          </Grid>
-          )}
+        </Grid>
+        {group.groupType === "WRITING" && (
+        <Grid size={4}>
+        <Stack >
+            <ListItem>
+                <Typography sx={{fontWeight: "bold"}}>Address:</Typography>
+            </ListItem>
+            <ListItem>
+                <Typography>{form.street}<br/>{`${form.city}, ${form.state} ${form.zip}`}</Typography>
+            </ListItem>
+            <ListItem>
+                <Typography><a href={form.websiteUrl} target='_blank' rel='noopener noreferrer'>{form.websiteUrl}</a></Typography>
+            </ListItem>
+        </Stack>
+        </Grid>
+        )}
 
-          <Grid size={6}>
-            <Stack >
-                <ListItem>
-                    <Typography sx={{fontWeight: "bold"}}>Social Media:</Typography>
-                </ListItem>
-                <ListItem>
-                    <Stack>
-                    {form.urls.map((u) => (
-                      <ListItem sx={{p:0}}>
-                        <Typography><a href={u.url} target='_blank' rel='noopener noreferrer'>{getUrlLabel(u.urlType)}</a></Typography>
-                      </ListItem>
-                    ))}
-                    </Stack>
-                </ListItem>
-            </Stack>
+        <Grid size={6}>
+        <Stack >
+            <ListItem>
+                <Typography sx={{fontWeight: "bold"}}>Social Media:</Typography>
+            </ListItem>
+            <ListItem>
+                <Stack>
+                {form.urls.map((u) => (
+                    <ListItem sx={{p:0}}>
+                    <Typography><a href={u.url} target='_blank' rel='noopener noreferrer'>{getUrlLabel(u.urlType)}</a></Typography>
+                    </ListItem>
+                ))}
+                </Stack>
+            </ListItem>
+        </Stack>
 
-          </Grid>
+        </Grid>
 
         </Grid>
 
@@ -101,12 +101,27 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
                 </Stack>
               </ListItem>
               {group.groupType === "WRITING" && (
-              <ListItem>
+              <ListItem sx={{mb:2}}>
                 <Link href={mapUrl} target="_blank" rel="noopener">
                     View on Google Maps
                 </Link>
               </ListItem>
               )}
+              <ListItem>
+                <Box>
+                    <Button
+                        variant="contained"
+                        component="a"
+                        href=""
+                        //onClick={() => navigate(`/filefeedbackdetail/${currentVersion?.id}`)}
+                        size="small"
+                        sx={{ fontSize: 14 }}
+                        disabled={true}
+                    >
+                    Invite To Group
+                    </Button>
+                </Box>
+              </ListItem>
             </Stack>
           </Grid>
         </Box>
