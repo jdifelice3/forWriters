@@ -53,8 +53,6 @@ export function ManuscriptReview({
   initialComments,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-    //console.log('initialComments', initialComments)
-    console.log('html', html)
   // We lock after mouseup captures the FINAL selection
   const draftLockedRef = useRef(false);
 
@@ -220,7 +218,6 @@ export function ManuscriptReview({
   }
 
   async function handleSave() {
-    console.log('in handleSave')
     if (!editor || !activeRange || !draftText.trim()) return;
     if (activeRange.to <= activeRange.from) return;
 

@@ -1,16 +1,10 @@
 "use client";
 
 import {
-  Paper,
   Box,
-  Button,
   Card,
   CardContent,
-  CardActions,
-  CircularProgress,
-  TextField,
   Typography,
-  Stack,
   Tab,
   Tabs,
 
@@ -18,19 +12,12 @@ import {
 import { 
     AppFile, 
     AppFileMeta,
-    FileFeedback, 
-    Reading, 
-    ReadingSubmission 
 } from "../types/domain-types";
-import { FileDomainCommands } from "../types/FileTypes";
-import { CommentDTO, CommentsForDisplay } from "../types/FeedbackTypes";
+import { CommentDTO } from "../types/FeedbackTypes";
 
 import { useState, useEffect } from "react";
-import { useReadings } from "../hooks/reading/useReadings"
 import { useFileDomain } from "../hooks/file/useFileDomain";
-import { useFilesData } from "../hooks/file/useFilesData";
 import { useFilesDataFeedback } from "../hooks/file/useFilesDataFeedback";
-import { useUserContext } from "../context/UserContext";
 import { useFiles } from "../hooks/file/useFiles";
 import { useParams } from "react-router-dom";
 import { ManuscriptReview } from "../components/review/ManuscriptReview";
@@ -38,16 +25,14 @@ import ReviewerRadioList from "../components/review/ReviewerRadioList";
 
 const FileFeedbackDetail = () => {
     const { appFileId } = useParams<{ appFileId: string }>();
-    //console.log('appFileId', appFileId)
     if(!appFileId) return;
-
-    let cancelled = false;
 
     const { getFileFeedbackUnique, getHTML } = useFileDomain();
     const { files } = useFiles();
 
     const [comments, setComments] = useState<CommentDTO[] | undefined>();
     const [commentCount, setCommentCount] = useState(0);
+    const [selectedReviewer, setSelectedReviewer] = useState<string | undefined>(undefined);
     const [manuscriptTitle, setManuscriptTitle]= useState("");
     const [tab, setTab] = useState(0);
     const [appFileMeta, setAppFileMeta] = useState<AppFileMeta | undefined>(undefined);
@@ -89,12 +74,11 @@ const FileFeedbackDetail = () => {
 
     const { commentsByParagraph } = useFilesDataFeedback(comments);
     const { commentsByReviewer } = useFilesDataFeedback(comments);
-    console.log('manuscriptHtml', manuscriptHtml)
 
-    const handleReviewerOnClick = (reviewerDisplayName: string) => {
-        //alert(reviewer);
+    const handleReviewerOnChange = (reviewerDisplayName: string) => {
         const reviewerComments: CommentDTO[] | undefined = comments?.filter(c => c.reviewerDisplayName === reviewerDisplayName); 
         setInititalComments(reviewerComments);    
+        setSelectedReviewer(reviewerDisplayName);
     }
   return (
     <Box 
@@ -145,7 +129,8 @@ const FileFeedbackDetail = () => {
                 <>
                 <ReviewerRadioList
                     reviewers={commentsByReviewer}
-                    onClick={handleReviewerOnClick}
+                    selectedReviewer={selectedReviewer}
+                    onChange={handleReviewerOnChange}
                 />
                 <ManuscriptReview
                     html={manuscriptHtml}
