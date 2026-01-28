@@ -82,7 +82,7 @@ const FileFeedbackDetail = () => {
     const { commentsByReviewer } = useFilesDataFeedback(comments);
 
     const handleReviewerOnChange2= (selectedReviewerNames: string[]) => {
-        alert(selectedReviewerNames)
+
         let reviewerComments: CommentDTO[] | undefined = undefined;
         reviewerComments = comments?.filter(c => selectedReviewerNames.includes(c.reviewerDisplayName));//c.reviewerDisplayName === reviewerDisplayName); 
         console.log('reviewerComments', reviewerComments)
