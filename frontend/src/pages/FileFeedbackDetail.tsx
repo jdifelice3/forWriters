@@ -22,6 +22,7 @@ import { useFiles } from "../hooks/file/useFiles";
 import { useParams } from "react-router-dom";
 import { ManuscriptReview } from "../components/review/ManuscriptReview";
 import ReviewerRadioList from "../components/review/ReviewerRadioList";
+import ReviewerCheckboxList from "../components/review/ReviewerCheckboxList";
 
 const FileFeedbackDetail = () => {
     const { appFileId } = useParams<{ appFileId: string }>();
@@ -32,13 +33,15 @@ const FileFeedbackDetail = () => {
 
     const [comments, setComments] = useState<CommentDTO[] | undefined>();
     const [commentCount, setCommentCount] = useState(0);
-    const [selectedReviewer, setSelectedReviewer] = useState<string | undefined>(undefined);
+    const [selectedReviewer, setSelectedReviewer] = useState<string[]>([]);
     const [manuscriptTitle, setManuscriptTitle]= useState("");
     const [tab, setTab] = useState(0);
     const [appFileMeta, setAppFileMeta] = useState<AppFileMeta | undefined>(undefined);
     const [appFile, setAppFile] = useState<AppFile | undefined>(undefined);
     const [manuscriptHtml, setManuscriptHtml] = useState<string>("");
     const [initialComments, setInititalComments] = useState<CommentDTO[] | undefined>([]);
+    const [reviewers, setReviewers] = useState<string []>([]);
+    const [seletecedReviewers, setSelectedReviewers] = useState<string[]>([]);
  
     useEffect(() => {
         if (!appFileId || files.length === 0) return;
@@ -58,7 +61,11 @@ const FileFeedbackDetail = () => {
         if (!appFileId) return;
 
         const load = async () => {
-            const result = await getFileFeedbackUnique(appFileId);
+            const result: CommentDTO[] = await getFileFeedbackUnique(appFileId);
+            console.log('result', result)
+            const reviewers: string[] = getReviewerNames(result);
+            console.log('reviewers', reviewers)
+            setReviewers(reviewers);
             setComments(result);
             setCommentCount(result.length);
 
@@ -74,16 +81,25 @@ const FileFeedbackDetail = () => {
     const { commentsByParagraph } = useFilesDataFeedback(comments);
     const { commentsByReviewer } = useFilesDataFeedback(comments);
 
-    const handleReviewerOnChange = (reviewerDisplayName: string) => {
-        console.log(reviewerDisplayName);
+    const handleReviewerOnChange2= (selectedReviewerNames: string[]) => {
+        alert(selectedReviewerNames)
         let reviewerComments: CommentDTO[] | undefined = undefined;
-        if(reviewerDisplayName === "selectall"){
-            reviewerComments = comments;
-        } else {
-            reviewerComments = comments?.filter(c => c.reviewerDisplayName === reviewerDisplayName); 
-        }
+        reviewerComments = comments?.filter(c => selectedReviewerNames.includes(c.reviewerDisplayName));//c.reviewerDisplayName === reviewerDisplayName); 
+        console.log('reviewerComments', reviewerComments)
         setInititalComments(reviewerComments);    
-        setSelectedReviewer(reviewerDisplayName);
+        setSelectedReviewer(selectedReviewerNames);
+    }
+
+    const getReviewerNames = (comments: CommentDTO[]) => {
+        let reviewerNames: string[] = [];
+        for(let i = 0; i < comments.length; i++){
+            let index = reviewerNames.find(r => r === comments[i].reviewerDisplayName);
+            if(!index){
+                reviewerNames.push(comments[i].reviewerDisplayName);
+            }
+        }
+
+        return reviewerNames;
     }
   return (
     <Box 
@@ -133,11 +149,18 @@ const FileFeedbackDetail = () => {
 
             {tab === 0 && commentCount > 0 && manuscriptHtml && (
                 <>
-                <ReviewerRadioList
+                {/* <ReviewerRadioList
                     reviewers={commentsByReviewer}
                     selectedReviewer={selectedReviewer}
                     onChange={handleReviewerOnChange}
+                /> */}
+                <Box sx={{mb: 1}}>
+                <ReviewerCheckboxList
+                    reviewers={reviewers}
+                    selectedReviewers={selectedReviewer}
+                    onChange={handleReviewerOnChange2}
                 />
+                </Box>
                 <ManuscriptReview
                     html={manuscriptHtml}
                     initialComments={initialComments!}
