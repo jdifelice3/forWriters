@@ -76,7 +76,7 @@ const FileFeedbackDetail = () => {
         };
 
         load();
-    }, [appFileId, getFileFeedbackUnique, getHTML]);
+    }, [appFileId, getFileFeedbackUnique, getHTML]);//
 
     const { commentsByParagraph } = useFilesDataFeedback(comments);
     const { commentsByReviewer } = useFilesDataFeedback(comments);
