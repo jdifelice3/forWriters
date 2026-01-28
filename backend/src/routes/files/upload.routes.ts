@@ -56,7 +56,21 @@ router.post("/version", upload.single("file"), async (req, res) => {
         const appFileMeta = await prisma.appFileMeta.findUnique({ where: {id: req.appFileMeta.id}});
         if(!appFileMeta) throw new Error('AppFileMeta object not found')
 
-        const newVersion = appFileMeta.currentVersionId + 1;
+        const maxVersionFiles = await prisma.appFile.findMany({
+            where: {
+                appFileMetaId: appFileMeta.id
+            },
+            orderBy: {
+                id: "desc"
+            }
+        });
+        
+        let maxVersion: number = 0;
+        if(maxVersionFiles){
+            maxVersion = maxVersionFiles[0].version;
+        }
+        console.log('maxVersion', maxVersion)
+        const newVersion = maxVersion + 1;
         const appFile = await prisma.appFile.create({
             data: {
                 appFileMetaId: req.appFileMeta.id,

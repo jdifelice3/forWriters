@@ -45,7 +45,11 @@ router.get("/", async (req, res) => {
 
     const files = await prisma.appFileMeta.findMany({
         include: {
-            appFile: true
+            appFile: {
+                orderBy: {
+                    version: "asc"
+                }
+            }
         },
         where: {
             userId: user?.id
