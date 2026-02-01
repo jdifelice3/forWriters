@@ -3,8 +3,6 @@ import { DashboardResponse } from "../types/DashboardTypes";
 import { apiFetch } from "../api/client"
 
 export function useDashboard(activeGroupId: string | null) {
-  if(!activeGroupId)
-    return {};
 
   const key = activeGroupId 
     ? `/dashboard/${activeGroupId}` 
