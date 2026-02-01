@@ -12,15 +12,3 @@ export const getSpotsOpenText = (e: Reading) => {
       return `${e.spotsOpen} of ${e.spotsOpen} spots open`;
     }
   }
-
-export const getCardBackgroundColor = (r: Reading) => {
-    if(r === undefined || r.scheduledType === "SCHEDULED" ){
-        if(r.submissionDeadline && new Date(r.submissionDeadline) > new Date()){
-            return "#e3f2fd";
-        } else {
-            return "#f3e5f5";
-        }
-    } else {
-        return "#e3f2fd";
-    }
-}

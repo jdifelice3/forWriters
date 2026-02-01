@@ -201,10 +201,10 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             </Typography>   
                         </Box>
                     )}
-                        <Box>&nbsp;</Box>
+                        {/* <Box>&nbsp;</Box> */}
                     {activeGroup.groupType === "WRITING" && (                        
                         <Box>
-                        <Typography 
+                        {/* <Typography 
                             variant="body2" 
                             color="text.secondary" 
                             sx={{
@@ -212,7 +212,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 color:(reading.readingParticipant ? (reading.readingParticipant.length === 0 ? "green" : "red") : "green")
                                 }}>
                                 {getSpotsOpenText(reading)}
-                        </Typography>
+                        </Typography> */}
                         <Typography variant="body2">
                             {/* Authors: */}
                         </Typography>
@@ -227,32 +227,6 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                 </CardContent>
                 <CardActions>
                     <Box>
-                        {activeGroup.groupType === "WRITING" && (
-                        <>
-                        <Button
-                            id={reading.id}
-                            size="small"
-                            variant="text"
-                            startIcon={<EventAvailableIcon />}
-                            onClick={(event) => domain.signUpForReading(reading.id)}
-                            sx={{ mt: 1 }}         
-                            disabled={!domain.canSignup(reading.id, user.id)}
-                        >
-                            Sign Up
-                        </Button>&nbsp;
-                        <Button
-                            id={reading.id}
-                            size="small"
-                            variant="text"
-                            startIcon={<EventAvailableIcon />}
-                            onClick={(event) => domain.withdrawFromReading(reading.id)}
-                            sx={{ mt: 1 }}         
-                            disabled={!domain.canWithdraw(reading.id, user.id)}
-                        >
-                            Withdraw
-                        </Button>&nbsp;
-                        </>
-                        )}
                         <Button className="readingReviewButton"
                             id={reading.id}
                             startIcon={<ReviewsIcon />}
@@ -265,29 +239,8 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         >
                             Review            
                         </Button>
-                        {activeGroup.groupType == "WRITING" && isAdmin && (
-                        <>
-                        <Box>
-                        <IconButton onClick={()=> alert('Edit')} size="small">
-                            <Tooltip title="edit">
-                                <EditIcon fontSize="small" />
-                            </Tooltip>
-                        </IconButton>
-                        <IconButton
-                            onClick={() => handleDelete(reading.id)}
-                            size="small"
-                            color="error"
-                        >
-                            <Tooltip title="delete">
-                                <DeleteIcon fontSize="small" />
-                            </Tooltip>
-                        </IconButton>
-                        </Box>
-                        </>
-                        )}
-                        {activeGroup.groupType === "PERSONAL" && isAdmin && (
                             <>
-                            <IconButton onClick={()=> alert('Edit')} size="small" disabled>
+                            <IconButton onClick={()=> alert('Edit')} size="small">
                                 <Tooltip title="edit">
                                     <EditIcon fontSize="small" />
                                 </Tooltip>
@@ -302,9 +255,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 </Tooltip>
                             </IconButton>
                             </>
-                        )}
                     </Box>      
-
                 </CardActions>
               </Card>
 

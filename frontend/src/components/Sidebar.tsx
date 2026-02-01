@@ -100,7 +100,7 @@ const Sidebar = () => {
                 key={"/members"}
                 selected={pathname.startsWith("/members")}
                 onClick={() => navigate("/members")}
-                disabled={true}
+                disabled={false}
             >
             <ListItemIcon className="sidebarIcon" color="white">{<ConnectWithoutContactIcon htmlColor="white"/>}</ListItemIcon>
             <ListItemText primary={"Members"} />

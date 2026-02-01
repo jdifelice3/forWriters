@@ -187,7 +187,6 @@ export interface Reading {
   description: string;
   minDaysBetweenReads: number;
   maxConsecutiveReads: number;
-  scheduledType: ReadingScheduleType;
   user: User;
   readingParticipant: ReadingParticipant[];
   group: Group;
@@ -234,6 +233,7 @@ export interface ReadingParticipant {
   id: string;
   readingId: string;
   userId: string;
+  role: ParticipantType;
   joinedAt: string;
   reading: Reading;
   user: User;

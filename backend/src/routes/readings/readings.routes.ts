@@ -7,6 +7,7 @@ import { SessionRequest } from "supertokens-node/framework/express";
 import Session from "supertokens-node/recipe/session";
 import { loadDocxFromS3AsHtml, addParagraphIds } from "../../services/streamFromS3";
 import { loadReadingById } from "./readings.middleware";
+import { ReadingParticipant } from "@prisma/client";
 
 const router = Router({ mergeParams: true });
 
@@ -45,16 +46,17 @@ router.put("/", async (req: Request, res: Response) => {
         readingStartTime,
         readingEndTime,
         submissionDeadline,
-        description
+        description,
+        participants
     } = req.body;
 
-    const reading = prisma.reading.update({
+    const reading = await prisma.reading.update({
         data: {
             name,
-            readingDate,
+            readingDate: new Date(readingDate).toISOString(),
             readingStartTime,
             readingEndTime,
-            submissionDeadline,
+            submissionDeadline: new Date(submissionDeadline).toISOString(),
             description
         },
         where: {
@@ -62,7 +64,26 @@ router.put("/", async (req: Request, res: Response) => {
         }
     });
 
-    return reading;
+    //ADD ReadingParticipants - We check for reading submissions at the UI
+    const deletedParticipants = await prisma.readingParticipant.deleteMany({
+        where: {
+            readingId: readingId
+        }
+    });
+    console.log('deleteParticipants', deletedParticipants);
+
+    const addedParticipants = await prisma.readingParticipant.createMany({
+        data: participants.map((p: ReadingParticipant) => ({
+            userId: p.userId,
+            readingId: readingId,
+            role: p.role
+        })),
+    })
+
+    console.log('body', req.body)
+    console.log('reading', reading)
+
+    res.json(reading);
 });
 
 router.delete("/", loadReadingById, async (req, res) => {

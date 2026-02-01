@@ -50,7 +50,7 @@ export default function Layout() {
                 <Route path="/filefeedbackdetail/:appFileId" element={<FileFeedbackDetail />} />
                 <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />
 
-                <Route path="/membersearch" element={<MemberSearchPage />} />
+                <Route path="/members" element={<MemberSearchPage />} />
                 <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
             </Routes>
         </Box>

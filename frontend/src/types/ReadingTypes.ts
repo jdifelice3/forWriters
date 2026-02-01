@@ -1,4 +1,5 @@
-import { GroupType } from "../types/domain-types"
+import { ReadingFormInput } from "../schemas/reading.schema";
+import { GroupType, Reading } from "../types/domain-types"
 export type FormInput = {
   name: string,
   readingDate: Date,
@@ -10,7 +11,8 @@ export type FormInput = {
 }
 
 export interface ReadingDomainCommands {
-  createReading(input: CreateReadingInput): Promise<void>;
+  createReading(input: ReadingFormInput): Promise<void>;
+  updateReading(readingId: string, input: ReadingFormInput): Promise<void>;
   deleteReading(readingId: string): Promise<void>;
   signUpForReading(readingId: string): Promise<void>;
   withdrawFromReading(readingId: string): Promise<void>;

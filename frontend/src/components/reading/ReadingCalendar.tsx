@@ -1,229 +1,152 @@
 import React, { useState } from "react";
-import { Reading } from "../../types/domain-types";
-import {
-    Alert,
-    Box,
-    Button, 
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    TextField,
-    Typography
-} from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { useUserContext } from "../../context/UserContext";
-import { ReadingCalendarItemForm } from "./ReadingCalendarItemForm";
-import { useForm } from "react-hook-form";
-import { useGroupContext } from "../../context/GroupContextProvider";
+import EditIcon from "@mui/icons-material/Edit";
+import { ReadingFormInput } from "../../schemas/reading.schema";
+import { Reading } from "../../types/domain-types";
 import { ReadingDomainCommands } from "../../types/ReadingTypes";
+import { useUserContext } from "../../context/UserContext";
+import { useGroupContext } from "../../context/GroupContextProvider";
 import { useReadingsUI } from "../../hooks/reading/useReadingsUI";
-
-type FormInput = {
-  name: string,
-  readingDate: Date,
-  readingStartTime: string,
-  readingEndTime: string,
-  submissionDeadline: Date,
-  description: string,
-  schedule: string
-}
+import { ReadingCalendarItemForm } from "./ReadingCalendarItemForm";
+import { ReadingFormDialog } from "./ReadingFormDialog";
+import { ReadingFormInline } from "./ReadingFormInline";
 
 interface ReadingCalendarProps {
   readings: Reading[];
   isAdmin: boolean;
   domain: ReadingDomainCommands;
   ui: ReturnType<typeof useReadingsUI>;
+  onCreateReading(form: any): Promise<void>;
+  //onUpdateReading(readingId: string, form: ReadingFormInput): Promise<void>;
   onFeedback(readingId: string): void;
-  onCreateReading(form: FormInput): void;
 }
 
-export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({ readings, isAdmin, domain, ui, onFeedback, onCreateReading}) => {
-    const { user, isLoading, error } = useUserContext();
-    const { activeGroup } = useGroupContext();
-    const [open, setOpen] = useState(false);
-    const [name, setName] = useState("");
-  
-    const [readingDate, setReadingDate] = useState("");
-    const [startTime, setStartTime] = useState("");
-    const [endTime, setEndTime] = useState("");
-    const [description, setDescription] = useState("");
-    const [submitting, setSubmitting] = React.useState(false);
-    const [submissionDeadline, setSubmissionDeadline] = useState("");
-    const [err, setErr] = useState<string | null>(null);
+export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
+  readings,
+  isAdmin,
+  domain,
+  ui,
+  onCreateReading,
+  //onUpdateReading,
+  onFeedback
+}) => {
+  const { user, isLoading, error } = useUserContext();
+  const { activeGroup } = useGroupContext();
 
-    const {register, handleSubmit, formState: { errors }} = useForm<FormInput>({
-        defaultValues: {
-            name: "", 
-            readingDate: new Date(),
-            readingStartTime: "",
-            readingEndTime: "",
-            submissionDeadline: new Date(),
-            description: "",
-            schedule: "SCHEDULED"
-        },
-    });
+  const [inlineEditId, setInlineEditId] = useState<string | null>(null);
+  const [dialogReading, setDialogReading] = useState<Reading | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-    if (isLoading) return <CircularProgress />;
-    if (error) return <Typography color="error">{error}</Typography>;
-    if (!user) return <Typography>No user found.</Typography>;
+  if (isLoading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!user || !activeGroup) return null;
 
-    const handleCreateReading = async (form: FormInput) => {
-        setOpen(false);
-        setName("");
-        setDescription("");
-        setReadingDate("")
-        setSubmissionDeadline("");
-        setStartTime("");
-        setEndTime("");
+const openCreateDialog = () => {
+  setDialogReading(null);
+  setDialogOpen(true);
+};
+const closeCreateDialog = () => {
+  setDialogReading(null);
+  setDialogOpen(false);
+};
 
-        onCreateReading(form);
-    }
+const openEditDialog = (reading: Reading) => {
+  setDialogReading(reading);
+  setDialogOpen(true);
+};
 
   return (
-      <Box>
-        {isAdmin && (
-          <Button
-            startIcon={<AddIcon />}
-            variant="outlined"
-            onClick={() => setOpen(true)}
-          >
-            Create Reading
-          </Button>
-        )}
-        <Box>
-            {err && (
-                <Alert severity="error" sx={{ mt: 3 }}>
-                    {err}
-                </Alert>
-            )}
-            {readings && readings.length > 0 ? (
-            readings.map((r, index) => (
-                <ReadingCalendarItemForm 
-                    key={index.toString()} 
-                    reading={r} 
-                    isAdmin={isAdmin} 
-                    domain={domain} 
-                    ui={ui}
-                    onFeedback={onFeedback}
-                />
-            ))
-            ) : (
-            <span></span>
-            )}
-        </Box>
-        <Dialog 
-            open={open} 
-            onClose={() => setOpen(false)}
+    <Box>
+      {isAdmin && (
+        <Button
+          startIcon={<AddIcon />}
+          variant="outlined"
+          sx={{ mb: 2 }}
+          onClick={() => openCreateDialog()}
         >
-            <DialogTitle sx={{pb: 0}}>Create a Reading</DialogTitle>
-            <Box  component="form" onSubmit={handleSubmit(handleCreateReading)} noValidate>
-                <DialogContent>
-                    <TextField
-                        label="Reading Name"
-                        type="string"
-                        value={name}
-                        fullWidth
-                        sx={{ my: 2 }}
-                        required
-                        {...register("name", {
-                            onChange: (e) => setName(e.target.value)
-                        })}
-                        error={!!errors.name}
-                        helperText={errors.name?.message}            
-                    />
-                    <TextField
-                        label="Description"
-                        type="string"
-                        value={description}
-                        fullWidth
-                        sx={{ my: 2 }}
-                        required
-                        {...register("description", {
-                            onChange: (e) => setDescription(e.target.value)
-                        })}
-                        error={!!errors.name}
-                        helperText={errors.name?.message}            
-                    />
-                    {activeGroup?.groupType === "WRITING" && (
-                        <>
-                        <TextField
-                            label="Reading Date"
-                            type="date"
-                            value={readingDate}
-                            fullWidth
-                            sx={{ 
-                                my: 2, 
-                            }}
-                            InputLabelProps={{ shrink: true }}
-                            required
-                            {...register("readingDate", {
-                                onChange: (e) => setReadingDate(e.target.value)
-                            })}
-                            error={!!errors.readingDate}
-                            helperText={errors.readingDate?.message}            
-                        />
-                        <TextField
-                            label="Submission Deadline"
-                            type="date"
-                            value={submissionDeadline}
-                            fullWidth
-                            InputLabelProps={{ shrink: true }}
-                            required
-                            {...register("submissionDeadline", {
-                                onChange: (e) => setSubmissionDeadline(e.target.value)
-                            })}
-                            error={!!errors.name}
-                            helperText={errors.name?.message}           
-                        />
-                        <TextField
-                            label="Start Time"
-                            type="string"
-                            value={startTime}
-                            fullWidth
-                            sx={{ my: 2 }}
-                            required
-                            {...register("readingStartTime", {
-                                onChange: (e) => setStartTime(e.target.value) 
-                            })}
-                            error={!!errors.name}
-                            helperText={errors.name?.message}            
-                        />
-                        <TextField
-                            label="End Time"
-                            type="string"
-                            value={endTime}
-                            fullWidth
-                            sx={{ my: 2 }}
-                            required
-                            {...register("readingEndTime", {
-                                onChange: (e) => setEndTime(e.target.value) 
-                            })}
-                            error={!!errors.name}
-                            helperText={errors.name?.message}            
-                            />
-                            </>
+          Create Reading
+        </Button>
+      )}
+
+      {readings.map(reading => {
+        const locked = reading.readingSubmission.length > 0;
+
+        return (
+          <Box key={reading.id} sx={{ mb: 3 }}>
+            {inlineEditId === reading.id ? (
+              <ReadingFormInline
+                reading={reading}
+                groupId={activeGroup.id}
+                locked={locked}
+                onCancel={() => setInlineEditId(null)}
+                onSave={async form => { 
+                  await domain.updateReading(reading.id, form);
+                  //await onUpdateReading(reading.id, form);
+                  setInlineEditId(null);
+                }}
+              />
+            ) : (
+              <>
+                <ReadingCalendarItemForm
+                  key={reading.id}
+                  reading={reading}
+                  isAdmin={isAdmin}
+                  onFeedback={onFeedback}
+                  domain={domain}
+                  ui={ui}
+                />
+
+                {isAdmin && (
+                  <Box display="flex" gap={1} mt={1}>
+                    {!locked && (
+                      <Button
+                        size="small"
+                        startIcon={<EditIcon />}
+                        onClick={() => setInlineEditId(reading.id)}
+                      >
+                        Inline Edit
+                      </Button>
                     )}
-                </DialogContent>
-                <DialogActions>
+
                     <Button
-                        type="submit"
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        disabled={submitting}
+                      size="small"
+                      onClick={() => openEditDialog(reading)}
                     >
-                    {submitting ? <CircularProgress size={22} /> : "Create Reading"}
+                      Edit (Dialog)
                     </Button>
-                    <Button onClick={() => setOpen(false)}>Cancel</Button>
-                </DialogActions>
-            </Box>
-        </Dialog>
+                  </Box>
+                )}
+              </>
+            )}
+          </Box>
+        );
+      })}
 
+        <ReadingFormDialog
+            open={dialogOpen}
+            reading={dialogReading ?? undefined}
+            locked={Boolean(dialogReading?.readingSubmission?.length)}
+            groupId={activeGroup.id}
+            showScheduleFields={activeGroup.groupType === "WRITING"}
+            onClose={() => {
+                setDialogReading(null);
+                setDialogOpen(false);
+            }}
+            onSubmit={async(form) => {
+                if (dialogReading) {
+                    await domain.updateReading(dialogReading.id, form);
+                } else {
+                    await domain.createReading(form);
+                }
 
-     </Box>
+                setDialogOpen(false);
+                setDialogReading(null);
+            }}
+        />
 
-
+        </Box>
   );
 };
+
 export default ReadingCalendar;

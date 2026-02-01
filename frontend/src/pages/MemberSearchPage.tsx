@@ -55,12 +55,12 @@ const MemberSearchPage = () => {
 
   return (
     <Box 
-        style={styles}  
+        
         sx={{ 
-        maxWidth: 900, 
-        mx: "auto", 
-        p: 4,
-        marginLeft: "100px",
+            maxWidth: 550, 
+            mx: "auto", 
+            pt: 4,
+            ml: 4
         }}>
         <Typography variant="h4" mb={3}>
             <CheckBoxIcon 
@@ -71,11 +71,11 @@ const MemberSearchPage = () => {
                 />&nbsp;
             Search Members
         </Typography>
-        <Typography variant="h6" sx={{}}>
+        {/* <Typography variant="h6" sx={{}}>
             Find a Collaborator
-        </Typography>
+        </Typography> */}
 
-      <MemberSearchBox onSelectMember={setSelectedMember} />
+      <MemberSearchBox onSelectMember={setSelectedMember} groupId={undefined}/>
         
       {selectedMember && (
         <Box mt={3}>
@@ -87,7 +87,9 @@ const MemberSearchPage = () => {
                 <Typography sx={{fontWeight:"bold"}}>
                     Bio
                 </Typography>
-                {selectedMember.bio}
+                <Typography>
+                    {!selectedMember.bio ? "No bio found." : selectedMember.bio}
+                </Typography>
             </CardContent>
           </Card>
           <Button

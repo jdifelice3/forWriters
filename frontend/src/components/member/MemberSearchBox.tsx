@@ -4,13 +4,14 @@ import { Autocomplete, TextField, CircularProgress } from "@mui/material";
 
 interface Props {
     onSelectMember: (user: UserSearch | null) => void;
+    groupId: string | undefined;
 }
 
-const MemberSearchBox = ({ onSelectMember: onSelectMember }: Props) => {
+const MemberSearchBox = ({ onSelectMember: onSelectMember, groupId }: Props) => {
     const [options, setOptions] = useState<UserSearch[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const searchUrl = `${import.meta.env.VITE_API_HOST}/api/users/search?query=`;
+    let searchUrl = `${import.meta.env.VITE_API_HOST}/api/users/search?query=`;
 
     const handleInput = async (query: string) => {
         if (!query) {
@@ -20,7 +21,11 @@ const MemberSearchBox = ({ onSelectMember: onSelectMember }: Props) => {
         setLoading(true);
         
         try {
-        const res = await fetch(`${searchUrl}${encodeURIComponent(query)}`,
+            searchUrl = searchUrl + encodeURIComponent(query);
+            if(groupId){
+                searchUrl += `&groupId=${groupId}`;
+            }
+        const res = await fetch(`${searchUrl}`,
             { 
             method: "GET", 
             headers: { "Content-Type": "application/json" },
@@ -44,6 +49,8 @@ const MemberSearchBox = ({ onSelectMember: onSelectMember }: Props) => {
             onChange={(_, value) => onSelectMember(value)}
             renderInput={(params) => (
                 <TextField
+                    sx={{backgroundColor: "white"}}
+                    placeholder="Type a name"
                     {...params}
                     //   label="Search for writing groups"
                     InputProps={{

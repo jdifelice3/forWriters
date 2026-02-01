@@ -234,6 +234,7 @@ export interface ReadingParticipant {
   id: string;
   readingId: string;
   userId: string;
+  role: ParticipantType;
   joinedAt: string;
   reading: Reading;
   user: User;

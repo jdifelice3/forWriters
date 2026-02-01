@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import { ReadingFormInput } from "../schemas/reading.schema";
 
 import { useGroupDetails, useGroupGetCount } from "../hooks/useGroup";
 
@@ -27,16 +28,6 @@ import ReadingCalendar from "../components/reading/ReadingCalendar";
 import FileManagerList from "../components/file/lists/FileManagerList";
 import { FileListProperties } from "../types/FileTypes";
 import { CreateReadingInput } from "../types/ReadingTypes";
-
-type FormInput = {
-  name: string,
-  readingDate: Date,
-  readingStartTime: string,
-  readingEndTime: string,
-  submissionDeadline: Date,
-  description: string,
-  schedule: string
-}
 
 const Readings = () => {
     const { groupId } = useParams();
@@ -80,11 +71,12 @@ const Readings = () => {
     showDescription: true
   };
 
-    const onCreateReading = async (form: FormInput) => {
-        const input: CreateReadingInput = {
+    const onCreateReading = async (form: ReadingFormInput) => {
+        console.log(JSON.stringify(form))
+        const input: ReadingFormInput = {
             ...form,
-            readingDate: new Date(form.readingDate),
-            submissionDeadline: new Date(form.submissionDeadline),
+            //readingDate,//: new Date(form.readingDate!),
+            //submissionDeadline//: new Date(form.submissionDeadline!),
         };
         await domain.createReading(input);
     };

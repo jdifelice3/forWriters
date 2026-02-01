@@ -1,9 +1,7 @@
-import { use, useCallback } from "react";
-import { useReadings } from "../../hooks/reading/useReadings";
+import { useCallback } from "react";
 import { ReadingsAPI } from "../../api/readingsApi";
-import { CreateReadingInput } from "../../types/ReadingTypes";
 import { AppFile, GroupType, Reading, ReadingParticipant, ReadingSubmission, User } from "../../types/domain-types"
-import { useIsomorphicLayoutEffect } from "swr/_internal";
+import { ReadingFormInput } from "../../schemas/reading.schema";
 
 export function useReadingDomain(
   groupId: string | undefined,
@@ -14,10 +12,10 @@ export function useReadingDomain(
   const disabled = !groupId || !user;
   const userId = user?.id;
   
-    const createReading = useCallback(async (input: CreateReadingInput) => {
+    const createReading = useCallback(async (input: ReadingFormInput) => {
         if (disabled) return;
-        await ReadingsAPI.create(groupId!, input, userId!, input.schedule);
-        await refresh();
+        await ReadingsAPI.create(groupId!, input, userId!);
+        refresh();
     }, [groupId, userId, disabled, refresh]);
 
     const signUpForReading = useCallback(async (readingId: string) => {
@@ -30,7 +28,7 @@ export function useReadingDomain(
         if (disabled) return;
         await ReadingsAPI.withdraw(groupId, readingId, userId!);
         await refresh();
-    }, [userId, disabled, refresh]);
+    }, [groupId, userId, disabled, refresh]);
 
     const deleteReading = useCallback(async (readingId: string) => {
         if (disabled) return;
@@ -38,10 +36,10 @@ export function useReadingDomain(
         await refresh();
     }, [groupId, disabled, refresh]);
 
-    const updateReading = useCallback(async (readingId: string, input: CreateReadingInput) => {
+    const updateReading = useCallback(async (readingId: string, input: ReadingFormInput) => {
         if (disabled) return;
         await ReadingsAPI.update(groupId!, readingId, input);
-        await refresh();
+        refresh();
     }, [groupId, disabled, refresh]);
 
     const submitFileVersion = useCallback(async (readingId: string, appFileId: string) => {
@@ -67,22 +65,25 @@ export function useReadingDomain(
 
 
 /** PERMISSIONS **/
-    const canSignup = (readingId: string, userId: string, maxParticipants: number = 2) => {
-        if (disabled) return;
-        const foundReading: Reading | undefined = readings.find(r => r.id === readingId);
-        const rp: ReadingParticipant | undefined =  foundReading?.readingParticipant.find(rp => rp.userId === userId);
+    const canSignup = useCallback(
+    (readingId: string, userId: string, maxParticipants = 2) => {
+        if (disabled) return false;
 
-        if(foundReading?.readingParticipant.length === maxParticipants){
-            return false;
+        const foundReading = readings.find(r => r.id === readingId);
+        if (!foundReading) return false;
+
+        if (foundReading.readingParticipant.length >= maxParticipants) {
+        return false;
         }
-        if(rp === undefined){
-            return true;
-        };
-        
-        return false; //default        
-    }
 
-    const canWithdraw = (readingId: string, userId: string) => {
+        return !foundReading.readingParticipant.some(rp => rp.userId === userId);
+    },
+    [readings, disabled]
+    );
+
+
+    const canWithdraw = useCallback(
+        (readingId: string, userId: string) => {
         if (disabled) return;
         const reading: Reading | undefined = readings.find(r => r.id === readingId);
         if(!reading) return undefined;
@@ -94,24 +95,32 @@ export function useReadingDomain(
         const userIsParticipant = result.length > 0;
         const canWithdraw = userIsParticipant && beforeDeadline;
         return canWithdraw; 
-    }
+    },
+    [readings, disabled]
+    );
 
-    const canSubmit = (readingId: string, userId: string) => {
+    const canSubmit = useCallback(
+        (readingId: string, userId: string) => {
         if (disabled) return;
         const foundReading: Reading | undefined = readings.find(r => r.id === readingId);
         const rp: ReadingParticipant | undefined =  foundReading?.readingParticipant.find(rp => rp.userId === userId);
         const rs: ReadingSubmission | undefined = foundReading?.readingSubmission.find(item => item.participantId === rp?.id)
         return rs === undefined;
-    }
+    },
+    [readings, disabled]
+    );
 
-    const canReviewReading = (readingId: string, userId: string) => {
+    const canReviewReading = useCallback(
+        (readingId: string, userId: string) => {
         if (disabled) return;
         const reading: Reading | undefined = readings.find(r => r.id === readingId);
         if(!reading) return undefined;
         if(!reading.submissionDeadline) return undefined;
 
         return new Date() >= new Date(reading.submissionDeadline);
-    }
+    },
+    [readings, disabled]
+    );
 
     const canReviewFile = (appFile: AppFile , userId: string) => {
         //users cannot review their own file
@@ -137,6 +146,7 @@ export function useReadingDomain(
 
     return {
         createReading,
+        updateReading,
         signUpForReading,
         withdrawFromReading,
         deleteReading,

@@ -1,6 +1,7 @@
 import { apiFetch } from "./client";
 import { FormInput } from "../types/ReadingTypes";
 import { CreateReadingInput } from "../types/ReadingTypes";
+import { ReadingFormInput } from "../schemas/reading.schema";
 
 type FeedbackResponse = {
   html: string;
@@ -14,15 +15,15 @@ export const ReadingsAPI = {
         });
     },
 
-    create(groupId: string, input: FormInput, userId: string, schedule: string) {
+    create(groupId: string, input: ReadingFormInput, userId: string) {
         return apiFetch(`/groups/${groupId}/readings`, {
             method: "POST",
-            body: JSON.stringify({ ...input, createdUserId: userId, schedule }),
+            body: JSON.stringify({ ...input, createdUserId: userId }),
             credentials: "include"
         });
     },
 
-    update(groupId: string, readingId: string, input: CreateReadingInput) {
+    update(groupId: string, readingId: string, input: ReadingFormInput) {
         return apiFetch(`/groups/${groupId}/readings/${readingId}`, {
             method: "PUT",
             body: JSON.stringify(input),

@@ -289,7 +289,7 @@ model Reading {
   description         String
   minDaysBetweenReads Int      @default(20) // configurable
   maxConsecutiveReads Int      @default(1) // e.g., can't sign up twice in a row
-  scheduledType          ReadingScheduleType    @default(SCHEDULED)
+  //scheduledType          ReadingScheduleType    @default(SCHEDULED)
 
   user          User            @relation(fields: [createdUserId], references: [id])
   readingParticipant ReadingParticipant[]
@@ -354,6 +354,7 @@ model ReadingParticipant {
   id        String   @id @default(cuid())
   readingId String
   userId    String
+  role      ParticipantType @default(AUTHOR)
   joinedAt  DateTime @default(now())
 
   reading   Reading @relation(fields: [readingId], references: [id])
@@ -363,6 +364,7 @@ model ReadingParticipant {
 
   @@unique([readingId, userId])
 }
+
 
 model ReadingSubmission {
   id             String   @id @default(cuid())
