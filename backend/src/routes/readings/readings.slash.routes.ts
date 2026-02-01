@@ -98,10 +98,6 @@ router.post("/", async (req: Request, res: Response) => {
                 ? readingEndTime
                 : null,
           description,
-          scheduledType:
-            group.groupType === "WRITING"
-              ? ReadingScheduleType.SCHEDULED
-              : ReadingScheduleType.UNSCHEDULED,
           createdUserId: user.id,
           readingDate:
             group.groupType === "WRITING"
