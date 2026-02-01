@@ -3,20 +3,15 @@ import { DashboardResponse } from "../types/DashboardTypes";
 import { apiFetch } from "../api/client"
 
 export function useDashboard(activeGroupId: string | null) {
+    const swr = useSWR<DashboardResponse>(
+        activeGroupId ? `/dashboard/${activeGroupId}` : null,
+        apiFetch
+    );
 
-  const key = activeGroupId 
-    ? `/dashboard/${activeGroupId}` 
-    : `/dashboard`;
-
-  const swr = useSWR<DashboardResponse>(key, apiFetch, {
-    keepPreviousData: true
-  });
-  
   return {
-    data: swr.data as DashboardResponse?? [],
+    data: swr.data, // DashboardResponse | undefined
     isLoading: swr.isLoading,
     isError: swr.error,
     mutate: swr.mutate,
-  };
-  
+  }
 }

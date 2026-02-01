@@ -33,7 +33,7 @@ export default function Dashboard() {
     const { user, isLoading: isUserLoading } = useUserContext();
     const { getUserProfile, updateUserProfile } = useUserDomain(user);
     const { activeGroup } = useGroupContext(); // { id, name, role } | null
-    const { data, isError, isLoading, mutate } = useDashboard(activeGroup?.id ?? null);
+    const { data, isLoading } = useDashboard(activeGroup?.id ?? null);
     const [userProfile, setUserProfile] = useState<UserProfileInput>({firstName: "", lastName: ""})
     const {
         control,
@@ -66,73 +66,74 @@ export default function Dashboard() {
         load();
       }, []);
 
-    if (isUserLoading || isLoading) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-    const onSubmit = async(data: ProfileFormInputs) => {
-        const firstName: string = data.firstName;
-        const lastName: string = data.lastName;
-        const results: Response = await updateUserProfile(user.id, firstName, lastName);
-        const userProfile = await results.json();
-        if(results.status !== 500){
-            alert("Profile saved successfully!");
-        } else if (results.status === 500){
-            alert("The profile was not saved due to an error");
-        }
+    if (!activeGroup) {
+        return <DashboardEmptyState />;
     }
 
-       
-        return(
-            <Box>
-                {!data?.group ? (
-            <Box sx={{mt: 4, ml: 6, width:"75%"}}>
-                <Box sx={{ p: 3, gap: 1  }}>
-                    <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
-                    Welcome
-                    </Typography>
-                    <Typography sx={{ mb: 2 }}>
-                    To get started, join a writing group or create your own. 
-                    </Typography>
-        <Button variant="contained" onClick={() => navigate("/groupsearch")}  sx={{mr: 2}}>
-                        Join a group
-                    </Button>
-                    <Button variant="outlined" onClick={() => navigate("/creategroup")}>
-                        Start a group
-                    </Button> 
-                </Box>
+    if (isLoading || !data) {
+        return (
+            <Box sx={{ p: 3 }}>
+            <CircularProgress />
             </Box>
-                    
-                ) : (
-                <Box sx={{ p: 3 }} className="mainComponentPanel">
-                <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
-                    Dashboard — {data.group!.name}
-                </Typography>
+        );
+    }
 
-                <Grid container spacing={2}>
-                    <Grid size={12}>
-                    <AttentionCard items={data.attention} />
-                    </Grid>
+    return (
+        <Box sx={{ p: 3 }} className="mainComponentPanel">
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
+            Dashboard — {activeGroup.name}
+            </Typography>
 
-                    <Grid size={12}>
-                    <UpcomingCard items={data.upcoming} />
-                    </Grid>
+            <Grid container spacing={2}>
+            <Grid size={12}>
+                <AttentionCard items={data.attention} />
+            </Grid>
 
-                    <Grid size={12}>
-                    <ResumeCard items={data.resume} />
-                    </Grid>
-                </Grid>
-                </Box> 
-                )}
-            </Box>
-            
-        )
+            <Grid size={12}>
+                <UpcomingCard items={data.upcoming} />
+            </Grid>
 
-            
-        // )};
-        // </div>
-        // )
+            <Grid size={12}>
+                <ResumeCard items={data.resume} />
+            </Grid>
+            </Grid>
+        </Box>
+    );
+
 } 
+
+const DashboardEmptyState = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Box sx={{ mt: 4, ml: 6, width: "75%" }}>
+      <Card>
+        <CardContent>
+          <Typography variant="h5" fontWeight={700} gutterBottom>
+            Welcome to forWriters ✍️
+          </Typography>
+
+          <Typography sx={{ mb: 2 }}>
+            To get started, join an existing writing group or create your own.
+          </Typography>
+
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/groupsearch")}
+            >
+              Join a group
+            </Button>
+
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/creategroup")}
+            >
+              Start a group
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+}
