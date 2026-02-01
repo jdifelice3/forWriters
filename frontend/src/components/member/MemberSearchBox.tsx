@@ -52,15 +52,14 @@ const MemberSearchBox = ({ onSelectMember: onSelectMember, groupId }: Props) => 
                     sx={{backgroundColor: "white"}}
                     placeholder="Type a name"
                     {...params}
-                    //   label="Search for writing groups"
                     InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
-                        <>
-                            {loading ? <CircularProgress size={20} /> : null}
-                            {params.InputProps.endAdornment}
-                        </>
-                        ),
+                    ...params.InputProps,
+                    endAdornment: (
+                    <>
+                        {loading ? <CircularProgress size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                    </>
+                    ),
                     }}
                 />
             )}

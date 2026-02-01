@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import { ReadingFormInput } from "../../schemas/reading.schema";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Tooltip from '@mui/material/Tooltip';
 import { Reading } from "../../types/domain-types";
 import { ReadingDomainCommands } from "../../types/ReadingTypes";
 import { useUserContext } from "../../context/UserContext";
@@ -56,6 +57,10 @@ const openEditDialog = (reading: Reading) => {
   setDialogOpen(true);
 };
 
+const handleDelete = (readingId: string) => {
+    const answer = confirm('Are you sure you want to delete this reading?')
+    if(answer) domain.deleteReading(readingId);
+}
   return (
     <Box>
       {isAdmin && (
@@ -99,7 +104,7 @@ const openEditDialog = (reading: Reading) => {
 
                 {isAdmin && (
                   <Box display="flex" gap={1} mt={1}>
-                    {!locked && (
+                    {/* {!locked && (
                       <Button
                         size="small"
                         startIcon={<EditIcon />}
@@ -107,14 +112,32 @@ const openEditDialog = (reading: Reading) => {
                       >
                         Inline Edit
                       </Button>
-                    )}
+                    )} */}
 
                     <Button
                       size="small"
+                      startIcon={<EditIcon />}
                       onClick={() => openEditDialog(reading)}
                     >
-                      Edit (Dialog)
+                      Edit Reading
                     </Button>
+
+                    {/* {!locked && ( */}
+                    <Tooltip title={locked ? "You cannot delete this reading because it has submissions" : ""}>
+                      <Box>
+                      <Button
+                        disabled={locked}
+                        size="small"
+                        startIcon={
+                            <DeleteIcon />
+                        }
+                        onClick={() => handleDelete(reading.id)}
+                      >
+                        Delete Reading
+                      </Button>
+                      </Box>
+                      </Tooltip>
+                    {/* )} */}
                   </Box>
                 )}
               </>

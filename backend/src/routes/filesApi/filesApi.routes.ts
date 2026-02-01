@@ -230,8 +230,6 @@ router.get("/:appFileMetaId/ids/fordeletion", async(req, res) => {
 
 const getDeletionIds = async(appFileMetaId: string): Promise<ObjectIdsForDeletion> => {
     //Retrieving ids
-    console.log('Retrieving ids')
-    console.log("appFileMetaId", appFileMetaId)
 
     const appFileMeta = await prisma.appFileMeta.findUnique({
         where: {
@@ -566,15 +564,12 @@ router.get("/:appFileId/feedback", async (req, res) => {
 
 router.get("/:appFileId/html", async (req, res) => {
     const appFileId = req.params.appFileId;
-    console.log('appFileId', appFileId)
 
     const appFile = await prisma.appFile.findUnique({
         where: {
             id: appFileId
         }
     });
-
-    console.log('appFile', appFile)
 
     if(!appFile){
         res.status(403).json({error: "File not found"});

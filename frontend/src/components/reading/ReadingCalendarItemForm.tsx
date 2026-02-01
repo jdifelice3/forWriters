@@ -97,11 +97,12 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                 if (hasSubmitted) {
                     return (
                         <>
+                        {activeGroup.groupType === "WRITING" && (
                         <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
                             You have signed up for this reading<br/>
-                            
                         </Typography>
-                        <Typography>
+                        )}
+                        <Typography sx={{mt: 1}}>
                             <b>Title:</b> {title}
                         </Typography>
                         <Typography>
@@ -239,7 +240,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         >
                             Review            
                         </Button>
-                            <>
+                            {/* <>
                             <IconButton onClick={()=> alert('Edit')} size="small">
                                 <Tooltip title="edit">
                                     <EditIcon fontSize="small" />
@@ -254,7 +255,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                     <DeleteIcon fontSize="small" />
                                 </Tooltip>
                             </IconButton>
-                            </>
+                            </> */}
                     </Box>      
                 </CardActions>
               </Card>

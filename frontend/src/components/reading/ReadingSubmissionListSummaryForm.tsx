@@ -29,7 +29,6 @@ const ReadingSubmissionListSummaryForm: React.FC<ReadingSubmissionListSummaryFor
     readingDate
 }) => {
     
-  
   return (
     <Box key={key}>
       <Stack spacing={1}>
@@ -54,10 +53,11 @@ const ReadingSubmissionListSummaryForm: React.FC<ReadingSubmissionListSummaryFor
         <Typography variant="body2" color="text.secondary">
           <b>Reading:</b> {readingName}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <b>Reading Date</b>: {new Date(readingDate!).toLocaleDateString()}
-        </Typography>
-
+        {readingDate !== null && (
+            <Typography variant="body2" color="text.secondary">
+            <b>Reading Date</b>: {new Date(readingDate!).toLocaleDateString()}
+            </Typography>
+        )}
       </Stack>
     </Box>
   );

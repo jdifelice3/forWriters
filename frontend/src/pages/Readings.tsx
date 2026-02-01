@@ -72,7 +72,6 @@ const Readings = () => {
   };
 
     const onCreateReading = async (form: ReadingFormInput) => {
-        console.log(JSON.stringify(form))
         const input: ReadingFormInput = {
             ...form,
             //readingDate,//: new Date(form.readingDate!),
@@ -96,7 +95,7 @@ const Readings = () => {
             <Stack className="readingSubPanel">
               {/* Reading calendar */}
                 <Typography variant="h6" mb={2} fontWeight="bold">
-                  Group Reading Calendar
+                  {group.groupType === "WRITING" ? "Group Reading Calendar" : "Review My Manuscripts"}
                 </Typography>
 
                 <ReadingCalendar

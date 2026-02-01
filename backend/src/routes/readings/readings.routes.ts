@@ -49,39 +49,49 @@ router.put("/", async (req: Request, res: Response) => {
         description,
         participants
     } = req.body;
+    let reading;
 
-    const reading = await prisma.reading.update({
-        data: {
-            name,
-            readingDate: new Date(readingDate).toISOString(),
-            readingStartTime,
-            readingEndTime,
-            submissionDeadline: new Date(submissionDeadline).toISOString(),
-            description
-        },
-        where: {
-            id: readingId
-        }
-    });
+    if(req.group.groupType === "WRITING"){
+        reading = await prisma.reading.update({
+            data: {
+                name,
+                readingDate: new Date(readingDate).toISOString(),
+                readingStartTime,
+                readingEndTime,
+                submissionDeadline: new Date(submissionDeadline).toISOString(),
+                description
+            },
+            where: {
+                id: readingId
+            }
+        });
 
-    //ADD ReadingParticipants - We check for reading submissions at the UI
-    const deletedParticipants = await prisma.readingParticipant.deleteMany({
-        where: {
-            readingId: readingId
-        }
-    });
-    console.log('deleteParticipants', deletedParticipants);
+        //ADD ReadingParticipants - We check for reading submissions at the UI
+        const deletedParticipants = await prisma.readingParticipant.deleteMany({
+            where: {
+                readingId: readingId
+            }
+        });
+        console.log('deleteParticipants', deletedParticipants);
 
-    const addedParticipants = await prisma.readingParticipant.createMany({
-        data: participants.map((p: ReadingParticipant) => ({
-            userId: p.userId,
-            readingId: readingId,
-            role: p.role
-        })),
-    })
-
-    console.log('body', req.body)
-    console.log('reading', reading)
+        const addedParticipants = await prisma.readingParticipant.createMany({
+            data: participants.map((p: ReadingParticipant) => ({
+                userId: p.userId,
+                readingId: readingId,
+                role: p.role
+            })),
+        })
+    } else if (req.group.groupType === "PERSONAL"){
+        reading = await prisma.reading.update({
+            data: {
+                name,
+                description
+            },
+            where: {
+                id: readingId
+            }
+        });
+    }
 
     res.json(reading);
 });

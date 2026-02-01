@@ -89,16 +89,28 @@ router.post("/", async (req: Request, res: Response) => {
         data: {
           groupId: req.group.id,
           name,
-          readingStartTime,
-          readingEndTime,
+          readingStartTime:
+            group.groupType === "WRITING"
+                ? readingStartTime
+                : null,
+          readingEndTime:
+          group.groupType === "WRITING"
+                ? readingEndTime
+                : null,
           description,
           scheduledType:
             group.groupType === "WRITING"
               ? ReadingScheduleType.SCHEDULED
               : ReadingScheduleType.UNSCHEDULED,
           createdUserId: user.id,
-          readingDate: new Date(readingDate),
-          submissionDeadline: new Date(submissionDeadline),
+          readingDate:
+            group.groupType === "WRITING"
+                ? new Date(readingDate)
+                : null,
+          submissionDeadline: 
+            group.groupType === "WRITING"
+                ? new Date(submissionDeadline)
+                : null,
         },
       });
 
@@ -111,11 +123,9 @@ router.post("/", async (req: Request, res: Response) => {
         });
       }
 
-      // 🔑 THIS IS CRITICAL
       return reading;
     });
 
-    // 🔑 ALSO CRITICAL
     return res.status(201).json(reading);
   } catch (err) {   
     console.error("Create reading failed:", err);

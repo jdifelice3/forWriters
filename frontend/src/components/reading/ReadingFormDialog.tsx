@@ -62,8 +62,6 @@ export const ReadingFormDialog: React.FC<ReadingFormDialogProps> = ({
     if (reading) {
       // Let the hook map participants etc.
       form.loadReading(reading);
-      console.log('reading', reading)
-
       // Ensure date/time fields are in the correct string formats for MUI inputs
       form.setValue("readingDate", toDateInputValue(reading.readingDate));
       form.setValue("submissionDeadline", toDateInputValue(reading.submissionDeadline));
@@ -202,7 +200,8 @@ export const ReadingFormDialog: React.FC<ReadingFormDialogProps> = ({
             </AccordionDetails>
           </Accordion>
 
-          {/* PARTICIPANTS / AUTHORS */}
+{/* PARTICIPANTS / AUTHORS */}
+        {showScheduleFields && (
           <Accordion sx={{ backgroundColor: "#e3fdfb" }} defaultExpanded>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography variant="h6">Authors - Add/Edit</Typography>
@@ -265,6 +264,7 @@ export const ReadingFormDialog: React.FC<ReadingFormDialogProps> = ({
               )}
             </AccordionDetails>
           </Accordion>
+        )}
         </DialogContent>
 
         <DialogActions sx={{ pb: 2, pr: 3 }}>

@@ -69,7 +69,6 @@ router.post("/version", upload.single("file"), async (req, res) => {
         if(maxVersionFiles){
             maxVersion = maxVersionFiles[0].version;
         }
-        console.log('maxVersion', maxVersion)
         const newVersion = maxVersion + 1;
         const appFile = await prisma.appFile.create({
             data: {

@@ -38,7 +38,7 @@ const app = express();
 app.set("trust proxy", true);
 
 app.use((req, _res, next) => {
-  console.log("REQ:", req.method, req.path);
+  //console.log("REQ:", req.method, req.path);
   next();
 });
 // -----------------------------------------------------------------------------

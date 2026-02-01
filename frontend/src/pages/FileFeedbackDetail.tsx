@@ -62,9 +62,7 @@ const FileFeedbackDetail = () => {
 
         const load = async () => {
             const result: CommentDTO[] = await getFileFeedbackUnique(appFileId);
-            console.log('result', result)
             const reviewers: string[] = getReviewerNames(result);
-            console.log('reviewers', reviewers)
             setReviewers(reviewers);
             setComments(result);
             setCommentCount(result.length);

@@ -177,7 +177,6 @@ const FileManager = () => {
           {/* Tabs */}
           <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{mb: 2}}>
             <Tab label="Manuscripts" />
-            {/* <Tab label="Feedback Sent" /> */}
             <Tab label="My Reading Submissions" />
           </Tabs>
 
