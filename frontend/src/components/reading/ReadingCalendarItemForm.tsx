@@ -47,7 +47,7 @@ interface ReadingCalendarItemFormProps {
 const currentDate = new Date();
 
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ key, reading, isAdmin, domain, ui, onFeedback }) => {
-    
+    console.log('reading', reading);
     const { user, isLoading, error } = useUserContext();
     const { activeGroup } = useGroupContext();
     const { refresh } = useReadings();
@@ -99,7 +99,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         <>
                         {activeGroup.groupType === "WRITING" && (
                         <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
-                            You have signed up for this reading<br/>
+                            You are signed up for this reading<br/>
                         </Typography>
                         )}
                         <Typography sx={{mt: 1}}>
@@ -108,6 +108,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         <Typography>
                             <b>Version:</b> {versionName}
                         </Typography>
+
                          <Button
                                 variant="text"
                                 color="primary"
@@ -124,8 +125,8 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                     return (
                         <>
                         {activeGroup.groupType === "WRITING" && (
-                            <Typography variant="body2" sx={{color: "green"}} fontWeight={"bold"}>
-                                You have signed up for this reading<br/>
+                            <Typography variant="body2" sx={{color: "green", my: 1}} fontWeight={"bold"}>
+                                You are signed up for this reading<br/>
                                 Please submit your manuscript by {new Date(reading.submissionDeadline || "").toLocaleDateString()}
                             </Typography>
                         )}
@@ -200,6 +201,23 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             <Typography variant="body2" color="text.secondary">
                                 Submit manuscripts by <b>{new Date(reading.submissionDeadline || "").toLocaleDateString()}</b>
                             </Typography>   
+                            {reading.readingParticipant && (
+                                <Typography variant="body2" sx={{mt: 1}}>
+                                    Authors:
+                                </Typography>
+                            )}
+                            {reading.readingParticipant && (
+                                reading.readingParticipant.map((rp, index) => (
+                                    <Typography variant="body2">
+                                        {
+                                            rp.user.userProfile?.firstName && 
+                                            rp.user.userProfile.lastName 
+                                                ? `${(index + 1).toString()}. ${rp.user.userProfile.firstName} ${rp.user.userProfile.lastName}`
+                                                : `${(index + 1).toString()}. Author name not provided`
+                                        }
+                                    </Typography>
+                                ))
+                            )}
                         </Box>
                     )}
                         {/* <Box>&nbsp;</Box> */}
