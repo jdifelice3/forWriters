@@ -61,6 +61,12 @@ export const FilesAPI = {
         });
     },
 
+    uploadProfileImage<AppFile>('/')
+        file: File
+    ){
+        return apiFetch
+    },
+
     addVersion(groupId: string, readingId:string, appFileId: string) {
         return apiFetch(`/groups/${groupId}/readings/${readingId}/submissions/${appFileId}/version`,{
             method: "POST",
