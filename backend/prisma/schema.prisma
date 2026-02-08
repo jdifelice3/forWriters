@@ -109,6 +109,13 @@ enum WorkType {
   SHORTSTORY
 }
 
+// Billing
+enum SubscriptionTier {
+  FREE
+  PRO_GROUP
+  PROFESSIONAL
+}
+
 model AppFile {
   id                  String       @id @default(cuid())
   appFileMetaId       String
@@ -119,6 +126,8 @@ model AppFile {
   documentType        DocumentType @default(MANUSCRIPT)
   mimetype            FileType     @default(DOCX)
   url                 String
+  // Size of the uploaded object in bytes. Used for enforcing per-user storage tiers.
+  sizeBytes           BigInt?
   uploadedAt          DateTime     @default(now())
   workType            WorkType?
   wordCount           Int?
@@ -274,6 +283,30 @@ model Notification {
   readAt    DateTime?
 }
 
+// One subscription per user. Free tier users will not have Stripe IDs.
+model Subscription {
+  id                   String            @id @default(cuid())
+  userId               String            @unique
+  tier                 SubscriptionTier  @default(FREE)
+
+  // Stripe identifiers (nullable for FREE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+
+  // Stripe subscription status values (e.g., active, trialing, canceled, past_due, unpaid)
+  status               String            @default("inactive")
+  currentPeriodEnd     DateTime?
+
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tier])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
 model Reading {
   id                  String   @id @default(cuid())
   name                String
@@ -385,8 +418,12 @@ model User {
   email         String   @unique
   role          Role     @default(READER)
   username      String   @unique
+  // Prevents repeat abuse of free trials.
+  proTrialUsedAt DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  subscription  Subscription?
 
   userProfile UserProfile?
 
@@ -427,12 +464,6 @@ model UserProfile {
   avatarUrl String?
 }
 
-model UserSearch {
-  userId       String     @id
-  fullName String?
-  bio      String?
-}
-
 model UserUrl {
   id        String   @id @default(cuid())
   url       String
@@ -442,5 +473,3 @@ model UserUrl {
 
   user User? @relation(fields: [userId], references: [id])
 }
-
-//create view "UserSearch" as SELECT id, "firstName" || ' ' || "lastName" AS "fullName", bio from "UserProfile";

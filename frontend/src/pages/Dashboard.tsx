@@ -52,8 +52,6 @@ export default function Dashboard() {
         },
     });
     
-    //let userProfile: UserProfile | undefined = undefined;
-
     useEffect(() => {
         const load = async() => {
             const result = await getUserProfile();

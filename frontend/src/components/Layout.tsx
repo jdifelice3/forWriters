@@ -22,6 +22,7 @@ import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
 import Dashboard from "../pages/Dashboard";
 import FileFeedbackDetail from "../pages/FileFeedbackDetail";
 import TopNav from "../components/nav/TopNav";
+import Billing from "../pages/Billing";
 
 export default function Layout() {
   const { loading } = useSessionContext();
@@ -52,6 +53,7 @@ export default function Layout() {
 
                 <Route path="/members" element={<MemberSearchPage />} />
                 <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
+                <Route path="/billing" element={<Billing />} />
             </Routes>
         </Box>
     </Box>

@@ -19,6 +19,8 @@ import fileUploadRoutes from "./routes/files/files.routes";
 // API router (JSON-only domain routes)
 import apiRoutes from "./routes";
 
+import billingRouter from "./routes/billing/billing.routes";
+
 // -----------------------------------------------------------------------------
 // Environment checks
 // -----------------------------------------------------------------------------
@@ -41,6 +43,7 @@ app.use((req, _res, next) => {
   //console.log("REQ:", req.method, req.path);
   next();
 });
+
 // -----------------------------------------------------------------------------
 // CORS
 // -----------------------------------------------------------------------------
@@ -77,6 +80,17 @@ app.use("/api/files", fileUploadRoutes);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// IMPORTANT: mount billing BEFORE express.json if express.json is global
+app.use(
+  "/api/billing/webhook",
+  bodyParser.raw({ type: "application/json" })
+);
+
+// 2️⃣ Billing routes (checkout, portal, webhook handler)
+app.use("/api/billing", billingRouter);
+
+// If your app does: app.use(express.json())
+// make sure it is mounted AFTER the above line OR excluded for /api/billing/webhook.
 // -----------------------------------------------------------------------------
 // Static uploads (download / preview)
 // -----------------------------------------------------------------------------

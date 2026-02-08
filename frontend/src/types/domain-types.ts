@@ -31,6 +31,8 @@ export type UrlType = "AUDIO" | "FACEBOOK" | "IMAGE" | "LINKEDIN" | "MEETUP" | "
 
 export type WorkType = "FLASHFICTION" | "NOVEL" | "NOVELLA" | "NOVELETTE" | "PLAY" | "SCREENPLAY" | "SERIALIZEDFICTION" | "SHORTSTORY";
 
+export type SubscriptionTier = "FREE" | "PRO_GROUP" | "PROFESSIONAL";
+
 export interface AppFile {
   id: string;
   appFileMetaId: string;
@@ -41,6 +43,7 @@ export interface AppFile {
   documentType: DocumentType;
   mimetype: FileType;
   url: string;
+  sizeBytes?: number;
   uploadedAt: string;
   workType?: WorkType;
   wordCount?: number;
@@ -172,6 +175,19 @@ export interface Notification {
   readAt?: string;
 }
 
+export interface Subscription {
+  id: string;
+  userId: string;
+  tier: SubscriptionTier;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  status: string;
+  currentPeriodEnd?: string;
+  createdAt: string;
+  updatedAt: string;
+  user: User;
+}
+
 export interface Reading {
   id: string;
   name: string;
@@ -257,8 +273,10 @@ export interface User {
   email: string;
   role: Role;
   username: string;
+  proTrialUsedAt?: string;
   createdAt: string;
   updatedAt: string;
+  subscription?: Subscription;
   userProfile?: UserProfile;
   groupUser: GroupUser[];
   group: Group[];
@@ -293,12 +311,6 @@ export interface UserProfile {
   phone?: string;
   bio?: string;
   avatarUrl?: string;
-}
-
-export interface UserSearch {
-  userId: string;
-  fullName?: string;
-  bio?: string;
 }
 
 export interface UserUrl {
