@@ -23,4 +23,5 @@ node_modules
 *.sw?
 .env
 .env.dev
+.env.dev.stripe
 .env.prod
