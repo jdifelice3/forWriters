@@ -272,6 +272,7 @@ model Notification {
   message   String
   createdAt DateTime @default(now())
   readAt    DateTime?
+  href      String   @default("/dashboard")
 }
 
 model Reading {
