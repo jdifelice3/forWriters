@@ -6,7 +6,7 @@
     "description": "",
     "main": "dist/index.js",
     "scripts": {
-        "dev": "copy .env.dev .env && nodemon --exec ts-node src/index.ts",
+        "dev": "copy .env.dev.stripe .env && nodemon --exec ts-node src/index.ts",
         "start": "node dist/index.js",
         "seed": "nodemon --exec ts-node prisma/seed.ts",
         "docx-extractor": "ts-node src/services/runDocxExtractor.ts",
