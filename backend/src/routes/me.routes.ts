@@ -94,18 +94,19 @@ router.get("/groups", verifySession(), async (req, res) => {
             userId: user!.id,
         },
         select: {
-        group: {
-            select: {
-            id: true,
-            name: true,
-            groupType: true,
+            role: true,
+            group: {
+                select: {
+                id: true,
+                name: true,
+                groupType: true,
+                },
             },
-        },
-        user: {
-            select: {
-                role: true
-            }
-        },
+            // user: {
+            //     select: {
+            //         role: true
+            //     }
+            // },
         },
     });
 
@@ -113,7 +114,7 @@ router.get("/groups", verifySession(), async (req, res) => {
         groups.map(g => ({
             id: g.group.id,
             name: g.group.name,
-            role: g.user.role,
+            role: g.role,
             groupType: g.group.groupType
         }))
     );

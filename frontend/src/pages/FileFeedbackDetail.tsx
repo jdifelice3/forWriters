@@ -83,7 +83,6 @@ const FileFeedbackDetail = () => {
 
         let reviewerComments: CommentDTO[] | undefined = undefined;
         reviewerComments = comments?.filter(c => selectedReviewerNames.includes(c.reviewerDisplayName));//c.reviewerDisplayName === reviewerDisplayName); 
-        console.log('reviewerComments', reviewerComments)
         setInititalComments(reviewerComments);    
         setSelectedReviewer(selectedReviewerNames);
     }

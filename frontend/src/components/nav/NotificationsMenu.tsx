@@ -19,7 +19,7 @@ export default function NotificationsMenu() {
   const navigate = useNavigate();
   const { activeGroup } = useGroupContext();
   const { data: notifications = [] } = useNotifications();
-  const { updateNotification } = useNotificationDomain(activeGroup?.id ?? null, user?.id ?? null);
+  const { updateNotification } = useNotificationDomain(activeGroup?.id, user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const unreadCount = notifications.length;

@@ -55,7 +55,6 @@ const loadRequests = async (groupId: string) => {
         </Box>
         );
     } 
-
     if(activeGroup.role !== "ADMIN"){
         navigate("/dashboard");
     }

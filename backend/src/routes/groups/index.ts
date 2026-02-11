@@ -6,7 +6,7 @@ import readingsRouter from "../readings/index";
 import groupSlashRoutes from "./group.slash.routes";
 import joinRoutes from "./join.routes";
 import joinRequestRoutes from "./join-requests.routes"
-import notificationsRoutes from "./notifications.routes";
+import notificationsRoutes from "../notifications/notifications.routes";
 
 const router = Router();
 

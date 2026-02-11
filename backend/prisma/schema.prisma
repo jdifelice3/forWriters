@@ -281,11 +281,11 @@ model Reading {
   groupId             String
   createdAt           DateTime @default(now())
   createdUserId       String
-  readingDate         DateTime?
+  readingDate         DateTime? @db.Date
   readingStartTime    String?
-  readingEndTime      String?
+  readingEndTime      String? 
   readingAddressId    String?  @unique
-  submissionDeadline  DateTime?
+  submissionDeadline  DateTime? @db.Date
   spotsOpen           Int      @default(2)
   description         String
   minDaysBetweenReads Int      @default(20) // configurable

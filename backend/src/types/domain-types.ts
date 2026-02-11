@@ -170,6 +170,8 @@ export interface Notification {
   message: string;
   createdAt: string;
   readAt?: string;
+  href: string;
+  triggerUserId?: string;
 }
 
 export interface Reading {
@@ -187,7 +189,6 @@ export interface Reading {
   description: string;
   minDaysBetweenReads: number;
   maxConsecutiveReads: number;
-  scheduledType: ReadingScheduleType;
   user: User;
   readingParticipant: ReadingParticipant[];
   group: Group;

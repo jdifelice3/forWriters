@@ -41,13 +41,12 @@ interface ReadingCalendarItemFormProps {
     isAdmin: boolean;
     domain: ReadingDomainCommands;
     ui: ReturnType<typeof useReadingsUI>;
-    onFeedback(readingId: string): void;
+    onFeedback(readingId: string): Promise<void>;
 }
 
 const currentDate = new Date();
 
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ key, reading, isAdmin, domain, ui, onFeedback }) => {
-    console.log('reading', reading);
     const { user, isLoading, error } = useUserContext();
     const { activeGroup } = useGroupContext();
     const { refresh } = useReadings();
@@ -196,10 +195,10 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                     {activeGroup.groupType === "WRITING" && (
                         <Box>
                             <Typography variant="body2">
-                                Reading Date:{new Date(reading.readingDate || "").toLocaleDateString()}
+                                Reading Date:{new Date(reading.readingDate || "").toLocaleDateString("en-US", { timeZone: "UTC" })}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Submit manuscripts by <b>{new Date(reading.submissionDeadline || "").toLocaleDateString()}</b>
+                                Submit manuscripts by <b>{new Date(reading.submissionDeadline || "").toLocaleDateString("en-US", { timeZone: "UTC" })}</b>
                             </Typography>   
                             {reading.readingParticipant && (
                                 <Typography variant="body2" sx={{mt: 1}}>
@@ -251,7 +250,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             startIcon={<ReviewsIcon />}
                             size="small"
                             variant="text"
-                            onClick={(event) => onFeedback(reading.id)}
+                            onClick={() => onFeedback(reading.id)}
                             sx={{ mt: 1 }}
                             disabled={!domain.canReviewReading(reading.id, user.id)}
 

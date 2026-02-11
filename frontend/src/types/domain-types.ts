@@ -170,6 +170,8 @@ export interface Notification {
   message: string;
   createdAt: string;
   readAt?: string;
+  href: string;
+  triggerUserId?: string;
 }
 
 export interface Reading {

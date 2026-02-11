@@ -18,20 +18,20 @@ router.get("/", async (req, res) => {
   }
 
   // Load current user once so we can exclude them
-  const currentUser = await prisma.user.findUnique({
-    where: { superTokensId: authId },
-    select: { id: true },
-  });
+//   const currentUser = await prisma.user.findUnique({
+//     where: { superTokensId: authId },
+//     select: { id: true },
+//   });
 
-  if (!currentUser) {
-    return res.status(401).json({ error: "User not found" });
-  }
+//   if (!currentUser) {
+//     return res.status(401).json({ error: "User not found" });
+//   }
 
   const users = await prisma.user.findMany({
     where: {
-      id: {
-        not: currentUser.id,
-      },
+    //   id: {
+    //     not: currentUser.id,
+    //   },
 
       // Optional group filter
       ...(groupId && {
