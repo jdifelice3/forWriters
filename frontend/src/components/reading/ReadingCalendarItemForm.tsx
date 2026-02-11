@@ -166,7 +166,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
         const answer = confirm('Are you sure you want to delete this reading?')
         if(answer) domain.deleteReading(readingId);
     }
-
+console.log('reading.readingParticipant', reading.readingParticipant)
     return (
     <>
          <Box mb={2}>
