@@ -200,12 +200,12 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             <Typography variant="body2" color="text.secondary">
                                 Submit manuscripts by <b>{new Date(reading.submissionDeadline || "").toLocaleDateString("en-US", { timeZone: "UTC" })}</b>
                             </Typography>   
-                            {reading.readingParticipant && (
+                            {reading.readingParticipant.length > 0 && (
                                 <Typography variant="body2" sx={{mt: 1}}>
                                     Authors:
                                 </Typography>
                             )}
-                            {reading.readingParticipant && (
+                            {reading.readingParticipant.length > 0 && (
                                 reading.readingParticipant.map((rp, index) => (
                                     <Typography variant="body2">
                                         {
