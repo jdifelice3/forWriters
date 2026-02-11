@@ -126,7 +126,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         {activeGroup.groupType === "WRITING" && (
                             <Typography variant="body2" sx={{color: "green", my: 1}} fontWeight={"bold"}>
                                 You are signed up for this reading<br/>
-                                Please submit your manuscript by {new Date(reading.submissionDeadline || "").toLocaleDateString()}
+                                Please submit your manuscript by {new Date(reading.submissionDeadline || "").toLocaleDateString("en-US", { timeZone: "UTC" })}
                             </Typography>
                         )}
                             <Button
