@@ -6,7 +6,7 @@ const router = Router({ mergeParams: true });
 
 router.get("/", async(req, res) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user: any = await prisma.user.findUnique({where: {superTokensId: authId,},});
     
     const notifications = await prisma.notification.findMany({

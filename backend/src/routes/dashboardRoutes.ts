@@ -9,7 +9,7 @@ router.get("/:groupId", async(req, res) => {
     const groupId = req.params.groupId;
     
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     
     const user: any = await prisma.user.findUnique({
       where: {

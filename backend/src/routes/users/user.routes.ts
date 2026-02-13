@@ -9,7 +9,7 @@ const router = Router();
 router.post("/:userId/connect-requests", async(req, res) => {
     const { userId  } = req.params; //formerly collaboratorId, the person the current user wants to connect to
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     
     const user: any = await prisma.user.findUnique({
       where: {
@@ -74,7 +74,7 @@ router.post("/:userId/connect-requests", async(req, res) => {
 
 router.get("/connect-requests", async(req, res) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     
     const user: any = await prisma.user.findUnique({
           where: {
@@ -105,7 +105,7 @@ router.put("/connect-requests/:id/approve", async(req, res, next) => {
 
     try {
       const session = await Session.getSession(req, res);
-      const authId = session.getUserId(true);
+      const authId = session.getUserId();
       
       const user = await prisma.user.findUnique({
             where: {
@@ -166,7 +166,7 @@ router.put("/connect-requests/:id/reject", async(req, res, next) => {
 
     try {
         const session = await Session.getSession(req, res);
-        const authId = session.getUserId(true);
+        const authId = session.getUserId();
       
         const user: any = await prisma.user.findUnique({
             where: {

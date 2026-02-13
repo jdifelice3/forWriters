@@ -123,7 +123,7 @@ router.delete("/", loadReadingById, async (req, res) => {
 // /api/groups/:groupId/readings/:readingId/signup
 router.post("/signup", async (req, res) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user: any = await prisma.user.findUnique({where: {superTokensId: authId,},});
     const readingId = req.reading.id;
 
@@ -250,7 +250,7 @@ const getSubmission = async(submissionId: string) => {
 
 router.post("/submissions/:appFileId/version", async (req: Request, res: Response) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user: any = await prisma.user.findUnique({where: {superTokensId: authId,},});
     const appFileId: string = req.params.appFileId;
 
@@ -281,7 +281,7 @@ router.post("/submissions/:appFileId/version", async (req: Request, res: Respons
 
 router.put("/submissions/:appFileId/version", async (req: Request, res: Response) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user: any = await prisma.user.findUnique({where: {superTokensId: authId,},});
     const appFileId: string = req.params.appFileId;
 

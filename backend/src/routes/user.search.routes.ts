@@ -8,7 +8,7 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   const session = await Session.getSession(req, res);
-  const authId = session.getUserId(true);
+  const authId = session.getUserId();
 
   const query = (req.query.query as string) || "";
   const groupId = req.query.groupId as string | undefined;

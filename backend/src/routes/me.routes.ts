@@ -46,7 +46,7 @@ router.get("/", verifySession(), async (req: SessionRequest, res) => {
 
 router.get("/profile", async(req, res) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
     if(!user) throw new Error("User not found");
@@ -61,7 +61,7 @@ router.get("/profile", async(req, res) => {
 
 router.put("/profile", async(req, res) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
     const { firstName, lastName, phone, bio } = req.body;
 
@@ -83,7 +83,7 @@ router.put("/profile", async(req, res) => {
 
 router.get("/groups", verifySession(), async (req, res) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
 
     if(!user) {

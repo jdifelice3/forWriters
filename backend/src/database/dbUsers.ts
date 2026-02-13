@@ -34,7 +34,7 @@ const prisma = new PrismaClient();
 // }
 
 //#region CREATE
-export const createUser = async(superTokensId: string, email: string, role: Role)  => {
+export const createUser = async(superTokensId: string, email: string, firstName: string, lastName: string, role: Role)  => {
     
     try{
         const newUser: any = await prisma.user.create({
@@ -45,19 +45,12 @@ export const createUser = async(superTokensId: string, email: string, role: Role
                 username: email,
 
                 userProfile: {
-                    create: {}
-                }
-            }
-        });
-
-        // const userSearch: any = await prisma.userSearch.create({
-        //     data: {
-        //         userId: newUser.id,
-        //         fullName: `${newUser.userProfile.firstName} ${newUser.userProfile.lastName}`,
-        //         bio: `${newUser.userProfile.bio}`
-        //     }
-        // })
-
+                    create: {
+                        firstName: firstName,
+                        lastName: lastName
+                    },
+            },
+        }});
     
         return newUser;
     } catch (err) {
@@ -66,27 +59,4 @@ export const createUser = async(superTokensId: string, email: string, role: Role
     }
 }
 
-
-// //#region UPDATE
-// export const updateUserProfile = async(userId: string, firstName: string, lastName: string, bio: string) => {
-//   try{
-//     const updatedUser: any = await prisma.userProfile.update({
-//       where: {
-//         id: userId
-//       },
-//       data: {
-//         firstName: firstName,
-//         lastName: lastName,
-//         bio: bio
-//       }
-//     });
-    
-//     return updatedUser;
-//   } catch (err: any) {
-//     if(err instanceof Error){
-//       console.error(err.message);
-//     }
-//     throw(err);
-//   }
-// }
 //#endregion

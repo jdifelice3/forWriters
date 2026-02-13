@@ -17,7 +17,7 @@ export const SuperTokensConfig = {
     
     recipeList: [
         EmailPassword.init(),
-        Session.init({
+        Session.init({  
             tokenTransferMethod: "cookie",
             onHandleEvent: async (event) => {
                 if (event.action === "SESSION_CREATED") {

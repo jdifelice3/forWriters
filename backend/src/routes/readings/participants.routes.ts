@@ -73,7 +73,7 @@ router.get(
 router.delete("/withdraw", loadReadingParticipantById, async (req: SessionRequest, res: Response) => {
     
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const actingUser: any = await prisma.user.findUnique({where: {superTokensId: authId}});
     
     if (req.readingParticipant.userId !== actingUser.id) {
@@ -93,7 +93,7 @@ router.post(
   loadReadingParticipantById,
   async (req: SessionRequest, res: Response) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const actingUser: any = await prisma.user.findUnique({where: {superTokensId: authId}});
     const actingUserId = actingUser.id;
     const { appFileId } = req.body;
@@ -122,7 +122,7 @@ router.post(
   upload.single("file"),
   async (req: SessionRequest, res: Response) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const actingUser: any = await prisma.user.findUnique({where: {superTokensId: authId}});
     const actingUserId = actingUser.id;
 

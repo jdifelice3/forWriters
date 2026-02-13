@@ -28,7 +28,7 @@ router.post("/:groupId", async (req: Request, res: Response) => {
     const groupId = req.params.groupId;
     try {
         const session = await Session.getSession(req, res);
-        const authId = session.getUserId(true);
+        const authId = session.getUserId();
        
         const user: any = await prisma.user.findUnique({
             where: {

@@ -13,7 +13,7 @@ router.put("/join-requests/:id/approve", async(req: SessionRequest, res: Respons
     
     try {
         const session = await Session.getSession(req, res);
-        const authId = session.getUserId(true);
+        const authId = session.getUserId();
         
         const user: any = await prisma.user.findUnique({
             where: {
@@ -82,7 +82,7 @@ router.put("/join-requests/:id/reject", async(req: SessionRequest, res: Response
 
     try {
         const session = await Session.getSession(req, res);
-        const authId = session.getUserId(true);
+        const authId = session.getUserId();
         //const result = await rejectJoinRequest(id, authId);
         const user: any = await prisma.user.findUnique({
             where: {
