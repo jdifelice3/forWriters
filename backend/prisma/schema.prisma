@@ -421,8 +421,8 @@ model UserProfile {
   id   String @id // Primary key
   user User   @relation(fields: [id], references: [id]) // FK lives here
 
-  firstName String?
-  lastName  String?
+  firstName String     @default("Name")
+  lastName  String     @default("Unknown")
   phone     String?
   bio       String?
   avatarUrl String?

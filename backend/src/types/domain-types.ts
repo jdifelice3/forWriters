@@ -171,7 +171,6 @@ export interface Notification {
   createdAt: string;
   readAt?: string;
   href: string;
-  triggerUserId?: string;
 }
 
 export interface Reading {
@@ -290,8 +289,8 @@ export interface UserCollaborator {
 export interface UserProfile {
   id: string;
   user: User;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
   bio?: string;
   avatarUrl?: string;
