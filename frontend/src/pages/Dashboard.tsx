@@ -29,7 +29,6 @@ type UserProfileInput = {
 }
 
 export default function Dashboard() {
-    const navigate = useNavigate();
     const { user, isLoading: isUserLoading } = useUserContext();
     const { getUserProfile, updateUserProfile } = useUserDomain(user);
     const { activeGroup } = useGroupContext(); // { id, name, role } | null

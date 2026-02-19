@@ -12,6 +12,14 @@ interface Props {
 
 const GroupUserList: React.FC<Props> = ({groupUsers}) => {
 
+    const getName = (gu: GroupUser) => {
+        if(!gu.user.userProfile?.firstName || !gu.user.userProfile?.firstName){
+            return "Name unknown";
+        } else {
+            return `${gu.user.userProfile.firstName} ${gu.user.userProfile.lastName}`;
+        }
+    }
+
     return (
     <Grid container spacing={3}>
         <>
@@ -19,9 +27,8 @@ const GroupUserList: React.FC<Props> = ({groupUsers}) => {
             <Grid key={index}>
             <Card>
                 <CardContent sx={{p:2, backgroundColor:"whitesmoke"}}>
-                    <Typography >
-                        {gu.user.userProfile ? gu.user.userProfile.firstName : ""}&nbsp;
-                        {gu.user.userProfile ? gu.user.userProfile.lastName : ""}                            
+                    <Typography color={getName(gu) === "Name unknown" ? "red" : "success"}>
+                        {getName(gu)}                            
                         {gu.role === "ADMIN" ? (
                             <span>&nbsp;(Admin)</span>
                         ) : (

@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import GroupJoinRequestList from '../components/group/GroupJoinRequestList';
 import { useGroupContext } from "../context/GroupContextProvider";
+import { useNavigate } from "react-router-dom";
 
 interface JoinRequest {
   id: string;
@@ -19,6 +20,7 @@ interface JoinRequest {
 
 export default function GroupJoinRequestAdmin() {
     const { activeGroup } = useGroupContext();
+    const navigate = useNavigate();
     const [requests, setRequests] = useState<JoinRequest[]>([]);
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState<string | null>(null);
@@ -53,7 +55,9 @@ const loadRequests = async (groupId: string) => {
         </Box>
         );
     } 
-
+    if(activeGroup.role !== "ADMIN"){
+        navigate("/dashboard");
+    }
   return (
     <Paper 
         sx={{ 

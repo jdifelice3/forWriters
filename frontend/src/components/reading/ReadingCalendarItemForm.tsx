@@ -41,13 +41,12 @@ interface ReadingCalendarItemFormProps {
     isAdmin: boolean;
     domain: ReadingDomainCommands;
     ui: ReturnType<typeof useReadingsUI>;
-    onFeedback(readingId: string): void;
+    onFeedback(readingId: string): Promise<void>;
 }
 
 const currentDate = new Date();
 
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({ key, reading, isAdmin, domain, ui, onFeedback }) => {
-    console.log('reading', reading);
     const { user, isLoading, error } = useUserContext();
     const { activeGroup } = useGroupContext();
     const { refresh } = useReadings();
@@ -127,7 +126,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         {activeGroup.groupType === "WRITING" && (
                             <Typography variant="body2" sx={{color: "green", my: 1}} fontWeight={"bold"}>
                                 You are signed up for this reading<br/>
-                                Please submit your manuscript by {new Date(reading.submissionDeadline || "").toLocaleDateString()}
+                                Please submit your manuscript by {new Date(reading.submissionDeadline || "").toLocaleDateString("en-US", { timeZone: "UTC" })}
                             </Typography>
                         )}
                             <Button
@@ -196,17 +195,17 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                     {activeGroup.groupType === "WRITING" && (
                         <Box>
                             <Typography variant="body2">
-                                Reading Date:{new Date(reading.readingDate || "").toLocaleDateString()}
+                                Reading Date:{new Date(reading.readingDate || "").toLocaleDateString("en-US", { timeZone: "UTC" })}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Submit manuscripts by <b>{new Date(reading.submissionDeadline || "").toLocaleDateString()}</b>
+                                Submit manuscripts by <b>{new Date(reading.submissionDeadline || "").toLocaleDateString("en-US", { timeZone: "UTC" })}</b>
                             </Typography>   
-                            {reading.readingParticipant && (
+                            {reading.readingParticipant.length > 0 && (
                                 <Typography variant="body2" sx={{mt: 1}}>
                                     Authors:
                                 </Typography>
                             )}
-                            {reading.readingParticipant && (
+                            {reading.readingParticipant.length > 0 && (
                                 reading.readingParticipant.map((rp, index) => (
                                     <Typography variant="body2">
                                         {
@@ -251,7 +250,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                             startIcon={<ReviewsIcon />}
                             size="small"
                             variant="text"
-                            onClick={(event) => onFeedback(reading.id)}
+                            onClick={() => onFeedback(reading.id)}
                             sx={{ mt: 1 }}
                             disabled={!domain.canReviewReading(reading.id, user.id)}
 

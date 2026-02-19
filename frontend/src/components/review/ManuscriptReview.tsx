@@ -274,6 +274,20 @@ export function ManuscriptReview({
     }
   }
 
+  async function handleDelete() {
+    if(readOnly) return;
+    if (!editor || !activeRange || !draftText.trim()) return;
+    if (activeRange.to <= activeRange.from) return;
+
+    try {
+        if (editingCommentId) {
+            const deletedComment = await CommentsAPI.delete(fileFeedbackId!,editingCommentId);
+        }
+    } finally {
+      clearDraft();
+    }
+  }
+  
   if (!editor) return null;
 
   const containerRect = containerRef.current
@@ -382,6 +396,9 @@ export function ManuscriptReview({
           <Box mt={1} display="flex" justifyContent="space-between">
             <Button size="small" onClick={clearDraft}>
               Cancel
+            </Button>
+            <Button size="small" variant="text" onClick={handleDelete}>
+              Delete
             </Button>
             <Button size="small" variant="contained" onClick={handleSave}>
               Save

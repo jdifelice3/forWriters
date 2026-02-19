@@ -7,7 +7,7 @@ const router = Router();
 
 router.get("/groupcount", async(req: Request, res: Response) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user: any = await prisma.user.findUnique({where: {superTokensId: authId}});
     
     const group = await prisma.group.findMany({
@@ -29,7 +29,7 @@ router.get("/groupcount", async(req: Request, res: Response) => {
 
 router.post("/", async( req, res, next) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
 
     try {
         const {name, 

@@ -3,9 +3,11 @@ import EmailPassword from "supertokens-node/recipe/emailpassword";
 import Session from "supertokens-node/recipe/session/index.js";
 import Dashboard from "supertokens-node/recipe/dashboard";
 import UserRoles from "supertokens-node/recipe/userroles";
+import UserMetadata from "supertokens-node/recipe/usermetadata";
 import type { TypeInput } from "supertokens-node/types";
 import { createUser } from "./database/dbUsers";
 import { Role } from "@prisma/client";
+
 
 if (typeof process.env.SUPERTOKENS_CONNECTION_URI === 'undefined') {
   throw new Error("Environment variable process.env.SUPERTOKENS_CONNECTION_URI is undefined");
@@ -52,31 +54,61 @@ export const SuperTokensConfig: TypeInput = {
         websiteBasePath: "/auth",   
     },
     recipeList: [
-        EmailPassword.init({
-            override: {
-                apis: (originalImplementation) => ({
-                ...originalImplementation,
+EmailPassword.init({
+  signUpFeature: {
+    formFields: [
+      {
+        id: "firstName",
+        validate: async (value) => {
+          if (!value || typeof value !== "string" || !value.trim()) {
+            return "First name is required";
+          }
+          return undefined;
+        },
+      },
+      {
+        id: "lastName",
+        validate: async (value) => {
+          if (!value || typeof value !== "string" || !value.trim()) {
+            return "Last name is required";
+          }
+          return undefined;
+        },
+      },
+    ],
+  },
 
-                    // Override the default signUpPOST
-                    async signUpPOST(input) {
-                        if (!originalImplementation.signUpPOST) {
-                            console.error("signUpPOST not implemented");
-                            throw new Error("signUpPOST not implemented");
-                        }
+  override: {
+    apis: (originalImplementation) => ({
+      ...originalImplementation,
 
-                        const response = await originalImplementation.signUpPOST(input);
+      async signUpPOST(input) {
+        const response = await originalImplementation.signUpPOST!(input);
 
-                        if (response.status === "OK") {
-                            const { user } = response;
-                            const newUser = await createUser(user.id, user.emails[0],Role.EDITOR );
-                           
-                        }
+        if (response.status === "OK") {
+          const firstName = String(
+            input.formFields.find(f => f.id === "firstName")!.value
+          );
 
-                        return response;
-                    },
-                }),
-            },
-        }),
+          const lastName = String(
+            input.formFields.find(f => f.id === "lastName")!.value
+          );
+
+          await createUser(
+            response.user.id,
+            response.user.emails[0],
+            firstName,
+            lastName,
+            Role.EDITOR
+          );
+        }
+
+        return response;
+      },
+    }),
+  },
+}),
+
         Dashboard.init(),
         UserRoles.init(),
         sessionInit        

@@ -71,7 +71,7 @@ router.post("/", upload.single("file"), async (req, res) => {
     
     // Get the SuperTokens session
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const { title, description, documentType } = req.body;
 
     // File metadata from multer-s3
@@ -115,7 +115,7 @@ router.post("/", upload.single("file"), async (req, res) => {
 router.post("/image", upload.single("file"), async (req, res) => {
     // Get the SuperTokens session
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const { title, description } = req.body;
 
     // File metadata from multer-s3

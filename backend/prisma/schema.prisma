@@ -175,6 +175,58 @@ model CollaboratorRequest {
   @@index([status])
 }
 
+// maps reviewer to the manuscript version (appFileId) in the context of a reading submission
+model FileFeedback {
+  id           String   @id @default(cuid())
+  reviewerUserId String
+  appFileId    String
+  createdAt    DateTime @default(now())
+
+  reviewerUser User   @relation(fields: [reviewerUserId], references: [id])
+  appFile      AppFile @relation(fields: [appFileId], references: [id])
+
+  fileFeedbackComment FileFeedbackComment[]
+
+  @@unique([appFileId, reviewerUserId])
+  @@index([appFileId])
+}
+
+model FileFeedbackComment {
+  id             String   @id @default(cuid())
+  fileFeedbackId String
+  reviewerUserId String
+  source         CommentSource @default(DOCX)
+  commentText    String
+  isResolved     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  fileFeedback   FileFeedback @relation(fields: [fileFeedbackId], references: [id])
+  reviewerUser   User         @relation(fields: [reviewerUserId], references: [id])
+
+  targets        FileFeedbackCommentTarget[]
+
+  @@index([fileFeedbackId])
+  @@index([reviewerUserId])
+}
+
+model FileFeedbackCommentTarget {
+  id                 String   @id @default(cuid())
+  commentId           String
+  paragraphId         String
+  from                Int
+  to                  Int
+  targetText          String
+
+  createdAt           DateTime @default(now())
+
+  comment             FileFeedbackComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([commentId])
+  @@index([paragraphId])
+  @@index([from])
+}
+
 model Group {
   id            String    @id @default(cuid())
   creatorUserId String
@@ -313,74 +365,21 @@ model Reading {
   groupId             String
   createdAt           DateTime @default(now())
   createdUserId       String
-  readingDate         DateTime?
+  readingDate         DateTime? @db.Date
   readingStartTime    String?
-  readingEndTime      String?
+  readingEndTime      String? 
   readingAddressId    String?  @unique
-  submissionDeadline  DateTime?
+  submissionDeadline  DateTime? @db.Date
   spotsOpen           Int      @default(2)
   description         String
   minDaysBetweenReads Int      @default(20) // configurable
   maxConsecutiveReads Int      @default(1) // e.g., can't sign up twice in a row
-  //scheduledType          ReadingScheduleType    @default(SCHEDULED)
 
   user          User            @relation(fields: [createdUserId], references: [id])
   readingParticipant ReadingParticipant[]
   group         Group           @relation(fields: [groupId], references: [id])
   groupAddress  GroupAddress?   @relation(fields: [readingAddressId], references: [id])
   readingSubmission         ReadingSubmission[]
-}
-
-// maps reviewer to the manuscript version (appFileId) in the context of a reading submission
-model FileFeedback {
-  id           String   @id @default(cuid())
-  reviewerUserId String
-  appFileId    String
-  createdAt    DateTime @default(now())
-
-  reviewerUser User   @relation(fields: [reviewerUserId], references: [id])
-  appFile      AppFile @relation(fields: [appFileId], references: [id])
-
-  fileFeedbackComment FileFeedbackComment[]
-
-  @@unique([appFileId, reviewerUserId])
-  @@index([appFileId])
-}
-
-model FileFeedbackComment {
-  id             String   @id @default(cuid())
-  fileFeedbackId String
-  reviewerUserId String
-  source         CommentSource @default(DOCX)
-  commentText    String
-  isResolved     Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  fileFeedback   FileFeedback @relation(fields: [fileFeedbackId], references: [id])
-  reviewerUser   User         @relation(fields: [reviewerUserId], references: [id])
-
-  targets        FileFeedbackCommentTarget[]
-
-  @@index([fileFeedbackId])
-  @@index([reviewerUserId])
-}
-
-model FileFeedbackCommentTarget {
-  id                 String   @id @default(cuid())
-  commentId           String
-  paragraphId         String
-  from                Int
-  to                  Int
-  targetText          String
-
-  createdAt           DateTime @default(now())
-
-  comment             FileFeedbackComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
-
-  @@index([commentId])
-  @@index([paragraphId])
-  @@index([from])
 }
 
 model ReadingParticipant {
@@ -457,8 +456,8 @@ model UserProfile {
   id   String @id // Primary key
   user User   @relation(fields: [id], references: [id]) // FK lives here
 
-  firstName String?
-  lastName  String?
+  firstName String     @default("Name")
+  lastName  String     @default("Unknown")
   phone     String?
   bio       String?
   avatarUrl String?
@@ -473,3 +472,4 @@ model UserUrl {
 
   user User? @relation(fields: [userId], references: [id])
 }
+

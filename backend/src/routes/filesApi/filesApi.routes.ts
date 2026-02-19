@@ -40,7 +40,7 @@ const ResolveInput = z.object({
 
 router.get("/", async (req, res) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user: any = await getUser(authId);
 
     const files = await prisma.appFileMeta.findMany({
@@ -81,7 +81,7 @@ router.get("/:id/description", async(req, res) => {
 
 router.get("/search", async (req, res) => {
     const session = await Session.getSession(req, res);
-    const authId = session.getUserId(true);
+    const authId = session.getUserId();
     const user: any = await getUser(authId);
 
     const query:string = (req.query.query as string) || "";
@@ -453,8 +453,7 @@ router.post("/feedback/:fileFeedbackId/comments", async (req, res) => {
 });
 
 // PATCH update text
-router.patch(
-  "/feedback/:fileFeedbackId/comments/:commentId",
+router.patch("/feedback/:fileFeedbackId/comments/:commentId",
   async (req, res) => {
     const { commentId } = req.params;
     const input = UpdateCommentInput.parse(req.body);
@@ -492,6 +491,26 @@ router.patch(
   }
 );
 
+router.delete("/feedback/:fileFeedbackId/comments/:commentId",
+    async (req, res) => {
+        const { commentId } = req.params;
+        console.log('commentId', commentId)
+        const commentTarget = await prisma.fileFeedbackCommentTarget.deleteMany({
+            where: {
+                commentId: commentId
+            }
+        });
+
+        const comment = await prisma.fileFeedbackComment.delete({
+            where: {
+                id: commentId
+            }
+        });
+
+        res.status(200).json(comment);
+    }
+);
+
 // PATCH resolve
 router.patch("/feedback/:fileFeedbackId/comments/:commentId/resolve", async (req, res) => {
     const { commentId } = req.params;
@@ -513,7 +532,7 @@ router.patch("/feedback/:fileFeedbackId/comments/:commentId/resolve", async (req
 router.get("/:appFileId/feedback", async (req, res) => {
   const { appFileId } = req.params;
   const session = await Session.getSession(req, res);
-  const authId = session.getUserId(true);
+  const authId = session.getUserId();
 
   const user = await prisma.user.findUnique({
     where: { superTokensId: authId },

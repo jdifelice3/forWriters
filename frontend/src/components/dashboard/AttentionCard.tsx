@@ -1,9 +1,11 @@
 import { Card, CardContent, Grid, Stack, Typography, List, ListItem, ListItemText, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useGroupContext } from "../../context/GroupContextProvider";
 import { DashboardAttentionItem } from "../../types/DashboardTypes";
 
 export default function AttentionCard({ items }: { items: DashboardAttentionItem[] }) {
   const navigate = useNavigate();
+  const { activeGroup } = useGroupContext();
     
   return (
     <Card className="dashboardSubPanel">
@@ -32,7 +34,7 @@ export default function AttentionCard({ items }: { items: DashboardAttentionItem
             </>
         )}
 
-        {items.length > 0 && (
+        {items.length > 0 && (activeGroup && activeGroup.role === "ADMIN") && (
           <Box sx={{ mt: 1, ml:3 }}>
             <Button size="small" onClick={() => navigate("/joinadminpage")}>
               View all

@@ -20,7 +20,7 @@ interface ReadingCalendarProps {
   ui: ReturnType<typeof useReadingsUI>;
   onCreateReading(form: any): Promise<void>;
   //onUpdateReading(readingId: string, form: ReadingFormInput): Promise<void>;
-  onFeedback(readingId: string): void;
+  onFeedback(readingId: string): Promise<void>;
 }
 
 export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({

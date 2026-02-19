@@ -45,7 +45,7 @@ router.post("/version", upload.single("file"), async (req, res) => {
         
         const { comment } = req.body;
         const session = await Session.getSession(req, res);
-        const authId = session.getUserId(true);
+        const authId = session.getUserId();
         const user = await prisma.user.findUnique({ where: { superTokensId: authId } });
         if(!user) throw new Error("User not found");
 

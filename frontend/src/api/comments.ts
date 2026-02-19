@@ -20,6 +20,14 @@ export const CommentsAPI = {
     });
   },
 
+  delete(fileFeedbackId: string, commentId: string | null){
+    if(!commentId) return;
+
+    return apiFetch<CommentDTO>(`/filesApi/feedback/${fileFeedbackId}/comments/${commentId}`, {
+        method: "DELETE"
+    });
+  },
+
   updateText(fileFeedbackId: string, commentId: string, commentText: string) {
     return apiFetch<CommentDTO>(`/filesApi/feedback/${fileFeedbackId}/comments/${commentId}`, {
       method: "PATCH",

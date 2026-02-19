@@ -23,12 +23,13 @@ router.get("/description/:groupId", async(req: Request, res: Response) => {
     res.status(200).json(group);
 });
 
+//From the GroupSearch.tsx page
 router.post("/:groupId", async (req: Request, res: Response) => {
     const groupId = req.params.groupId;
     try {
         const session = await Session.getSession(req, res);
-        const authId = session.getUserId(true);
-        //const joinRequest = await 
+        const authId = session.getUserId();
+       
         const user: any = await prisma.user.findUnique({
             where: {
                 superTokensId: authId,
@@ -92,16 +93,26 @@ router.post("/:groupId", async (req: Request, res: Response) => {
         } else {
             requestor = `${joinRequest.user.userProfile?.firstName} ${joinRequest.user.userProfile?.lastName}`;
         }
-
-        let notificationMessage = `${requestor} has submitted a request to join`;
-        const notification = await prisma.notification.create({
-            data: {
-                userId: user.id,
-                type: "GROUP_JOIN_REQUEST",
-                entityId: groupId,
-                message: notificationMessage,
+        //find the admins of the group. Send them notifications of the join request
+        const groupAdmins = await prisma.groupUser.findMany({
+            where: {
+                groupId: groupId,
+                role: "ADMIN"
             }
         });
+
+        for(let i = 0; i < groupAdmins.length; i++){
+            let notificationMessage = `${requestor} has submitted a request to join`;
+            const notification = await prisma.notification.create({
+                data: {
+                    userId: groupAdmins[i].userId,
+                    type: "GROUP_JOIN_REQUEST",
+                    entityId: groupId,
+                    message: notificationMessage,
+                    href: "/joinadminpage"
+                }
+            });
+        }
 
         res.json(joinRequest);
        

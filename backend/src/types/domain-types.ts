@@ -173,6 +173,7 @@ export interface Notification {
   message: string;
   createdAt: string;
   readAt?: string;
+  href: string;
 }
 
 export interface Subscription {
@@ -306,8 +307,8 @@ export interface UserCollaborator {
 export interface UserProfile {
   id: string;
   user: User;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
   bio?: string;
   avatarUrl?: string;

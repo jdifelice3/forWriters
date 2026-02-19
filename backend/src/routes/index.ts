@@ -9,6 +9,7 @@ import groupRoutes from "./groups";
 import meRoutes from "./me.routes";
 import filesApiRoutes from "./filesApi/filesApi.routes";
 import dashboardRoutes from "./dashboardRoutes";
+import notificationsRoutes from "./notifications/notifications.routes";
 
 const router = Router();
 
@@ -30,6 +31,7 @@ router.use("/filesApi", filesApiRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/me", meRoutes);
 router.use("/groups", groupRoutes);
+router.use("/notifications", notificationsRoutes);
 
 // General Error Handling
 router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

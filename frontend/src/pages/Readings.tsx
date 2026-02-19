@@ -1,7 +1,7 @@
 import { useUserContext } from "../context/UserContext";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Group,
+  Group, Reading
 } from "../types/domain-types";
 import {
   Box,
@@ -21,6 +21,7 @@ import { useReadings } from "../hooks/reading/useReadings";
 import { useReadingDomain } from "../hooks/reading/useReadingDomain";
 import { useReadingsData } from "../hooks/reading/useReadingsData";
 import { useReadingsUI } from "../hooks/reading/useReadingsUI";
+import { useNotificationDomain } from "../hooks/notification/useNotificationDomain";
 
 import { useFileUI } from "../hooks/file/useFileUI";
 
@@ -36,7 +37,8 @@ const Readings = () => {
   const uiFile = useFileUI();
   const { data: group, isLoading: isGroupLoading } = useGroupDetails<Group>(groupId);
   const { readings, isLoading: isReadingLoading, refresh } = useReadings();
- 
+  const { createNotification } = useNotificationDomain(group?.id, user)
+
   const ui = useReadingsUI();
   const domain = useReadingDomain(group?.id ?? undefined, user, readings, refresh);
   
@@ -74,11 +76,33 @@ const Readings = () => {
     const onCreateReading = async (form: ReadingFormInput) => {
         const input: ReadingFormInput = {
             ...form,
-            //readingDate,//: new Date(form.readingDate!),
-            //submissionDeadline//: new Date(form.submissionDeadline!),
         };
         await domain.createReading(input);
     };
+
+    const onFeedback = async(readingId: string) => {
+        const reading: Reading | undefined = readings.find(r => r.id === readingId);
+        if(!reading) return;
+
+        const href = `/filefeedback/${readingId}`;
+        if(reading?.readingParticipant.length > 0){
+            for(let i = 0; i < reading?.readingParticipant.length; i++){
+                const name = 
+                    reading.readingParticipant[i].user.userProfile?.firstName
+                    ? `${reading.readingParticipant[i].user.userProfile?.firstName} ${reading.readingParticipant[i].user.userProfile?.lastName}`
+                    : reading.readingParticipant[i].user.email;
+
+                const message = `${name} is reviewing your reading`;
+                createNotification(
+                    message, 
+                    "READING_FEEDBACK", 
+                    reading.readingParticipant[i].user.id, 
+                    href
+                )
+            }
+        }
+        navigate(href);
+    }
 
   return (
     <Card elevation={0} className="mainComponentPanel">
@@ -103,9 +127,7 @@ const Readings = () => {
                   isAdmin={isAdmin}
                   domain={domain}
                   ui={ui}
-                  onFeedback={(readingId) =>
-                    navigate(`/filefeedback/${readingId}`)
-                  }
+                  onFeedback={onFeedback}
                   onCreateReading={onCreateReading}
                 />
             </Stack>
