@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch, pdfFetch } from "./client";
 import { FileUploadFormInput, FileFormInput, ObjectIdsForDeletion } from "../types/FileTypes";
 import { AppFileMeta, AppFile, FileFeedback } from "../types/domain-types";
 import { CommentDTO } from "../types/FeedbackTypes";
@@ -87,6 +87,25 @@ export const FilesAPI = {
             method: "GET",
             credentials: "include",
         })
+    },
+
+    exportFeedbackReport(
+        appFileId: string,
+        includeResolved: boolean,
+        includeReviewerAppendix: boolean
+    ){
+        return pdfFetch(`/files/${appFileId}/export-pdf`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    includeResolved: includeResolved,
+                    includeReviewerAppendix: includeReviewerAppendix,
+                }),
+            });
     },
 
     getDeletionIds(appFileMetaId: string){

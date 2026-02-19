@@ -8,10 +8,19 @@ const formatDate = (date: Date) =>
     day: "numeric",
   });
 
+  const ensureSpace = (doc: PDFKit.PDFDocument, needed: number) => {
+    if (doc.y + needed > doc.page.height - 60) {
+        doc.addPage();
+    }
+  };
+
+
 export const generateFeedbackPdf = async (
   input: GenerateFeedbackPdfInput
 ): Promise<Buffer> => {
+    
   return new Promise((resolve) => {
+    
     const doc = new PDFDocument({
       margin: 50,
       bufferPages: true,
@@ -22,6 +31,13 @@ export const generateFeedbackPdf = async (
     doc.on("end", () => {
       resolve(Buffer.concat(buffers));
     });
+
+    const defaultLeft = doc.page.margins.left;
+    const defaultWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+    //const leftMargin = 70;
+    //const rightMargin = 70;
+    //const usableWidth = doc.page.width - leftMargin - rightMargin;
+    const indent = 20;
 
     // ----------------------------
     // HEADER
@@ -68,56 +84,68 @@ export const generateFeedbackPdf = async (
     // ----------------------------
     // COMMENTS SECTION
     // ----------------------------
+
     doc.font("Helvetica-Bold")
        .fontSize(12)
        .text("Comments (Ordered by Manuscript Flow)");
     doc.moveDown(1);
 
-    input.comments.forEach((comment) => {
+    input.comments.forEach((comment, index) => {
       // Ensure space before comment block
-      if (doc.y > doc.page.height - 120) {
-        doc.addPage();
-      }
+
+      ensureSpace(doc, 120);
 
       // Paragraph label
       doc.font("Helvetica-Bold")
          .fontSize(12)
-         .text(`Paragraph ${comment.paragraphNumber}`);
-      doc.moveDown(0.5);
+         .text(`Paragraph ${comment.paragraphNumber}`, defaultLeft,doc.y, { underline: true, width: defaultWidth });
 
+         doc.moveDown(0.5);
+      
       // Targets
       comment.targets.forEach((target) => {
         doc.font("Helvetica-Oblique")
            .fontSize(11)
            .text(`“${target.excerpt}”`, {
-             indent: 20,
+             indent: indent,
            });
-        doc.moveDown(0.5);
+        doc.moveDown(1.0);
       });
 
-      // Reviewer + Status
-      doc.font("Helvetica")
-         .fontSize(10)
-         .text(
-           `Reviewer: ${comment.reviewerName}  |  Status: ${
-             comment.isResolved ? "Resolved" : "Unresolved"
-           }`
-         );
-      doc.moveDown(0.5);
-
       // Comment body
+    //   doc.font("Helvetica")
+    //      .fontSize(11)
+    //      .text(comment.commentText, 
+    //         {
+    //             width: doc.page.width - 100,
+    //         });
       doc.font("Helvetica")
          .fontSize(11)
-         .text(comment.commentText, {
-           width: doc.page.width - 100,
-         });
-      doc.moveDown(1);
+         .text(comment.commentText, defaultLeft + indent, doc.y, {
+            width: defaultWidth - indent * 2,
+      });
+     doc.moveDown(1.0);
+     
+     // Reviewer + Status
+      doc.font("Helvetica")
+        .fontSize(9)
+        .fillColor("gray")
+        .text(`${comment.reviewerName} · ${comment.isResolved ? "Resolved" : "Unresolved"}`, defaultLeft + indent, doc.y, {
+            width: defaultWidth - indent * 2,
+      });
+
+      doc.fillColor("black");
+      doc.fontSize(10);
+ 
+      doc.moveDown(3);
 
       // Divider
-      doc.moveTo(50, doc.y)
-         .lineTo(doc.page.width - 50, doc.y)
-         .stroke();
-      doc.moveDown(1);
+        // if (index !== input.comments.length - 1) {
+        // doc.moveTo(50, doc.y)
+        //     .lineTo(doc.page.width - 50, doc.y)
+        //     .stroke();
+        // doc.moveDown(1);
+        // }
     });
 
     // ----------------------------
@@ -173,28 +201,24 @@ export const generateFeedbackPdf = async (
     // PAGE NUMBERS
     // ----------------------------
     const pageRange = doc.bufferedPageRange();
-const pageCount = pageRange.count;
+    const pageCount = pageRange.count;
 
-for (let i = 0; i < pageCount; i++) {
-  doc.switchToPage(i);
+    for (let i = 0; i < pageCount; i++) {
+    doc.switchToPage(i);
 
-  const oldY = doc.y; // save cursor
+    doc.font("Helvetica");
+    doc.fontSize(8);
 
-  doc.fontSize(8)
-     .font("Helvetica")
-     .text(
-       `Page ${i + 1} of ${pageCount}`,
-       50,
-       doc.page.height - 40,
-       {
-         align: "center",
-         width: doc.page.width - 100,
-         lineBreak: false, // critical
-       }
-     );
+    const footerText = `Page ${i + 1} of ${pageCount} · forWriters`;
 
-  doc.y = oldY; // restore cursor
-}
+    const textWidth = doc.widthOfString(footerText);
+    const x = (doc.page.width - textWidth) / 2;
+    const y = doc.page.height - 40;
+
+    doc.text(footerText, x, y, {
+        lineBreak: false,
+    });
+    }
 
 
     doc.end();

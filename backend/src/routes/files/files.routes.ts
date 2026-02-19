@@ -57,7 +57,9 @@ router.get("/:fileId/download", async (req, res, next) => {
 });
 
 router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
+    console.log('in export-pdf route')
     const { appFileId } = req.params;
+    console.log('appFileId', appFileId)
     const ExportPdfInput = z.object({
         includeResolved: z.boolean().default(true),
         includeReviewerAppendix: z.boolean().default(false),
@@ -67,6 +69,7 @@ router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
     const session = await Session.getSession(req, res);
     const authId = session.getUserId();
     const user = await getUser(authId);
+
     if (!user) {
     return res.status(401).json({ error: "User not found" });
     }
@@ -95,7 +98,7 @@ router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
     });
 
     const commentModels = feedback.flatMap(f => f.fileFeedbackComment);
-    //console.log('commentModels', commentModels)
+    console.log('commentModels', commentModels)
     let pdfComments = commentModels.map(c => {
         const targets = c.targets.map(t => ({
             paragraphNumber: getParagraphNumber(t.paragraphId),
@@ -118,7 +121,7 @@ router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
             createdAt: c.createdAt,
         };
     });
-    //console.log('pdfComments', pdfComments)
+
     if (!input.includeResolved) {
         pdfComments = pdfComments.filter(c => !c.isResolved);
     }
@@ -150,7 +153,7 @@ router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
         resolvedCount: pdfComments.filter(c => c.isResolved).length,
         reviewerCount: new Set(pdfComments.map(c => c.reviewerName)).size,
     };
-    console.log('summary', summary)
+    //console.log('summary', summary)
     const dto: GenerateFeedbackPdfInput = {
         title: appFile.appFileMeta.title,
         version: appFile.version,
@@ -169,7 +172,6 @@ router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
         "Content-Disposition",
         `attachment; filename="${filename}"`
     );
-
     res.send(buffer);
   }
 );

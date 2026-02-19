@@ -302,7 +302,7 @@ export function ManuscriptReview({
     if(commentId !== undefined){
         tempZindeces[commentId!] = 99;
     }
-    console.log('tempZindeces', tempZindeces)
+    
     setZindex(tempZindeces);
   }
     /* =========================

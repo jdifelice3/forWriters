@@ -71,7 +71,7 @@ router.post<
   if (!tier || !cadence) {
     return res.status(400).json({ error: "Missing tier or cadence" });
   }
-  console.log('before Session.getSession')
+ 
     const appSession = await Session.getSession(req, res);
     const authId = appSession.getUserId();
     const appUser: User | null = await prisma.user.findUnique({where: { superTokensId: authId,},}); 

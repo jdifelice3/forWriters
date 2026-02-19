@@ -98,6 +98,12 @@ export interface FileDomainCommands {
     getHTML(
         appFileId: string
     ): Promise<string>;
+
+    exportFeedbackReport(
+        appFileId: string,
+        includeResolved: boolean,
+        includeReviewerAppendix: boolean
+    ): Promise<void>;
 }
 
 export interface FileUIActions {

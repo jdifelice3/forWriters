@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FileListProperties } from "../../../types/FileTypes";
 import { AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands } from "../../../types/FileTypes";
+import { useBillingUI } from "../../../hooks/billing/useBillingUI";
 import {
     Button,
     Box,
@@ -15,10 +16,11 @@ import Grid from "@mui/material/Grid";
 import FileIcon from "../../controls/FileIcon";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LockIcon from '@mui/icons-material/Lock';
 
 interface FileListDetailsFormProps {
   fileMeta: AppFileMeta;
-  domain: Pick<FileDomainCommands, "deleteFile">;
+  domain: FileDomainCommands;
   onEdit(): void;
   fileListProperties: FileListProperties;
 }
@@ -29,11 +31,12 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
   onEdit,
   fileListProperties,
 }) => {
+    const { isPro} = useBillingUI();
     const navigate = useNavigate();
     const currentVersion = fileMeta.appFile.find(
         (f) => f.version === fileMeta.currentVersionId
     );
-    
+
   return (
     <Box>
       <Grid container spacing={2}>
@@ -91,6 +94,7 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
             )}
           </Box>
           {fileListProperties.showDeleteButton && (
+            <>
             <Box>
                 <Button
                     component="a"
@@ -100,7 +104,19 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
                   >
                 View Feedback
               </Button>
+              </Box>
+              <Box>
+              <Button
+                variant="text"
+                size="medium"
+                onClick={() => domain.exportFeedbackReport(currentVersion!.id, true, true)}
+                disabled={isPro}
+                endIcon={isPro ? <LockIcon fontSize="small" /> : undefined}
+                >
+                Export Feedback PDF
+                </Button>
             </Box>
+            </>
             )}
         </Stack>
       </Grid>

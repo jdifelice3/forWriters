@@ -4,6 +4,7 @@ import {
   Box,
   Card,
   CardContent,
+  Grid,
   Typography,
   Tab,
   Tabs,
@@ -108,7 +109,10 @@ const FileFeedbackDetail = () => {
             marginLeft: "55px",
             
         }}>
-            
+        
+        <Grid container spacing={2}>
+
+        </Grid>
         <Typography variant="h4" mb={3} textAlign="left">
             Feedback for {manuscriptTitle}
         </Typography>

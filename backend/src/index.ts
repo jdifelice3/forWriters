@@ -48,10 +48,10 @@ app.use(
 
 app.use("/api/billing", billingRouter);
 
-app.use((req, _res, next) => {
-  console.log("REQ:", req.method, req.path);
-  next();
-});
+// app.use((req, _res, next) => {
+//   console.log("REQ:", req.method, req.path);
+//   next();
+// });
 
 // -----------------------------------------------------------------------------
 // CORS
@@ -99,26 +99,6 @@ app.use("/api/files", fileRoutes);
 // Static uploads (download / preview)
 // -----------------------------------------------------------------------------
 const uploadDir = path.join(process.cwd(), "uploads");
-
-// app.use(
-//   "/uploads",
-//   express.static(uploadDir, {
-//     setHeaders: (res, filePath) => {
-//       res.setHeader("Access-Control-Allow-Origin", process.env.WEB_HOST!);
-//       res.setHeader("Access-Control-Allow-Credentials", "true");
-//       res.setHeader(
-//         "Access-Control-Expose-Headers",
-//         "Content-Disposition"
-//       );
-
-//       const filename = path.basename(filePath);
-//       res.setHeader(
-//         "Content-Disposition",
-//         `attachment; filename="${filename}"`
-//       );
-//     },
-//   })
-// );
 
 // -----------------------------------------------------------------------------
 // JSON API routes (authenticated + domain logic)

@@ -163,7 +163,31 @@ export function useFileDomain(): FileDomainCommands {
             return html
         },
         [mutate]
-    )
+    );
+
+    const exportFeedbackReport = useCallback<FileDomainCommands["exportFeedbackReport"]>(
+        async (
+            appFileId: string,
+            includeResolved: boolean,
+            includeReviewerAppendix: boolean
+        ) => {
+            try{
+                const blob = await FilesAPI.exportFeedbackReport(appFileId, includeResolved, includeReviewerAppendix);
+                const url = window.URL.createObjectURL(blob);
+                console.log('url', url)
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "feedback.pdf";
+                a.click();
+
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error(err);
+                alert("Unexpected error generating report.");
+            }
+        },
+        [mutate]
+    );
 
     return {
         saveMetadata,
@@ -175,6 +199,7 @@ export function useFileDomain(): FileDomainCommands {
         getFileFeedbackUnique,
         getComments,
         getDeletionIds,
-        getHTML
+        getHTML,
+        exportFeedbackReport
     };
 }
