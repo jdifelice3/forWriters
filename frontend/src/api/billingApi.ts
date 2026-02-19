@@ -2,7 +2,7 @@
 import { apiFetch } from "./client";
 
 export type BillingCadence = "MONTH" | "YEAR";
-export type PaidTier = "PRO_GROUP" | "PROFESSIONAL";
+export type PaidTier = "PROFESSIONAL" | "STUDIO";
 
 export const BillingAPI = {
   checkout(tier: PaidTier, cadence: BillingCadence) {
@@ -22,7 +22,7 @@ export const BillingAPI = {
 
   me() {
     return apiFetch<{
-      tier: "FREE" | "PRO_GROUP" | "PROFESSIONAL";
+      tier: "FREE" | "PROFESSIONAL" | "STUDIO";
       status: string;
       currentPeriodEnd: string | null;
     }>("/billing/me", {

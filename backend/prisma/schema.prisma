@@ -19,14 +19,14 @@ enum DocumentType {
   FEEDBACK
 }
 
-enum FileType {
-  DOCX
-  PDF
-}
-
 enum EventType {
   READING
   RETREAT
+}
+
+enum FileType {
+  DOCX
+  PDF
 }
 
 enum Genre {
@@ -43,6 +43,7 @@ enum Genre {
 enum GroupType {
   WRITING
   PERSONAL
+  STUDIO
 }
 
 enum GroupRole {
@@ -112,8 +113,8 @@ enum WorkType {
 // Billing
 enum SubscriptionTier {
   FREE
-  PRO_GROUP
   PROFESSIONAL
+  STUDIO
 }
 
 model AppFile {
@@ -132,10 +133,15 @@ model AppFile {
   workType            WorkType?
   wordCount           Int?
   pageCount           Int?
+  paragraphCount      Int?
+  sentenceCount       Int?
   genre               Genre?
   manuscriptIsVisible Boolean      @default(false)
   versionComment      String?
   createdAt           DateTime      @default(now())
+
+  htmlCache       String?  @db.Text
+  paragraphsJson  Json?
 
   appFileMeta    AppFileMeta        @relation("OriginalAppFile", fields: [appFileMetaId], references: [id])
   readingSubmission  ReadingSubmission[]
@@ -143,6 +149,30 @@ model AppFile {
 
   @@unique([appFileMetaId, version])
 }
+
+model AppFileDiff {
+  id              String   @id @default(uuid())
+  appFileMetaId   String
+  fromVersion     Int
+  toVersion       Int
+
+  diffJson        Json
+
+  // 🔥 Revision analytics
+  wordDelta       Int
+  sentenceDelta   Int
+  paragraphDelta  Int
+  addedCount      Int
+  deletedCount    Int
+  modifiedCount   Int
+
+  createdAt       DateTime @default(now())
+
+  appFileMeta   AppFileMeta @relation("Diff", fields: [appFileMetaId], references: [id], onDelete: Cascade)
+
+  @@unique([appFileMetaId, fromVersion, toVersion])
+}
+
 
 model AppFileMeta {
     id                  String          @id @default(cuid())
@@ -155,8 +185,9 @@ model AppFileMeta {
     updatedAt           DateTime        @default(now())
     deletedAt           DateTime?
 
-    user                User         @relation("AppFileOwnerUser", fields: [userId], references: [id])
-    appFile             AppFile[]    @relation("OriginalAppFile") 
+    user                User            @relation("AppFileOwnerUser", fields: [userId], references: [id])
+    appFile             AppFile[]       @relation("OriginalAppFile") 
+    AppFileDiff         AppFileDiff[]   @relation("Diff")
 }
 
 model CollaboratorRequest {
@@ -333,6 +364,7 @@ model Notification {
   message   String
   createdAt DateTime @default(now())
   readAt    DateTime?
+  href      String   @default("/dashboard")
 }
 
 // One subscription per user. Free tier users will not have Stripe IDs.

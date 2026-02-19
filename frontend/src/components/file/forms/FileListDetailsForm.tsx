@@ -68,8 +68,7 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
                 component="a"
                 href={currentVersion.url}
                 download={currentVersion.filename}
-                size="small"
-                sx={{ fontSize: 14 }}
+                size="medium"
               >
                 {fileListProperties.buttonDownloadText}
               </Button>
@@ -97,8 +96,7 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
                     component="a"
                     href=""
                     onClick={() => navigate(`/filefeedbackdetail/${currentVersion?.id}`)}
-                    size="small"
-                    sx={{ fontSize: 14 }}
+                    size="medium"
                   >
                 View Feedback
               </Button>

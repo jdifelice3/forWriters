@@ -5,9 +5,9 @@ export type CommentSource = "DOCX" | "MANUAL";
 
 export type DocumentType = "MANUSCRIPT" | "VERSION" | "FEEDBACK";
 
-export type FileType = "DOCX" | "PDF";
-
 export type EventType = "READING" | "RETREAT";
+
+export type FileType = "DOCX" | "PDF";
 
 export type Genre = "FANTASY" | "HISTORICAL" | "HORROR" | "LITERARY" | "MYSTERY" | "POEM" | "ROMANCE" | "SCIENCEFICTION";
 
@@ -31,7 +31,7 @@ export type UrlType = "AUDIO" | "FACEBOOK" | "IMAGE" | "LINKEDIN" | "MEETUP" | "
 
 export type WorkType = "FLASHFICTION" | "NOVEL" | "NOVELLA" | "NOVELETTE" | "PLAY" | "SCREENPLAY" | "SERIALIZEDFICTION" | "SHORTSTORY";
 
-export type SubscriptionTier = "FREE" | "PRO_GROUP" | "PROFESSIONAL";
+export type SubscriptionTier = "FREE" | "PROFESSIONAL" | "STUDIO";
 
 export interface AppFile {
   id: string;
@@ -48,13 +48,33 @@ export interface AppFile {
   workType?: WorkType;
   wordCount?: number;
   pageCount?: number;
+  paragraphCount?: number;
+  sentenceCount?: number;
   genre?: Genre;
   manuscriptIsVisible: boolean;
   versionComment?: string;
   createdAt: string;
+  htmlCache?: string;
+  paragraphsJson?: any;
   appFileMeta: AppFileMeta;
   readingSubmission: ReadingSubmission[];
   fileFeedback: FileFeedback[];
+}
+
+export interface AppFileDiff {
+  id: string;
+  appFileMetaId: string;
+  fromVersion: number;
+  toVersion: number;
+  diffJson: any;
+  wordDelta: number;
+  sentenceDelta: number;
+  paragraphDelta: number;
+  addedCount: number;
+  deletedCount: number;
+  modifiedCount: number;
+  createdAt: string;
+  appFileMeta: AppFileMeta;
 }
 
 export interface AppFileMeta {
@@ -69,6 +89,7 @@ export interface AppFileMeta {
   deletedAt?: string;
   user: User;
   appFile: AppFile[];
+  AppFileDiff: AppFileDiff[];
 }
 
 export interface CollaboratorRequest {
@@ -80,6 +101,41 @@ export interface CollaboratorRequest {
   updatedAt: string;
   user: User;
   collaboratorUser: User;
+}
+
+export interface FileFeedback {
+  id: string;
+  reviewerUserId: string;
+  appFileId: string;
+  createdAt: string;
+  reviewerUser: User;
+  appFile: AppFile;
+  fileFeedbackComment: FileFeedbackComment[];
+}
+
+export interface FileFeedbackComment {
+  id: string;
+  fileFeedbackId: string;
+  reviewerUserId: string;
+  source: CommentSource;
+  commentText: string;
+  isResolved: boolean;
+  createdAt: string;
+  updatedAt: string;
+  fileFeedback: FileFeedback;
+  reviewerUser: User;
+  targets: FileFeedbackCommentTarget[];
+}
+
+export interface FileFeedbackCommentTarget {
+  id: string;
+  commentId: string;
+  paragraphId: string;
+  from: number;
+  to: number;
+  targetText: string;
+  createdAt: string;
+  comment: FileFeedbackComment;
 }
 
 export interface Group {
@@ -209,41 +265,6 @@ export interface Reading {
   group: Group;
   groupAddress?: GroupAddress;
   readingSubmission: ReadingSubmission[];
-}
-
-export interface FileFeedback {
-  id: string;
-  reviewerUserId: string;
-  appFileId: string;
-  createdAt: string;
-  reviewerUser: User;
-  appFile: AppFile;
-  fileFeedbackComment: FileFeedbackComment[];
-}
-
-export interface FileFeedbackComment {
-  id: string;
-  fileFeedbackId: string;
-  reviewerUserId: string;
-  source: CommentSource;
-  commentText: string;
-  isResolved: boolean;
-  createdAt: string;
-  updatedAt: string;
-  fileFeedback: FileFeedback;
-  reviewerUser: User;
-  targets: FileFeedbackCommentTarget[];
-}
-
-export interface FileFeedbackCommentTarget {
-  id: string;
-  commentId: string;
-  paragraphId: string;
-  from: number;
-  to: number;
-  targetText: string;
-  createdAt: string;
-  comment: FileFeedbackComment;
 }
 
 export interface ReadingParticipant {

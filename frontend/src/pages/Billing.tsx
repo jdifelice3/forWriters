@@ -17,12 +17,12 @@ export default function Billing() {
           <Typography variant="h6">Pro Group</Typography>
           <Typography>$9 / month</Typography>
 
-          {tier === "PRO_GROUP" ? (
+          {tier === "PROFESSIONAL" ? (
             <Button onClick={openPortal}>Manage billing</Button>
           ) : (
             <Button
               variant="contained"
-              onClick={() => startCheckout("PRO_GROUP", "MONTH")}
+              onClick={() => startCheckout("PROFESSIONAL", "MONTH")}
             >
               Upgrade
             </Button>

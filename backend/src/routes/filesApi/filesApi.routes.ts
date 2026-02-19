@@ -4,8 +4,11 @@ import { getUser } from "../../database/util/user";
 import { Router } from "express";
 import { z } from "zod";
 import { loadDocxFromS3AsHtml, addParagraphIds } from "../../services/streamFromS3";
-import { fullFeedbackInclude } from "./filesApi.feedback.includes";
-import { AppFileMeta } from "@prisma/client";
+import { computeRevisionDiff } from "../../util/revisionDiff";
+import { htmlToParagraphs } from "../../util/htmlToParagraphs";
+import { DocumentStats, ParagraphBlock } from "../../types/File";
+import { requirePro } from "../billing/billing.middleware";
+
 const router = Router();
 
 type ObjectIdsForDeletion = {
@@ -285,9 +288,13 @@ const getDeletionIds = async(appFileMetaId: string): Promise<ObjectIdsForDeletio
             }
         }
     });
-    const submissionIds: string[] | undefined = targets.map((s) => (
+    // const submissionIds: string[] | undefined = targets.map((s) => (
+    //     s.id
+    // ));
+    const submissionIds: string[] | undefined = readingSubmissions.map((s) => (
         s.id
     ));
+
 
 
     return {
@@ -606,6 +613,151 @@ router.get("/:appFileId/html", async (req, res) => {
     res.json({
         html: html,
     });
+});
+
+router.get("/:appFileMetaId/diff", requirePro, async (req, res) => {
+  const session = await Session.getSession(req, res);
+  const authId = session.getUserId();
+  const user: any = await getUser(authId);
+
+  const { appFileMetaId } = req.params;
+
+  const fromVersion = Number(req.query.fromVersion);
+  const toVersion = Number(req.query.toVersion);
+
+  if (!Number.isInteger(fromVersion) || !Number.isInteger(toVersion)) {
+    return res.status(400).json({ error: "fromVersion and toVersion must be integers" });
+  }
+  if (fromVersion === toVersion) {
+    return res.status(400).json({ error: "fromVersion and toVersion must be different" });
+  }
+
+  // ✅ Pro gating (stub): wire this to your billing/subscription when ready.
+  // if (!userHasPro(user)) return res.status(403).json({ error: "Pro feature" });
+
+  // Confirm ownership of the manuscript (AppFileMeta.userId is owner)
+  const meta = await prisma.appFileMeta.findUnique({
+    where: { id: appFileMetaId },
+    select: { id: true, userId: true, title: true },
+  });
+
+  if (!meta || meta.userId !== user.id) {
+    return res.status(404).json({ error: "Manuscript not found" });
+  }
+
+  // 1) cache lookup
+  const cached = await prisma.appFileDiff.findUnique({
+    where: {
+      appFileMetaId_fromVersion_toVersion: {
+        appFileMetaId,
+        fromVersion,
+        toVersion,
+      },
+    },
+  });
+
+  if (cached) {
+    return res.json(cached.diffJson);
+  }
+
+  // 2) fetch both versions
+  const [fromFile, toFile] = await Promise.all([
+    prisma.appFile.findFirst({
+      where: { appFileMetaId, version: fromVersion },
+    }),
+    prisma.appFile.findFirst({
+      where: { appFileMetaId, version: toVersion },
+    }),
+  ]);
+
+  if (!fromFile || !toFile) {
+    return res.status(404).json({ error: "One or both versions not found" });
+  }
+
+  if (!process.env.AWS_S3_BUCKET || !process.env.AWS_S3_REGION) {
+    return res.status(500).json({ error: "Invalid S3 configuration" });
+  }
+
+  // 3) load DOCX -> HTML -> paragraph blocks
+  // NOTE: we do NOT need paragraph IDs for diffing; addParagraphIds is for feedback targeting.
+  const [fromHtml, toHtml] = await Promise.all([
+    loadDocxFromS3AsHtml(process.env.AWS_S3_BUCKET, fromFile.filename, process.env.AWS_S3_REGION),
+    loadDocxFromS3AsHtml(process.env.AWS_S3_BUCKET, toFile.filename, process.env.AWS_S3_REGION),
+  ]);
+
+    const fromParagraphs = fromFile.paragraphsJson as ParagraphBlock[];
+    const toParagraphs = toFile.paragraphsJson as ParagraphBlock[];
+
+  // 4) compute diff (toVersion defines ordering)
+  const diff = computeRevisionDiff({
+    fromVersion,
+    toVersion,
+    fromParagraphs,
+    toParagraphs,
+  });
+
+  const wordDelta = (toFile.wordCount ?? 0) - (fromFile.wordCount ?? 0);
+  const sentenceDelta = (toFile.sentenceCount ?? 0) - (fromFile.sentenceCount ?? 0);
+  const paragraphDelta = (toFile.paragraphCount ?? 0) - (fromFile.paragraphCount ?? 0);
+
+  // 5) cache it (directional)
+const created = await prisma.appFileDiff.create({
+  data: {
+    appFileMetaId,
+    fromVersion,
+    toVersion,
+    diffJson: diff,
+    wordDelta,
+    sentenceDelta,
+    paragraphDelta,
+    addedCount: diff.summary.added,
+    deletedCount: diff.summary.deleted,
+    modifiedCount: diff.summary.modified,
+  },
+});
+
+
+  return res.json(created.diffJson);
+});
+
+router.get("/:appFileMetaId/revision-history", requirePro, async (req, res) => {
+  const { appFileMetaId } = req.params;
+
+  const versions = await prisma.appFile.findMany({
+    where: { appFileMetaId },
+    orderBy: { version: "asc" },
+    select: {
+      version: true,
+      uploadedAt: true,
+      versionComment: true,
+      wordCount: true,
+      paragraphCount: true,
+      sentenceCount: true,
+    },
+  });
+
+  const diffs = await prisma.appFileDiff.findMany({
+    where: { appFileMetaId },
+    orderBy: { fromVersion: "asc" },
+    select: {
+      fromVersion: true,
+      toVersion: true,
+      wordDelta: true,
+      paragraphDelta: true,
+      sentenceDelta: true,
+      addedCount: true,
+      deletedCount: true,
+      modifiedCount: true,
+    },
+  });
+
+  res.json({ versions, diffs });
+});
+
+router.get("/:appFileMetaId/revision-history", requirePro, async (req, res) => {
+});
+
+router.get("/:appFileId/feedback/export", requirePro, async (req, res) => {
 });
 
 const getDocxAsHtml = async (awsS3bucket: string, filename: string, awsS3region: string) => {

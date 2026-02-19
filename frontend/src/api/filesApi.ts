@@ -42,7 +42,7 @@ export const FilesAPI = {
     uploadManuscript(
         formData: FormData
     ){
-        return apiFetch<void>("/files", {
+        return apiFetch<void>("/files/upload", {
             method: "POST",
             credentials: "include",
             body: formData,

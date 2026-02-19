@@ -1,14 +1,14 @@
-export type PaidTier = "PRO_GROUP" | "PROFESSIONAL";
+export type PaidTier = "PROFESSIONAL" | "STUDIO";
 export type BillingCadence = "MONTH" | "YEAR";
 
 export const TRIAL_DAYS_PRO_GROUP = 7;
 
-export const tierFromPriceId = (priceId: string): "PRO_GROUP" | "PROFESSIONAL" | null => {
-  const pairs: Array<[string | undefined, "PRO_GROUP" | "PROFESSIONAL"]> = [
-    [process.env.STRIPE_PRICE_PRO_MONTHLY, "PRO_GROUP"],
-    [process.env.STRIPE_PRICE_PRO_ANNUAL, "PRO_GROUP"],
-    [process.env.STRIPE_PRICE_PROFESSIONAL_MONTHLY, "PROFESSIONAL"],
-    [process.env.STRIPE_PRICE_PROFESSIONAL_ANNUAL, "PROFESSIONAL"],
+export const tierFromPriceId = (priceId: string): "PROFESSIONAL" | "STUDIO" | null => {
+  const pairs: Array<[string | undefined, "PROFESSIONAL" | "STUDIO"]> = [
+    [process.env.STRIPE_PRICE_PRO_MONTHLY, "PROFESSIONAL"],
+    [process.env.STRIPE_PRICE_PRO_ANNUAL, "PROFESSIONAL"],
+    [process.env.STRIPE_PRICE_PROFESSIONAL_MONTHLY, "STUDIO"],
+    [process.env.STRIPE_PRICE_PROFESSIONAL_ANNUAL, "STUDIO"],
   ];
 
   for (const [id, tier] of pairs) {
@@ -19,7 +19,7 @@ export const tierFromPriceId = (priceId: string): "PRO_GROUP" | "PROFESSIONAL" |
 
 export const priceIdFor = (tier: PaidTier, cadence: BillingCadence): string => {
   const key =
-    tier === "PRO_GROUP"
+    tier === "PROFESSIONAL"
       ? cadence === "MONTH"
         ? "STRIPE_PRICE_PRO_MONTHLY"
         : "STRIPE_PRICE_PRO_ANNUAL"

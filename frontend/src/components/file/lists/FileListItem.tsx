@@ -63,13 +63,15 @@ const FileListItem: React.FC<FileListItemProps> = ({
 
                 {/* Upload control (correct pattern) */}
                 <Button
-                  size="small"
+                  size="medium"
                   component="label"
                   onClick={(e) => onUploadVersion(fileMeta.id)}
                 >
                   Upload New Version
                 </Button>
-
+                <Typography variant="body1" sx={{ml: 1}}>
+                    Select active version:
+                </Typography>
                 <FileVersionList
                   fileMeta={fileMeta}
                   versions={fileMeta.appFile}

@@ -30,7 +30,7 @@ type CheckoutBody = {
 
 async function getAppUserBySession(req: any, res: any) {
   const session = await Session.getSession(req, res);
-  const authId = session.getUserId(true);
+  const authId = session.getUserId();
   const user = await prisma.user.findUnique({
     where: { superTokensId: authId },
     include: { subscription: true },
@@ -71,8 +71,9 @@ router.post<
   if (!tier || !cadence) {
     return res.status(400).json({ error: "Missing tier or cadence" });
   }
+  console.log('before Session.getSession')
     const appSession = await Session.getSession(req, res);
-    const authId = appSession.getUserId(true);
+    const authId = appSession.getUserId();
     const appUser: User | null = await prisma.user.findUnique({where: { superTokensId: authId,},}); 
 
   const user = await getAppUserBySession(req, res);
@@ -80,7 +81,7 @@ router.post<
 
   const priceId = priceIdFor(tier, cadence);
 
-  const trialEligible = tier === "PRO_GROUP" && !user.proTrialUsedAt;
+  const trialEligible = tier === "PROFESSIONAL" && !user.proTrialUsedAt;
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
@@ -105,7 +106,7 @@ router.post<
 // POST /api/billing/portal
 router.post("/portal", async (req: SessionRequest, res) => {
     const appSession = await Session.getSession(req, res);
-    const authId = appSession.getUserId(true);
+    const authId = appSession.getUserId();
     const appUser: User | null = await prisma.user.findUnique({where: { superTokensId: authId,},}); 
 
   const user = await getAppUserBySession(req, res);
@@ -123,14 +124,13 @@ router.post("/portal", async (req: SessionRequest, res) => {
 router.post(
   "/webhook",
   // raw body required for Stripe signature verification
-  express.raw({ type: "application/json" }),
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
     if (!sig) {
       return res.status(400).send("Missing Stripe signature");
     }
     const appSession = await Session.getSession(req, res);
-    const authId = appSession.getUserId(true);
+    const authId = appSession.getUserId();
     const appUser: User | null = await prisma.user.findUnique({where: { superTokensId: authId,},}); 
 
     let event;
@@ -198,7 +198,7 @@ router.post(
 
           // One-time trial lock
           const trialApplied = subStripe.metadata?.trialApplied === "true";
-          if (tier === "PRO_GROUP" && trialApplied) {
+          if (tier === "PROFESSIONAL" && trialApplied) {
             await prisma.user.update({
               where: { id: appUserId },
               data: { proTrialUsedAt: new Date() },

@@ -14,7 +14,8 @@ import {
 import { SuperTokensConfig } from "./config";
 
 // Infrastructure routes
-import fileUploadRoutes from "./routes/files/files.routes";
+import fileRoutes from "./routes/files/files.routes";
+import uploadRoutes from "./routes/files/upload/upload.routes"; 
 
 // API router (JSON-only domain routes)
 import apiRoutes from "./routes";
@@ -38,6 +39,14 @@ supertokens.init(SuperTokensConfig);
 // -----------------------------------------------------------------------------
 const app = express();
 app.set("trust proxy", true);
+
+// IMPORTANT: mount billing BEFORE express.json if express.json is global
+app.use(
+  "/api/billing/webhook",
+  bodyParser.raw({ type: "application/json" })
+);
+
+app.use("/api/billing", billingRouter);
 
 app.use((req, _res, next) => {
   console.log("REQ:", req.method, req.path);
@@ -72,22 +81,17 @@ app.use(supertokensMiddleware());
 // -----------------------------------------------------------------------------
 // 🚨 Upload routes (MUST come before body parsing)
 // -----------------------------------------------------------------------------
-app.use("/api/files", fileUploadRoutes);
+app.use("/api/files/upload", uploadRoutes);
+// -----------------------------
+ 
 
-// -----------------------------------------------------------------------------
+//------------------------------------------------
 // Body parsing (JSON APIs only)
 // -----------------------------------------------------------------------------
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// IMPORTANT: mount billing BEFORE express.json if express.json is global
-app.use(
-  "/api/billing/webhook",
-  bodyParser.raw({ type: "application/json" })
-);
-
-// 2️⃣ Billing routes (checkout, portal, webhook handler)
-app.use("/api/billing", billingRouter);
+app.use("/api/files", fileRoutes);
 
 // If your app does: app.use(express.json())
 // make sure it is mounted AFTER the above line OR excluded for /api/billing/webhook.
@@ -96,25 +100,25 @@ app.use("/api/billing", billingRouter);
 // -----------------------------------------------------------------------------
 const uploadDir = path.join(process.cwd(), "uploads");
 
-app.use(
-  "/uploads",
-  express.static(uploadDir, {
-    setHeaders: (res, filePath) => {
-      res.setHeader("Access-Control-Allow-Origin", process.env.WEB_HOST!);
-      res.setHeader("Access-Control-Allow-Credentials", "true");
-      res.setHeader(
-        "Access-Control-Expose-Headers",
-        "Content-Disposition"
-      );
+// app.use(
+//   "/uploads",
+//   express.static(uploadDir, {
+//     setHeaders: (res, filePath) => {
+//       res.setHeader("Access-Control-Allow-Origin", process.env.WEB_HOST!);
+//       res.setHeader("Access-Control-Allow-Credentials", "true");
+//       res.setHeader(
+//         "Access-Control-Expose-Headers",
+//         "Content-Disposition"
+//       );
 
-      const filename = path.basename(filePath);
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${filename}"`
-      );
-    },
-  })
-);
+//       const filename = path.basename(filePath);
+//       res.setHeader(
+//         "Content-Disposition",
+//         `attachment; filename="${filename}"`
+//       );
+//     },
+//   })
+// );
 
 // -----------------------------------------------------------------------------
 // JSON API routes (authenticated + domain logic)

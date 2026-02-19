@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { BillingAPI } from "../../api/billingApi";
 
 type BillingMe = {
-  tier: "FREE" | "PRO_GROUP" | "PROFESSIONAL";
+  tier: "FREE" | "PROFESSIONAL" | "STUDIO";
   status: string;
   currentPeriodEnd: string | null;
 };

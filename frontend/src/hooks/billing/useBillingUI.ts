@@ -5,8 +5,8 @@ export function useBillingUI() {
   const { billing, loading } = useBillingData();
 
   const isFree = billing?.tier === "FREE";
-  const isPro = billing?.tier === "PRO_GROUP";
   const isProfessional = billing?.tier === "PROFESSIONAL";
+  const isStudio = billing?.tier === "STUDIO";
 
   return {
     loading,
@@ -17,7 +17,7 @@ export function useBillingUI() {
       : null,
 
     isFree,
-    isPro,
-    isProfessional,
+    isPro: isProfessional,
+    isProfessional: isStudio,
   };
 }
