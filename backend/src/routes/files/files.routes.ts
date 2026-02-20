@@ -57,9 +57,9 @@ router.get("/:fileId/download", async (req, res, next) => {
 });
 
 router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
-    console.log('in export-pdf route')
+    
     const { appFileId } = req.params;
-    console.log('appFileId', appFileId)
+    
     const ExportPdfInput = z.object({
         includeResolved: z.boolean().default(true),
         includeReviewerAppendix: z.boolean().default(false),
@@ -98,7 +98,6 @@ router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
     });
 
     const commentModels = feedback.flatMap(f => f.fileFeedbackComment);
-    console.log('commentModels', commentModels)
     let pdfComments = commentModels.map(c => {
         const targets = c.targets.map(t => ({
             paragraphNumber: getParagraphNumber(t.paragraphId),

@@ -1,5 +1,6 @@
 import PDFDocument from "pdfkit";
 import { GenerateFeedbackPdfInput } from "../../types/Pdf";
+import { extractCategorizedThemes } from "../../services/pdf/themeAnalysis";
 
 const formatDate = (date: Date) =>
   date.toLocaleDateString("en-US", {
@@ -34,9 +35,6 @@ export const generateFeedbackPdf = async (
 
     const defaultLeft = doc.page.margins.left;
     const defaultWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-    //const leftMargin = 70;
-    //const rightMargin = 70;
-    //const usableWidth = doc.page.width - leftMargin - rightMargin;
     const indent = 20;
 
     // ----------------------------
@@ -49,7 +47,7 @@ export const generateFeedbackPdf = async (
     doc.moveDown(0.25);
 
     doc.text(`Generated ${formatDate(input.generatedDate)}`);
-    doc.moveDown(1);
+    doc.moveDown(2);
 
     doc.moveTo(50, doc.y)
        .lineTo(doc.page.width - 50, doc.y)
@@ -74,128 +72,230 @@ export const generateFeedbackPdf = async (
     doc.moveDown(0.5);
 
     doc.text(`Reviewers: ${input.summary.reviewerCount}`);
-    doc.moveDown(1);
+    doc.moveDown(2);
 
     doc.moveTo(50, doc.y)
        .lineTo(doc.page.width - 50, doc.y)
        .stroke();
     doc.moveDown(1);
 
-    // ----------------------------
-    // COMMENTS SECTION
-    // ----------------------------
+// ----------------------------
+// THEMES
+// ----------------------------
+const themes = extractCategorizedThemes(
+  input.comments.map(c => c.commentText), 5
+);
+if (themes.length > 0) {
+  doc.font("Helvetica-Bold")
+     .fontSize(12)
+     .text("Recurring Feedback Themes");
+  doc.moveDown(0.75);
+
+  const grouped = {
+    character: [] as typeof themes,
+    craft: [] as typeof themes,
+    thematic: [] as typeof themes
+  };
+
+  themes.forEach(t => grouped[t.category].push(t));
+
+  const renderCategory = (title: string, items: typeof themes) => {
+    if (items.length === 0) return;
 
     doc.font("Helvetica-Bold")
-       .fontSize(12)
-       .text("Comments (Ordered by Manuscript Flow)");
-    doc.moveDown(1);
+       .fontSize(11)
+       .text(title);
+    doc.moveDown(0.5);
 
-    input.comments.forEach((comment, index) => {
-      // Ensure space before comment block
+    doc.font("Helvetica")
+       .fontSize(10);
 
-      ensureSpace(doc, 120);
-
-      // Paragraph label
-      doc.font("Helvetica-Bold")
-         .fontSize(12)
-         .text(`Paragraph ${comment.paragraphNumber}`, defaultLeft,doc.y, { underline: true, width: defaultWidth });
-
-         doc.moveDown(0.5);
-      
-      // Targets
-      comment.targets.forEach((target) => {
-        doc.font("Helvetica-Oblique")
-           .fontSize(11)
-           .text(`“${target.excerpt}”`, {
-             indent: indent,
-           });
-        doc.moveDown(1.0);
-      });
-
-      // Comment body
-    //   doc.font("Helvetica")
-    //      .fontSize(11)
-    //      .text(comment.commentText, 
-    //         {
-    //             width: doc.page.width - 100,
-    //         });
-      doc.font("Helvetica")
-         .fontSize(11)
-         .text(comment.commentText, defaultLeft + indent, doc.y, {
-            width: defaultWidth - indent * 2,
-      });
-     doc.moveDown(1.0);
-     
-     // Reviewer + Status
-      doc.font("Helvetica")
-        .fontSize(9)
-        .fillColor("gray")
-        .text(`${comment.reviewerName} · ${comment.isResolved ? "Resolved" : "Unresolved"}`, defaultLeft + indent, doc.y, {
-            width: defaultWidth - indent * 2,
-      });
-
-      doc.fillColor("black");
-      doc.fontSize(10);
- 
-      doc.moveDown(3);
-
-      // Divider
-        // if (index !== input.comments.length - 1) {
-        // doc.moveTo(50, doc.y)
-        //     .lineTo(doc.page.width - 50, doc.y)
-        //     .stroke();
-        // doc.moveDown(1);
-        // }
+    items.forEach(t => {
+      doc.text(`• ${t.phrase} — mentioned ${t.count} time${t.count === 1 ? "" : "s"}`);
+      doc.moveDown(0.25);
     });
 
-    // ----------------------------
-    // APPENDIX
-    // ----------------------------
-    if (input.includeReviewerAppendix) {
+    doc.moveDown(0.75);
+  };
+
+  renderCategory("Character & Psychology", grouped.character);
+  renderCategory("Craft & Structure", grouped.craft);
+  renderCategory("Thematic & Conceptual", grouped.thematic);
+
+  doc.moveDown(1);
+
+  doc.moveTo(50, doc.y)
+     .lineTo(doc.page.width - 50, doc.y)
+     .stroke();
+  doc.moveDown(1);
+}
+
+// ----------------------------
+// COMMENTS SECTION (Grouped by Paragraph)
+// ----------------------------
+
+doc.font("Helvetica-Bold")
+   .fontSize(12)
+   .text("Comments (Ordered by Manuscript Flow)");
+doc.moveDown(1);
+
+// Group by paragraph
+const groupedByParagraph = new Map<number, typeof input.comments>();
+
+input.comments.forEach((c) => {
+  if (!groupedByParagraph.has(c.paragraphNumber)) {
+    groupedByParagraph.set(c.paragraphNumber, []);
+  }
+  groupedByParagraph.get(c.paragraphNumber)!.push(c);
+});
+
+// Sort numerically
+const sortedParagraphs = Array.from(groupedByParagraph.keys())
+  .sort((a, b) => a - b);
+
+sortedParagraphs.forEach((paragraphNumber) => {
+  const comments = groupedByParagraph.get(paragraphNumber)!;
+
+  ensureSpace(doc, 120);
+
+  // Paragraph Header
+  doc.font("Helvetica-Bold")
+     .fontSize(12)
+     .text(
+       `Paragraph ${paragraphNumber}`,
+       defaultLeft,
+       doc.y,
+       { underline: true, width: defaultWidth }
+     );
+
+  doc.moveDown(0.75);
+
+  // Render each comment with its own target(s)
+  comments.forEach((comment) => {
+
+    // Targets for THIS comment
+    comment.targets.forEach((target) => {
+      doc.font("Helvetica-Oblique")
+         .fontSize(11)
+         .text(`“${target.excerpt}”`, defaultLeft, doc.y, {
+           indent: indent, width: defaultWidth
+         });
+
+      doc.moveDown(0.75);
+    });
+
+    // Comment text
+    doc.font("Helvetica")
+       .fontSize(11)
+       .text(
+         comment.commentText,
+         defaultLeft + indent,
+         doc.y,
+         { width: defaultWidth - indent * 2 }
+       );
+
+    doc.moveDown(0.5);
+
+    // Reviewer + Status
+    doc.font("Helvetica")
+       .fontSize(9)
+       .fillColor("gray")
+       .text(
+         `${comment.reviewerName} · ${
+           comment.isResolved ? "Resolved" : "Unresolved"
+         }`,
+         defaultLeft + indent,
+         doc.y,
+         { width: defaultWidth - indent * 2 }
+       );
+
+    doc.fillColor("black");
+    doc.moveDown(1.5);
+  });
+
+  doc.moveDown(1.5);
+});
+
+
+
+// ----------------------------
+// APPENDIX (Grouped by Reviewer → Paragraph)
+// ----------------------------
+if (input.includeReviewerAppendix) {
+  doc.addPage();
+
+  doc.font("Helvetica-Bold")
+     .fontSize(12)
+     .text("Appendix: Comments by Reviewer");
+  doc.moveDown(1);
+
+  const groupedByReviewer = new Map<string, typeof input.comments>();
+
+  input.comments.forEach((c) => {
+    if (!groupedByReviewer.has(c.reviewerName)) {
+      groupedByReviewer.set(c.reviewerName, []);
+    }
+    groupedByReviewer.get(c.reviewerName)!.push(c);
+  });
+
+  const reviewers = Array.from(groupedByReviewer.keys()).sort();
+
+  reviewers.forEach((reviewer) => {
+    const reviewerComments = groupedByReviewer.get(reviewer)!;
+
+    if (doc.y > doc.page.height - 120) {
       doc.addPage();
+    }
 
+    doc.font("Helvetica-Bold")
+       .fontSize(11)
+       .text(`${reviewer} (${reviewerComments.length} comments)`, defaultLeft, doc.y, {width: defaultWidth});
+    doc.moveDown(1);
+
+    // Group by paragraph for this reviewer
+    const groupedByParagraphForReviewer =
+      new Map<number, typeof reviewerComments>();
+
+    reviewerComments.forEach((c) => {
+      if (!groupedByParagraphForReviewer.has(c.paragraphNumber)) {
+        groupedByParagraphForReviewer.set(c.paragraphNumber, []);
+      }
+      groupedByParagraphForReviewer
+        .get(c.paragraphNumber)!
+        .push(c);
+    });
+
+    const sortedParagraphsForReviewer =
+      Array.from(groupedByParagraphForReviewer.keys())
+        .sort((a, b) => a - b);
+
+    sortedParagraphsForReviewer.forEach((paragraphNumber) => {
       doc.font("Helvetica-Bold")
-         .fontSize(12)
-         .text("Appendix: Comments by Reviewer");
-      doc.moveDown(1);
+         .fontSize(10)
+         .text(`Paragraph ${paragraphNumber}`, defaultLeft, doc.y, {width: defaultWidth});
+      doc.moveDown(0.5);
 
-      const grouped = new Map<string, typeof input.comments>();
-
-      input.comments.forEach((c) => {
-        if (!grouped.has(c.reviewerName)) {
-          grouped.set(c.reviewerName, []);
-        }
-        grouped.get(c.reviewerName)!.push(c);
-      });
-
-      grouped.forEach((comments, reviewer) => {
-        if (doc.y > doc.page.height - 120) {
-          doc.addPage();
-        }
-
-        doc.font("Helvetica-Bold")
-           .fontSize(11)
-           .text(reviewer);
-        doc.moveDown(0.5);
-
-        doc.font("Helvetica").fontSize(10);
-
-        comments.forEach((c) => {
-          const preview =
-            c.targets.length > 0
-              ? c.targets[0].excerpt.split(" ").slice(0, 12).join(" ") +
-                (c.targets[0].excerpt.split(" ").length > 12 ? "…" : "")
-              : "";
-
-          doc.text(
-            `• Paragraph ${c.paragraphNumber} — ${preview}`
-          );
-          doc.moveDown(0.4);
+      groupedByParagraphForReviewer
+        .get(paragraphNumber)!
+        .forEach((c) => {
+          doc.font("Helvetica")
+             .fontSize(10)
+             .text(
+               `• ${c.commentText}`,
+               defaultLeft + indent,
+               doc.y,
+               { width: defaultWidth - indent * 2 }
+             );
+          doc.moveDown(0.5);
         });
 
-        doc.moveDown(1);
-      });
-    }
+      doc.moveDown(1);
+    });
+
+    doc.moveDown(1.5);
+  });
+}
+
 
     // ----------------------------
     // PAGE NUMBERS

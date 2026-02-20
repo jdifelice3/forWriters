@@ -174,7 +174,7 @@ export function useFileDomain(): FileDomainCommands {
             try{
                 const blob = await FilesAPI.exportFeedbackReport(appFileId, includeResolved, includeReviewerAppendix);
                 const url = window.URL.createObjectURL(blob);
-                console.log('url', url)
+                
                 const a = document.createElement("a");
                 a.href = url;
                 a.download = "feedback.pdf";

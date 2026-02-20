@@ -162,8 +162,6 @@ router.delete("/", async(req, res) => {
 
         const deletionIds: ObjectIdsForDeletion = await getDeletionIds(fileMetaId, );
 
-        console.log('deleteIds', deletionIds)
-
         //Deleting
         const { count: targetCount} = await prisma.fileFeedbackCommentTarget.deleteMany({
             where: {
@@ -501,7 +499,7 @@ router.patch("/feedback/:fileFeedbackId/comments/:commentId",
 router.delete("/feedback/:fileFeedbackId/comments/:commentId",
     async (req, res) => {
         const { commentId } = req.params;
-        console.log('commentId', commentId)
+        
         const commentTarget = await prisma.fileFeedbackCommentTarget.deleteMany({
             where: {
                 commentId: commentId

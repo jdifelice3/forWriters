@@ -16,7 +16,6 @@ import Grid from "@mui/material/Grid";
 import FileIcon from "../../controls/FileIcon";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import LockIcon from '@mui/icons-material/Lock';
 
 interface FileListDetailsFormProps {
   fileMeta: AppFileMeta;
@@ -106,15 +105,6 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
               </Button>
               </Box>
               <Box>
-              <Button
-                variant="text"
-                size="medium"
-                onClick={() => domain.exportFeedbackReport(currentVersion!.id, true, true)}
-                disabled={isPro}
-                endIcon={isPro ? <LockIcon fontSize="small" /> : undefined}
-                >
-                Export Feedback PDF
-                </Button>
             </Box>
             </>
             )}

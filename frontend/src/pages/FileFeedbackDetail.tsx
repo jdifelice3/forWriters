@@ -2,6 +2,7 @@
 
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Grid,
@@ -24,8 +25,12 @@ import { useParams } from "react-router-dom";
 import { ManuscriptReview } from "../components/review/ManuscriptReview";
 import ReviewerRadioList from "../components/review/ReviewerRadioList";
 import ReviewerCheckboxList from "../components/review/ReviewerCheckboxList";
+import { useBillingUI } from "../hooks/billing/useBillingUI";
+import LockIcon from '@mui/icons-material/Lock';
 
 const FileFeedbackDetail = () => {
+    const { isPro} = useBillingUI();
+    const { exportFeedbackReport } = useFileDomain();
     const { appFileId } = useParams<{ appFileId: string }>();
     if(!appFileId) return;
 
@@ -109,19 +114,31 @@ const FileFeedbackDetail = () => {
             marginLeft: "55px",
             
         }}>
-        
-        <Grid container spacing={2}>
-
-        </Grid>
         <Typography variant="h4" mb={3} textAlign="left">
             Feedback for {manuscriptTitle}
         </Typography>
-        <Typography variant="body1" mb={0}>
-            <b>Version</b>: {appFile ? appFile.version.toString() : ""}
-        </Typography>
-        <Typography variant="body1" mb={2}>
-            <b>Filename</b>: {appFile ? appFile.filename.toString() : ""}
-        </Typography>
+        <Grid container spacing={2}>
+            <Grid size={6}>
+                <Typography variant="body1" mb={0}>
+                    <b>Version</b>: {appFile ? appFile.version.toString() : ""}
+                </Typography>
+                <Typography variant="body1" mb={2}>
+                    <b>Filename</b>: {appFile ? appFile.filename.toString() : ""}
+                </Typography>
+            </Grid>
+            <Grid size={6}>
+                <Button
+                    variant="contained"
+                    size="medium"
+                    onClick={() => exportFeedbackReport(appFile!.id, true, true)}
+                    disabled={isPro}
+                    endIcon={isPro ? <LockIcon fontSize="small" /> : undefined}
+                >
+                    Export Feedback PDF
+                </Button>
+            </Grid>
+        </Grid>
+        
 
         {commentCount === 0 && (
             <>
@@ -150,11 +167,6 @@ const FileFeedbackDetail = () => {
 
             {tab === 0 && commentCount > 0 && manuscriptHtml && (
                 <>
-                {/* <ReviewerRadioList
-                    reviewers={commentsByReviewer}
-                    selectedReviewer={selectedReviewer}
-                    onChange={handleReviewerOnChange}
-                /> */}
                 <Box sx={{mb: 1}}>
                 <ReviewerCheckboxList
                     reviewers={reviewers}
