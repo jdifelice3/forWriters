@@ -23,6 +23,7 @@ import Dashboard from "../pages/Dashboard";
 import FileFeedbackDetail from "../pages/FileFeedbackDetail";
 import TopNav from "../components/nav/TopNav";
 import Billing from "../pages/Billing";
+import { VersionCompare } from "../pages/VersionCompare";
 
 export default function Layout() {
   const { loading } = useSessionContext();
@@ -54,6 +55,7 @@ export default function Layout() {
                 <Route path="/members" element={<MemberSearchPage />} />
                 <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
                 <Route path="/billing" element={<Billing />} />
+                <Route path="/versioncompare/:appFileMetaId/" element={<VersionCompare />} />
             </Routes>
         </Box>
     </Box>

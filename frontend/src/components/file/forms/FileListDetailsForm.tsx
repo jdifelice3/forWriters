@@ -105,6 +105,16 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
               </Button>
               </Box>
               <Box>
+              <Button
+                    component="a"
+                    href=""
+                    onClick={() => navigate(`/filefeedbackdetail/${currentVersion?.id}`)}
+                    size="medium"
+                  >
+                View Revision Trends
+              </Button>
+              </Box>
+              <Box>
             </Box>
             </>
             )}

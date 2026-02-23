@@ -7,6 +7,7 @@ import {
 } from "./domain-types";
 
 import { CommentDTO } from "./FeedbackTypes";
+import { DiffResponse } from "../types/Diff";
 
 export type FileUploadFormInput = {
   title: string;
@@ -104,6 +105,7 @@ export interface FileDomainCommands {
         includeResolved: boolean,
         includeReviewerAppendix: boolean
     ): Promise<void>;
+
 }
 
 export interface FileUIActions {

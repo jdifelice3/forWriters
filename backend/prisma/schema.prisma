@@ -156,7 +156,7 @@ model AppFileDiff {
   fromVersion     Int
   toVersion       Int
 
-  diffJson        Json
+  blocks        Json
 
   // 🔥 Revision analytics
   wordDelta       Int

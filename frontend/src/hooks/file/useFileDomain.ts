@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { FileDomainCommands } from "../../types/FileTypes";
 import { FilesAPI } from "../../api/filesApi";
+import { FileDomainCommands } from "../../types/FileTypes";
 import { useFiles } from "./useFiles";
 import { AppFile, FileFeedback, Reading } from "../../types/domain-types";
 import { CommentDTO, CommentsForDisplay } from "../../types/FeedbackTypes";
@@ -200,6 +200,6 @@ export function useFileDomain(): FileDomainCommands {
         getComments,
         getDeletionIds,
         getHTML,
-        exportFeedbackReport
+        exportFeedbackReport,
     };
 }

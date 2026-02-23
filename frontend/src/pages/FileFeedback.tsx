@@ -120,7 +120,8 @@ const FileFeedback = () => {
         getFileFeedbackUnique: getFileFeedbackUnique,
         getComments: getComments,
         getDeletionIds: getDeletionIds,
-        getHTML: getHTML
+        getHTML: getHTML,
+        //exportFeedbackReport: exportFeedbackReport
     }
 
   return (

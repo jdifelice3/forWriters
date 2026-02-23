@@ -655,7 +655,7 @@ router.get("/:appFileMetaId/diff", requirePro, async (req, res) => {
   });
 
   if (cached) {
-    return res.json(cached.diffJson);
+    return res.json(cached.blocks);
   }
 
   // 2) fetch both versions
@@ -704,7 +704,7 @@ const created = await prisma.appFileDiff.create({
     appFileMetaId,
     fromVersion,
     toVersion,
-    diffJson: diff,
+    blocks: diff,
     wordDelta,
     sentenceDelta,
     paragraphDelta,
@@ -715,7 +715,7 @@ const created = await prisma.appFileDiff.create({
 });
 
 
-  return res.json(created.diffJson);
+  return res.json(created.blocks);
 });
 
 router.get("/:appFileMetaId/revision-history", requirePro, async (req, res) => {

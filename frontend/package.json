@@ -3,6 +3,9 @@
     "private": true,
     "version": "1.0.0",
     "type": "module",
+    "engines": {
+        "node": ">=22.12.0"
+    },
     "scripts": {
         "start": "vite",
         "dev": "copy .env.dev .env && vite",
@@ -46,6 +49,7 @@
         "react-hook-form": "^7.66.0",
         "react-pro-sidebar": "^0.7.1",
         "react-router-dom": "^7.9.5",
+        "recharts": "^3.7.0",
         "supertokens-auth-react": "latest",
         "swr": "^2.3.6",
         "tippy.js": "^6.3.7",

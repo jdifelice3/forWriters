@@ -13,6 +13,7 @@ import { GenerateFeedbackPdfInput } from "../../types/Pdf";
 import { generateFeedbackPdf } from "../../services/pdf/exportFeedbackReport";
 import z from "zod";
 import { getParagraphNumber, normalizeExcerpt, sanitizeFilename } from "../../util/Pdf"
+import { getOrCreateDiff } from "../../services/diff/diffService";
 
 const router = express.Router();
 
@@ -175,5 +176,39 @@ router.post("/:appFileId/export-pdf", requirePro, async (req, res) => {
   }
 );
 
+router.get("/:appFileMetaId/revision-metrics", requirePro, async (req, res) => {
+  const { appFileMetaId } = req.params;
+
+  const versions = await prisma.appFile.findMany({
+    where: { appFileMetaId },
+    orderBy: { version: "asc" },
+    select: {
+      version: true,
+      wordCount: true,
+      paragraphCount: true,
+      sentenceCount: true,
+      createdAt: true
+    }
+  });
+
+  res.json(versions);
+});
+
+router.post(
+  "/:appFileMetaId/compare",
+  requirePro,
+  async (req, res) => {
+    const { appFileMetaId } = req.params;
+    const { fromVersion, toVersion } = req.body;
+
+    const diff = await getOrCreateDiff(
+      appFileMetaId,
+      fromVersion,
+      toVersion
+    );
+
+    res.json(diff);
+  }
+);
 
 export default router;

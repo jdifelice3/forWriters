@@ -11,7 +11,7 @@ export type FileType = "DOCX" | "PDF";
 
 export type Genre = "FANTASY" | "HISTORICAL" | "HORROR" | "LITERARY" | "MYSTERY" | "POEM" | "ROMANCE" | "SCIENCEFICTION";
 
-export type GroupType = "WRITING" | "PERSONAL";
+export type GroupType = "WRITING" | "PERSONAL" | "STUDIO";
 
 export type GroupRole = "OWNER" | "MEMBER" | "ADMIN" | "READER";
 
@@ -66,7 +66,7 @@ export interface AppFileDiff {
   appFileMetaId: string;
   fromVersion: number;
   toVersion: number;
-  diffJson: any;
+  blocks: any;
   wordDelta: number;
   sentenceDelta: number;
   paragraphDelta: number;

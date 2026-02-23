@@ -2,6 +2,7 @@ import { apiFetch, pdfFetch } from "./client";
 import { FileUploadFormInput, FileFormInput, ObjectIdsForDeletion } from "../types/FileTypes";
 import { AppFileMeta, AppFile, FileFeedback } from "../types/domain-types";
 import { CommentDTO } from "../types/FeedbackTypes";
+import { DiffResponse } from "../types/Diff";
 
 type FeedbackResponse = {
   html: string;
@@ -54,7 +55,7 @@ export const FilesAPI = {
         formData: FormData
     ){
 
-        return apiFetch<void>(`/files/${fileMetaId}/upload/version`, {
+        return apiFetch<void>(`/files/upload/${fileMetaId}/version`, {
             method: "POST",
             credentials: "include",
             body: formData,
@@ -120,5 +121,20 @@ export const FilesAPI = {
             method: "GET",
             credentials: "include"
         })
+    },
+
+    compareVersions(appFileMetaId: string, fromVersion: number, toVersion: number){
+        return apiFetch<DiffResponse>(`/files/${appFileMetaId}/compare`,
+            {
+                headers: { 'Content-Type': 'application/json' },
+                credentials: "include",
+                method: "POST",
+                body: JSON.stringify(
+                    {
+                        fromVersion: fromVersion,
+                        toVersion: toVersion
+                    }
+                )
+            })
     }
 }

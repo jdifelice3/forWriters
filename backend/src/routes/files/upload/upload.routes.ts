@@ -89,18 +89,56 @@ router.post("/", upload.single("file"), async (req, res) => {
 
   const currentDate = new Date();
 
+  // 🔥 NEW: Convert DOCX → HTML using your existing service
+  if (!process.env.AWS_S3_BUCKET || !process.env.AWS_S3_REGION) {
+    throw new Error("Missing S3 configuration");
+  }
+
+  const html = await loadDocxFromS3AsHtml(
+    process.env.AWS_S3_BUCKET,
+    key,
+    process.env.AWS_S3_REGION
+  );
+
+  // 🔥 Extract paragraphs + stats
+  const { paragraphs, paragraphCount, wordCount, sentenceCount } =
+    processHtmlDocument(html);
+
+  // Optional page estimate (250–300 words per page typical manuscript)
+  const pageCount = Math.ceil(wordCount / 275);
+
   const appFile = await prisma.appFile.create({
     data: {
       appFileMetaId: appFileMeta.id,
       version: 1,
-      name: `1-${title}-${currentDate.toLocaleDateString()}`,
+      name: `${1}-${appFileMeta.title}-${currentDate.toLocaleDateString()}`,
       filename: key,
       mimetype: mapMimeToEnum(mimeType),
       url: s3Url,
       userId: user.id,
-      documentType,
+      versionComment: "First version",
+
+      // 🔥 NEW CACHED FIELDS
+      htmlCache: html,
+      paragraphsJson: paragraphs,
+      paragraphCount,
+      sentenceCount,
+      wordCount,
+      pageCount,
     },
   });
+//   const appFile = await prisma.appFile.create({
+//     data: {
+//       appFileMetaId: appFileMeta.id,
+//       version: 1,
+//       name: `1-${title}-${currentDate.toLocaleDateString()}`,
+//       filename: key,
+//       mimetype: mapMimeToEnum(mimeType),
+//       url: s3Url,
+//       userId: user.id,
+//       documentType,
+//     },
+//   });
 
   res.json({
     ok: true,
@@ -109,8 +147,8 @@ router.post("/", upload.single("file"), async (req, res) => {
   });
 });
 
-// POST /files/:appFileMetaId/upload/version
-router.post("/version", loadAppFileMetaById, upload.single("file"), async (req, res) => {
+// POST /files/upload/:appFileMetaId/version
+router.post("/:appFileMetaId/version", loadAppFileMetaById, upload.single("file"), async (req, res) => {
   const currentDate = new Date();
 
   if (!req.file) throw new Error("There is no file in the request");
