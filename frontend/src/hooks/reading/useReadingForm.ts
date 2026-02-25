@@ -1,6 +1,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Reading, UserSearch } from "../../types/domain-types";
+import { Reading } from "../../types/domain-types";
+import { UserSearch } from "../../types/UserTypes";
 import {
   ReadingFormSchema,
   ReadingFormInput
@@ -60,7 +61,7 @@ export function useReadingForm(reading?: Reading) {
 
     participants.append({
       userId: user.userId,
-      fullName: user.fullName,
+      fullName: user.fullname,
       role: "AUTHOR"
     });
 

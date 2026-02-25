@@ -83,7 +83,7 @@ router.get("/", async (req, res) => {
   // Shape the response to match userSearch
   const results = users.map((u) => ({
     userId: u.id,
-    fullName: [u.userProfile?.firstName, u.userProfile?.lastName]
+    fullname: [u.userProfile?.firstName, u.userProfile?.lastName]
       .filter(Boolean)
       .join(" "),
     bio: u.userProfile?.bio ?? null,

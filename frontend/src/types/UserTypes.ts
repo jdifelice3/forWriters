@@ -16,6 +16,12 @@ export interface UserProfile {
   bio: string;
 }
 
+export interface UserSearch {
+    userId: string;
+    fullname: string;
+    bio: string;
+}
+
 export type ProfileFormInputs = {
     firstName: string,
     lastName: string,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UserSearch } from "../types/domain-types";
+import { UserSearch } from "../types/UserTypes";
 import {
   Box,
   Button,
@@ -43,7 +43,7 @@ const MemberSearchPage = () => {
       if (!res.ok) throw new Error(data.error || "Failed to connect");
 
       setConfirmation(
-        `Your request to connect with "${selectedMember.fullName}" has been sent. If accepted, you will connect.`
+        `Your request to connect with "${selectedMember.fullname}" has been sent. If accepted, you will connect.`
       );
     } catch (err) {
       if (err instanceof Error) setError(err.message);
@@ -80,7 +80,7 @@ const MemberSearchPage = () => {
       {selectedMember && (
         <Box mt={3}>
           <Typography sx={{mb: 2 }}>
-            Selected memeber: <strong>{selectedMember.fullName}</strong>
+            Selected memeber: <strong>{selectedMember.fullname}</strong>
           </Typography>
           <Card>
             <CardContent>

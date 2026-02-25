@@ -38,7 +38,8 @@ const FileFeedback = () => {
         getFileFeedbackUnique,
         getComments,
         getDeletionIds,
-        getHTML
+        getHTML,
+        exportFeedbackReport
       } = useFileDomain();
 
     const { activeGroup } = useGroupContext();
@@ -121,7 +122,7 @@ const FileFeedback = () => {
         getComments: getComments,
         getDeletionIds: getDeletionIds,
         getHTML: getHTML,
-        //exportFeedbackReport: exportFeedbackReport
+        exportFeedbackReport: exportFeedbackReport
     }
 
   return (

@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { UserSearch } from "../../types/domain-types";
 import { Autocomplete, TextField, CircularProgress } from "@mui/material";
-
+import { UserSearch } from "../../types/UserTypes";
 interface Props {
     onSelectMember: (user: UserSearch | null) => void;
     groupId: string | undefined;
@@ -44,7 +43,7 @@ const MemberSearchBox = ({ onSelectMember: onSelectMember, groupId }: Props) => 
             options={options}
             fullWidth   
             loading={loading}
-            getOptionLabel={(opt) => opt.fullName || ""}
+            getOptionLabel={(opt) => opt.fullname || ""}
             onInputChange={(_, value) => handleInput(value)}
             onChange={(_, value) => onSelectMember(value)}
             renderInput={(params) => (

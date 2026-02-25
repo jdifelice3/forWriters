@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, TextField, Select, MenuItem, Button, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { UserSearch } from "../types/domain-types";
+import { UserSearch } from "../types/UserTypes";
 
 type UserRow = {
   user: string;
@@ -17,7 +17,7 @@ export const UserList: React.FC<UserListProps> = ({selectedUser}) => {
   const [rows, setRows] = useState<UserRow[]>([]);
 
       useEffect(() => {
-        addRow(selectedUser.fullName!);
+        addRow(selectedUser.fullname!);
         updateRow
         
       },[]);
