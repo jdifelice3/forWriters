@@ -21,6 +21,7 @@ const statusStyles = {
 export const DiffParagraph = ({ block }: { block: DiffBlock }) => {
   return (
     <Box
+      id={`paragraph-${block.paragraphNumber}`}  // 👈 here
       sx={{
         mb: 2,
         px: 2,

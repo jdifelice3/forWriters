@@ -19,10 +19,7 @@ export async function getOrCreateDiff(
       }
     }
   });
-  console.log('existing', existing)
   if (existing) return existing;
-  console.log('lower', lower)
-  console.log('higher', higher)
   // 2️⃣ Load versions
   const versions = await prisma.appFile.findMany({
     where: {
@@ -39,7 +36,6 @@ export async function getOrCreateDiff(
       paragraphCount: true
     }
   });
-  console.log('versions', versions)
 
   if (versions.length !== 2) {
     throw new Error("Versions not found");
@@ -48,12 +44,11 @@ export async function getOrCreateDiff(
   const from = versions.find(v => v.version === lower)!;
   const to = versions.find(v => v.version === higher)!;
 
-  console.log('from', from)
-  console.log('to', to)
   const diffJson = createDiff(
     from.paragraphsJson as any,
     to.paragraphsJson as any
   );
+
 
   // 3️⃣ Compute analytics
   const wordDelta =

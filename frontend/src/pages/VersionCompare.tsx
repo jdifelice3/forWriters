@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Box, Typography, Button, MenuItem, Select, FormControl, InputLabel, Switch, FormControlLabel } from "@mui/material"
+import { Box, CircularProgress, Typography, Button, MenuItem, Select, FormControl, InputLabel, Switch, FormControlLabel } from "@mui/material"
 import { DiffResponse } from "../types/Diff";
 import { AppFileMeta } from "../types/domain-types";
 import { DiffSummary } from "../components/diff/DiffSummary"
@@ -8,6 +8,7 @@ import { RevisionTrendChart } from "../components/diff/RevisionTrendChart"
 import { useParams } from "react-router-dom";
 import { useFileDiffDomain } from "../hooks/file/useFileDiffDomain";
 import { useFiles } from "../hooks/file/useFiles";
+import { RevisionDistribution } from "../components/diff/RevisionDistribution"
 
 export const VersionCompare = () => {
     const { appFileMetaId } = useParams<{ appFileMetaId: string }>();
@@ -31,6 +32,7 @@ export const VersionCompare = () => {
     }
     setLoading(true)
     const data = await compareVersions(fromVersion, toVersion);
+    console.log('data', data)
     setDiff(data)
     setLoading(false)
     window.scrollTo({ top: 0, behavior: "smooth" })
@@ -49,7 +51,7 @@ export const VersionCompare = () => {
             Select two versions to compare
           </Typography>
         {/* </Box> */}
-    <Box sx={{mt: 4}}>
+    <Box sx={{mt: 4, ml: 2}}>
       {/* Top Controls */}
       <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 4, ml:2 }}>
         <FormControl size="small">
@@ -61,7 +63,7 @@ export const VersionCompare = () => {
           >
             {appFileMeta.appFile.map((v) => (
               <MenuItem key={v.version} value={v.version}>
-                {v.filename}
+                {v.filename.replace(/^\d+-/, '')}
               </MenuItem>
             ))}
           </Select>
@@ -76,7 +78,7 @@ export const VersionCompare = () => {
           >
             {appFileMeta.appFile.map((v) => (
               <MenuItem key={v.version} value={v.version}>
-                {v.filename}
+                {v.filename.replace(/^\d+-/, '')}
               </MenuItem>
             ))}
           </Select>
@@ -87,7 +89,7 @@ export const VersionCompare = () => {
           onClick={handleCompare}
           disabled={!fromVersion || !toVersion || loading}
         >
-          Compare
+           {loading ? "Comparing..." : "Compare"}
         </Button>
 
         {diff && (
@@ -116,14 +118,46 @@ export const VersionCompare = () => {
       )} */}
 
       {/* Results */}
+
       {diff && (
         <>
-          <RevisionTrendChart diff={diff} />
-          <DiffSummary diff={diff} />
-          <DiffBlockList blocks={diff.blocks} showUnchanged={showUnchanged} />
+         <Typography variant="h6" fontWeight={600} mb={2}>
+            Revision Changes            
+        </Typography>
+        <RevisionTrendChart diff={diff} />
+
+        <Typography variant="h6" fontWeight={600} mb={0.5}>
+            Revision Distribution
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+            Where the manuscript changed most.
+        </Typography>
+        <RevisionDistribution blocks={diff.blocks} />
+
+        <DiffSummary diff={diff} />
+        <Box
+            id="diff-container"
+            sx={{
+                maxHeight: "70vh",
+                overflowY: "auto",
+                scrollBehavior: "smooth"
+            }}
+        >
+            <DiffBlockList
+                blocks={diff.blocks}
+                showUnchanged={showUnchanged}
+            />
+        </Box>
         </>
       )}
+
+      
     </Box>
+    {loading && (
+  <Box sx={{ textAlign: "center", py: 6 }}>
+    <CircularProgress />
+  </Box>
+)}
     </>
   )
 }

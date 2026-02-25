@@ -108,7 +108,7 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
               <Button
                     component="a"
                     href=""
-                    onClick={() => navigate(`/filefeedbackdetail/${currentVersion?.id}`)}
+                    onClick={() => navigate(`/versioncompare/${fileMeta.id}`)}
                     size="medium"
                   >
                 View Revision Trends

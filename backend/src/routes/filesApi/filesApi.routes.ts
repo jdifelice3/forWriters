@@ -104,9 +104,9 @@ router.get("/search", async (req, res) => {
       orderBy: { name: "asc" },
       select: {
         id: true,
-        name: true,
+        filename: true,
         appFileMetaId: true
-        // add any other fields you want to show
+        // add any other fields
       },
    });
     

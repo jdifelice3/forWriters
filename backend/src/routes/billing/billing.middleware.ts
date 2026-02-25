@@ -15,21 +15,17 @@ export async function requirePro(
       where: { superTokensId: authId },
       include: { subscription: true },
     });
-    // console.log("authId", authId)
-    // console.log("user.id", user?.id)
-    if (!user || !user.subscription) {
-      return res.status(403).json({ error: "Pro subscription required" });
-    }
-    const { tier, status } = user.subscription;
-    //console.log('tier, status', tier, status)
-    const isPro =
-      tier === "PROFESSIONAL" &&
-      (status === "active" || status === "trialing");
-    //console.log('isPro', isPro)
-      if (!isPro) {
-        //console.log("Pro subscription required")
-      return res.status(403).json({ error: "Pro subscription required" });
-    }
+    //Temporarily disable this check. For reading group testing
+    // if (!user || !user.subscription) {
+    //   return res.status(403).json({ error: "Pro subscription required" });
+    // }
+    // const { tier, status } = user.subscription;
+    // const isPro =
+    //   tier === "PROFESSIONAL" &&
+    //   (status === "active" || status === "trialing");
+    // if (!isPro) {
+    //   return res.status(403).json({ error: "Pro subscription required" });
+    // }
     next();
   } catch (err) {
     return res.status(401).json({ error: "Unauthorized" });

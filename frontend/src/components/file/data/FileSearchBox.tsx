@@ -37,7 +37,7 @@ const searchUrl = `${import.meta.env.VITE_API_HOST}/api/filesApi/search?query=`;
     <Autocomplete
       options={options}
       fullWidth
-      getOptionLabel={(opt) => opt.name}
+      getOptionLabel={(opt) => opt.filename.replace(/^\d+-/, '')}
       onInputChange={(_, value) => handleInput(value)}
       onChange={(_, value) => onSelectFile(value)}
       renderInput={(params) => (

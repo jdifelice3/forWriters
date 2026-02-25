@@ -31,6 +31,7 @@ export type DiffParagraph = {
   sentences: {
     text: string;
     status: string;//"unchanged" | "added" | "deleted";
-  }[];
+  }[]
+  paragraphNumber: number;
 };
 

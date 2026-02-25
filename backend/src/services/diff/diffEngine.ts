@@ -39,10 +39,9 @@ function diffSentences(a: string, b: string) {
 }
 
 export function createDiff(fromBlocks: Block[], toBlocks: Block[]) {
+    console.log('in createDiff')
   const matchedFrom = new Set<number>();
   const diffJson: DiffParagraph[] = [];
-    console.log('fromBlocks', fromBlocks)
-    console.log('toBlocks', toBlocks)
   const fromTokenized = fromBlocks.map(b => tokenize(b.text));
 
   for (let i = 0; i < toBlocks.length; i++) {
@@ -84,7 +83,8 @@ export function createDiff(fromBlocks: Block[], toBlocks: Block[]) {
         id: toBlock.id,
         order: i,
         status,
-        sentences: sentenceDiff
+        sentences: sentenceDiff,
+        paragraphNumber: i + 1
       });
 
     } else {
@@ -96,11 +96,12 @@ export function createDiff(fromBlocks: Block[], toBlocks: Block[]) {
         sentences: sentenceSplit(toBlock.text).map(s => ({
           text: s,
           status: "added"
-        }))
+        })),
+        paragraphNumber: i + 1
       });
     }
   }
-
+console.log('diffJson', diffJson)
   // Deleted paragraphs
   fromBlocks.forEach((block, index) => {
     if (!matchedFrom.has(index)) {
@@ -111,7 +112,8 @@ export function createDiff(fromBlocks: Block[], toBlocks: Block[]) {
         sentences: sentenceSplit(block.text).map(s => ({
           text: s,
           status: "deleted"
-        }))
+        })),
+        paragraphNumber: index + 1
       });
     }
   });

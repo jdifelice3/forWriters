@@ -34,7 +34,7 @@ const FileVersionList: React.FC<FileVersionListProps> = ({
           }
         >
         <ListItemText
-            primary={`v${version.version} — ${version.filename}`}
+            primary={`v${version.version} — ${version.filename.replace(/^\d+-/, '')}`}
             secondary={
                 [
                 version.versionComment,
