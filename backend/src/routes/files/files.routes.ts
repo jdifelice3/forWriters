@@ -198,17 +198,25 @@ router.post(
   "/:appFileMetaId/compare",
   requirePro,
   async (req, res) => {
-    const { appFileMetaId } = req.params;
-    const { fromVersion, toVersion } = req.body;
-
-    const diff = await getOrCreateDiff(
-      appFileMetaId,
-      fromVersion,
-      toVersion
-    );
-
-    res.json(diff);
+    return res.json({ ok: true });
   }
 );
+
+// router.post(
+//   "/:appFileMetaId/compare",
+//   requirePro,
+//   async (req, res) => {
+//     const { appFileMetaId } = req.params;
+//     const { fromVersion, toVersion } = req.body;
+
+//     const diff = await getOrCreateDiff(
+//       appFileMetaId,
+//       fromVersion,
+//       toVersion
+//     );
+
+//     res.json(diff);
+//   }
+// );
 
 export default router;
