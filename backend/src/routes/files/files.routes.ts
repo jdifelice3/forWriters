@@ -194,29 +194,34 @@ router.get("/:appFileMetaId/revision-metrics", requirePro, async (req, res) => {
   res.json(versions);
 });
 
-router.post(
-  "/:appFileMetaId/compare",
-  requirePro,
-  async (req, res) => {
-    return res.json({ ok: true });
-  }
-);
-
 // router.post(
 //   "/:appFileMetaId/compare",
 //   requirePro,
 //   async (req, res) => {
-//     const { appFileMetaId } = req.params;
-//     const { fromVersion, toVersion } = req.body;
-
-//     const diff = await getOrCreateDiff(
-//       appFileMetaId,
-//       fromVersion,
-//       toVersion
-//     );
-
-//     res.json(diff);
+//     return res.json({ ok: true });
 //   }
 // );
+
+router.post(
+  "/:appFileMetaId/compare",
+  requirePro,
+  async (req, res) => {
+    try{
+        const { appFileMetaId } = req.params;
+        const { fromVersion, toVersion } = req.body;
+
+        const diff = await getOrCreateDiff(
+        appFileMetaId,
+        fromVersion,
+        toVersion
+        );
+
+        res.json(diff);
+    } catch (err) {
+        console.error("COMPARE ERROR:", err);
+      return res.status(500).json({ error: "Compare failed" });
+    }
+    }
+);
 
 export default router;
