@@ -69,6 +69,8 @@ app.use(
   })
 );
 
+app.options("*", cors());
+
 app.get("/__health", (req, res) => {
   res.json({ ok: true, time: Date.now() });
 });

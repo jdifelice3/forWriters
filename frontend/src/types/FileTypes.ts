@@ -1,8 +1,6 @@
 import { Variant } from "./Style";
 import { 
-    AppFile, 
     AppFileMeta,
-    FileFeedback, 
     Reading 
 } from "./domain-types";
 

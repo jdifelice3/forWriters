@@ -13,7 +13,7 @@ export const useFilesDiff = (appFileMetaId?: string) => {
 
   const swr = useSWR<DiffResponse>(
     key,
-    ([_, id]) => apiFetch(`/file/${id}/compare`),
+    ([_, id]) => apiFetch(`/files/${id}/compare`),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
