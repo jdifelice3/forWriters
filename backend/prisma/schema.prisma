@@ -190,6 +190,104 @@ model AppFileMeta {
     AppFileDiff         AppFileDiff[]   @relation("Diff")
 }
 
+model AuthEvent {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+
+  // actor
+  superTokensId String?
+  email         String?
+
+  // classification
+  type          AuthEventType
+  outcome       AuthOutcome
+  reasonCode    String? // e.g. "WRONG_CREDENTIALS", "TOO_MANY_ATTEMPTS"
+  message       String? // short, not sensitive
+
+  // request context
+  ip            String?
+  ipHash        String? // hash for privacy-preserving correlation
+  userAgent     String?
+  uaHash        String? // optional
+  deviceId      String? // your stable device identifier
+  sessionHandle String? // if available
+  requestId     String? // if you attach correlation IDs
+
+  // optional enrichment
+  geoCountry    String?
+  geoRegion     String?
+  geoCity       String?
+  asn           String?
+  isp           String?
+  riskScore     Int?    // 0-100
+
+  @@index([superTokensId, createdAt])
+  @@index([ipHash, createdAt])
+  @@index([deviceId, createdAt])
+}
+
+enum AuthEventType {
+  SIGN_UP
+  SIGN_IN
+  SIGN_OUT
+  SESSION_REFRESH
+  SESSION_REVOKE
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET_SUCCESS
+  EMAIL_VERIFIED
+  ROLE_CHANGED
+
+  // security signals
+  SIGN_IN_FAILED
+  SIGN_IN_BLOCKED
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+}
+
+enum AuthOutcome {
+  SUCCESS
+  FAILURE
+  BLOCKED
+}
+
+model AccountSecurity {
+  superTokensId  String  @id
+  failedCount    Int     @default(0)
+  lockedUntil    DateTime?
+  lastFailedAt   DateTime?
+  lastSuccessAt  DateTime?
+  lastIpHash     String?
+  lastDeviceId   String?
+  updatedAt      DateTime @updatedAt
+}
+
+model AuthDevice {
+  id            String   @id @default(uuid())
+  superTokensId String
+  deviceId      String   // stable ID (cookie-based)
+  label         String?  // user-assigned "Home laptop"
+  firstSeenAt   DateTime @default(now())
+  lastSeenAt    DateTime @default(now())
+  trusted       Boolean  @default(false)
+
+  // optional UA snapshot for display
+  userAgent     String?
+
+  @@unique([superTokensId, deviceId])
+  @@index([superTokensId, lastSeenAt])
+}
+
+model SessionIndex {
+  sessionHandle String   @id
+  superTokensId String
+  createdAt     DateTime @default(now())
+  lastSeenAt    DateTime @default(now())
+  deviceId      String?
+  ipHash        String?
+
+  @@index([superTokensId, lastSeenAt])
+}
+
 model CollaboratorRequest {
   id                        String                  @id @default(cuid())
   userId                    String

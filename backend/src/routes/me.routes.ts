@@ -89,6 +89,7 @@ router.get("/groups", verifySession(), async (req, res) => {
     if(!user) {
         res.status(404).json({"error": "User not found"});
     }
+    //console.log('user', user)
     const groups = await prisma.groupUser.findMany({
         where: {
             userId: user!.id,
