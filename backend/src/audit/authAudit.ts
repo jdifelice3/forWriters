@@ -43,6 +43,20 @@ export async function logAuthEvent(params: {
         requestId,
       },
     });
+
+    // device table upkeep
+    await prisma.authDevice.upsert({
+    where: { superTokensId_deviceId: { superTokensId: params.superTokensId!, deviceId: deviceId ?? "unknown" } },
+    update: { lastSeenAt: new Date(), userAgent: ua },
+    create: {
+        superTokensId: params.superTokensId!,
+        deviceId: deviceId ?? "unknown",
+        firstSeenAt: new Date(),
+        lastSeenAt: new Date(),
+        userAgent: ua ?? null,
+        }
+    });
+
   } catch (e) {
     console.error("Auth audit log failed:", e);
   }

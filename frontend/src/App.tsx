@@ -12,6 +12,7 @@ import { PreBuiltUIList } from "./config";
 import { SWRConfig } from "swr";
 import { typedFetcher } from "./util/fetcher";
 import { GroupContextProvider } from "./context/GroupContextProvider";
+import EmailVerification from "supertokens-auth-react/recipe/emailverification";
 
 // ---------- Root App ----------
 export default function App() {
@@ -32,7 +33,13 @@ export default function App() {
                         <Route
                             path="/*"
                             element={
-                                <SessionAuth requireAuth={false}>
+                                <SessionAuth 
+                                    requireAuth={false}
+                                    overrideGlobalClaimValidators={(globalValidators) => [
+                                        ...globalValidators,
+                                        EmailVerification.EmailVerificationClaim.validators.isVerified(),
+                                    ]}
+                                >
                                     <UserProvider>
                                         <GroupContextProvider>
                                             <Layout />

@@ -10,6 +10,11 @@ import { createUser } from "./database/dbUsers";
 import { recordAuthSuccess, logAuthEvent, sha256, stReqToRequestLike } from "./audit/authAudit";
 import type { BaseRequest } from "supertokens-node/lib/build/framework/request";
 import AccountLinking from "supertokens-node/recipe/accountlinking";
+import { recordAuthFailure } from "./audit/authAudit";
+import { sendEmail } from "./util/email";
+import EmailVerification from "supertokens-node/recipe/emailverification";
+import { RecipeUserId } from "supertokens-node";
+
 
 if (typeof process.env.SUPERTOKENS_CONNECTION_URI === 'undefined') {
   throw new Error("Environment variable process.env.SUPERTOKENS_CONNECTION_URI is undefined");
@@ -62,6 +67,31 @@ export const SuperTokensConfig: TypeInput = {
             })
         }),
         EmailPassword.init({
+            emailDelivery: {
+                override: (originalImplementation) => ({
+                    ...originalImplementation,
+                    sendEmail: async (input) => {
+                        if (input.type === "PASSWORD_RESET") {
+                        const resetLink = input.passwordResetLink;
+
+                        await sendEmail({
+                            to: input.user.email,
+                            subject: "Reset your password",
+                            html: `
+                            <p>You requested a password reset for forWriters.</p>
+                            <p><a href="${resetLink}">Reset your password</a></p>
+                            <p>If you did not request this, you can ignore this email.</p>
+                            `,
+                            text: `Reset your password: ${resetLink}`,
+                        });
+
+                        return;
+                        }
+
+                        return originalImplementation.sendEmail(input);
+                    },
+                }),
+            },
             signUpFeature: {
                 formFields: [
                     {
@@ -133,6 +163,32 @@ export const SuperTokensConfig: TypeInput = {
                     async signInPOST(input) {
                         const response = await originalImplementation.signInPOST!(input);
 
+                        if (response.status === "OK") {
+                            const recipeUserId = new RecipeUserId(response.user.id);
+                            const verified = await EmailVerification.isEmailVerified(
+                                recipeUserId,
+                                response.user.emails[0]
+                            );
+
+                            if (!verified) {
+                                return {
+                                    status: "GENERAL_ERROR",
+                                    message: "Please verify your email before logging in."
+                                };
+                            }
+                        }
+                    if (response.status !== "OK") {
+                        //superTokensId: string, ipHash?: string, deviceId?: string
+
+    const email = input.formFields.find(f => f.id === "email")?.value;
+
+    // await recordAuthFailure({
+    //   email: typeof email === "string" ? email : "",
+    //   ip: input.options.req.getIP()
+    // });
+  
+                    }
+
                         const reqLike = stReqToRequestLike(input.options.req as BaseRequest);
 
                         if (response.status === "OK") {
@@ -157,12 +213,33 @@ export const SuperTokensConfig: TypeInput = {
                         }
 
                         return response;
-                    }
-
+                    },
                 }),
             },
         }),
+        EmailVerification.init({
+            mode: "REQUIRED",
+            emailDelivery: {
+                override: (originalImplementation) => ({
+                ...originalImplementation,
+                sendEmail: async (input) => {
 
+                    const verifyLink = input.emailVerifyLink;
+
+                    await sendEmail({
+                        to: input.user.email,
+                        subject: "Verify your email",
+                        html: `
+                            <p>Welcome to forWriters.</p>
+                            <p>Please verify your email by clicking on the link:</p>
+                            <a href="${verifyLink}">Verify Email</a>
+                        `,
+                        text: `Verify your email: ${verifyLink}`
+                    });
+                }
+                })
+            }
+        }),
         Dashboard.init(),
         UserRoles.init(),
         sessionInit        

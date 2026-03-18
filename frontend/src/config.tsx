@@ -4,7 +4,9 @@ import React from 'react';
 import EmailPassword from "supertokens-auth-react/recipe/emailpassword";
 import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
 import Session from "supertokens-auth-react/recipe/session";
+import EmailVerification from "supertokens-auth-react/recipe/emailverification";
 import { mutate } from "swr";
+import { EmailVerificationPreBuiltUI } from "supertokens-auth-react/recipe/emailverification/prebuiltui";
 
 export const SuperTokensConfig = {
     appInfo: {
@@ -17,6 +19,7 @@ export const SuperTokensConfig = {
     
     recipeList: [
         EmailPassword.init(),
+        EmailVerification.init(),
         Session.init({  
             tokenTransferMethod: "cookie",
             onHandleEvent: async (event) => {
@@ -42,7 +45,7 @@ export const recipeDetails = {
     docsLink: "https://supertokens.com/docs/quickstart/introduction",
 };
 
-export const PreBuiltUIList = [EmailPasswordPreBuiltUI];
+export const PreBuiltUIList = [EmailPasswordPreBuiltUI, EmailVerificationPreBuiltUI];
 
 
 

@@ -2,9 +2,11 @@
 
 import React from "react";
 import EmailPassword from "supertokens-auth-react/recipe/emailpassword";
-import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
 import Session from "supertokens-auth-react/recipe/session";
 import { mutate } from "swr";
+import EmailVerification from "supertokens-auth-react/recipe/emailverification";
+import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
+import { EmailVerificationPreBuiltUI } from "supertokens-auth-react/recipe/emailverification/prebuiltui";
 
 export const SuperTokensConfig = {
   appInfo: {
@@ -51,6 +53,7 @@ EmailPassword.init({
     },
   },
 }),
+EmailVerification.init(),
 
     Session.init({
       tokenTransferMethod: "cookie",
@@ -70,3 +73,5 @@ EmailPassword.init({
     return undefined;
   },
 };
+
+export const PreBuiltUIList = [EmailPasswordPreBuiltUI, EmailVerificationPreBuiltUI];

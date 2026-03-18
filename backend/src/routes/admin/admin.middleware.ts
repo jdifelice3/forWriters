@@ -5,6 +5,8 @@ const DEVICE_COOKIE = "fw_device";
 
 export function deviceIdMiddleware(req: Request, res: Response, next: NextFunction) {
   const existing = req.cookies?.[DEVICE_COOKIE];
+  //console.log('req.cookies', req.cookies);
+  //console.log('existing', existing)
   if (existing && typeof existing === "string") {
     (req as any).deviceId = existing;
     return next();
@@ -12,7 +14,7 @@ export function deviceIdMiddleware(req: Request, res: Response, next: NextFuncti
 
   const deviceId = crypto.randomUUID();
   (req as any).deviceId = deviceId;
-
+  console.log('deviceId', deviceId)
   res.cookie(DEVICE_COOKIE, deviceId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
