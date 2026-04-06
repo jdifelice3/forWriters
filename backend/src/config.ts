@@ -14,7 +14,7 @@ import { recordAuthFailure } from "./audit/authAudit";
 import { sendEmail } from "./util/email";
 import EmailVerification from "supertokens-node/recipe/emailverification";
 import { RecipeUserId } from "supertokens-node";
-
+import { Resend } from "resend";
 
 if (typeof process.env.SUPERTOKENS_CONNECTION_URI === 'undefined') {
   throw new Error("Environment variable process.env.SUPERTOKENS_CONNECTION_URI is undefined");
@@ -73,8 +73,10 @@ export const SuperTokensConfig: TypeInput = {
                     sendEmail: async (input) => {
                         if (input.type === "PASSWORD_RESET") {
                         const resetLink = input.passwordResetLink;
-
-                        await sendEmail({
+                        const resend = new Resend(process.env.RESEND_API_KEY);
+                        const result = await resend.emails.send({
+                            //from: process.env.EMAIL_FROM?
+                            from: "support@forwriters.ink",
                             to: input.user.email,
                             subject: "Reset your password",
                             html: `
@@ -83,8 +85,9 @@ export const SuperTokensConfig: TypeInput = {
                             <p>If you did not request this, you can ignore this email.</p>
                             `,
                             text: `Reset your password: ${resetLink}`,
-                        });
 
+                        });
+                        console.log("SES SEND RESULT:", result);
                         return;
                         }
 
@@ -225,8 +228,10 @@ export const SuperTokensConfig: TypeInput = {
                 sendEmail: async (input) => {
 
                     const verifyLink = input.emailVerifyLink;
+                    const resend = new Resend(process.env.RESEND_API_KEY);
 
-                    await sendEmail({
+                    await resend.emails.send({
+                        from: "support@forwriters.ink",
                         to: input.user.email,
                         subject: "Verify your email",
                         html: `

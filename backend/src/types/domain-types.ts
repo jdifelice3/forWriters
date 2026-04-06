@@ -33,6 +33,10 @@ export type WorkType = "FLASHFICTION" | "NOVEL" | "NOVELLA" | "NOVELETTE" | "PLA
 
 export type SubscriptionTier = "FREE" | "PROFESSIONAL" | "STUDIO";
 
+export type AuthEventType = "SIGN_UP" | "SIGN_IN" | "SIGN_OUT" | "SESSION_REFRESH" | "SESSION_REVOKE" | "PASSWORD_RESET_REQUEST" | "PASSWORD_RESET_SUCCESS" | "EMAIL_VERIFIED" | "ROLE_CHANGED" | "SIGN_IN_FAILED" | "SIGN_IN_BLOCKED" | "ACCOUNT_LOCKED" | "ACCOUNT_UNLOCKED";
+
+export type AuthOutcome = "SUCCESS" | "FAILURE" | "BLOCKED";
+
 export interface AppFile {
   id: string;
   appFileMetaId: string;
@@ -90,6 +94,61 @@ export interface AppFileMeta {
   user: User;
   appFile: AppFile[];
   AppFileDiff: AppFileDiff[];
+}
+
+export interface AuthEvent {
+  id: string;
+  createdAt: string;
+  superTokensId?: string;
+  email?: string;
+  type: AuthEventType;
+  outcome: AuthOutcome;
+  reasonCode?: string;
+  message?: string;
+  ip?: string;
+  ipHash?: string;
+  userAgent?: string;
+  uaHash?: string;
+  deviceId?: string;
+  sessionHandle?: string;
+  requestId?: string;
+  geoCountry?: string;
+  geoRegion?: string;
+  geoCity?: string;
+  asn?: string;
+  isp?: string;
+  riskScore?: number;
+}
+
+export interface AccountSecurity {
+  superTokensId: string;
+  failedCount: number;
+  lockedUntil?: string;
+  lastFailedAt?: string;
+  lastSuccessAt?: string;
+  lastIpHash?: string;
+  lastDeviceId?: string;
+  updatedAt: string;
+}
+
+export interface AuthDevice {
+  id: string;
+  superTokensId: string;
+  deviceId: string;
+  label?: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  trusted: boolean;
+  userAgent?: string;
+}
+
+export interface SessionIndex {
+  sessionHandle: string;
+  superTokensId: string;
+  createdAt: string;
+  lastSeenAt: string;
+  deviceId?: string;
+  ipHash?: string;
 }
 
 export interface CollaboratorRequest {
@@ -155,7 +214,7 @@ export interface Group {
   groupUrl: GroupUrl[];
   user: User;
   joinRequests: JoinRequest[];
-  groupInvite: GroupInvite[];
+  invites: GroupInvite[];
 }
 
 export interface GroupAddress {
@@ -174,11 +233,15 @@ export interface GroupInvite {
   groupId: string;
   email: string;
   role: GroupRole;
+  invitedById: string;
   tokenHash: string;
   expiresAt: string;
   acceptedAt?: string;
+  revokedAt?: string;
   createdAt: string;
+  updatedAt: string;
   group: Group;
+  invitedBy: User;
 }
 
 export interface GroupNews {
@@ -313,6 +376,7 @@ export interface User {
   collaboratorUserRequestor: CollaboratorRequest[];
   fileFeedback: FileFeedback[];
   fileFeedbackComment: FileFeedbackComment[];
+  sentInvites: GroupInvite[];
 }
 
 export interface UserCollaborator {

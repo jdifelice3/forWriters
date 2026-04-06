@@ -374,7 +374,7 @@ model Group {
   groupUrl     GroupUrl[]
   user         User           @relation(fields: [creatorUserId], references: [id])
   joinRequests JoinRequest[]
-  groupInvite  GroupInvite[]
+  invites      GroupInvite[]
 }
 
 model GroupAddress {
@@ -390,17 +390,26 @@ model GroupAddress {
 }
 
 model GroupInvite {
-  id          String   @id @default(uuid())
-  groupId     String
-  email       String
-  role        GroupRole
-  tokenHash   String
-  expiresAt   DateTime
-  acceptedAt DateTime?
-  createdAt  DateTime @default(now())
+  id           String     @id @default(uuid())
+  groupId      String
+  email        String
+  role         GroupRole
+  invitedById  String
 
-  group Group @relation(fields: [groupId], references: [id])
+  tokenHash    String     @unique
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  revokedAt    DateTime?
 
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  group        Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  invitedBy    User       @relation("GroupInviteInvitedBy", fields: [invitedById], references: [id])
+
+  @@index([groupId])
+  @@index([email])
+  @@index([invitedById])
   @@unique([groupId, email])
 }
 
@@ -426,6 +435,8 @@ model GroupUser {
   group Group @relation(fields: [groupId], references: [id])
 
   @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
 }
 
 model GroupUrl {
@@ -569,6 +580,7 @@ model User {
   collaboratorUserRequestor    CollaboratorRequest[]        @relation("UserCollaboratorRequest")
   fileFeedback   FileFeedback[]
   fileFeedbackComment FileFeedbackComment[]
+  sentInvites    GroupInvite[] @relation("GroupInviteInvitedBy")
 }
 
 model UserCollaborator {
