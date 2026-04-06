@@ -12,6 +12,7 @@
 .env.dev
 .env.dev.stripe
 .env.prod
+.env.dev.audit
 
 npm-debug.log*
 yarn-debug.log*
