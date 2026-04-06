@@ -4,6 +4,8 @@ import path from "path";
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
+import { deviceIdMiddleware } from "./routes/admin/admin.middleware";
 
 import supertokens from "supertokens-node";
 import {
@@ -46,7 +48,7 @@ app.use(
   bodyParser.raw({ type: "application/json" })
 );
 
-app.use("/api/billing", billingRouter);
+
 
 // app.use((req, _res, next) => {
 //   console.log("REQ:", req.method, req.path);
@@ -69,11 +71,17 @@ app.use(
   })
 );
 
+app.use("/api/billing", billingRouter);
+
 app.options("*", cors());
 
 app.get("/__health", (req, res) => {
   res.json({ ok: true, time: Date.now() });
 });
+
+//Auditing
+app.use(cookieParser());
+app.use(deviceIdMiddleware);
 
 // -----------------------------------------------------------------------------
 // SuperTokens core middleware (auth plumbing)

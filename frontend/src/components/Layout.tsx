@@ -24,6 +24,9 @@ import FileFeedbackDetail from "../pages/FileFeedbackDetail";
 import TopNav from "../components/nav/TopNav";
 import Billing from "../pages/Billing";
 import { VersionCompare } from "../pages/VersionCompare";
+import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
+import { PreBuiltUIList } from "../supertokensConfig";
+import * as ReactRouterDOM from "react-router-dom";
 
 export default function Layout() {
   const { loading } = useSessionContext();
@@ -36,6 +39,7 @@ export default function Layout() {
         <Sidebar />
         <Box component="main" sx={{ flexGrow: 1, mt: 10, ml:0 }}>
             <Routes>
+                 {getSuperTokensRoutesForReactRouterDom(ReactRouterDOM, PreBuiltUIList)}
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/userprofile" element={<UserProfile />} />

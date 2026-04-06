@@ -60,6 +60,36 @@ async function ensureStripeCustomer(user: { id: string; email: string; subscript
   return customer.id;
 }
 
+router.get("/me", async (req, res) => {
+  const session = await Session.getSession(req, res)
+  const authId = session.getUserId()
+
+  const user = await prisma.user.findUnique({
+    where: { superTokensId: authId }
+  })
+
+  if (!user) {
+    return res.status(404).json({ error: "User not found" })
+  }
+
+  const subscription = await prisma.subscription.findUnique({
+    where: { userId: user.id }
+  })
+
+  if (!subscription) {
+    return res.json({
+      tier: "FREE",
+      status: "inactive"
+    })
+  }
+
+  res.json({
+    tier: subscription.tier,
+    status: subscription.status,
+    currentPeriodEnd: subscription.currentPeriodEnd
+  })
+})
+
 // POST /api/billing/checkout
 router.post<
     {},                 // res body

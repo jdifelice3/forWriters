@@ -13,12 +13,15 @@ import {
   Stack,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import { useInviteDomain } from "../../hooks/invite/useInviteDomain";
 
 interface GroupDetailsProps {
   group: Group;
 }
 
 export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
+    const { sendInvites } = useInviteDomain();
+
   const [form, setForm] = useState({
     name: group.name || "",
     description: group.description || "",
@@ -34,6 +37,15 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${form.street}, ${form.city}, ${form.state} ${form.zip}`
   )}`;
+
+  const handleSendInvites = async(emails: string[] | undefined) => {
+    if(!emails){
+        let arrEmail: string[] = [];// = "johndifelice@gmail.com"; 
+        arrEmail.push("johndifelice@gmail.com");
+        await sendInvites(group.id, arrEmail);
+    }
+    
+  }
 
   return (
     <Card sx={{ height: "100%" }}>
@@ -113,10 +125,10 @@ export const GroupDetails: React.FC<GroupDetailsProps> = ({ group }) => {
                         variant="contained"
                         component="a"
                         href=""
-                        //onClick={() => navigate(`/filefeedbackdetail/${currentVersion?.id}`)}
+                        onClick={() => handleSendInvites(undefined)}
                         size="small"
                         sx={{ fontSize: 14 }}
-                        disabled={true}
+                        //disabled={true}
                     >
                     Invite To Group
                     </Button>
