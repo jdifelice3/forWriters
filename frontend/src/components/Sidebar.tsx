@@ -95,7 +95,7 @@ const Sidebar = () => {
             <ListItemIcon className="sidebarIcon" color="white">{<CollectionsBookmarkIcon htmlColor="white"/>}</ListItemIcon>
             <ListItemText primary={"Files"} />
         </ListItemButton>
-
+{/* 
         <ListItemButton
                 key={"/members"}
                 selected={pathname.startsWith("/members")}
@@ -104,7 +104,7 @@ const Sidebar = () => {
             >
             <ListItemIcon className="sidebarIcon" color="white">{<ConnectWithoutContactIcon htmlColor="white"/>}</ListItemIcon>
             <ListItemText primary={"Members"} />
-        </ListItemButton>
+        </ListItemButton> */}
     </List>
     </Drawer>
     </ThemeProvider>

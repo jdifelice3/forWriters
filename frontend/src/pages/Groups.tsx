@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { useGroupDetails } from "../hooks/useGroup";
@@ -5,6 +6,7 @@ import { useParams } from "react-router";
 import { Group } from "../types/domain-types";
 import {
   Box,
+  Button,
   Typography,
   Card,
   CardContent,
@@ -19,8 +21,11 @@ import { GroupDetailsAdmin } from "../components/group/GroupDetailsAdmin";
 import { GroupPersonalDetailsAdmin } from "../components/group/GroupPersonalDetailsAdmin";
 import { GroupDetails } from "../components/group/GroupDetails";
 import { GroupPersonalDetails } from "../components/group/GroupPersonalDetails";
+import GroupInviteMembersDialog from "../components/group/GroupInviteMembersDialog";
+import { GroupRole } from "../types/domain-types";
 
 const Groups = () => {
+    const [open, setOpen] = useState(false);
     const { groupId } = useParams();
     const { user } = useUserContext();
     const { data : group, isLoading } = useGroupDetails<Group>(groupId);
@@ -39,7 +44,24 @@ const Groups = () => {
 
     const userIndex: number = group.groupUser.findIndex(item => item.userId === user.id);
     const isAdmin = (group.groupUser[userIndex].role === "ADMIN");
+    
+
+    const handleCloseInviteDialog = () => {
+        setOpen(false);
+    }
+
+    const handleOnSendExistingInvite = async(input: { userId: string; role: GroupRole }) => {
+        alert(`${input.userId}, ${input.role}`);
+    }
+
+    const handleOnSendEmailInvite = async(input: { email: string; role: GroupRole }) => {
+        alert(`${input.email}, ${input.role}`);
+    }
   
+    const handleInviteToGroup = (e: any) => {
+        setOpen(true);
+        return true;
+    }
   return (
     <Card elevation={0} className="mainComponentPanel">
         <CardContent>
@@ -60,6 +82,25 @@ const Groups = () => {
                 ) : (
                     group.groupType === "WRITING" ? <GroupDetails group={group} /> : <GroupPersonalDetails group={group} />
                 )}
+                </Grid>
+                <Grid size={3} >
+                    <Card>
+                        <CardContent>
+                            <Button onClick={handleInviteToGroup} variant="contained">
+                                Invite to Group
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid>
+                    <GroupInviteMembersDialog
+                        open={open}
+                        onClose = {handleCloseInviteDialog}
+                        onSendExistingInvite = {handleOnSendExistingInvite}
+                        onSendEmailInvite = {handleOnSendEmailInvite}
+                        memberOptions = {[]}
+                        loadingMembers = {true}
+                    />
                 </Grid>
             </Grid>
 

@@ -71,24 +71,25 @@ export const SuperTokensConfig: TypeInput = {
                 override: (originalImplementation) => ({
                     ...originalImplementation,
                     sendEmail: async (input) => {
+                        console.log("input.type",input.type);
                         if (input.type === "PASSWORD_RESET") {
-                        const resetLink = input.passwordResetLink;
-                        const resend = new Resend(process.env.RESEND_API_KEY);
-                        const result = await resend.emails.send({
-                            //from: process.env.EMAIL_FROM?
-                            from: "support@forwriters.ink",
-                            to: input.user.email,
-                            subject: "Reset your password",
-                            html: `
-                            <p>You requested a password reset for forWriters.</p>
-                            <p><a href="${resetLink}">Reset your password</a></p>
-                            <p>If you did not request this, you can ignore this email.</p>
-                            `,
-                            text: `Reset your password: ${resetLink}`,
+                            const resetLink = input.passwordResetLink;
+                            const resend = new Resend(process.env.RESEND_API_KEY);
+                            const result = await resend.emails.send({
+                                //from: process.env.EMAIL_FROM?
+                                from: "support@forwriters.ink",
+                                to: input.user.email,
+                                subject: "Reset your password",
+                                html: `
+                                <p>You requested a password reset for forWriters.</p>
+                                <p><a href="${resetLink}">Reset your password</a></p>
+                                <p>If you did not request this, you can ignore this email.</p>
+                                `,
+                                text: `Reset your password: ${resetLink}`,
 
-                        });
-                        console.log("SES SEND RESULT:", result);
-                        return;
+                            });
+                            console.log("SES SEND RESULT:", result);
+                            return;
                         }
 
                         return originalImplementation.sendEmail(input);
@@ -182,16 +183,12 @@ export const SuperTokensConfig: TypeInput = {
                         }
                     if (response.status !== "OK") {
                         //superTokensId: string, ipHash?: string, deviceId?: string
-
-    const email = input.formFields.find(f => f.id === "email")?.value;
-
-    // await recordAuthFailure({
-    //   email: typeof email === "string" ? email : "",
-    //   ip: input.options.req.getIP()
-    // });
-  
+                        const email = input.formFields.find(f => f.id === "email")?.value;
+                        // await recordAuthFailure({
+                        //   email: typeof email === "string" ? email : "",
+                        //   ip: input.options.req.getIP()
+                        // });
                     }
-
                         const reqLike = stReqToRequestLike(input.options.req as BaseRequest);
 
                         if (response.status === "OK") {
