@@ -115,7 +115,7 @@ export function useReadingDomain(
         if (disabled) return;
         const reading: Reading | undefined = readings.find(r => r.id === readingId);
         if(!reading) return undefined;
-        if(!reading.submissionDeadline) return undefined;
+        if(!reading.submissionDeadline) return true;
 
         return new Date() >= new Date(reading.submissionDeadline);
     },

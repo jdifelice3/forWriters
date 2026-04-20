@@ -68,15 +68,6 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
           <Box>
             {currentVersion && (
               <>
-              {/* <Button
-                variant="contained"
-                component="a"
-                href={currentVersion.url}
-                download={currentVersion.filename}
-                size="small"
-              >
-                {fileListProperties.buttonDownloadText}
-              </Button> */}
               <IconButton 
                 href={currentVersion.url} 
                 size="medium"
