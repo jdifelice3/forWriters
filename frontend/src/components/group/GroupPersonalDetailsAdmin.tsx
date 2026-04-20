@@ -79,7 +79,8 @@ export const GroupPersonalDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }
 
         {!editing && (
           <Button
-            variant="outlined"
+            variant="contained"
+            size="small"
             startIcon={<EditIcon />}
             onClick={() => setEditing(true)}
             sx={{ mb: 2 }}
@@ -137,6 +138,7 @@ export const GroupPersonalDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }
 
                     <Button
                         variant="contained"
+                        size="small"
                         startIcon={<SaveIcon />}
                         onClick={handleSave}
                         disabled={saving}
@@ -146,6 +148,7 @@ export const GroupPersonalDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }
                     &nbsp;&nbsp;
                     <Button
                         variant="contained"
+                        size="small"
                         startIcon={<CancelIcon />}
                         onClick={() => setEditing(false)}
                     >

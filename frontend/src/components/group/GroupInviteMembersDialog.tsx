@@ -19,6 +19,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { UserSearch } from "../../types/UserTypes";
+import MemberSearchBox from "../member/MemberSearchBox";
 
 // type GroupRole = "MEMBER" | "READER" | "ADMIN";
 
@@ -46,6 +48,7 @@ type InviteMembersDialogProps = {
   onSendEmailInvite: (input: { email: string; role: GroupRole }) => Promise<void>;
   memberOptions: MemberOption[];
   loadingMembers?: boolean;
+  groupId?: string | undefined
 };
 
 const GroupInviteMembersDialog = ({
@@ -55,16 +58,20 @@ const GroupInviteMembersDialog = ({
   onSendEmailInvite,
   memberOptions,
   loadingMembers = false,
+  groupId
 }: InviteMembersDialogProps) => {
   const [tab, setTab] = useState(0);
 
-  const [selectedMember, setSelectedMember] = useState<MemberOption | null>(null);
+//   const [selectedMember, setSelectedMember] = useState<MemberOption | null>(null);
+  const [selectedMember, setSelectedMember] = useState<UserSearch | null>(null);
   const [existingRole, setExistingRole] = useState<GroupRole>("MEMBER");
   const [email, setEmail] = useState("");
   const [emailRole, setEmailRole] = useState<GroupRole>("MEMBER");
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
+  console.log("selectedMember", selectedMember);
+  console.log("selectedMember.groupStatus", selectedMember?.groupStatus); 
   const eligibility: InviteEligibility = useMemo(() => {
     if (!selectedMember) return "idle";
     switch (selectedMember.groupStatus) {
@@ -102,6 +109,13 @@ const GroupInviteMembersDialog = ({
     selectedMember &&
     (eligibility === "eligible" || eligibility === "expired_invite");
 
+    const handleOnClose = () => {
+        setSubmitting(false);
+        setSuccessMessage("");
+        setSelectedMember(null);
+        onClose();
+    }
+
   async function handleSendExistingInvite() {
     if (!selectedMember || !canSendExisting) return;
     setSubmitting(true);
@@ -109,10 +123,10 @@ const GroupInviteMembersDialog = ({
 
     try {
       await onSendExistingInvite({
-        userId: selectedMember.id,
+        userId: selectedMember.userId,
         role: existingRole,
       });
-      setSuccessMessage(`Invitation sent to ${selectedMember.displayName}.`);
+      setSuccessMessage(`Invitation sent to ${selectedMember.fullname}.`);
       setSelectedMember(null);
     } finally {
       setSubmitting(false);
@@ -136,7 +150,7 @@ const GroupInviteMembersDialog = ({
     }
   }
 
-  function renderOptionLabel(option: MemberOption) {
+  function renderOptionLabel(option: UserSearch) {
     switch (option.groupStatus) {
       case "already_member":
         return "Already a member";
@@ -150,7 +164,7 @@ const GroupInviteMembersDialog = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleOnClose} fullWidth maxWidth="sm">
       <DialogTitle>Invite to Group</DialogTitle>
 
       <DialogContent dividers>
@@ -171,36 +185,11 @@ const GroupInviteMembersDialog = ({
 
         {tab === 0 && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Autocomplete
-              options={memberOptions}
-              loading={loadingMembers}
-              value={selectedMember}
-              onChange={(_, value) => setSelectedMember(value)}
-              getOptionLabel={(option) => `${option.displayName} (${option.email})`}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Search for a member"
-                  placeholder="Name or email"
-                />
-              )}
-              renderOption={(props, option) => (
-                <Box component="li" {...props} sx={{ display: "flex", flexDirection: "column", py: 1 }}>
-                  <Typography variant="body1">{option.displayName}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {option.email}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {renderOptionLabel(option)}
-                  </Typography>
-                </Box>
-              )}
-            />
-
+            <MemberSearchBox onSelectMember={setSelectedMember} groupId={groupId}/>
             {selectedMember && (
               <Card variant="outlined">
                 <CardContent>
-                  <Typography variant="subtitle1">{selectedMember.displayName}</Typography>
+                  <Typography variant="subtitle1">{selectedMember.fullname}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     {selectedMember.email}
                   </Typography>
@@ -260,7 +249,7 @@ const GroupInviteMembersDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} disabled={submitting}>
+        <Button onClick={handleOnClose} disabled={submitting} variant="contained">
           Cancel
         </Button>
 

@@ -242,6 +242,7 @@ export interface GroupInvite {
   updatedAt: string;
   group: Group;
   invitedBy: User;
+  pendingSessions: PendingInviteSession[];
 }
 
 export interface GroupNews {
@@ -293,6 +294,14 @@ export interface Notification {
   createdAt: string;
   readAt?: string;
   href: string;
+}
+
+export interface PendingInviteSession {
+  id: string;
+  inviteId: string;
+  expiresAt: string;
+  createdAt: string;
+  invite: GroupInvite;
 }
 
 export interface Subscription {

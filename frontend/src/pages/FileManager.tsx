@@ -167,7 +167,7 @@ const FileManager = () => {
             </Grid>
             <Grid size={6} textAlign="right">
               <Button
-                variant="outlined"
+                variant="contained"
                 startIcon={<UploadIcon />}
                 onClick={() => ui.setUploadDialogOpen(true)}
               >

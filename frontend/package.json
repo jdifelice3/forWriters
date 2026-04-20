@@ -43,6 +43,7 @@
         "@tiptap/react": "^3.13.0",
         "@tiptap/starter-kit": "^3.13.0",
         "dotenv": "^17.2.3",
+        "js-cookie": "^3.0.5",
         "mui-tiptap": "^1.28.1",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
@@ -57,6 +58,7 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.39.1",
+        "@types/js-cookie": "^3.0.6",
         "@types/node": "^24.10.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { mutate } from "swr";
 import { 
     Box, 
     Divider,
@@ -22,6 +23,9 @@ import ResumeCard from "../components/dashboard/ResumeCard";
 import { ProfileFormInputs } from "../types/UserTypes";
 import { useUserContext } from "../context/UserContext";
 import { useUserDomain } from "../hooks/useUserDomain";
+import { useGroupInvite } from "../hooks/useGroup";
+import { GroupSummary } from '../types/ContextTypes';
+
 
 type UserProfileInput = {
     firstName: string;
@@ -29,11 +33,15 @@ type UserProfileInput = {
 }
 
 export default function Dashboard() {
+    const [userProfile, setUserProfile] = useState<UserProfileInput>({firstName: "", lastName: ""});
+
+    const groupInvite = useGroupInvite(); 
+    const navigate = useNavigate();
+    const { setActiveGroup } = useGroupContext();
     const { user, isLoading: isUserLoading } = useUserContext();
     const { getUserProfile, updateUserProfile } = useUserDomain(user);
     const { activeGroup } = useGroupContext(); // { id, name, role } | null
     const { data, isLoading } = useDashboard(activeGroup?.id ?? null);
-    const [userProfile, setUserProfile] = useState<UserProfileInput>({firstName: "", lastName: ""})
     const {
         control,
         handleSubmit,
@@ -51,15 +59,34 @@ export default function Dashboard() {
         },
     });
     
+    
     useEffect(() => {
+        const groupInviteGroupId = sessionStorage.getItem("groupInviteGroupId");
+
         const load = async() => {
+            if(groupInviteGroupId){
+            const completeResponse = await groupInvite.completeInvite();
+            mutate(
+                key => typeof key === "string" && key.includes("/api/groups/"),
+                undefined,
+                { revalidate: false }
+            );
+
+            const groupSummary: GroupSummary = {  
+                id: completeResponse.groupId,
+                name: completeResponse.name,
+                role: completeResponse.role,
+                groupType: completeResponse.groupType
+            }
+            setActiveGroup(groupSummary);
+            sessionStorage.removeItem("groupInviteGroupId");
+            navigate(`/groups/${groupInviteGroupId}`);
+        }
             const result = await getUserProfile();
             if(userProfile){
                 setUserProfile(result);
             }
-            
         }
-        
         load();
       }, []);
 
@@ -76,11 +103,11 @@ export default function Dashboard() {
     }
 
     return (
+        <>
         <Box sx={{ p: 3 }} className="mainComponentPanel">
             <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
-            Dashboard — {activeGroup.name}
+                Dashboard — {activeGroup.name}
             </Typography>
-
             <Grid container spacing={2}>
             <Grid size={12}>
                 <AttentionCard items={data.attention} />
@@ -95,6 +122,7 @@ export default function Dashboard() {
             </Grid>
             </Grid>
         </Box>
+        </>
     );
 
 } 

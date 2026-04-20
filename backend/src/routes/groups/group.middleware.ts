@@ -30,7 +30,7 @@ export async function loadGroupMembership(
     if(!req.session) return;
 
     const authId = req.session.getUserId();
-        //const joinRequest = await 
+
     const user: any = await prisma.user.findUnique({
         where: {
             superTokensId: authId,
@@ -53,4 +53,5 @@ export async function loadGroupMembership(
     req.groupRole = membership.role;
     req.user = user;
     next();
+
 }

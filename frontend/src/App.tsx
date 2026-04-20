@@ -13,12 +13,24 @@ import { SWRConfig } from "swr";
 import { typedFetcher } from "./util/fetcher";
 import { GroupContextProvider } from "./context/GroupContextProvider";
 import EmailVerification from "supertokens-auth-react/recipe/emailverification";
+import GroupInvite from "./pages/GroupInvite";
 
 // ---------- Root App ----------
 export default function App() {
     const theme = createTheme({
         typography: {
-            fontSize: 12, // Change this value to your preferred font size
+            fontSize: 12, 
+        },
+        palette: {
+            primary: {
+                main: "#2563EB", //"#3B82F6", 
+            },
+            secondary: {
+                main: "#D1D5DB", 
+            },
+            warning: {
+                main: "#DC2626"
+            }
         },
     });
   return (
@@ -27,9 +39,17 @@ export default function App() {
             <SWRConfig value={{ fetcher: typedFetcher }}>
                 <BrowserRouter>
                     <Routes>
-                         {/* Supertokens built-in auth routes (login, signup, reset password, etc.) */}
                         {getSuperTokensRoutesForReactRouterDom(ReactRouter, PreBuiltUIList)}
-                        {/* All your application routes, wrapped in Layout */}
+                        
+                        <Route 
+                            path="/groups/:groupId/invite/accept" 
+                            element={
+                                <GroupContextProvider>
+                                <GroupInvite />
+                                </GroupContextProvider>
+                            }                        
+                        />
+
                         <Route
                             path="/*"
                             element={

@@ -11,7 +11,7 @@ import { recordAuthSuccess, logAuthEvent, sha256, stReqToRequestLike } from "./a
 import type { BaseRequest } from "supertokens-node/lib/build/framework/request";
 import AccountLinking from "supertokens-node/recipe/accountlinking";
 import { recordAuthFailure } from "./audit/authAudit";
-import { sendEmail } from "./util/email";
+//import { sendEmail } from "./util/email";
 import EmailVerification from "supertokens-node/recipe/emailverification";
 import { RecipeUserId } from "supertokens-node";
 import { Resend } from "resend";

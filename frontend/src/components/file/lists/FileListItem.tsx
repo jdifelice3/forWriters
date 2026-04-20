@@ -1,4 +1,5 @@
 import {
+  Box,
   Card,
   CardContent,
   Grid,
@@ -63,12 +64,15 @@ const FileListItem: React.FC<FileListItemProps> = ({
 
                 {/* Upload control (correct pattern) */}
                 <Button
-                  size="medium"
-                  component="label"
-                  onClick={(e) => onUploadVersion(fileMeta.id)}
+                    size="small"
+                    variant="contained"
+                    component="label"
+                    onClick={(e) => onUploadVersion(fileMeta.id)}
+                    sx={{mb: 2}}
                 >
-                  Upload New Version
+                    Upload New Version
                 </Button>
+                
                 <Typography variant="body1" sx={{ml: 1}}>
                     Select active version:
                 </Typography>

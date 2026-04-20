@@ -66,7 +66,8 @@ const handleDelete = (readingId: string) => {
       {isAdmin && (
         <Button
           startIcon={<AddIcon />}
-          variant="outlined"
+          variant="contained"
+          size="small"
           sx={{ mb: 2 }}
           onClick={() => openCreateDialog()}
         >

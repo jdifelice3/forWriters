@@ -116,7 +116,7 @@ export const NewsFeed: React.FC<NewsFeedProps> = ({ groupId, isAdmin }) => {
         {isAdmin && !adding && (
           <Button
             startIcon={<AddIcon />}
-            variant="outlined"
+            variant="contained"
             onClick={() => setAdding(true)}
             sx={{ mb: 2 }}
           >

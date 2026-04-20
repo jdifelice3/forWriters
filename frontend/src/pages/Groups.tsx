@@ -23,12 +23,15 @@ import { GroupDetails } from "../components/group/GroupDetails";
 import { GroupPersonalDetails } from "../components/group/GroupPersonalDetails";
 import GroupInviteMembersDialog from "../components/group/GroupInviteMembersDialog";
 import { GroupRole } from "../types/domain-types";
+import { useGroupInvite } from "../hooks/useGroup";
+
 
 const Groups = () => {
     const [open, setOpen] = useState(false);
     const { groupId } = useParams();
     const { user } = useUserContext();
     const { data : group, isLoading } = useGroupDetails<Group>(groupId);
+    const groupInvite = useGroupInvite();
 
     if (isLoading) {
         return (
@@ -51,11 +54,12 @@ const Groups = () => {
     }
 
     const handleOnSendExistingInvite = async(input: { userId: string; role: GroupRole }) => {
-        alert(`${input.userId}, ${input.role}`);
+        const success = await groupInvite.sendInvite(input.userId, input.role, "USERID");
+        
     }
 
     const handleOnSendEmailInvite = async(input: { email: string; role: GroupRole }) => {
-        alert(`${input.email}, ${input.role}`);
+        const success = await groupInvite.sendInvite(input.email, input.role, "EMAIL");
     }
   
     const handleInviteToGroup = (e: any) => {
@@ -65,7 +69,7 @@ const Groups = () => {
   return (
     <Card elevation={0} className="mainComponentPanel">
         <CardContent>
-            <Typography variant="h4" mb={3}>
+            <Typography variant="h4" mb={2}>
                 <GroupIcon 
                     sx={{ 
                         fontSize: '48px',
@@ -83,15 +87,20 @@ const Groups = () => {
                     group.groupType === "WRITING" ? <GroupDetails group={group} /> : <GroupPersonalDetails group={group} />
                 )}
                 </Grid>
-                <Grid size={3} >
+                {isAdmin && (
+                <Grid size={12} >
                     <Card>
                         <CardContent>
-                            <Button onClick={handleInviteToGroup} variant="contained">
+                            <Typography variant="h6" mb={2}>
+                                Invite People to Group
+                            </Typography>
+                            <Button onClick={handleInviteToGroup} variant="contained" size="small">
                                 Invite to Group
                             </Button>
                         </CardContent>
                     </Card>
                 </Grid>
+                )}
                 <Grid>
                     <GroupInviteMembersDialog
                         open={open}
@@ -100,6 +109,7 @@ const Groups = () => {
                         onSendEmailInvite = {handleOnSendEmailInvite}
                         memberOptions = {[]}
                         loadingMembers = {true}
+                        groupId = {groupId}
                     />
                 </Grid>
             </Grid>

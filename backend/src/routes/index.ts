@@ -2,7 +2,6 @@ import { Router, Request, Response, NextFunction } from "express";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
 
 import userRoutes from "./users";
-//import userProfileRoutes from "./userProfileRoutes";
 import fileRoutes from "./files/index";
 import pdfRoutes from "./pdfRoutes";
 import groupRoutes from "./groups";
@@ -10,6 +9,8 @@ import meRoutes from "./me.routes";
 import filesApiRoutes from "./filesApi/filesApi.routes";
 import dashboardRoutes from "./dashboardRoutes";
 import notificationsRoutes from "./notifications/notifications.routes";
+import inviteRoutes from "./groups/invite.routes";
+import groupInviteRoutes from "./groups/group.invite.routes";
 
 const router = Router();
 
@@ -17,10 +18,12 @@ const router = Router();
  * Public routes (no session)
  */
 router.use("/pdfs", pdfRoutes);
+router.use("/invites", inviteRoutes);
 
 /**
  * Authenticated routes
  */
+
 router.use(verifySession());
 
 // Everything below this line has req.session

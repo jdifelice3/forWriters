@@ -28,6 +28,7 @@ import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui
 import { PreBuiltUIList } from "../supertokensConfig";
 import * as ReactRouterDOM from "react-router-dom";
 
+
 export default function Layout() {
   const { loading } = useSessionContext();
 

@@ -14,7 +14,6 @@ export function deviceIdMiddleware(req: Request, res: Response, next: NextFuncti
 
   const deviceId = crypto.randomUUID();
   (req as any).deviceId = deviceId;
-  console.log('deviceId', deviceId)
   res.cookie(DEVICE_COOKIE, deviceId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

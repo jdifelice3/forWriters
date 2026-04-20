@@ -107,30 +107,30 @@ const GroupsCreate = () => {
     setSuccess(null);
 
     try {
-      const res = await fetch(groupsUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ 
-            name: values.name,
-            groupType: groupType,
-            description: values.description,
-            imageUrl: values.imageUrl,
-            address: values.address,
-            defaultMinDaysBetweenReads: values.defaultMinDaysBetweenReads,
-            defaultMaxConsecutiveReads: values.defaultMaxConsecutiveReads,
-            inviteEmailsCsv: values.inviteEmailsCsv
-        }),
-      });
+        const res = await fetch(groupsUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ 
+                name: values.name,
+                groupType: groupType,
+                description: values.description,
+                imageUrl: values.imageUrl,
+                address: values.address,
+                defaultMinDaysBetweenReads: values.defaultMinDaysBetweenReads,
+                defaultMaxConsecutiveReads: values.defaultMaxConsecutiveReads,
+                inviteEmailsCsv: values.inviteEmailsCsv
+            }),
+        });
 
-    if (!res.ok) {
-        const text = await res.text();
-        
-        let message = JSON.parse(text);
-        
-        setError(message.error);
-        return;
-    }
+        if (!res.ok) {
+            const text = await res.text();
+            
+            let message = JSON.parse(text);
+            
+            setError(message.error);
+            return;
+        }
 
         const group: Group = await res.json();
         setSuccess("Group created successfully.");

@@ -17,9 +17,11 @@ export interface UserProfile {
 }
 
 export interface UserSearch {
+    email: string;
     userId: string;
     fullname: string;
     bio: string;
+    groupStatus: "not_in_group" | "already_member" | "pending_invite" | "expired_invite";
 }
 
 export type ProfileFormInputs = {

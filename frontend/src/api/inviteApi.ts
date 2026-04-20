@@ -11,7 +11,7 @@ export const InviteAPI = {
     },
 
     validate(token: string | undefined){
-        return apiFetch<tokenValidationResponse>(`/groups/invite/validate`, {
+        return apiFetch<tokenValidationResponse>(`/groups/invites/validate`, {
             method: "POST",
             body: JSON.stringify({ token: token }),
             credentials: "include"

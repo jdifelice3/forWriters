@@ -400,6 +400,7 @@ model GroupInvite {
   expiresAt    DateTime
   acceptedAt   DateTime?
   revokedAt    DateTime?
+  declinedAt DateTime?
 
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -407,6 +408,8 @@ model GroupInvite {
   group        Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
   invitedBy    User       @relation("GroupInviteInvitedBy", fields: [invitedById], references: [id])
 
+  pendingSessions PendingInviteSession[]
+  
   @@index([groupId])
   @@index([email])
   @@index([invitedById])
@@ -474,6 +477,17 @@ model Notification {
   createdAt DateTime @default(now())
   readAt    DateTime?
   href      String   @default("/dashboard")
+}
+
+model PendingInviteSession {
+  id         String      @id @default(uuid())
+  inviteId   String
+  expiresAt  DateTime
+  createdAt  DateTime    @default(now())
+
+  invite     GroupInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+
+  @@index([inviteId])
 }
 
 // One subscription per user. Free tier users will not have Stripe IDs.

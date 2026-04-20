@@ -3,20 +3,18 @@ import prisma from "../../database/prisma";
 import Session from "supertokens-node/recipe/session";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
 import { loadGroupById, loadGroupMembership } from "../groups/group.middleware";
-import { acceptInvite, hashToken } from "../../util/inviteUtil";
 import crypto from "crypto";
-import { GroupRole } from "../../types/domain-types";
-import { sendEmail } from "../../util/email";
+import { Resend } from "resend";
 
 const router = Router({ mergeParams: true });
 
 router.use(loadGroupById);
 router.use(loadGroupMembership);
 
-router.get("/", verifySession(), async(req: Request, res: Response) => {
+router.get("/", async(req: Request, res: Response) => {
 });
 
-router.post("/", verifySession(), async(req: Request, res: Response) => {
+router.post("/", async(req: Request, res: Response) => {
     const session = await Session.getSession(req, res);
     const authId = session.getUserId();
     const user = await prisma.user.findUnique({
@@ -24,12 +22,34 @@ router.post("/", verifySession(), async(req: Request, res: Response) => {
         include: { subscription: true },
     });
 
+    const { input, role, inputType } = req.body;
+    let email: string;
+
+    if(inputType === "USERID"){
+        const inviteUser = await prisma.user.findUnique({
+            where: {
+                id: input
+            },
+            select: {
+                email: true
+            }
+        });
+
+        email = inviteUser ? inviteUser.email : "";
+    } else {
+        email = input;
+    }
+
+    if(!email){
+        throw Object.assign(new Error("Invite user email not found"), { statusCode: 401 });
+    }
+
     if (!user) {
         throw Object.assign(new Error("User not found"), { statusCode: 401 });
     }
 
-    const { emails } = req.body.emails;
-    for(let i = 0; i < emails.length; i++){
+    // const { emails } = req.body.emails;
+    // for(let i = 0; i < emails.length; i++){
         const token = crypto.randomBytes(32).toString("hex");
         const tokenHash = crypto
             .createHash("sha256")
@@ -42,8 +62,8 @@ router.post("/", verifySession(), async(req: Request, res: Response) => {
         await prisma.groupInvite.create({
             data: {
                 groupId: req.group.id,
-                email: emails[i],
-                role: "MEMBER",
+                email: email,
+                role: role,
                 invitedById: user.id,
                 tokenHash: tokenHash,
                 expiresAt: date
@@ -51,9 +71,10 @@ router.post("/", verifySession(), async(req: Request, res: Response) => {
         });
 
         const inviteUrl = `${process.env.WEB_HOST}/groups/${req.group.id}/invite/accept?token=${token}`;
-
-        await sendEmail({
-            to: emails[i],
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const result = await resend.emails.send({
+            from: "support@forwriters.ink",
+            to: email,
             subject: "You've been invited to join a writing group at forWriters",
             html: `
                 <p>You’ve been invited to join <b>${req.group.name}</b>.</p>
@@ -61,35 +82,8 @@ router.post("/", verifySession(), async(req: Request, res: Response) => {
                 <p>This link expires in 7 days.</p>
             `,
         });
-    }
-});
-
-router.post("/accept", verifySession(), async (req: Request, res: Response) => {
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
-    
-    try {
-        const token = req.body.token;
-
-        if (!token) {
-        return res.status(400).json({ error: "Token required" });
-        }
-
-        const result = await acceptInvite({
-            token,
-            authId,
-        });
-
+        console.log('send email result', result);
         res.json(result);
-  } catch (err: any) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-router.post("/resend", verifySession(), async(req: Request, res: Response) => {
-});
-
-router.post("/revoke", verifySession(), async(req: Request, res: Response) => {
 });
 
 export default router;
