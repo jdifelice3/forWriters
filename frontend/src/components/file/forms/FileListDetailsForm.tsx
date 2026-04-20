@@ -16,6 +16,7 @@ import Grid from "@mui/material/Grid";
 import FileIcon from "../../controls/FileIcon";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import DownloadIcon from '@mui/icons-material/Download';
 
 interface FileListDetailsFormProps {
   fileMeta: AppFileMeta;
@@ -66,7 +67,8 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
 
           <Box>
             {currentVersion && (
-              <Button
+              <>
+              {/* <Button
                 variant="contained"
                 component="a"
                 href={currentVersion.url}
@@ -74,22 +76,30 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
                 size="small"
               >
                 {fileListProperties.buttonDownloadText}
-              </Button>
+              </Button> */}
+              <IconButton 
+                href={currentVersion.url} 
+                size="medium"
+                download={currentVersion.filename}
+               >
+                <DownloadIcon />
+              </IconButton>
+              </>
             )}
 
             {fileListProperties.showEditButton && (
-              <IconButton onClick={onEdit} size="small">
-                <EditIcon fontSize="small" />
+              <IconButton onClick={onEdit} size="medium">
+                <EditIcon />
               </IconButton>
             )}
 
             {fileListProperties.showDeleteButton && (
               <IconButton
                 onClick={() => domain.deleteFile(fileMeta.id)}
-                size="small"
+                size="medium"
                 color="error"
               >
-                <DeleteIcon fontSize="small" />
+                <DeleteIcon />
               </IconButton>
             )}
           </Box>
