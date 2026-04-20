@@ -123,7 +123,7 @@ export function useReadingDomain(
         if(!reading) return false;
         if(!reading.submissionDeadline) return true;
             console.log('new Date() >= new Date(reading.submissionDeadline)', new Date() >= new Date(reading.submissionDeadline));
-        return new Date() >= new Date(reading.submissionDeadline);
+        return new Date(reading.submissionDeadline) > new Date();
     },
     [readings, disabled]
     );
