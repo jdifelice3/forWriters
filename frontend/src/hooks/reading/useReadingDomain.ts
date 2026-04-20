@@ -112,11 +112,17 @@ export function useReadingDomain(
 
     const canReviewReading = useCallback(
         (readingId: string, userId: string) => {
+            console.log('in canReviewReading');
+            console.log('disabled', disabled);
         if (disabled) return;
         const reading: Reading | undefined = readings.find(r => r.id === readingId);
-        if(!reading) return undefined;
+        console.log('readingId', readingId);
+        console.log('reading', reading);
+            console.log('!reading', !reading);
+            console.log('!reading.submissionDeadline', !reading?.submissionDeadline);
+        if(!reading) return false;
         if(!reading.submissionDeadline) return true;
-
+            console.log('new Date() >= new Date(reading.submissionDeadline)', new Date() >= new Date(reading.submissionDeadline));
         return new Date() >= new Date(reading.submissionDeadline);
     },
     [readings, disabled]
