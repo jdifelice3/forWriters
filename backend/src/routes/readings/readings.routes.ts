@@ -8,6 +8,7 @@ import Session from "supertokens-node/recipe/session";
 import { loadDocxFromS3AsHtml, addParagraphIds } from "../../services/streamFromS3";
 import { loadReadingById } from "./readings.middleware";
 import { ReadingParticipant } from "@prisma/client";
+import { Resend } from "resend";
 
 const router = Router({ mergeParams: true });
 
@@ -224,6 +225,63 @@ router.get("/submissions/:submissionId/feedback", loadSubmissionById, async (req
         html: html,
     });
 });
+
+router.post("/message/reviewer/send", async (req, res) => {
+    const readingId = req.reading.id;
+    const groupId = req.group.id;
+    //const inviteUrl = `${process.env.WEB_HOST}/filefeedback/${readingId}`;
+    const inviteUrl = `${process.env.WEB_HOST}/groups/${groupId}/readings/${readingId}/notification`;
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    const results = await prisma.group.findUnique({
+      include: {
+        groupUser: {
+            include: {
+                user: true
+            }
+        }
+      },
+      where: {
+        id: groupId,
+      },
+
+    });
+
+    if(results && results.groupUser){
+        for(let i = 0; i < results.groupUser.length; i++){
+            const subject = process.env.NODE_ENV === "production" ?
+                `TESTING: forWriters - Manuscripts in "${req.group.name}" are ready for review` :
+                `Manuscripts in "${req.group.name}" are ready for review`;
+            const html = process.env.NODE_ENV === "production" ?
+                `<p>Greetings from forWriters,</p>
+                    <p>Manuscript(s) in <b>${req.group.name}</b> are ready for review.</p>
+                    Click on the link to read them.
+                    <a href="${inviteUrl}">Review Manuscripts</a>
+                ` : 
+                `   <p>TESTING</p>
+                    <p>Greetings from forWriters,</p>
+                    <p>Manuscript(s) in the <b>${req.reading.name}</b> reading in the <b>${req.group.name}</b> group
+                    are ready for review.</p>
+                    Click on the link to read them.
+                    <a href="${inviteUrl}">Review Manuscripts</a>
+                `;
+
+            const result = await resend.emails.send({
+                from: "support@forwriters.ink",
+                to: "support@forwriters.ink",
+                bcc: results.groupUser[i].user.email,
+                subject: subject,
+                html: html,
+            });
+        }
+
+        res.json({success: true});
+    } else {
+        res.json({success: false});
+    }
+
+});
+
 
 const getDocxAsHtml = async (awsS3bucket: string, filename: string, awsS3region: string) => {
     const html = await loadDocxFromS3AsHtml(

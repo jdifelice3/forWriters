@@ -9,7 +9,6 @@ import { CompleteResponse } from "../types/GroupInviteTypes";
 
 export const useGroupDetails = <T>(groupId: string | undefined) => {
   const { activeGroup } = useGroupContext();
-  
     return useSWR<T>(
         activeGroup ? `${import.meta.env.VITE_API_HOST}/api/groups/${groupId}` : null,
         fetcher

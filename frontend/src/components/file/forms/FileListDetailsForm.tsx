@@ -98,7 +98,7 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
             <>
             <Box>
                 <Button
-                    variant="contained"
+                    variant="outlined"
                     component="a"
                     href=""
                     onClick={() => navigate(`/filefeedbackdetail/${currentVersion?.id}`)}
@@ -109,7 +109,7 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
               </Box>
               <Box>
               <Button
-                    variant="contained"
+                    variant="outlined"
                     component="a"
                     href=""
                     onClick={() => navigate(`/versioncompare/${fileMeta.id}`)}

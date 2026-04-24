@@ -65,7 +65,7 @@ const FileListItem: React.FC<FileListItemProps> = ({
                 {/* Upload control (correct pattern) */}
                 <Button
                     size="small"
-                    variant="contained"
+                    variant="outlined"
                     component="label"
                     onClick={(e) => onUploadVersion(fileMeta.id)}
                     sx={{mb: 2}}

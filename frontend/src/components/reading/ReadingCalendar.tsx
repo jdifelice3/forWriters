@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import Tooltip from '@mui/material/Tooltip';
 import { Reading } from "../../types/domain-types";
 import { ReadingDomainCommands } from "../../types/ReadingTypes";
 import { useUserContext } from "../../context/UserContext";
@@ -19,7 +16,6 @@ interface ReadingCalendarProps {
   domain: ReadingDomainCommands;
   ui: ReturnType<typeof useReadingsUI>;
   onCreateReading(form: any): Promise<void>;
-  //onUpdateReading(readingId: string, form: ReadingFormInput): Promise<void>;
   onFeedback(readingId: string): Promise<void>;
 }
 
@@ -29,7 +25,6 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
   domain,
   ui,
   onCreateReading,
-  //onUpdateReading,
   onFeedback
 }) => {
   const { user, isLoading, error } = useUserContext();
@@ -57,10 +52,6 @@ const openEditDialog = (reading: Reading) => {
   setDialogOpen(true);
 };
 
-const handleDelete = (readingId: string) => {
-    const answer = confirm('Are you sure you want to delete this reading?')
-    if(answer) domain.deleteReading(readingId);
-}
   return (
     <Box>
       {isAdmin && (
@@ -88,7 +79,7 @@ const handleDelete = (readingId: string) => {
                 onCancel={() => setInlineEditId(null)}
                 onSave={async form => { 
                   await domain.updateReading(reading.id, form);
-                  //await onUpdateReading(reading.id, form);
+                 
                   setInlineEditId(null);
                 }}
               />
@@ -101,46 +92,8 @@ const handleDelete = (readingId: string) => {
                   onFeedback={onFeedback}
                   domain={domain}
                   ui={ui}
-                />
-
-                {isAdmin && (
-                  <Box display="flex" gap={1} mt={1}>
-                    {/* {!locked && (
-                      <Button
-                        size="small"
-                        startIcon={<EditIcon />}
-                        onClick={() => setInlineEditId(reading.id)}
-                      >
-                        Inline Edit
-                      </Button>
-                    )} */}
-
-                    <Button
-                      size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => openEditDialog(reading)}
-                    >
-                      Edit Reading
-                    </Button>
-
-                    {/* {!locked && ( */}
-                    <Tooltip title={locked ? "You cannot delete this reading because it has submissions" : ""}>
-                      <Box>
-                      <Button
-                        disabled={locked}
-                        size="small"
-                        startIcon={
-                            <DeleteIcon />
-                        }
-                        onClick={() => handleDelete(reading.id)}
-                      >
-                        Delete Reading
-                      </Button>
-                      </Box>
-                      </Tooltip>
-                    {/* )} */}
-                  </Box>
-                )}
+                  openEditDialog={openEditDialog}
+                />                
               </>
             )}
           </Box>

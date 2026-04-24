@@ -160,12 +160,12 @@ const FileManager = () => {
         <CardContent>
           {/* Header */}
           <Grid container alignItems="center">
-            <Grid size={6}>
+            <Grid size={5}>
               <Typography variant="h4" mb={3}>
                 <CollectionsBookmarkIcon sx={{ fontSize: 24 }} /> Files
               </Typography>
             </Grid>
-            <Grid size={6} textAlign="right">
+            <Grid size={5} textAlign="right">
               <Button
                 variant="contained"
                 startIcon={<UploadIcon />}
@@ -203,7 +203,7 @@ const FileManager = () => {
 
           {/* My Reading Submissions */}
           {tab == 1 && (
-            <Card className="readingCardSignup">
+            <Card className="readingCardSignup" sx={{width: 500}}>
                 <CardContent>
               {isLoading ? (
                 <Box display="flex" justifyContent="center" p={6}>

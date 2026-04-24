@@ -123,7 +123,7 @@ const FileFeedbackDetail = () => {
                     <b>Version</b>: {appFile ? appFile.version.toString() : ""}
                 </Typography>
                 <Typography variant="body1" mb={2}>
-                    <b>Filename</b>: {appFile ? appFile.filename.toString() : ""}
+                    <b>Filename</b>: {`${appFile?.filename.replace(/^\d+-/, '')}`}
                 </Typography>
             </Grid>
             <Grid size={6}>
@@ -142,7 +142,7 @@ const FileFeedbackDetail = () => {
 
         {commentCount === 0 && (
             <>
-            <Typography>
+            <Typography variant="h5" fontWeight="bold"sx={{color: "red"}}>
                 There is no feedback to display
             </Typography>
             </>

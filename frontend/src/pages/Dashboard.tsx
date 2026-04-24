@@ -13,7 +13,7 @@ import {
     Card,
     CardContent
 } from "@mui/material";
-import { UserProfile } from "../types/domain-types";
+import { UserProfile, Group } from "../types/domain-types";
 import { useNavigate } from "react-router-dom";
 import { useDashboard } from "../hooks/useDashboard";
 import { useGroupContext } from "../context/GroupContextProvider";
@@ -25,6 +25,7 @@ import { useUserContext } from "../context/UserContext";
 import { useUserDomain } from "../hooks/useUserDomain";
 import { useGroupInvite } from "../hooks/useGroup";
 import { GroupSummary } from '../types/ContextTypes';
+import { useGroupDetails } from "../hooks/useGroup";
 
 
 type UserProfileInput = {
@@ -42,6 +43,15 @@ export default function Dashboard() {
     const { getUserProfile, updateUserProfile } = useUserDomain(user);
     const { activeGroup } = useGroupContext(); // { id, name, role } | null
     const { data, isLoading } = useDashboard(activeGroup?.id ?? null);
+
+    const readingNotificationReadingId = sessionStorage.getItem("readingNotificationReadingId");
+    const readingNotificationGroupId = sessionStorage.getItem("readingNotificationGroupId");
+    console.log('readingNotificationReadingId', readingNotificationReadingId);
+    console.log('readingNotificationGroupId', readingNotificationGroupId);
+    const groupId: string | undefined = readingNotificationGroupId === null ? undefined : readingNotificationGroupId;
+
+    const { data : group, isLoading: isGroupLoading } = useGroupDetails<Group>(groupId);
+    
     const {
         control,
         handleSubmit,
@@ -62,33 +72,56 @@ export default function Dashboard() {
     
     useEffect(() => {
         const groupInviteGroupId = sessionStorage.getItem("groupInviteGroupId");
-
+        
         const load = async() => {
             if(groupInviteGroupId){
-            const completeResponse = await groupInvite.completeInvite();
-            mutate(
-                key => typeof key === "string" && key.includes("/api/groups/"),
-                undefined,
-                { revalidate: false }
-            );
+                const completeResponse = await groupInvite.completeInvite();
+                mutate(
+                    key => typeof key === "string" && key.includes("/api/groups/"),
+                    undefined,
+                    { revalidate: false }
+                );
 
-            const groupSummary: GroupSummary = {  
-                id: completeResponse.groupId,
-                name: completeResponse.name,
-                role: completeResponse.role,
-                groupType: completeResponse.groupType
+                const groupSummary: GroupSummary = {  
+                    id: completeResponse.groupId,
+                    name: completeResponse.name,
+                    role: completeResponse.role,
+                    groupType: completeResponse.groupType
+                }
+                setActiveGroup(groupSummary);
+                sessionStorage.removeItem("groupInviteGroupId");
+                navigate(`/groups/${groupInviteGroupId}`);
+            } else if(readingNotificationReadingId !== null) {
+                if (isGroupLoading) return;
+                console.log('in dashboard, reading notification');
+                mutate(
+                    key => typeof key === "string" && key.includes("/api/groups/"),
+                    undefined,
+                    { revalidate: false }
+                );
+                console.log('group', group);
+                if(group){
+                    const groupSummary: GroupSummary = {  
+                        id: group.id,
+                        name: group.name,
+                        role: group.groupUser[0].role,
+                        groupType: group.groupType
+                    }
+                    setActiveGroup(groupSummary);
+                    sessionStorage.removeItem("readingNotificationReadingId");
+                    sessionStorage.removeItem("readingNotificationGroupId");
+                    navigate(`/filefeedback/${readingNotificationReadingId}`)
+                }
+            } else {
+                const result = await getUserProfile();
+                if(userProfile){
+                    setUserProfile(result);
+                }
             }
-            setActiveGroup(groupSummary);
-            sessionStorage.removeItem("groupInviteGroupId");
-            navigate(`/groups/${groupInviteGroupId}`);
         }
-            const result = await getUserProfile();
-            if(userProfile){
-                setUserProfile(result);
-            }
-        }
+        
         load();
-      }, []);
+      }, [isGroupLoading]);
 
     if (!activeGroup) {
         return <DashboardEmptyState />;

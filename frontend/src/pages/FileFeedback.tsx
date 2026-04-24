@@ -143,14 +143,19 @@ const FileFeedback = () => {
         <Typography variant="h6">
             Reading: {reading?.name}
         </Typography>
-        <Typography variant="h6">
-            Date: {new Date(reading!.readingDate || "").toLocaleDateString()}
-        </Typography>
+        {reading!.readingDate && (
+            <Typography variant="h6">
+                Date: {new Date(reading!.readingDate || "").toLocaleDateString()}
+            </Typography>
+        )}
         <Typography  variant="h6" sx={{mb:2}}>
             There&nbsp;
             {reading!.readingSubmission.length === 1 ? "is" : "are"}&nbsp;
             <b>{reading!.readingSubmission.length}</b> manuscript
             {reading!.readingSubmission.length === 1 ? "" : "s"}&nbsp;to review
+        </Typography>
+        <Typography variant="h6" sx={{color: "blue", mb: 2}} fontWeight={"bold"}>
+            Highlight manuscript text and add a comment in the popup box
         </Typography>
             {reading && reading.readingParticipant.findIndex(rp => rp.readingSubmission?.appFile.appFileMeta !== null) === -1 ? (
                 <Card>
@@ -179,6 +184,7 @@ const FileFeedback = () => {
                                             variant="body1"
                                             color="text.secondary"
                                             sx={{ mb: 2, mt: 2, mr:-4, width: "550px"}}
+                                            fontStyle={"italic"}
                                     >
                                         {rs.appFile.appFileMeta.description}
                                     </Typography>
@@ -188,6 +194,7 @@ const FileFeedback = () => {
                                                 </Typography>
                                             ) : (
                                                 <>
+                                                <Box sx={{mb: 10}}>
                                                 {manuscriptHtmlBySubmission[rs.id] ? (
                                                     <ManuscriptReview
                                                         html={manuscriptHtmlBySubmission[rs.id]}
@@ -199,6 +206,7 @@ const FileFeedback = () => {
                                                 ) : (
                                                     <CircularProgress size={20} />
                                                 )}
+                                                </Box>
                                                 </>
                                         )}
                                 </Grid>

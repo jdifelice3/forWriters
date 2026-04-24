@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction, Router } from "express";
+import { Request, Response, Router } from "express";
 import prisma from "../../database/prisma";
 import Session from "supertokens-node/recipe/session";
-import { verifySession } from "supertokens-node/recipe/session/framework/express";
 import { loadGroupById, loadGroupMembership } from "../groups/group.middleware";
 import crypto from "crypto";
 import { Resend } from "resend";

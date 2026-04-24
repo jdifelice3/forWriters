@@ -70,8 +70,6 @@ const GroupInviteMembersDialog = ({
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  console.log("selectedMember", selectedMember);
-  console.log("selectedMember.groupStatus", selectedMember?.groupStatus); 
   const eligibility: InviteEligibility = useMemo(() => {
     if (!selectedMember) return "idle";
     switch (selectedMember.groupStatus) {
@@ -250,7 +248,7 @@ const GroupInviteMembersDialog = ({
 
       <DialogActions>
         <Button onClick={handleOnClose} disabled={submitting} variant="contained">
-          Cancel
+          {successMessage.length === 0 ? "Cancel" : "Close"}
         </Button>
 
         {tab === 0 ? (

@@ -17,6 +17,7 @@ interface ReadingSubmissionListSummaryFormProps {
     fileDescription: string | undefined;
     readingName: string;
     readingDate: string | undefined;
+    createdAt: string | undefined;
 }
 
 const ReadingSubmissionListSummaryForm: React.FC<ReadingSubmissionListSummaryFormProps> = ({
@@ -26,7 +27,8 @@ const ReadingSubmissionListSummaryForm: React.FC<ReadingSubmissionListSummaryFor
     fileDescription,
     filename,
     readingName,
-    readingDate
+    readingDate,
+    createdAt
 }) => {
     
   return (
@@ -41,23 +43,24 @@ const ReadingSubmissionListSummaryForm: React.FC<ReadingSubmissionListSummaryFor
           
         </Stack>
 
-        {/* <Typography variant="body1" color="text.secondary">
-          {fileDescription || "No description"}
-        </Typography> */}
         <Typography sx={{ fontSize: 14 }}>
-            Version: <b>{fileVersion.toString()}</b>
+            <b>Version:</b> {fileVersion.toString()}
         </Typography>
         <Typography sx={{ fontSize: 14 }}>
-            Filename: <b>{filename}</b>
+            <b>Filename:</b> {filename}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          <b>Reading:</b> {readingName}
-        </Typography>
-        {readingDate !== null && (
-            <Typography variant="body2" color="text.secondary">
+        {readingDate !== null ? (
+            <Typography sx={{ fontSize: 14 }}>
             <b>Reading Date</b>: {new Date(readingDate!).toLocaleDateString()}
             </Typography>
+        ) : (
+            <Typography sx={{ fontSize: 14 }}>
+            <b>Date Created</b>: {new Date(createdAt!).toLocaleDateString()}
+            </Typography>
         )}
+        <Typography sx={{ fontSize: 14 }}>
+          <b>Reading Name:</b> {readingName}
+        </Typography>
       </Stack>
     </Box>
   );

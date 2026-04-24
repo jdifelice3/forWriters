@@ -14,6 +14,7 @@ import { typedFetcher } from "./util/fetcher";
 import { GroupContextProvider } from "./context/GroupContextProvider";
 import EmailVerification from "supertokens-auth-react/recipe/emailverification";
 import GroupInvite from "./pages/GroupInvite";
+import ReadingNotification from "./pages/ReadingNotification";
 
 // ---------- Root App ----------
 export default function App() {
@@ -49,7 +50,14 @@ export default function App() {
                                 </GroupContextProvider>
                             }                        
                         />
-
+                        <Route 
+                            path="/groups/:groupId/readings/:readingId/notification"
+                            element={
+                                <GroupContextProvider>
+                                <ReadingNotification />
+                                </GroupContextProvider>
+                            }                        
+                        />
                         <Route
                             path="/*"
                             element={

@@ -26,6 +26,7 @@ import Billing from "../pages/Billing";
 import { VersionCompare } from "../pages/VersionCompare";
 import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
 import { PreBuiltUIList } from "../supertokensConfig";
+import ReadingNotification from "../pages/ReadingNotification";
 import * as ReactRouterDOM from "react-router-dom";
 
 
@@ -61,6 +62,8 @@ export default function Layout() {
                 <Route path="/connectrequests" element={<CollaboratorRequestAdmin />} />
                 <Route path="/billing" element={<Billing />} />
                 <Route path="/versioncompare/:appFileMetaId/" element={<VersionCompare />} />
+                {/* <Route path="/groups/:groupId/readings/:readingId/notification" element={<ReadingNotification />} /> */}
+
             </Routes>
         </Box>
     </Box>

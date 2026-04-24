@@ -51,7 +51,8 @@ const ReadingSubmissionList: React.FC<ReadingSubmissionListProps> = ({
                 readingName={r.name}
                 readingDate={r.readingDate}
                 fileVersion={rs.appFile.version}
-                filename={rs.appFile.filename}
+                filename={`${rs.appFile.filename.replace(/^\d+-/, '')}`}
+                createdAt={r.createdAt}
             />
         ))}         
       </Box>

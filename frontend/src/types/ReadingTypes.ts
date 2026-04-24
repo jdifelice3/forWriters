@@ -10,12 +10,17 @@ export type FormInput = {
   schedule: string
 }
 
+export type SendInviteEmail = {
+    success: boolean;
+}
+
 export interface ReadingDomainCommands {
   createReading(input: ReadingFormInput): Promise<void>;
   updateReading(readingId: string, input: ReadingFormInput): Promise<void>;
   deleteReading(readingId: string): Promise<void>;
   signUpForReading(readingId: string): Promise<void>;
   withdrawFromReading(readingId: string): Promise<void>;
+  sendInviteEmail(groupId: string, readingId: string): Promise<SendInviteEmail>;
 
   submitFileVersion(readingId: string, appFileId: string): Promise<void>;
   updateSubmittedVersion(readingId: string, appFileId: string): Promise<void>;

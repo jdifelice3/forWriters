@@ -75,4 +75,11 @@ export const ReadingsAPI = {
         });
     },
 
+    sendInviteEmail(groupId: string, readingId: string) {
+        return apiFetch<{success: boolean}>(`/groups/${groupId}/readings/${readingId}/message/reviewer/send`, {
+            method: "POST",
+            credentials: "include"
+        })
+    }
+
 };
