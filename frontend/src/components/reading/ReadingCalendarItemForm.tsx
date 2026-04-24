@@ -76,7 +76,9 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
     const [loading, setLoading] = useState(false);
     const [informMembersOpen, setInformMembersOpen] = useState(false);
     const [sendInviteSuccess, setSendInviteSuccess] = useState(false);
+    const [copied, setCopied] = useState(false);
   
+    const readingNotificationUrl = `${import.meta.env.VITE_WEB_HOST}/groups/${activeGroup.id}/readings/${reading.id}/notification`;
 
     if (isLoading) return <CircularProgress />;
     if (error) return <Typography color="error">{error}</Typography>;
@@ -205,6 +207,17 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
         setSendInviteSuccess(false);
         setInformMembersOpen(true)
     }
+
+    const copyToClipboard = async () => {
+        try {
+            //setCopied(copied);
+            setCopied(!copied);
+            await navigator.clipboard.writeText(readingNotificationUrl);
+            setTimeout(() => setCopied(false), 1500); // hide after 1.5s
+        } catch(e){
+            console.log("copy failed");
+        }
+    };
 
     const locked = reading.readingSubmission.length > 0;
 
@@ -485,11 +498,35 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                     Tell members that manuscripts in this reading are ready for review
                 </DialogTitle>
                     <DialogContent sx={{mb: -2}}>
-                        <Typography sx={{whiteSpace: "pre-line", width: 500}}>
-                            {!sendInviteSuccess && (
-                                "If you want to tell only certain members, copy the link to your clipboard and email it with your personal account."
-                            )}
-                        </Typography>
+                        {!sendInviteSuccess && (
+                        <Box sx={{whiteSpace: "pre-line", width: 500}}>
+                            If you want to tell only certain members,
+                            <Box
+                                style={{
+                                    fontFamily: '"Roboto", "Helvetica", "Arial", "sans-serif"',
+                                    display: copied ? "inline-flex" : "none",
+                                    position: "absolute",
+                                    bottom: "69%",
+                                    left: "70%",
+                                    transform: "translateX(-50%) translateY(-8px)",
+                                    background: "rgba(0,0,0,0.8)",
+                                    color: "#fff",
+                                    padding: "6px 8px",
+                                    borderRadius: 6,
+                                    fontSize: 12,
+                                    whiteSpace: "nowrap",
+                                    pointerEvents: "none",
+                                    transition: "opacity 150ms",
+                                }}
+                                >
+                                Copied
+                                </Box>
+                            <Button onClick={copyToClipboard}>
+                                copy the link
+                            </Button>
+                            to your clipboard and email it with your personal account.
+                        </Box>
+                        )}
                     </DialogContent>
                     <DialogContent>
                         <Typography sx={{
