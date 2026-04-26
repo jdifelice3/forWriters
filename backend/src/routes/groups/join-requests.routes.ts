@@ -4,6 +4,7 @@ import Session from "supertokens-node/recipe/session";
 import { JoinRequestError } from "../../database/types/Error";
 import { JoinRequestStatus, GroupRole } from "@prisma/client";
 import { SessionRequest } from "supertokens-node/framework/express";
+import { loadGroupMembership, loadGroupById } from "./group.middleware";
 
 const router = Router();
 
@@ -26,10 +27,14 @@ router.put("/join-requests/:id/approve", async(req: SessionRequest, res: Respons
                 id: id 
             },
             include: {
-                group: true,
+                group: {
+                    include: {
+                        groupUser: true
+                    }
+                }
             },
         });
-  
+
         if (!joinReq) {
             throw new JoinRequestError("Join request not found.", 404);
         }
@@ -37,8 +42,7 @@ router.put("/join-requests/:id/approve", async(req: SessionRequest, res: Respons
         if (joinReq.status !== JoinRequestStatus.PENDING) {
             throw new JoinRequestError("This request is no longer pending.", 400);
         }
-
-        if (req.groupRole !== GroupRole.ADMIN) {
+        if (joinReq.group.groupUser[0].role !== GroupRole.ADMIN) {
             throw new JoinRequestError("You are not an admin for this group.", 403);
         }
 
@@ -111,7 +115,7 @@ router.put("/join-requests/:id/reject", async(req: SessionRequest, res: Response
                 },
             },
         });
-
+        console.log('req.groupRole', req.groupRole);
         if (req.groupRole !== GroupRole.ADMIN) {
             throw new JoinRequestError("You are not an admin for this group.", 403);
         }
