@@ -16,6 +16,9 @@ import EmailVerification from "supertokens-auth-react/recipe/emailverification";
 import GroupInvite from "./pages/GroupInvite";
 import ReadingNotification from "./pages/ReadingNotification";
 
+const requireEmailVerification =
+    import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false";
+
 // ---------- Root App ----------
 export default function App() {
     const theme = createTheme({
@@ -63,10 +66,14 @@ export default function App() {
                             element={
                                 <SessionAuth 
                                     requireAuth={true}
-                                    overrideGlobalClaimValidators={(globalValidators) => [
-                                        ...globalValidators,
-                                        EmailVerification.EmailVerificationClaim.validators.isVerified(),
-                                    ]}
+                                    overrideGlobalClaimValidators={(globalValidators) =>
+                                        requireEmailVerification
+                                            ? [
+                                                ...globalValidators,
+                                                EmailVerification.EmailVerificationClaim.validators.isVerified(),
+                                            ]
+                                            : globalValidators
+                                    }
                                 >
                                     <UserProvider>
                                         <GroupContextProvider>
