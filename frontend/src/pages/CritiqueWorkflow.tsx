@@ -272,9 +272,9 @@ export default function CritiqueWorkflow() {
           <Button
             className="back-link"
             startIcon={<ArrowBackRoundedIcon />}
-            onClick={() => navigate(`/groups/${groupId}/readings`)}
+            onClick={() => navigate(`/groups/${groupId}/critique`)}
           >
-            All readings
+            Critique Studio
           </Button>
           <Typography className="critique-eyebrow">
             {activeGroup.name} / {reading.name}

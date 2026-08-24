@@ -10,11 +10,12 @@ import { GroupSummary } from "../../types/ContextTypes";
 import { mutate } from "swr";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useGroupContext } from "../../context/GroupContextProvider";
 
 export default function GroupSelector() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { activeGroup, groups, setActiveGroup } = useGroupContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -28,7 +29,10 @@ export default function GroupSelector() {
         undefined,
         { revalidate: false }
     );
-    navigate(`/groups/${g.id}`);
+    const destination = location.pathname.match(/^\/groups\/[^/]+\/critique\/?$/)
+      ? `/groups/${g.id}/critique`
+      : `/groups/${g.id}`;
+    navigate(destination);
   }
 
   return (

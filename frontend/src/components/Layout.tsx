@@ -28,6 +28,7 @@ import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui
 import { PreBuiltUIList } from "../supertokensConfig";
 import ReadingNotification from "../pages/ReadingNotification";
 import CritiqueWorkflow from "../pages/CritiqueWorkflow";
+import CritiqueHub from "../pages/CritiqueHub";
 import * as ReactRouterDOM from "react-router-dom";
 
 
@@ -55,6 +56,7 @@ export default function Layout() {
                 <Route path="/creategroup" element={<GroupsCreate />} />
                 
                 <Route path="/groups/:groupId/readings" element={<Readings />} />
+                <Route path="/groups/:groupId/critique" element={<CritiqueHub />} />
                 <Route
                   path="/groups/:groupId/readings/:readingId/workflow"
                   element={<CritiqueWorkflow />}

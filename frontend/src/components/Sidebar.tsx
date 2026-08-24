@@ -17,6 +17,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import GroupIcon from "@mui/icons-material/Group";
 import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
 import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
+import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
 
 
 const Sidebar = () => {
@@ -85,6 +86,16 @@ const Sidebar = () => {
             >
             <ListItemIcon className="sidebarIcon" color="white">{<MenuBookIcon htmlColor="white"/>}</ListItemIcon>
             <ListItemText primary={"Readings"} />
+        </ListItemButton>
+
+        <ListItemButton
+                key={"/critique"}
+                selected={pathname.includes("/critique") || pathname.includes("/workflow")}
+                onClick={() => navigate(`/groups/${groupId}/critique`)}
+                disabled={!activeGroup}
+            >
+            <ListItemIcon className="sidebarIcon" color="white">{<RateReviewRoundedIcon htmlColor="white"/>}</ListItemIcon>
+            <ListItemText primary={"Critique Studio"} />
         </ListItemButton>
 
         <ListItemButton

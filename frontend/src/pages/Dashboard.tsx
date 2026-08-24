@@ -26,6 +26,8 @@ import { useUserDomain } from "../hooks/useUserDomain";
 import { useGroupInvite } from "../hooks/useGroup";
 import { GroupSummary } from '../types/ContextTypes';
 import { useGroupDetails } from "../hooks/useGroup";
+import AutoStoriesRoundedIcon from "@mui/icons-material/AutoStoriesRounded";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 
 
 type UserProfileInput = {
@@ -142,6 +144,69 @@ export default function Dashboard() {
                 Dashboard — {activeGroup.name}
             </Typography>
             <Grid container spacing={2}>
+            <Grid size={12}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    overflow: "hidden",
+                    borderRadius: 3,
+                    color: "#f7faf7",
+                    background:
+                      "radial-gradient(circle at 90% 0%, rgba(146, 186, 157, .32), transparent 32%), linear-gradient(135deg, #17271d, #315b42)",
+                  }}
+                >
+                  <CardContent sx={{ p: { xs: 3, md: 4 }, "&:last-child": { pb: { xs: 3, md: 4 } } }}>
+                    <Stack
+                      direction={{ xs: "column", md: "row" }}
+                      alignItems={{ xs: "flex-start", md: "center" }}
+                      justifyContent="space-between"
+                      spacing={3}
+                    >
+                      <Box sx={{ maxWidth: 660 }}>
+                        <Typography
+                          sx={{
+                            color: "#b7d0be",
+                            fontSize: 11,
+                            fontWeight: 800,
+                            letterSpacing: 1.4,
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          New working workflow
+                        </Typography>
+                        <Typography
+                          variant="h4"
+                          sx={{ mt: 0.75, mb: 1, fontFamily: "Georgia, serif", fontWeight: 700 }}
+                        >
+                          Enter Critique Studio
+                        </Typography>
+                        <Typography sx={{ color: "#d7e5db", lineHeight: 1.6 }}>
+                          Submit a manuscript, assign reviewers, and explore persisted feedback
+                          for {activeGroup.name} in one connected workspace.
+                        </Typography>
+                      </Box>
+                      <Button
+                        variant="contained"
+                        size="large"
+                        startIcon={<AutoStoriesRoundedIcon />}
+                        endIcon={<ArrowForwardRoundedIcon />}
+                        onClick={() => navigate(`/groups/${activeGroup.id}/critique`)}
+                        sx={{
+                          flexShrink: 0,
+                          borderRadius: 2,
+                          bgcolor: "#f4f8f5",
+                          color: "#264933",
+                          textTransform: "none",
+                          boxShadow: "none",
+                          "&:hover": { bgcolor: "white", boxShadow: "none" },
+                        }}
+                      >
+                        Open Studio
+                      </Button>
+                    </Stack>
+                  </CardContent>
+                </Card>
+            </Grid>
             <Grid size={12}>
                 <AttentionCard items={data.attention} />
             </Grid>
