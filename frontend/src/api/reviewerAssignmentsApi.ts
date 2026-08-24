@@ -46,3 +46,19 @@ export const ReviewerAssignmentsAPI = {
     });
   },
 };
+
+export type DirectReviewSetup = {
+  groupId: string;
+  readingId: string;
+  submissionId: string;
+  created: boolean;
+};
+
+export const ReviewRequestsAPI = {
+  start(groupId: string, appFileId: string) {
+    return apiFetch<DirectReviewSetup>(`/groups/${groupId}/review-requests`, {
+      method: "POST",
+      body: JSON.stringify({ appFileId }),
+    });
+  },
+};

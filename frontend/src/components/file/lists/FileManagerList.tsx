@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { AppFileMeta } from "../../../types/domain-types";
+import { AppFile, AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../../../types/FileTypes";
 import FileListItem from "./FileListItem";
 import EditFileDialog from "./EditFileDialog";
@@ -13,6 +13,8 @@ interface FileManagerListProps {
   fileListProperties: FileListProperties;
   domain?: FileDomainCommands;
   onUploadVersion(fileMetaId: string): void;
+  onAssignReviewers?(version: AppFile): void;
+  assigningVersionId?: string;
 }
 
 const FileManagerList: React.FC<FileManagerListProps> = ({
@@ -20,14 +22,15 @@ const FileManagerList: React.FC<FileManagerListProps> = ({
   domain,
   fileListProperties,
   variant,
-  onUploadVersion
+  onUploadVersion,
+  onAssignReviewers,
+  assigningVersionId,
 }) => {
+  const [editingFile, setEditingFile] = useState<AppFileMeta | null>(null);
 
-    if (variant === "FILES" && !domain) {
-        throw new Error("FileManagerList in FILES mode requires a domain");
-    }
-
-    const [editingFile, setEditingFile] = useState<AppFileMeta | null>(null);
+  if (variant === "FILES" && !domain) {
+    throw new Error("FileManagerList in FILES mode requires a domain");
+  }
 
   if (!files || files.length === 0) {
     return (
@@ -51,6 +54,8 @@ const FileManagerList: React.FC<FileManagerListProps> = ({
                 fileListProperties={fileListProperties}
                 onEdit={setEditingFile}
                 onUploadVersion={onUploadVersion}
+                onAssignReviewers={onAssignReviewers}
+                assigningVersionId={assigningVersionId}
           />
         ))}
       </Box>

@@ -125,10 +125,6 @@ router.get(
 router.post(
   "/submissions/:submissionId",
   asyncHandler(async (req, res) => {
-    if (!canManageAssignments(req.groupRole)) {
-      return res.status(403).json({ error: "Group admins only" });
-    }
-
     const { reviewerUserId } = assignmentInput.parse(req.body);
     const submission = await prisma.readingSubmission.findFirst({
       where: {
@@ -140,6 +136,13 @@ router.post(
 
     if (!submission) {
       return res.status(404).json({ error: "Submission not found" });
+    }
+
+    const canManageSubmission =
+      canManageAssignments(req.groupRole) ||
+      submission.participant.userId === req.user.id;
+    if (!canManageSubmission) {
+      return res.status(403).json({ error: "Only group managers or the author can assign reviewers" });
     }
 
     const membership = await prisma.groupUser.findUnique({
@@ -191,6 +194,9 @@ router.patch(
         id: req.params.assignmentId,
         submission: { readingId: req.reading.id },
       },
+      include: {
+        submission: { include: { participant: true } },
+      },
     });
 
     if (!assignment) {
@@ -218,19 +224,25 @@ router.patch(
 router.delete(
   "/:assignmentId",
   asyncHandler(async (req, res) => {
-    if (!canManageAssignments(req.groupRole)) {
-      return res.status(403).json({ error: "Group admins only" });
-    }
-
     const assignment = await prisma.readingReviewerAssignment.findFirst({
       where: {
         id: req.params.assignmentId,
         submission: { readingId: req.reading.id },
       },
+      include: {
+        submission: { include: { participant: true } },
+      },
     });
 
     if (!assignment) {
       return res.status(404).json({ error: "Reviewer assignment not found" });
+    }
+
+    const canDelete =
+      canManageAssignments(req.groupRole) ||
+      assignment.submission.participant.userId === req.user.id;
+    if (!canDelete) {
+      return res.status(403).json({ error: "Only group managers or the author can remove reviewers" });
     }
 
     await prisma.readingReviewerAssignment.delete({

@@ -17,6 +17,7 @@ import {
   Tabs,
   TextField,
   Typography,
+  Alert,
 } from "@mui/material";
 import UploadIcon from "@mui/icons-material/Upload";
 import CloseIcon from "@mui/icons-material/Close";
@@ -38,6 +39,9 @@ import { useUserContext } from "../context/UserContext";
 import UploadFileForm from "../components/file/forms/UploadFileForm";
 import ConfirmDialog from "../components/dialogs/ConfirmDialog";
 import ReadingSubmissionList from "../components/reading/ReadingSubmissionList";
+import { useGroupContext } from "../context/GroupContextProvider";
+import { useNavigate } from "react-router-dom";
+import { ReviewRequestsAPI } from "../api/reviewerAssignmentsApi";
 
 const manuscriptListProperties: FileListProperties = {
     noFilesMessage: "You have not uploaded manuscripts",
@@ -60,10 +64,14 @@ const mySubmissionsListProperties: FileListProperties = {
 }
 
 const FileManager = () => {
+    const navigate = useNavigate();
+    const { activeGroup } = useGroupContext();
     const { user, isLoading: isUserLoading } = useUserContext();
     const [open, setOpen] = useState(false);
     const [appFileMetaIdToDelete, setAppFileMetaIdToDelete] = useState("");
     const [deletionDialogMessage, setDeletionDialogMessage] = useState("");
+    const [assigningVersionId, setAssigningVersionId] = useState("");
+    const [reviewSetupError, setReviewSetupError] = useState("");
     const { 
         saveMetadata, 
         deleteFile, 
@@ -132,6 +140,30 @@ const FileManager = () => {
         await deleteFile(appFileMetaId)
     }
 
+    const onAssignReviewers = async (version: AppFile) => {
+        if (!activeGroup) {
+            setReviewSetupError(
+                "Choose or create a group first. Reviewers must belong to the group where the review takes place."
+            );
+            return;
+        }
+
+        setAssigningVersionId(version.id);
+        setReviewSetupError("");
+        try {
+            const setup = await ReviewRequestsAPI.start(activeGroup.id, version.id);
+            navigate(
+                `/groups/${setup.groupId}/readings/${setup.readingId}/workflow?stage=assign&submission=${setup.submissionId}`
+            );
+        } catch (error) {
+            setReviewSetupError(
+                error instanceof Error ? error.message : "Could not open reviewer assignment"
+            );
+        } finally {
+            setAssigningVersionId("");
+        }
+    };
+
     const domain: FileDomainCommands = {
         saveMetadata: saveMetadata,
         deleteFile: onDeleteFile,
@@ -158,6 +190,15 @@ const FileManager = () => {
       />
       <Card elevation={0} className="filesComponentPanel">
         <CardContent>
+          {reviewSetupError && (
+            <Alert
+              severity="info"
+              onClose={() => setReviewSetupError("")}
+              sx={{ mb: 2 }}
+            >
+              {reviewSetupError}
+            </Alert>
+          )}
           {/* Header */}
           <Grid container alignItems="center">
             <Grid size={5}>
@@ -196,6 +237,8 @@ const FileManager = () => {
                   variant="FILES"
                   fileListProperties={manuscriptListProperties}
                   onUploadVersion={onBeginUploadVersion}
+                  onAssignReviewers={onAssignReviewers}
+                  assigningVersionId={assigningVersionId}
                 />
               )}
             </>

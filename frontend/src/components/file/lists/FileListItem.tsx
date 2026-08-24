@@ -6,7 +6,7 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import { AppFileMeta } from "../../../types/domain-types";
+import { AppFile, AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../../../types/FileTypes";
 import FileListForm from "../forms/FileListDetailsForm";
 import FileListSummaryForm from "../forms/FileListSummaryForm";
@@ -19,6 +19,8 @@ interface FileListItemProps {
   onEdit(file: AppFileMeta): void;
   domain?: FileDomainCommands;
   onUploadVersion(fileMetaId: string): void;
+  onAssignReviewers?(version: AppFile): void;
+  assigningVersionId?: string;
 }
 
 const FileListItem: React.FC<FileListItemProps> = ({
@@ -27,7 +29,9 @@ const FileListItem: React.FC<FileListItemProps> = ({
   domain,
   fileListProperties,
   onEdit,
-  onUploadVersion
+  onUploadVersion,
+  onAssignReviewers,
+  assigningVersionId,
 }) => {
   // Enforce invariant early
   if (variant === "FILES" && !domain) {
@@ -83,6 +87,8 @@ const FileListItem: React.FC<FileListItemProps> = ({
                   onVersionChange={(versionId) =>
                     domain.setActiveVersion(fileMeta.id, versionId)
                   }
+                  onAssignReviewers={onAssignReviewers}
+                  assigningVersionId={assigningVersionId}
                 />
               </Grid>
             )}

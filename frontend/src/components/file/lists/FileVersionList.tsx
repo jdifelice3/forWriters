@@ -7,19 +7,25 @@ import {
   ListItemText,
   Radio,
   Stack,
+  Button,
 } from "@mui/material";
+import GroupAddRoundedIcon from "@mui/icons-material/GroupAddRounded";
 
 interface FileVersionListProps {
   fileMeta: AppFileMeta;
   versions: AppFile[];
   currentVersionId: number;
   onVersionChange(versionId: number): void;
+  onAssignReviewers?(version: AppFile): void;
+  assigningVersionId?: string;
 }
 
 const FileVersionList: React.FC<FileVersionListProps> = ({
   versions,
   currentVersionId,
   onVersionChange,
+  onAssignReviewers,
+  assigningVersionId,
 }) => {
   return (
     <List dense>
@@ -27,10 +33,24 @@ const FileVersionList: React.FC<FileVersionListProps> = ({
         <ListItem
           key={version.id}
           secondaryAction={
-            <Radio
-              checked={version.version === currentVersionId}
-              onChange={() => onVersionChange(version.version)}
-            />
+            <Stack direction="row" spacing={1} alignItems="center">
+              {onAssignReviewers && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<GroupAddRoundedIcon />}
+                  disabled={assigningVersionId === version.id}
+                  onClick={() => onAssignReviewers(version)}
+                  sx={{ textTransform: "none", whiteSpace: "nowrap" }}
+                >
+                  {assigningVersionId === version.id ? "Opening…" : "Assign reviewers"}
+                </Button>
+              )}
+              <Radio
+                checked={version.version === currentVersionId}
+                onChange={() => onVersionChange(version.version)}
+              />
+            </Stack>
           }
         >
         <ListItemText

@@ -7,6 +7,7 @@ import joinRoutes from "./join.routes";
 import joinRequestRoutes from "./join-requests.routes"
 import notificationsRoutes from "../notifications/notifications.routes";
 import groupInviteRoutes from "./group.invite.routes";
+import reviewRequestsRoutes from "../readings/review-requests.routes";
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.use("/search", searchRoutes);
 router.use("/join", joinRoutes);
 
 router.use("/:groupId/readings", readingsRouter);
+router.use("/:groupId/review-requests", reviewRequestsRoutes);
 router.use("/:groupId/notifications", notificationsRoutes);
 router.use("/:groupId/join", joinRequestRoutes);
 router.use("/:groupId", groupDetailsRoutes);

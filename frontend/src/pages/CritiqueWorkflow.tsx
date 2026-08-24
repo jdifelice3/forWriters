@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Alert,
   Avatar,
@@ -75,6 +75,7 @@ export default function CritiqueWorkflow() {
     readingId: string;
   }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, isLoading: userLoading } = useUserContext();
   const { activeGroup } = useGroupContext();
   const { readings, isLoading: readingsLoading, refresh: refreshReadings } =
@@ -91,7 +92,8 @@ export default function CritiqueWorkflow() {
     updateStatus,
   } = useCritiqueWorkflow(groupId, readingId);
 
-  const [stage, setStage] = useState<Stage>(1);
+  const initialStage = searchParams.get("stage") === "assign" ? 2 : 1;
+  const [stage, setStage] = useState<Stage>(initialStage);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState("");
   const [selectedAppFileId, setSelectedAppFileId] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -106,10 +108,16 @@ export default function CritiqueWorkflow() {
   );
 
   useEffect(() => {
-    if (!selectedSubmissionId && workflow?.submissions[0]) {
-      setSelectedSubmissionId(workflow.submissions[0].id);
+    const requestedSubmissionId = searchParams.get("submission");
+    const requestedSubmission = workflow?.submissions.find(
+      (submission) => submission.id === requestedSubmissionId
+    );
+    if (!selectedSubmissionId && (requestedSubmission || workflow?.submissions[0])) {
+      setSelectedSubmissionId(
+        requestedSubmission?.id ?? workflow!.submissions[0].id
+      );
     }
-  }, [selectedSubmissionId, workflow?.submissions]);
+  }, [searchParams, selectedSubmissionId, workflow]);
 
   const versionOptions = useMemo(
     () =>
@@ -131,6 +139,10 @@ export default function CritiqueWorkflow() {
   );
   const selectedSubmission = workflow?.submissions.find(
     (submission) => submission.id === selectedSubmissionId
+  );
+  const canManageSelectedSubmission = Boolean(
+    workflow?.canManageAssignments ||
+    selectedSubmission?.author.userId === workflow?.currentUserId
   );
 
   const myAssignments = useMemo(
@@ -483,17 +495,22 @@ export default function CritiqueWorkflow() {
                         Assignments are isolated to {activeGroup.name} and saved immediately.
                       </Typography>
                     </Box>
-                    {!workflow.canManageAssignments && (
-                      <Chip icon={<LockRoundedIcon />} label="Admin managed" />
+                    {!canManageSelectedSubmission && (
+                      <Chip icon={<LockRoundedIcon />} label="Author or admin managed" />
                     )}
                   </Box>
 
-                  <Box className="real-reviewer-grid">
+                  {workflow.eligibleReviewers.filter(
+                    (reviewer) => reviewer.userId !== selectedSubmission.author.userId
+                  ).length === 0 ? (
+                    <Alert severity="info">
+                      This group has no other members to assign yet. Invite a reviewer to
+                      {activeGroup.name}, then return to this version.
+                    </Alert>
+                  ) : (
+                    <Box className="real-reviewer-grid">
                     {workflow.eligibleReviewers
-                      .filter(
-                        (reviewer) =>
-                          reviewer.userId !== selectedSubmission.author.userId
-                      )
+                      .filter((reviewer) => reviewer.userId !== selectedSubmission.author.userId)
                       .map((reviewer) => {
                         const assignment = selectedSubmission.assignments.find(
                           (item) => item.reviewer.userId === reviewer.userId
@@ -502,7 +519,7 @@ export default function CritiqueWorkflow() {
                           <button
                             key={reviewer.userId}
                             className={assignment ? "selected" : ""}
-                            disabled={!workflow.canManageAssignments || busy}
+                            disabled={!canManageSelectedSubmission || busy}
                             onClick={() => toggleReviewer(reviewer.userId)}
                           >
                             <span className="reviewer-check">
@@ -532,7 +549,8 @@ export default function CritiqueWorkflow() {
                           </button>
                         );
                       })}
-                  </Box>
+                    </Box>
+                  )}
                 </>
               )}
             </>
