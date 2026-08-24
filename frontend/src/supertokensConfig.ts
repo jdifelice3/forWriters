@@ -8,6 +8,10 @@ import EmailVerification from "supertokens-auth-react/recipe/emailverification";
 import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
 import { EmailVerificationPreBuiltUI } from "supertokens-auth-react/recipe/emailverification/prebuiltui";
 
+const requireEmailVerification =
+  import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false" &&
+  import.meta.env.VITE_WEB_HOST === "https://app.forwriters.ink";
+
 export const SuperTokensConfig = {
   appInfo: {
     appName: "forWriters",
@@ -53,7 +57,9 @@ EmailPassword.init({
     },
   },
 }),
-EmailVerification.init(),
+EmailVerification.init({
+  mode: requireEmailVerification ? "REQUIRED" : "OPTIONAL",
+}),
 
     Session.init({
       tokenTransferMethod: "cookie",
