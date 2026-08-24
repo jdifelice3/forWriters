@@ -32,21 +32,15 @@ if (typeof process.env.WEBSITE_DOMAIN === 'undefined') {
   throw new Error("Environment variable process.env.WEBSITE_DOMAIN is undefined");
 }
 
-const sessionInit = process.env.NODE_ENV === 'production' ?
-    Session.init({
-        useDynamicAccessTokenSigningKey: false,
-        cookieSameSite: "none",
-        cookieSecure: true,
-        antiCsrf: "VIA_TOKEN",
-        cookieDomain: ".forwriters.ink",
-    })
-    :
-    Session.init({
-        useDynamicAccessTokenSigningKey: false,
-        cookieSameSite: "none",
-        cookieSecure: true,
-        antiCsrf: "VIA_TOKEN",
-    });
+const cookieDomain = process.env.COOKIE_DOMAIN?.trim() || undefined;
+
+const sessionInit = Session.init({
+    useDynamicAccessTokenSigningKey: false,
+    cookieSameSite: "none",
+    cookieSecure: true,
+    antiCsrf: "VIA_TOKEN",
+    cookieDomain,
+});
 
 export const SuperTokensConfig: TypeInput = {
     supertokens: {

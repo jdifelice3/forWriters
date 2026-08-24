@@ -18,7 +18,7 @@ export function deviceIdMiddleware(req: Request, res: Response, next: NextFuncti
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "none",
-    domain: process.env.NODE_ENV === "production" ? ".forwriters.ink" : undefined,
+    domain: process.env.COOKIE_DOMAIN?.trim() || undefined,
     maxAge: 1000 * 60 * 60 * 24 * 365 * 2, // 2 years
   });
 
@@ -29,4 +29,3 @@ export function requestIdMiddleware(req: Request, _res: Response, next: NextFunc
   (req as any).requestId = req.headers["x-request-id"]?.toString() ?? crypto.randomUUID();
   next();
 }
-
