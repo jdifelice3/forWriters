@@ -69,11 +69,11 @@ export default function App() {
                                     requireAuth={true}
                                     overrideGlobalClaimValidators={(globalValidators) =>
                                         requireEmailVerification
-                                            ? [
-                                                ...globalValidators,
-                                                EmailVerification.EmailVerificationClaim.validators.isVerified(),
-                                            ]
-                                            : globalValidators
+                                            ? globalValidators
+                                            : globalValidators.filter(
+                                                (validator) =>
+                                                    validator.id !== EmailVerification.EmailVerificationClaim.id,
+                                            )
                                     }
                                 >
                                     <UserProvider>
