@@ -1,8 +1,7 @@
-import { SessionAuth } from "supertokens-auth-react/recipe/session";
+import { SessionAuth, useSessionContext } from "supertokens-auth-react/recipe/session";
 import { BrowserRouter, Routes, Route  } from "react-router-dom";
 import * as ReactRouter from "react-router-dom";
-import SuperTokens, { SuperTokensWrapper } from "supertokens-auth-react";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { Box, CircularProgress, ThemeProvider, Typography, createTheme } from "@mui/material";
 import Layout from "./components/Layout";
 import "react-pro-sidebar/dist/css/styles.css";
 import "./assets/css/forWriters.css";
@@ -19,6 +18,47 @@ import ReadingNotification from "./pages/ReadingNotification";
 const requireEmailVerification =
     import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false" &&
     import.meta.env.VITE_WEB_HOST === "https://app.forwriters.ink";
+
+function SessionStartupScreen() {
+    const session = useSessionContext();
+
+    if (!session.loading) return null;
+
+    return (
+        <Box
+            role="status"
+            aria-live="polite"
+            sx={{
+                position: "fixed",
+                inset: 0,
+                zIndex: (theme) => theme.zIndex.modal + 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background:
+                    "radial-gradient(circle at 50% 32%, #eef5f0 0%, #f8faf8 42%, #ffffff 78%)",
+                color: "#253a2c",
+            }}
+        >
+            <Box sx={{ textAlign: "center", px: 3 }}>
+                <CircularProgress size={30} thickness={4} sx={{ color: "#315b42" }} />
+                <Typography
+                    sx={{
+                        mt: 2,
+                        fontFamily: "Georgia, serif",
+                        fontSize: 22,
+                        fontWeight: 700,
+                    }}
+                >
+                    Opening forWriters…
+                </Typography>
+                <Typography sx={{ mt: 0.75, color: "#6d786f", fontSize: 12 }}>
+                    Restoring your secure session and group workspace.
+                </Typography>
+            </Box>
+        </Box>
+    );
+}
 
 // ---------- Root App ----------
 export default function App() {
@@ -40,9 +80,9 @@ export default function App() {
     });
   return (
     <ThemeProvider theme={theme}>
-        <SuperTokensWrapper>
-            <SWRConfig value={{ fetcher: typedFetcher }}>
-                <BrowserRouter>
+        <SWRConfig value={{ fetcher: typedFetcher }}>
+            <BrowserRouter>
+                    <SessionStartupScreen />
                     <Routes>
                         {getSuperTokensRoutesForReactRouterDom(ReactRouter, PreBuiltUIList)}
                         
@@ -85,9 +125,8 @@ export default function App() {
                             }
                         />
                     </Routes>
-                </BrowserRouter>
-            </SWRConfig>
-        </SuperTokensWrapper>
+            </BrowserRouter>
+        </SWRConfig>
     </ThemeProvider>
   );
 }
