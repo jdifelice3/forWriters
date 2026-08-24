@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useGroupContext } from "../context/GroupContextProvider";
 import { useFileDomain } from "../hooks/file/useFileDomain";
 import { useReadings } from "../hooks/reading/useReadings";
@@ -25,6 +25,7 @@ import { useUserContext } from "../context/UserContext";
 import { FileDomainCommands } from "../types/FileTypes";
 import { CommentDTO } from "../types/FeedbackTypes";
 import { ManuscriptReview } from "../components/review/ManuscriptReview";
+import { useCritiqueWorkflow } from "../hooks/reading/useCritiqueWorkflow";
 
 const FileFeedback = () => {
     const { user } = useUserContext();
@@ -43,9 +44,10 @@ const FileFeedback = () => {
       } = useFileDomain();
 
     const { activeGroup } = useGroupContext();
-    const { readingId } = useParams<{ readingId: string }>();
+    const { groupId, readingId } = useParams<{ groupId: string; readingId: string }>();
     const { readings, isLoading: isReadingLoading, refresh } = useReadings();
     const reading: Reading | undefined = readings.find(r => r.id === readingId);
+    const { workflow } = useCritiqueWorkflow(groupId, readingId);
     const { canReviewFile, getManuscriptHtml } = useReadingDomain(activeGroup?.id, user, readings, refresh);
     const [editFile, setEditFile] = useState<AppFile | null>(null);
     const [editTitle, setEditTitle] = useState("");
@@ -55,31 +57,55 @@ const FileFeedback = () => {
     const [fileFeedbackIds, setFileFeedbackIds] = useState<Record<string, string>>({});
     const [initialComments, setInititalComments] = useState<Record<string, CommentDTO[]>>({});
 
+    const requestedSubmissionId = new URLSearchParams(window.location.search).get("submission");
+    const visibleSubmissions = useMemo(() => {
+        const reviewableSubmissionIds = new Set(
+            workflow?.submissions
+                .filter((submission) =>
+                    submission.assignments.some(
+                        (assignment) => assignment.reviewer.userId === user?.id
+                    )
+                )
+                .map((submission) => submission.id) ?? []
+        );
+
+        return reading?.readingSubmission.filter((submission) => {
+            if (!groupId || !workflow) return true;
+            if (!reviewableSubmissionIds.has(submission.id)) return false;
+            return !requestedSubmissionId || submission.id === requestedSubmissionId;
+        }) ?? [];
+    }, [groupId, reading?.readingSubmission, requestedSubmissionId, user?.id, workflow]);
+    const reviewReading = useMemo(
+        () => reading ? { ...reading, readingSubmission: visibleSubmissions } : undefined,
+        [reading, visibleSubmissions]
+    );
+
     useEffect(() => {
-        if (!reading) return;
+        if (!reviewReading) return;
+        const currentReviewReading = reviewReading;
         
         let cancelled = false;
 
         async function loadMissing() {
             const updates: Record<string, string> = {};
-            const ids = await getFileFeedback(reading ?? undefined);
+            const ids = await getFileFeedback(currentReviewReading);
 
             const initComments: Record<string, CommentDTO[]> = {};
             const entries = Object.entries(ids);
 
             for (let i = 0; i < entries.length; i++) {
-                let [key, value] = entries[i];
+                const [key, value] = entries[i];
                 initComments[key] = await getComments(value);
             }
             setFileFeedbackIds(ids);
             setInititalComments(initComments);
-            for (const rs of reading!.readingSubmission) {
+            for (const rs of currentReviewReading.readingSubmission) {
                 if (!rs.appFile) continue;
 
                 // guard: already loaded
                 if (manuscriptHtmlBySubmission[rs.id]) continue;
 
-                const html = await getManuscriptHtml(reading!.id, rs.id);
+                const html = await getManuscriptHtml(currentReviewReading.id, rs.id);
                 if (html) {
                     updates[rs.id] = html;
                 }
@@ -99,9 +125,11 @@ const FileFeedback = () => {
             cancelled = true;
         };
     }, [
-        reading?.id,                       
-        reading?.readingSubmission.length, 
-        manuscriptHtmlBySubmission,        
+        reviewReading,
+        manuscriptHtmlBySubmission,
+        getFileFeedback,
+        getComments,
+        getManuscriptHtml,
     ]);
 
     if ( !activeGroup || !reading ) {
@@ -151,22 +179,22 @@ const FileFeedback = () => {
         <Typography  variant="h6" sx={{mb:2}}>
             There&nbsp;
             {reading!.readingSubmission.length === 1 ? "is" : "are"}&nbsp;
-            <b>{reading!.readingSubmission.length}</b> manuscript
-            {reading!.readingSubmission.length === 1 ? "" : "s"}&nbsp;to review
+            <b>{visibleSubmissions.length}</b> manuscript
+            {visibleSubmissions.length === 1 ? "" : "s"}&nbsp;to review
         </Typography>
         <Typography variant="h6" sx={{color: "blue", mb: 2}} fontWeight={"bold"}>
             Highlight manuscript text and add a comment in the popup box
         </Typography>
-            {reading && reading.readingParticipant.findIndex(rp => rp.readingSubmission?.appFile.appFileMeta !== null) === -1 ? (
+            {visibleSubmissions.length === 0 ? (
                 <Card>
                     <CardContent>
                         <Typography variant="body1" color="text.secondary">
-                            No files uploaded yet.
+                            No manuscripts are assigned to you in this reading.
                         </Typography>
                     </CardContent>
                 </Card>
             ) : (
-                reading.readingSubmission.map((rs: ReadingSubmission) => (
+                visibleSubmissions.map((rs: ReadingSubmission) => (
                     <Card key={rs.id} sx={{mb:4}}>
                         <CardContent>
                             <Grid container>

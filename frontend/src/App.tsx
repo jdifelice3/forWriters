@@ -8,7 +8,7 @@ import "react-pro-sidebar/dist/css/styles.css";
 import "./assets/css/forWriters.css";
 import { UserProvider } from "./context/UserContext";
 import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
-import { PreBuiltUIList } from "./config";
+import { PreBuiltUIList } from "./supertokensConfig";
 import { SWRConfig } from "swr";
 import { typedFetcher } from "./util/fetcher";
 import { GroupContextProvider } from "./context/GroupContextProvider";
@@ -62,7 +62,7 @@ export default function App() {
                             path="/*"
                             element={
                                 <SessionAuth 
-                                    requireAuth={false}
+                                    requireAuth={true}
                                     overrideGlobalClaimValidators={(globalValidators) => [
                                         ...globalValidators,
                                         EmailVerification.EmailVerificationClaim.validators.isVerified(),
@@ -83,5 +83,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
-

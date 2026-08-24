@@ -1,6 +1,7 @@
 import {
+  AppFileMeta,
   Group,
-  GroupMemberRole,
+  GroupRole,
   Reading,
   ReadingParticipant,
   ReadingSubmission,
@@ -11,7 +12,7 @@ declare global {
   namespace Express {
     interface Request {
         group: Group;
-        groupRole: GroupMemberRole;
+        groupRole: GroupRole;
         reading: Reading;
         readingParticipant: ReadingParticipant;
         submission: ReadingSubmission;

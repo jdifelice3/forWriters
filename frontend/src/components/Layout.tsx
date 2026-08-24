@@ -27,6 +27,7 @@ import { VersionCompare } from "../pages/VersionCompare";
 import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
 import { PreBuiltUIList } from "../supertokensConfig";
 import ReadingNotification from "../pages/ReadingNotification";
+import CritiqueWorkflow from "../pages/CritiqueWorkflow";
 import * as ReactRouterDOM from "react-router-dom";
 
 
@@ -54,6 +55,14 @@ export default function Layout() {
                 <Route path="/creategroup" element={<GroupsCreate />} />
                 
                 <Route path="/groups/:groupId/readings" element={<Readings />} />
+                <Route
+                  path="/groups/:groupId/readings/:readingId/workflow"
+                  element={<CritiqueWorkflow />}
+                />
+                <Route
+                  path="/groups/:groupId/readings/:readingId/review"
+                  element={<FileFeedback />}
+                />
                 <Route path="/filefeedback/:readingId" element={<FileFeedback />} />
                 <Route path="/filefeedbackdetail/:appFileId" element={<FileFeedbackDetail />} />
                 <Route path="/joinadminpage" element={<GroupJoinRequestAdmin />} />

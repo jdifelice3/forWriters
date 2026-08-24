@@ -37,6 +37,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MessageIcon from '@mui/icons-material/Message';
 import ArchiveIcon from '@mui/icons-material/Archive';
+import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 
 interface ReadingCalendarItemFormProps {
     key: string;
@@ -66,9 +67,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
     const { user, isLoading, error } = useUserContext();
     const { activeGroup } = useGroupContext();
     const { refresh } = useReadings();
-    
-    if (!activeGroup) return <CircularProgress />;
-        
+
     const [err, setErr] = React.useState<string | null>(null);
     const [submitManuscriptOpen, setSubmitManuscriptOpen] = useState(false);
     const [updateManuscriptVersionOpen, setUpdateManuscriptVersionOpen] = useState(false);
@@ -77,6 +76,8 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
     const [informMembersOpen, setInformMembersOpen] = useState(false);
     const [sendInviteSuccess, setSendInviteSuccess] = useState(false);
     const [copied, setCopied] = useState(false);
+
+    if (!activeGroup) return <CircularProgress />;
   
     const readingNotificationUrl = `${import.meta.env.VITE_WEB_HOST}/groups/${activeGroup.id}/readings/${reading.id}/notification`;
 
@@ -110,7 +111,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
         return { hasSignedUp, hasSubmitted, title, version, versionName, isPastSubmissionDeadline, fileDescription};
     }
 
-    const FileSubmissionDetails = () => {
+    const renderFileSubmissionDetails = () => {
         const { hasSignedUp, hasSubmitted, title, version, versionName, 
             isPastSubmissionDeadline, fileDescription} = getfileSubmissionDetails();
         
@@ -286,10 +287,18 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
 
 {/* FileSubmissionDetails */}
 
-                      <FileSubmissionDetails/>
+                      {renderFileSubmissionDetails()}
 
                 </CardContent>
                 <CardActions>
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<AssignmentTurnedInRoundedIcon />}
+                        href={`/groups/${activeGroup.id}/readings/${reading.id}/workflow`}
+                    >
+                        Critique workflow
+                    </Button>
                     {isAdmin ? (
                             <Box display="flex" gap={1} mt={1}>
                                 <Tooltip title={"Tell group members about the reading with an email"}>

@@ -71,6 +71,12 @@ enum ParticipantType {
   REVIEWER
 }
 
+enum ReviewerAssignmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+}
+
 enum ReadingScheduleType {
     SCHEDULED
     UNSCHEDULED
@@ -563,7 +569,26 @@ model ReadingSubmission {
   reading       Reading   @relation(fields: [readingId], references: [id])
   participant   ReadingParticipant    @relation(fields: [participantId], references: [id])
   appFile       AppFile  @relation(fields: [appFileId], references: [id])
+  reviewerAssignments ReadingReviewerAssignment[]
   @@unique([readingId, participantId, appFileId])
+}
+
+model ReadingReviewerAssignment {
+  id               String                   @id @default(cuid())
+  submissionId     String
+  reviewerUserId   String
+  assignedByUserId String
+  status           ReviewerAssignmentStatus @default(ASSIGNED)
+  assignedAt       DateTime                 @default(now())
+  completedAt      DateTime?
+
+  submission ReadingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewer   User              @relation("ReadingReviewerAssignmentReviewer", fields: [reviewerUserId], references: [id])
+  assignedBy User              @relation("ReadingReviewerAssignmentAssigner", fields: [assignedByUserId], references: [id])
+
+  @@unique([submissionId, reviewerUserId])
+  @@index([reviewerUserId, status])
+  @@index([assignedByUserId])
 }
 
 model User {
@@ -588,6 +613,8 @@ model User {
   urls                UserUrl[]
   joinRequests        JoinRequest[]
   readingParticipant       ReadingParticipant[]                       @relation("ReadingParticipantUser")
+  reviewAssignments        ReadingReviewerAssignment[]                @relation("ReadingReviewerAssignmentReviewer")
+  assignedReviewers        ReadingReviewerAssignment[]                @relation("ReadingReviewerAssignmentAssigner")
   userInviter         UserCollaborator[]                    @relation("User")
   userCollaborator    UserCollaborator[]                    @relation("UserCollaborator")
   userRequestor       CollaboratorRequest[]                 @relation("UserRequest")
@@ -628,4 +655,3 @@ model UserUrl {
 
   user User? @relation(fields: [userId], references: [id])
 }
-
