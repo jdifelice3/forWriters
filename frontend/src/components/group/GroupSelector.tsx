@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGroupContext } from "../../context/GroupContextProvider";
 
-export default function GroupSelector() {
+export default function GroupSelector({ variant = "default" }: { variant?: "default" | "studio" }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { activeGroup, groups, setActiveGroup } = useGroupContext();
@@ -29,7 +29,8 @@ export default function GroupSelector() {
         undefined,
         { revalidate: false }
     );
-    const destination = location.pathname.match(/^\/groups\/[^/]+\/critique\/?$/)
+    const destination = location.pathname === "/studio" ||
+      location.pathname.match(/^\/groups\/[^/]+\/critique\/?$/)
       ? `/groups/${g.id}/critique`
       : `/groups/${g.id}`;
     navigate(destination);
@@ -42,7 +43,14 @@ export default function GroupSelector() {
         endIcon={<ExpandMoreIcon />}
         variant="outlined"
 
-        sx={{ textTransform: "none", minWidth: 220 }}
+        sx={variant === "studio" ? {
+          minWidth: 220,
+          borderColor: "#cdd9d0",
+          background: "#f8fbf9",
+          color: "#315b42",
+          textTransform: "none",
+          "&:hover": { borderColor: "#8fa394", background: "white" },
+        } : { textTransform: "none", minWidth: 220 }}
       >
         {activeGroup ? activeGroup.name : "Select a group"}
       </Button>

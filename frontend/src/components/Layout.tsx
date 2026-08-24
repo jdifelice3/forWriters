@@ -5,7 +5,7 @@ import {
     Box,
 } from "@mui/material";
 
-import Sidebar from "./Sidebar";
+import StudioSidebar from "./studio/StudioSidebar";
 
 // Your pages
 import Home from "../pages/Home";
@@ -21,7 +21,7 @@ import Readings from "../pages/Readings";
 import CollaboratorRequestAdmin from "../pages/CollaboratorRequestAdmin";
 import Dashboard from "../pages/Dashboard";
 import FileFeedbackDetail from "../pages/FileFeedbackDetail";
-import TopNav from "../components/nav/TopNav";
+import StudioTopNav from "./studio/StudioTopNav";
 import Billing from "../pages/Billing";
 import { VersionCompare } from "../pages/VersionCompare";
 import { getSuperTokensRoutesForReactRouterDom } from "supertokens-auth-react/ui";
@@ -29,7 +29,9 @@ import { PreBuiltUIList } from "../supertokensConfig";
 import ReadingNotification from "../pages/ReadingNotification";
 import CritiqueWorkflow from "../pages/CritiqueWorkflow";
 import CritiqueHub from "../pages/CritiqueHub";
+import StudioHome from "../pages/StudioHome";
 import * as ReactRouterDOM from "react-router-dom";
+import "../assets/css/studio-shell.css";
 
 
 export default function Layout() {
@@ -38,14 +40,16 @@ export default function Layout() {
   if (loading) return null;
 
   return (
-    <Box sx={{ display: "flex" }}>
-        <TopNav />
-        <Sidebar />
-        <Box component="main" sx={{ flexGrow: 1, mt: 10, ml:0 }}>
+    <Box sx={{ display: "flex" }} className="studio-shell">
+        <StudioTopNav />
+        <StudioSidebar />
+        <Box component="main" sx={{ flexGrow: 1 }} className="studio-main">
             <Routes>
                  {getSuperTokensRoutesForReactRouterDom(ReactRouterDOM, PreBuiltUIList)}
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/studio" element={<StudioHome />} />
+                <Route path="/dashboard" element={<StudioHome />} />
+                <Route path="/" element={<StudioHome />} />
+                <Route path="/legacy-dashboard" element={<Dashboard />} />
                 <Route path="/userprofile" element={<UserProfile />} />
                 <Route path="/files" element={<FileManager/>} />
                 <Route path="/filemanager/manuscript" element={<FileManager/>} />

@@ -1,0 +1,124 @@
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import CloudDoneRoundedIcon from "@mui/icons-material/CloudDoneRounded";
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import MessageRoundedIcon from "@mui/icons-material/MessageRounded";
+import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
+import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useGroupContext } from "../context/GroupContextProvider";
+import "../assets/css/studio-shell.css";
+
+export default function StudioHome() {
+  const navigate = useNavigate();
+  const { activeGroup, groups, isLoading } = useGroupContext();
+
+  if (isLoading) {
+    return (
+      <Box className="studio-home-loading">
+        <CircularProgress size={28} />
+        <Typography>Preparing your writing workspace…</Typography>
+      </Box>
+    );
+  }
+
+  if (activeGroup) {
+    return <Navigate replace to={`/groups/${activeGroup.id}/critique`} />;
+  }
+
+  return (
+    <Box className="studio-home-page">
+      <Box className="studio-home-hero">
+        <Typography className="studio-kicker">forWriters · functional prototype</Typography>
+        <Typography component="h1">
+          A clearer path from
+          <br />
+          draft to dialogue.
+        </Typography>
+        <Typography className="studio-home-lede">
+          Organize a reading, submit a manuscript, choose the right reviewers,
+          and turn many voices into feedback a writer can actually use.
+        </Typography>
+
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+          <Button
+            className="studio-primary-action"
+            variant="contained"
+            endIcon={<ArrowForwardRoundedIcon />}
+            onClick={() => navigate("/creategroup")}
+          >
+            Start a writing group
+          </Button>
+          <Button
+            className="studio-secondary-action"
+            variant="outlined"
+            onClick={() => navigate("/groupsearch")}
+          >
+            Find an existing group
+          </Button>
+        </Stack>
+
+        <Typography className="studio-home-note">
+          {groups.length === 0
+            ? "Your staging account is authenticated. Add a group to begin the live workflow."
+            : `${groups.length} group${groups.length === 1 ? "" : "s"} available.`}
+        </Typography>
+      </Box>
+
+      <Box className="studio-home-workflow">
+        <Box className="studio-home-workflow-heading">
+          <Typography component="h2">One connected critique workflow</Typography>
+          <Typography>
+            The prototype uses the existing forWriters services instead of sample data.
+          </Typography>
+        </Box>
+
+        <Box className="studio-home-step-grid">
+          <Box>
+            <span><UploadFileRoundedIcon /></span>
+            <b>01</b>
+            <Typography component="h3">Submit with context</Typography>
+            <Typography>
+              Upload a DOCX manuscript or choose an existing version, then attach it
+              to a group reading.
+            </Typography>
+          </Box>
+          <Box>
+            <span><GroupsRoundedIcon /></span>
+            <b>02</b>
+            <Typography component="h3">Assign deliberately</Typography>
+            <Typography>
+              See eligible group members and reviewer workloads before making
+              persistent assignments.
+            </Typography>
+          </Box>
+          <Box>
+            <span><MessageRoundedIcon /></span>
+            <b>03</b>
+            <Typography component="h3">Understand the feedback</Typography>
+            <Typography>
+              Move from in-manuscript comments to an organized view of themes,
+              reviewers, and progress.
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box className="studio-home-foundation">
+        <Typography>Connected to the staging foundation</Typography>
+        <Stack direction="row" spacing={1}>
+          <span><LockRoundedIcon /> SuperTokens</span>
+          <span><CloudDoneRoundedIcon /> Amazon S3</span>
+          <span><StorageRoundedIcon /> PostgreSQL</span>
+        </Stack>
+      </Box>
+    </Box>
+  );
+}

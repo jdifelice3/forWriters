@@ -74,7 +74,7 @@ EmailVerification.init({
 
   getRedirectionURL: async (context: any) => {
     if (context.action === "SUCCESS") {
-      return "/dashboard";
+      return "/studio";
     }
     return undefined;
   },

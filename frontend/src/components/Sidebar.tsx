@@ -91,8 +91,7 @@ const Sidebar = () => {
         <ListItemButton
                 key={"/critique"}
                 selected={pathname.includes("/critique") || pathname.includes("/workflow")}
-                onClick={() => navigate(`/groups/${groupId}/critique`)}
-                disabled={!activeGroup}
+                onClick={() => navigate(activeGroup ? `/groups/${groupId}/critique` : "/studio")}
             >
             <ListItemIcon className="sidebarIcon" color="white">{<RateReviewRoundedIcon htmlColor="white"/>}</ListItemIcon>
             <ListItemText primary={"Critique Studio"} />
