@@ -33,6 +33,7 @@ if (typeof process.env.WEBSITE_DOMAIN === 'undefined') {
 }
 
 const cookieDomain = process.env.COOKIE_DOMAIN?.trim() || undefined;
+const requireEmailVerification = process.env.REQUIRE_EMAIL_VERIFICATION !== "false";
 
 const sessionInit = Session.init({
     useDynamicAccessTokenSigningKey: false,
@@ -168,7 +169,7 @@ export const SuperTokensConfig: TypeInput = {
                                 response.user.emails[0]
                             );
 
-                            if (!verified) {
+                            if (requireEmailVerification && !verified) {
                                 return {
                                     status: "GENERAL_ERROR",
                                     message: "Please verify your email before logging in."
@@ -212,7 +213,7 @@ export const SuperTokensConfig: TypeInput = {
             },
         }),
         EmailVerification.init({
-            mode: "REQUIRED",
+            mode: requireEmailVerification ? "REQUIRED" : "OPTIONAL",
             emailDelivery: {
                 override: (originalImplementation) => ({
                 ...originalImplementation,
