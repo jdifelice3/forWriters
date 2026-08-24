@@ -12,6 +12,7 @@ import Session from "supertokens-node/recipe/session";
 import { mapMimeToEnum } from "../../../util/Enum";
 import { loadAppFileMetaById } from "../fileMeta.middleware";
 import { getUser } from "../../../database/util/user";
+import { createS3ObjectKey } from "../../../files/s3ObjectKey";
 
 const router = Router({ mergeParams: true });
 // All routes here REQUIRE a valid AppFileMeta
@@ -34,8 +35,7 @@ const upload = multer({
     bucket: process.env.AWS_S3_BUCKET!,
     //contentType: multerS3.AUTO_CONTENT_TYPE,  --commented this out so the type would remain octet for downloads. disabled preview enirely for now 12/11/2025
     key: (_req, file, cb) => {
-      const filename = `${Date.now()}-${file.originalname}`;
-      cb(null, filename);
+      cb(null, createS3ObjectKey(file.originalname));
     },
   }),
 });

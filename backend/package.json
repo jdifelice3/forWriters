@@ -11,7 +11,8 @@
         "seed": "nodemon --exec ts-node prisma/seed.ts",
         "docx-extractor": "ts-node src/services/runDocxExtractor.ts",
         "generate:dtos": "node src/scripts/generate-dtos.mjs",
-        "build": "tsc"
+        "build": "tsc",
+        "test:staging": "npm run build && node --test test/s3ObjectKey.test.js"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.948.0",
