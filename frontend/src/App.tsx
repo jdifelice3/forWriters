@@ -17,7 +17,8 @@ import GroupInvite from "./pages/GroupInvite";
 import ReadingNotification from "./pages/ReadingNotification";
 
 const requireEmailVerification =
-    import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false";
+    import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false" &&
+    import.meta.env.VITE_WEB_HOST === "https://app.forwriters.ink";
 
 // ---------- Root App ----------
 export default function App() {
