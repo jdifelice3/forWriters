@@ -113,11 +113,10 @@ export function useFileDomain(): FileDomainCommands {
 
     const getComments = useCallback<FileDomainCommands["getComments"]>(
         async (fileFeedbackId: string) => {
-            let comments: CommentDTO[] = await FilesAPI.getComments(fileFeedbackId);
-            await mutate?.();
+            const comments: CommentDTO[] = await FilesAPI.getComments(fileFeedbackId);
             return comments;
         },
-        [mutate]
+        []
     )
 
     const getFileFeedback = useCallback<FileDomainCommands["getFileFeedback"]>(
@@ -126,43 +125,38 @@ export function useFileDomain(): FileDomainCommands {
             const fileFeedbackRecords: Record<string, string> = {};
             //create FileFeed records if they do not exist
             for(let i = 0; i < reading.readingSubmission.length; i++){
-                let f:FileFeedback = await FilesAPI.getFileFeedback(reading.readingSubmission[i].appFile.id);
+                const f:FileFeedback = await FilesAPI.getFileFeedback(reading.readingSubmission[i].appFile.id);
                 fileFeedbackRecords[reading.readingSubmission[i].id] = f.id;
             }
-            await mutate?.();
             return fileFeedbackRecords;
         },
-        [mutate]
+        []
     );
 
     const getFileFeedbackUnique = useCallback<FileDomainCommands["getFileFeedbackUnique"]>(
         async (appFileId: string | undefined) => {
             if(!appFileId) return [];
             const commentDTO: CommentDTO[] = await FilesAPI.getFileComments(appFileId);
-            
-            await mutate?.();
             return commentDTO;
         },
-        [mutate]
+        []
     );
 
 
     const getDeletionIds = useCallback<FileDomainCommands["getDeletionIds"]>(
         async (appFileMetaId: string) => {
-            let deletionIds: ObjectIdsForDeletion = await FilesAPI.getDeletionIds(appFileMetaId);
-            await mutate?.();
+            const deletionIds: ObjectIdsForDeletion = await FilesAPI.getDeletionIds(appFileMetaId);
             return deletionIds;
         },
-        [mutate]
+        []
     );
 
     const getHTML = useCallback<FileDomainCommands["getHTML"]>(
         async(appFileId: string) => {
             const { html } = await FilesAPI.getHTML(appFileId);
-            await mutate?.();
             return html
         },
-        [mutate]
+        []
     );
 
     const exportFeedbackReport = useCallback<FileDomainCommands["exportFeedbackReport"]>(
@@ -186,7 +180,7 @@ export function useFileDomain(): FileDomainCommands {
                 alert("Unexpected error generating report.");
             }
         },
-        [mutate]
+        []
     );
 
     return {

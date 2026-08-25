@@ -59,10 +59,8 @@ export function useReadingDomain(
         if (disabled) return;
     
         const { html } = await ReadingsAPI.getManuscriptHTML(groupId!, readingId, submissionId);
-
-        await refresh();
         return html;
-    }, [groupId, disabled, refresh]);
+    }, [groupId, disabled]);
 
     const sendInviteEmail = useCallback(async(groupId: string, readingId: string) => {
    

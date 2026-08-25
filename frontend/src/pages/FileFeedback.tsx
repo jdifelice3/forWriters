@@ -9,6 +9,7 @@ import { AppFile, Reading, ReadingSubmission } from "../types/domain-types";
 import { useParams } from "react-router-dom";
 import {
   Box,
+  Alert,
   Card,
   CardContent,
   CircularProgress,
@@ -56,6 +57,7 @@ const FileFeedback = () => {
     const [manuscriptHtmlBySubmission, setManuscriptHtmlBySubmission] = useState<Record<string, string>>({});
     const [fileFeedbackIds, setFileFeedbackIds] = useState<Record<string, string>>({});
     const [initialComments, setInititalComments] = useState<Record<string, CommentDTO[]>>({});
+    const [reviewLoadError, setReviewLoadError] = useState("");
 
     const requestedSubmissionId = new URLSearchParams(window.location.search).get("submission");
     const visibleSubmissions = useMemo(() => {
@@ -86,47 +88,53 @@ const FileFeedback = () => {
         
         let cancelled = false;
 
-        async function loadMissing() {
-            const updates: Record<string, string> = {};
-            const ids = await getFileFeedback(currentReviewReading);
+        async function loadReviewData() {
+            try {
+                const ids = await getFileFeedback(currentReviewReading);
+                const commentEntries = await Promise.all(
+                    Object.entries(ids).map(async ([submissionId, feedbackId]) => (
+                        [submissionId, await getComments(feedbackId)] as const
+                    ))
+                );
+                const htmlEntries = await Promise.all(
+                    currentReviewReading.readingSubmission
+                        .filter((submission) => Boolean(submission.appFile))
+                        .map(async (submission) => (
+                            [
+                                submission.id,
+                                await getManuscriptHtml(currentReviewReading.id, submission.id),
+                            ] as const
+                        ))
+                );
 
-            const initComments: Record<string, CommentDTO[]> = {};
-            const entries = Object.entries(ids);
+                if (cancelled) return;
 
-            for (let i = 0; i < entries.length; i++) {
-                const [key, value] = entries[i];
-                initComments[key] = await getComments(value);
-            }
-            setFileFeedbackIds(ids);
-            setInititalComments(initComments);
-            for (const rs of currentReviewReading.readingSubmission) {
-                if (!rs.appFile) continue;
-
-                // guard: already loaded
-                if (manuscriptHtmlBySubmission[rs.id]) continue;
-
-                const html = await getManuscriptHtml(currentReviewReading.id, rs.id);
-                if (html) {
-                    updates[rs.id] = html;
+                const htmlBySubmission: Record<string, string> = {};
+                htmlEntries.forEach(([submissionId, html]) => {
+                    if (html) htmlBySubmission[submissionId] = html;
+                });
+                if (htmlEntries.some(([, html]) => !html)) {
+                    throw new Error("The manuscript response did not contain document content.");
                 }
-            }
 
-            if (!cancelled && Object.keys(updates).length > 0) {
-                setManuscriptHtmlBySubmission(prev => ({
-                    ...prev,
-                    ...updates,
-                }));
+                setFileFeedbackIds(ids);
+                setInititalComments(Object.fromEntries(commentEntries));
+                setManuscriptHtmlBySubmission(htmlBySubmission);
+                setReviewLoadError("");
+            } catch (error) {
+                if (cancelled) return;
+                console.error("Unable to load review data", error);
+                setReviewLoadError("The manuscript could not be loaded. Please try refreshing the page.");
             }
         }
 
-        loadMissing();
+        loadReviewData();
 
         return () => {
             cancelled = true;
         };
     }, [
         reviewReading,
-        manuscriptHtmlBySubmission,
         getFileFeedback,
         getComments,
         getManuscriptHtml,
@@ -185,6 +193,11 @@ const FileFeedback = () => {
         <Typography variant="h6" sx={{color: "blue", mb: 2}} fontWeight={"bold"}>
             Highlight manuscript text and add a comment in the popup box
         </Typography>
+        {reviewLoadError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+                {reviewLoadError}
+            </Alert>
+        )}
             {visibleSubmissions.length === 0 ? (
                 <Card>
                     <CardContent>
@@ -223,7 +236,7 @@ const FileFeedback = () => {
                                             ) : (
                                                 <>
                                                 <Box sx={{mb: 10}}>
-                                                {manuscriptHtmlBySubmission[rs.id] ? (
+                                                {reviewLoadError ? null : manuscriptHtmlBySubmission[rs.id] ? (
                                                     <ManuscriptReview
                                                         html={manuscriptHtmlBySubmission[rs.id]}
                                                         initialComments={initialComments[rs.id]}
