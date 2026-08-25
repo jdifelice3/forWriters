@@ -69,6 +69,7 @@ const GroupInviteMembersDialog = ({
   const [emailRole, setEmailRole] = useState<GroupRole>("MEMBER");
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const eligibility: InviteEligibility = useMemo(() => {
     if (!selectedMember) return "idle";
@@ -110,6 +111,7 @@ const GroupInviteMembersDialog = ({
     const handleOnClose = () => {
         setSubmitting(false);
         setSuccessMessage("");
+        setErrorMessage("");
         setSelectedMember(null);
         onClose();
     }
@@ -118,6 +120,7 @@ const GroupInviteMembersDialog = ({
     if (!selectedMember || !canSendExisting) return;
     setSubmitting(true);
     setSuccessMessage("");
+    setErrorMessage("");
 
     try {
       await onSendExistingInvite({
@@ -126,6 +129,8 @@ const GroupInviteMembersDialog = ({
       });
       setSuccessMessage(`Invitation sent to ${selectedMember.fullname}.`);
       setSelectedMember(null);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "The invitation could not be sent.");
     } finally {
       setSubmitting(false);
     }
@@ -135,6 +140,7 @@ const GroupInviteMembersDialog = ({
     if (!email.trim()) return;
     setSubmitting(true);
     setSuccessMessage("");
+    setErrorMessage("");
 
     try {
       await onSendEmailInvite({
@@ -143,6 +149,8 @@ const GroupInviteMembersDialog = ({
       });
       setSuccessMessage(`Invitation sent to ${email.trim()}.`);
       setEmail("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "The invitation could not be sent.");
     } finally {
       setSubmitting(false);
     }
@@ -178,6 +186,12 @@ const GroupInviteMembersDialog = ({
         {successMessage && (
           <Alert severity="success" sx={{ mb: 2 }}>
             {successMessage}
+          </Alert>
+        )}
+
+        {errorMessage && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errorMessage}
           </Alert>
         )}
 

@@ -25,7 +25,14 @@ export async function apiFetch<T>(
   
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || res.statusText);
+    let message = text || res.statusText;
+    try {
+      const payload = JSON.parse(text) as { error?: string; message?: string };
+      message = payload.error || payload.message || message;
+    } catch {
+      // Preserve non-JSON server responses.
+    }
+    throw new Error(message);
   }
 
   return res.json();
