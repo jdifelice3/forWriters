@@ -92,7 +92,9 @@ export default function CritiqueWorkflow() {
     updateStatus,
   } = useCritiqueWorkflow(groupId, readingId);
 
-  const initialStage = searchParams.get("stage") === "assign" ? 2 : 1;
+  const requestedStage = searchParams.get("stage");
+  const initialStage: Stage =
+    requestedStage === "review" ? 3 : requestedStage === "assign" ? 2 : 1;
   const [stage, setStage] = useState<Stage>(initialStage);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState("");
   const [selectedAppFileId, setSelectedAppFileId] = useState("");
@@ -687,7 +689,19 @@ export default function CritiqueWorkflow() {
                       variant="contained"
                       onClick={() =>
                         navigate(
-                          `/filefeedbackdetail/${submission.manuscript.appFileId}`
+                          `/filefeedbackdetail/${submission.manuscript.appFileId}`,
+                          {
+                            state: {
+                              workflowPath: `/groups/${groupId}/readings/${readingId}/workflow?stage=review`,
+                              feedbackContext: {
+                                groupName: activeGroup.name,
+                                readingName: reading.name,
+                                title: submission.manuscript.title,
+                                version: submission.manuscript.version,
+                                filename: submission.manuscript.filename,
+                              },
+                            },
+                          }
                         )
                       }
                     >

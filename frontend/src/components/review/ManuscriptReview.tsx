@@ -15,7 +15,6 @@ import {
 
 import { Comment, CommentDTO } from "../../types/FeedbackTypes";
 import { CommentsAPI } from "../../api/comments";
-import { readonly } from "zod";
 
 /* =========================
    Types
@@ -281,7 +280,7 @@ export function ManuscriptReview({
 
     try {
         if (editingCommentId) {
-            const deletedComment = await CommentsAPI.delete(fileFeedbackId!,editingCommentId);
+            await CommentsAPI.delete(fileFeedbackId!,editingCommentId);
         }
     } finally {
       clearDraft();
@@ -295,7 +294,7 @@ export function ManuscriptReview({
     : null;
 
   const resetExistingZindeces = (commentId: string | undefined) => {
-    let tempZindeces: Record<string, number> = ({});
+    const tempZindeces: Record<string, number> = ({});
     for(let i = 0; i < initialComments.length; i++){
         tempZindeces[initialComments[i].id] = 10;
     }
@@ -310,8 +309,16 @@ export function ManuscriptReview({
   ========================= */
 
   return (
-    <Box ref={containerRef} sx={{ position: "relative", width: "550px" }}>
-      <Paper variant="outlined" sx={{ p: 2 }}>
+    <Box
+      ref={containerRef}
+      className={`manuscript-review ${readOnly ? "manuscript-review-readonly" : ""}`}
+      sx={{ position: "relative", width: "650px" }}
+    >
+      <Paper
+        className="manuscript-review-document"
+        variant="outlined"
+        sx={{ p: { xs: 3, md: 5 } }}
+      >
         <EditorContent editor={editor} />
       </Paper>
 
@@ -326,10 +333,11 @@ export function ManuscriptReview({
           return (
             <Paper
               key={c.id}
+              className="manuscript-review-comment"
               sx={{
                 position: "absolute",
                 top: coords.top - containerRect.top,
-                left: 560,
+                left: "calc(100% + 18px)",
                 width: 300,
                 p: 1.25,
                 opacity: c.isResolved ? 0.6 : 1,
@@ -366,11 +374,12 @@ export function ManuscriptReview({
       {/* Draft editor */}
       {activeRange && containerRect && (
         <Paper
+          className="manuscript-review-comment manuscript-review-comment-draft"
           elevation={6}
           sx={{
             position: "absolute",
             top: activeRange.top,
-            left: 560,
+            left: "calc(100% + 18px)",
             width: 300,
             p: 2,
             zIndex: 50,
