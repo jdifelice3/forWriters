@@ -90,8 +90,9 @@ export default function GroupInvite() {
 
       sessionStorage.setItem(pendingGroupKey, groupId);
       sessionStorage.setItem(pendingSessionKey, invitation.pendingId);
+      const authView = invitation.hasAccount ? "signin" : "signup";
       navigate(
-        `/auth?show=signup&redirectToPath=${encodeURIComponent("/studio")}`
+        `/auth?show=${authView}&redirectToPath=${encodeURIComponent("/studio")}`
       );
     } catch (error) {
       setErrorMessage(

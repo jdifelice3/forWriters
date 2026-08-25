@@ -68,6 +68,13 @@ router.post("/validate", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid or expired invite" });
     }
 
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email: { equals: invite.email, mode: "insensitive" },
+      },
+      select: { id: true },
+    });
+
     const pending = await prisma.pendingInviteSession.create({
       data: {
         inviteId: invite.id,
@@ -81,6 +88,7 @@ router.post("/validate", async (req: Request, res: Response) => {
       valid: true,
       groupName: invite.group.name,
       email: invite.email,
+      hasAccount: Boolean(existingUser),
       role: invite.role,
       invitedBy: `${invite.group.user.userProfile?.firstName ?? ""} ${invite.group.user.userProfile?.lastName ?? ""}`.trim(),
     });
