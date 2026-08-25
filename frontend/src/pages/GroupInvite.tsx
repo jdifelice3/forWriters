@@ -90,7 +90,9 @@ export default function GroupInvite() {
 
       sessionStorage.setItem(pendingGroupKey, groupId);
       sessionStorage.setItem(pendingSessionKey, invitation.pendingId);
-      navigate(`/auth?redirectToPath=${encodeURIComponent("/studio")}`);
+      navigate(
+        `/auth?show=signup&redirectToPath=${encodeURIComponent("/studio")}`
+      );
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "The invitation could not be accepted."
