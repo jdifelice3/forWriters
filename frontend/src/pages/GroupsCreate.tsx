@@ -6,9 +6,6 @@ import { Group, GroupRole } from "../types/domain-types";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   CircularProgress,
   TextField,
   Typography,
@@ -22,13 +19,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import type { Resolver } from "react-hook-form";
-import KeyIcon from '@mui/icons-material/Key';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import InfoIcon from '@mui/icons-material/Info';
-import { useGroupContext } from "../context/GroupContextProvider";
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import InfoIcon from "@mui/icons-material/Info";
 import { GroupSummary } from "../types/ContextTypes";
+import "../assets/css/workspace-pages.css";
 
 
 // -------------------------
@@ -58,15 +55,10 @@ type CreateGroupInput = z.infer<typeof createGroupSchema>;
 
 const groupsUrl = `${import.meta.env.VITE_API_HOST}/api/groups`;
 
-const styles = {
-    marginLeft: '75px' // or a responsive value
-};
-
 const GroupsCreate = () => {
   const navigate = useNavigate();
-  const { setActiveGroup } = useGroupContext();
   const [groupType, setGroupType] = React.useState("WRITING");
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = React.useState<Element | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
@@ -93,7 +85,7 @@ const GroupsCreate = () => {
         setGroupType(event.target.value);
     };
 
-    const handleClick = (event: any) => {
+    const handleClick = (event: React.MouseEvent<SVGSVGElement>) => {
         setAnchorEl(event.currentTarget); // Set anchor to the clicked button
     };
 
@@ -126,7 +118,7 @@ const GroupsCreate = () => {
         if (!res.ok) {
             const text = await res.text();
             
-            let message = JSON.parse(text);
+            const message = JSON.parse(text);
             
             setError(message.error);
             return;
@@ -156,26 +148,26 @@ const GroupsCreate = () => {
     const id = open ? 'simple-popover' : undefined;
 
   return (
-    <Box
-        style={styles}  
-        sx={{ 
-        maxWidth: 900, 
-        mx: "auto", 
-        p: 4,
-      }}>
-      <Typography variant="h4" mb={3}>
-        <KeyIcon 
-              sx={{ 
-                fontSize: '48px',
-                verticalAlign: "bottom", 
-              }}
-            />&nbsp;
-        Start a Group
-      </Typography>
+    <Box className="workspace-page groups-create-workspace">
+      <Box className="workspace-page-header">
+        <Box>
+          <Typography className="workspace-eyebrow">New workspace</Typography>
+          <Typography component="h1">Start a group</Typography>
+          <Typography className="workspace-page-lede">
+            Create a private personal studio or a shared writing group with readings,
+            members, and critique workflows.
+          </Typography>
+        </Box>
+      </Box>
 
-      <Card>
-        <CardHeader title="Group Details" sx={{mb:-2}}/>
-        <CardContent>
+      <Box className="workspace-surface create-group-panel">
+        <Box className="workspace-section-heading">
+          <Box>
+            <Typography component="h2">Group details</Typography>
+            <Typography>Choose the group model and add the information members will see.</Typography>
+          </Box>
+          <GroupsRoundedIcon sx={{ color: "#718078" }} />
+        </Box>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -193,15 +185,18 @@ const GroupsCreate = () => {
                 noValidate
                 
             >
-            <Grid container spacing={2}>
+            <Grid container spacing={2.25}>
               <Grid size={12}>
-                <Typography variant="h6" sx={{ mt: 1 }}>
-                  Group Type<InfoIcon style={{ cursor: 'pointer' }} onClick={handleClick}/>
+                <Typography className="create-group-field-heading">
+                  Group type
+                  <InfoIcon className="create-group-info" onClick={handleClick}/>
                 </Typography>
                 <RadioGroup
+                    className="create-group-type-options"
                     name="groupType" 
                     value={groupType} 
                     onChange={handleRadioButtons} 
+                    row
                 >
                     <FormControlLabel value="WRITING" control={<Radio />} label="Writing Group"/>
                     <FormControlLabel value="PERSONAL" control={<Radio />} label="Personal" />
@@ -220,30 +215,28 @@ const GroupsCreate = () => {
                         horizontal: 'left',
                     }}
                     >
-                    <Typography sx={{ p: 2 }}>
-                        <div style={{fontWeight: "bold", fontSize: "14pt"}}>GroupTypes</div>
-                        <div>&nbsp;</div>
-                        <span style={{fontWeight: "bold"}}>Writing Group</span>
+                    <Box className="create-group-help">
+                        <Typography component="h3">Group types</Typography>
+                        <strong>Writing group</strong>
                         <ul>
                             <li>The group has multiple authors as members.</li>
                             <li>Multiple authors can submit manuscripts to one or more readings for feedback.</li>
                             <li>The group has an administrator who creates scheduled readings as well as group news posts.</li>
                             <li>The group is visible to a group search.</li>
-                            
                         </ul>
-                        <span style={{fontWeight: "bold"}}>Personal Group</span>
+                        <strong>Personal group</strong>
                         <ul>
                             <li>The group has one author. This author is the group administator.</li>
                             <li>The author is the only one who can submit manscripts to a reading.</li>
                             <li>The group is not visible to a group search.</li>
                         </ul>
-                        <span style={{fontWeight: "bold"}}>Both</span>
+                        <strong>Both</strong>
                         <ul>
                             <li>The group administrator can invite members and non-members to join the group.</li>
                             <li>The administator must approve requests to join the group.</li>
                         </ul>
                         <Button onClick={handleClose}>Close</Button>
-                    </Typography>                
+                    </Box>
                 </Popover>
               
               </Grid>
@@ -280,11 +273,10 @@ const GroupsCreate = () => {
                   helperText={errors.imageUrl?.message}
                 />
               </Grid>
-            <Grid container 
-                sx={{ display: groupType === "WRITING" ? 'block' : 'none', width: "100%" }}
-            >
+            {groupType === "WRITING" && (
+            <Grid container spacing={2.25} size={12} className="create-group-conditional-fields">
               <Grid size={12}>
-                <Typography variant="h6" sx={{ mt: 1 }}>
+                <Typography className="create-group-field-heading">
                   Address
                 </Typography>
               </Grid>
@@ -296,7 +288,6 @@ const GroupsCreate = () => {
                     {...register("address.street")}
                     error={!!errors.address?.street}
                     helperText={errors.address?.street?.message}
-                    sx={{mt:2}}
                 />
               </Grid>
               <Grid size={12}>
@@ -306,10 +297,9 @@ const GroupsCreate = () => {
                   {...register("address.city")}
                   error={!!errors.address?.city}
                   helperText={errors.address?.city?.message}
-                  sx={{mt:2}}
                 />
               </Grid>
-              <Grid size={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="State"
                   fullWidth
@@ -317,22 +307,20 @@ const GroupsCreate = () => {
                   {...register("address.state")}
                   error={!!errors.address?.state}
                   helperText={errors.address?.state?.message}
-                  sx={{mt:2, width: "25%"}}
                 />
               </Grid>
-              <Grid size={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="ZIP"
                   fullWidth
                   {...register("address.zip")}
                   error={!!errors.address?.zip}
                   helperText={errors.address?.zip?.message}
-                  sx={{mt:2, width: "50%"}}
                 />
               </Grid>
 
               <Grid size={12}>
-                <Typography variant="h6" sx={{ mt: 2 }}>
+                <Typography className="create-group-field-heading create-group-policy-heading">
                   Reading Policy Defaults (optional)
                 </Typography>
               </Grid>
@@ -345,11 +333,15 @@ const GroupsCreate = () => {
                   {...register("defaultMinDaysBetweenReads")}
                   error={!!errors.defaultMinDaysBetweenReads}
                   helperText={errors.defaultMinDaysBetweenReads?.message}
-                  sx={{mt:2}}
                 />
               </Grid>
-              </Grid>
+            </Grid>
+            )}
               <Grid size={12}>
+                <Box className="create-group-actions">
+                <Button variant="outlined" onClick={() => navigate(-1)} disabled={submitting}>
+                  Cancel
+                </Button>
                 <Button
                   type="submit"
                   variant="contained"
@@ -358,11 +350,11 @@ const GroupsCreate = () => {
                 >
                   {submitting ? <CircularProgress size={22} /> : "Create Group"}
                 </Button>
+                </Box>
               </Grid>
             </Grid>
           </Box>
-        </CardContent>
-      </Card>
+      </Box>
     </Box>
   );
 }

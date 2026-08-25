@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
+import CollectionsBookmarkRoundedIcon from "@mui/icons-material/CollectionsBookmarkRounded";
 import { AppFile, AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../../../types/FileTypes";
 import FileListItem from "./FileListItem";
@@ -34,8 +35,9 @@ const FileManagerList: React.FC<FileManagerListProps> = ({
 
   if (!files || files.length === 0) {
     return (
-      <Box>
-        <Typography color="textPrimary">
+      <Box className="workspace-empty-state">
+        <CollectionsBookmarkRoundedIcon />
+        <Typography variant="h5">
           {fileListProperties.noFilesMessage}
         </Typography>
       </Box>

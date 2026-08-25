@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import { Reading } from "../../types/domain-types";
 import { ReadingDomainCommands } from "../../types/ReadingTypes";
 import { useUserContext } from "../../context/UserContext";
@@ -15,7 +16,6 @@ interface ReadingCalendarProps {
   isAdmin: boolean;
   domain: ReadingDomainCommands;
   ui: ReturnType<typeof useReadingsUI>;
-  onCreateReading(form: any): Promise<void>;
   onFeedback(readingId: string): Promise<void>;
 }
 
@@ -24,7 +24,6 @@ export const ReadingCalendar: React.FC<ReadingCalendarProps> = ({
   isAdmin,
   domain,
   ui,
-  onCreateReading,
   onFeedback
 }) => {
   const { user, isLoading, error } = useUserContext();
@@ -42,11 +41,6 @@ const openCreateDialog = () => {
   setDialogReading(null);
   setDialogOpen(true);
 };
-const closeCreateDialog = () => {
-  setDialogReading(null);
-  setDialogOpen(false);
-};
-
 const openEditDialog = (reading: Reading) => {
   setDialogReading(reading);
   setDialogOpen(true);
@@ -66,11 +60,24 @@ const openEditDialog = (reading: Reading) => {
         </Button>
       )}
 
+      {readings.length === 0 && (
+        <Box className="workspace-empty-state">
+          <MenuBookRoundedIcon />
+          <Typography variant="h5">No readings yet</Typography>
+          <Typography color="text.secondary">
+            {isAdmin
+              ? "Create the first reading to begin collecting manuscripts."
+              : "A group manager has not created a reading yet."}
+          </Typography>
+        </Box>
+      )}
+
+      <Box className="reading-card-list">
       {readings.map(reading => {
         const locked = reading.readingSubmission.length > 0;
 
         return (
-          <Box key={reading.id} sx={{ mb: 3 }}>
+          <Box key={reading.id}>
             {inlineEditId === reading.id ? (
               <ReadingFormInline
                 reading={reading}
@@ -99,6 +106,7 @@ const openEditDialog = (reading: Reading) => {
           </Box>
         );
       })}
+      </Box>
 
         <ReadingFormDialog
             open={dialogOpen}

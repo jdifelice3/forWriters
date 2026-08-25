@@ -1,46 +1,49 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-} from "@mui/material";
-import { GroupUser } from "../../types/domain-types"
+import { Avatar, Card, CardContent, Chip, Typography } from "@mui/material";
+import { GroupUser } from "../../types/domain-types";
 
 interface Props {
   groupUsers: GroupUser[];
 }
 
-const GroupUserList: React.FC<Props> = ({groupUsers}) => {
-
-    const getName = (gu: GroupUser) => {
-        if(!gu.user.userProfile?.firstName || !gu.user.userProfile?.firstName){
-            return "Name unknown";
-        } else {
-            return `${gu.user.userProfile.firstName} ${gu.user.userProfile.lastName}`;
-        }
-    }
-
-    return (
-    <Grid container spacing={3}>
-        <>
-        {groupUsers.map((gu: GroupUser, index) => (
-            <Grid key={index}>
-            <Card>
-                <CardContent sx={{p:2, backgroundColor:"whitesmoke"}}>
-                    <Typography color={getName(gu) === "Name unknown" ? "red" : "success"}>
-                        {getName(gu)}                            
-                        {gu.role === "ADMIN" ? (
-                            <span>&nbsp;(Admin)</span>
-                        ) : (
-                            <span>&nbsp;</span>
-                        )}
-                    </Typography>
-                </CardContent>
-            </Card>
-            </Grid>
-        ))}
-        </>            
-    </Grid>
-  );
+function memberName(member: GroupUser) {
+  const profile = member.user.userProfile;
+  if (!profile?.firstName || !profile?.lastName) return "Name not provided";
+  return `${profile.firstName} ${profile.lastName}`;
 }
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+const GroupUserList: React.FC<Props> = ({ groupUsers }) => (
+  <div className="group-member-grid">
+    {groupUsers.map((member) => {
+      const name = memberName(member);
+      return (
+        <Card className="group-member-card" key={member.id}>
+          <CardContent>
+            <Avatar src={member.user.userProfile?.avatarUrl ?? undefined}>
+              {initials(name)}
+            </Avatar>
+            <span>
+              <Typography component="strong">{name}</Typography>
+              <Typography component="small">{member.user.email}</Typography>
+            </span>
+            <Chip
+              size="small"
+              color={member.role === "ADMIN" || member.role === "OWNER" ? "success" : "default"}
+              label={member.role.toLowerCase()}
+            />
+          </CardContent>
+        </Card>
+      );
+    })}
+  </div>
+);
+
 export default GroupUserList;

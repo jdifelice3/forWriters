@@ -9,22 +9,20 @@ import {
   Typography,
   Stack,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import FileUploadField from "./FileUploadField";
 import { useForm, Controller } from "react-hook-form";
 import { updateUserProfile, getUserProfile } from "../services/srvUserProfiles";
 import { useEffect } from 'react';
 import Session from "supertokens-auth-react/recipe/session";
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import { ProfileFormInputs } from "../types/UserTypes";
 
-const styles = {
-    marginLeft: '75px' // or a responsive value
-};
+import "../assets/css/workspace-pages.css";
 
 const UserProfile = () => {
     const [userId, setUserId] = useState<string>("");
-    const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     const {
@@ -64,12 +62,22 @@ const UserProfile = () => {
             email: user.email,
             bio: user.userProfile.bio
         });
+        setLoading(false);
     }
     fetchUserId();
-  }, []);
+  }, [reset]);
+
+  if (loading) {
+    return (
+      <Box className="workspace-loading">
+        <CircularProgress size={24} />
+        <Typography>Loading your profile…</Typography>
+      </Box>
+    );
+  }
 
   if (!userId) {
-    return <div>No session</div>;
+    return <Box className="workspace-empty-state"><Typography>No active session.</Typography></Box>;
   }
 
 
@@ -97,20 +105,29 @@ const UserProfile = () => {
   };
 
   return (
-    <Box style={styles} sx={{ maxWidth: 750, mx: "auto", p: 4}}
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-        <Typography variant="h4" mb={3}>
-            <AccountBoxIcon 
-                sx={{ 
-                    fontSize: '40px',
-                    verticalAlign: "bottom", 
-                }}
-                />&nbsp;
-                Profile
-        </Typography>
-      <Stack spacing={2}>
+    <Box className="workspace-page profile-workspace">
+      <Box className="workspace-page-header">
+        <Box>
+          <Typography className="workspace-eyebrow">Account</Typography>
+          <Typography component="h1">Your profile</Typography>
+          <Typography className="workspace-page-lede">
+            Keep your name, photo, and writer bio current for the groups you join.
+          </Typography>
+        </Box>
+      </Box>
+      <Box
+        className="workspace-surface profile-form-panel"
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <Box className="workspace-section-heading">
+          <Box>
+            <Typography component="h2">Profile details</Typography>
+            <Typography>This information helps other writers recognize you.</Typography>
+          </Box>
+          <AccountCircleRoundedIcon />
+        </Box>
+        <Stack spacing={2.25}>
         {/* Avatar upload */}
         <Controller
             name="avatar"
@@ -188,11 +205,13 @@ const UserProfile = () => {
             variant="contained"
             color="primary"
             type="submit"
+            className="workspace-primary-action"
             sx={{ mt: 2, alignSelf: "flex-end" }}
         >
             Save Changes
         </Button>
       </Stack>
+      </Box>
     </Box>
   );
 }

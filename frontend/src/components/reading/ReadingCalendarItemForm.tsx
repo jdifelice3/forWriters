@@ -40,7 +40,6 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 
 interface ReadingCalendarItemFormProps {
-    key: string;
     reading: Reading;
     isAdmin: boolean;
     domain: ReadingDomainCommands;
@@ -56,7 +55,6 @@ type SendInviteEmail = {
 const currentDate = new Date();
 
 export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = ({
-        key, 
         reading, 
         isAdmin, 
         domain, 
@@ -234,12 +232,6 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
             <Stack spacing={2} sx={{mb:2}}>
               <Card 
                 className = "readingCardSignup"
-                sx={{
-                  border: "1px solid #ddd",
-                  p: 1,
-                  borderRadius: 2,
-                  width: 700
-                }}
               >
                 <CardContent>
                     <Typography variant="body1" fontWeight="bold" sx={{mb:1}}>
@@ -304,7 +296,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 <Tooltip title={"Tell group members about the reading with an email"}>
                                 <Box>
                                 <Button
-                                    variant="contained"
+                                    variant="outlined"
                                     size="small"
                                     startIcon={<MessageIcon />}
                                     onClick={handleInformMembersOnOpen}
@@ -315,7 +307,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 </Tooltip>
                                 <Tooltip title={"Modify the name and description of your reading"}>
                                 <Button
-                                    variant="contained"
+                                    variant="outlined"
                                     size="small"
                                     startIcon={<EditIcon />}
                                     onClick={() => openEditDialog(reading)}
@@ -326,7 +318,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 <Tooltip title={"COMMING SOON. Archive your reading if you want to keep it, but don't want it visible"}>
                                     <Box>
                                     <Button
-                                    variant="contained"
+                                    variant="outlined"
                                     size="small"
                                     startIcon={
                                         <ArchiveIcon />
@@ -341,7 +333,8 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                                 <Tooltip title={locked ? "You cannot delete this reading because it has submissions" : ""}>
                                     <Box>
                                     <Button
-                                        variant="contained"
+                                        variant="outlined"
+                                        color="error"
                                         disabled={locked}
                                         size="small"
                                         startIcon={
@@ -377,6 +370,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
 
 {/* Dialog - Submit Manuscript to Reading */}
         <Dialog
+            className="workspace-dialog"
             open={submitManuscriptOpen} 
             onClose={() => setSubmitManuscriptOpen(false)}
         >
@@ -437,10 +431,11 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
 
 {/* Dialog - Update Manuscript Verion */}
         <Dialog
+            className="workspace-dialog"
             open={updateManuscriptVersionOpen} 
             onClose={() => setUpdateManuscriptVersionOpen(false)}
         >
-            <DialogTitle variant="h5" sx={{pb: 0}}>Update Manuscript Verion</DialogTitle>
+            <DialogTitle variant="h5" sx={{pb: 0}}>Update Manuscript Version</DialogTitle>
                 <Box 
                     // style={styles}  
                     sx={{ 
@@ -497,6 +492,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
 
             {/* Dialog - inform members */}
             <Dialog 
+                className="workspace-dialog"
                 open={informMembersOpen}
             >
                 <DialogTitle 

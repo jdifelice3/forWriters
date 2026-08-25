@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { AppFileMeta, Reading } from "../../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../../types/FileTypes";
@@ -28,12 +27,10 @@ const ReadingSubmissionList: React.FC<ReadingSubmissionListProps> = ({
         throw new Error("ReadingSubmissionList in FILES mode requires a domain");
     }
 
-    const [editingFile, setEditingFile] = useState<AppFileMeta | null>(null);
-
   if (!files || files.length === 0) {
     return (
-      <Box>
-        <Typography color="textPrimary">
+      <Box className="workspace-empty-state">
+        <Typography variant="h5">
           {fileListProperties.noFilesMessage}
         </Typography>
       </Box>
@@ -42,7 +39,7 @@ const ReadingSubmissionList: React.FC<ReadingSubmissionListProps> = ({
 
   return (
     <>
-      <Box>
+      <Box className="reading-submissions-panel">
         {myReadings.map(r => r.readingSubmission.map(rs =>
             <ReadingSubmissionListSummaryForm
                 key={rs.appFile.appFileMetaId}

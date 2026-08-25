@@ -4,14 +4,12 @@ import { useState } from "react";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogTitle,
   DialogContent,
-  Grid,
   IconButton,
   Tab,
   Tabs,
@@ -22,12 +20,13 @@ import {
 import UploadIcon from "@mui/icons-material/Upload";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
-import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
+import CollectionsBookmarkRoundedIcon from "@mui/icons-material/CollectionsBookmarkRounded";
+import CloudDoneRoundedIcon from "@mui/icons-material/CloudDoneRounded";
+import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 
-import { AppFileMeta, AppFile } from "../types/domain-types";
+import { AppFile } from "../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../types/FileTypes";
 import FileManagerList from "../components/file/lists/FileManagerList";
-import UploadFileDataManuscript from "../components/file/data/UploadFileDataManuscript";
 import UploadFileDataVersion from "../components/file/data/UploadFileDataVersion";
 import { useFiles } from "../hooks/file/useFiles";
 import { useFilesData } from "../hooks/file/useFilesData";
@@ -42,6 +41,7 @@ import ReadingSubmissionList from "../components/reading/ReadingSubmissionList";
 import { useGroupContext } from "../context/GroupContextProvider";
 import { useNavigate } from "react-router-dom";
 import { ReviewRequestsAPI } from "../api/reviewerAssignmentsApi";
+import "../assets/css/workspace-pages.css";
 
 const manuscriptListProperties: FileListProperties = {
     noFilesMessage: "You have not uploaded manuscripts",
@@ -66,7 +66,7 @@ const mySubmissionsListProperties: FileListProperties = {
 const FileManager = () => {
     const navigate = useNavigate();
     const { activeGroup } = useGroupContext();
-    const { user, isLoading: isUserLoading } = useUserContext();
+    const { user } = useUserContext();
     const [open, setOpen] = useState(false);
     const [appFileMetaIdToDelete, setAppFileMetaIdToDelete] = useState("");
     const [deletionDialogMessage, setDeletionDialogMessage] = useState("");
@@ -179,7 +179,7 @@ const FileManager = () => {
     }
   
   return (
-    <Box>
+    <Box className="workspace-page manuscripts-workspace">
         <ConfirmDialog
             open={open}
             title="Are you sure you want to delete this manuscript?"
@@ -188,90 +188,103 @@ const FileManager = () => {
             onClose={() => setOpen(false)            
         }
       />
-      <Card elevation={0} className="filesComponentPanel">
-        <CardContent>
-          {reviewSetupError && (
-            <Alert
-              severity="info"
-              onClose={() => setReviewSetupError("")}
-              sx={{ mb: 2 }}
-            >
-              {reviewSetupError}
-            </Alert>
-          )}
-          {/* Header */}
-          <Grid container alignItems="center">
-            <Grid size={5}>
-              <Typography variant="h4" mb={3}>
-                <CollectionsBookmarkIcon sx={{ fontSize: 24 }} /> Files
-              </Typography>
-            </Grid>
-            <Grid size={5} textAlign="right">
-              <Button
-                variant="contained"
-                startIcon={<UploadIcon />}
-                onClick={() => ui.setUploadDialogOpen(true)}
-              >
-                Upload New Manuscript
-              </Button>
-            </Grid>
-          </Grid>
+      <Box className="workspace-page-header">
+        <Box>
+          <Typography className="workspace-eyebrow">
+            {activeGroup?.name ?? "Your writing workspace"}
+          </Typography>
+          <Typography component="h1">Manuscripts</Typography>
+          <Typography className="workspace-page-lede">
+            Keep every draft and version together, choose the active manuscript, and
+            send an exact version into a critique workflow.
+          </Typography>
+        </Box>
+        <Box className="workspace-header-actions">
+          <Button
+            variant="contained"
+            startIcon={<UploadIcon />}
+            onClick={() => ui.setUploadDialogOpen(true)}
+          >
+            Upload manuscript
+          </Button>
+        </Box>
+      </Box>
 
-          {/* Tabs */}
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{mb: 2}}>
-            <Tab label="Manuscripts" />
-            <Tab label="My Reading Submissions" />
-          </Tabs>
+      <Box className="workspace-summary-strip">
+        <Chip
+          icon={<CollectionsBookmarkRoundedIcon />}
+          label={`${myManuscripts.length} ${myManuscripts.length === 1 ? "manuscript" : "manuscripts"}`}
+        />
+        <Chip
+          icon={<HistoryRoundedIcon />}
+          label={`${myManuscripts.reduce((total, manuscript) => total + manuscript.appFile.length, 0)} saved versions`}
+        />
+        <Chip icon={<CloudDoneRoundedIcon />} label="Stored in Amazon S3" />
+      </Box>
 
-          {/* Manuscripts */}
+      {reviewSetupError && (
+        <Alert
+          severity="info"
+          onClose={() => setReviewSetupError("")}
+          sx={{ mb: 2 }}
+        >
+          {reviewSetupError}
+        </Alert>
+      )}
+
+      <Box className="workspace-surface manuscript-library-panel">
+        <Tabs
+          className="manuscript-library-tabs"
+          value={tab}
+          onChange={(_, value) => setTab(value)}
+        >
+          <Tab label="Manuscripts" />
+          <Tab label="Reading submissions" />
+        </Tabs>
+
+        <Box className="manuscript-library-content">
           {tab === 0 && (
-            <>
-              {isLoading ? (
-                <Box display="flex" justifyContent="center" p={6}>
-                  <CircularProgress />
-                </Box>
-              ) : (
-                <FileManagerList
-                  files={myManuscripts}
-                  domain={domain}
-                  variant="FILES"
-                  fileListProperties={manuscriptListProperties}
-                  onUploadVersion={onBeginUploadVersion}
-                  onAssignReviewers={onAssignReviewers}
-                  assigningVersionId={assigningVersionId}
-                />
-              )}
-            </>
+            isLoading ? (
+              <Box className="workspace-loading" sx={{ minHeight: 280 }}>
+                <CircularProgress size={25} />
+                <Typography>Loading manuscripts…</Typography>
+              </Box>
+            ) : (
+              <FileManagerList
+                files={myManuscripts}
+                domain={domain}
+                variant="FILES"
+                fileListProperties={manuscriptListProperties}
+                onUploadVersion={onBeginUploadVersion}
+                onAssignReviewers={onAssignReviewers}
+                assigningVersionId={assigningVersionId}
+              />
+            )
           )}
 
-          {/* My Reading Submissions */}
-          {tab == 1 && (
-            <Card className="readingCardSignup" sx={{width: 500}}>
-                <CardContent>
-              {isLoading ? (
-                <Box display="flex" justifyContent="center" p={6}>
-                  <CircularProgress />
-                </Box>
-              ) : (
-                <ReadingSubmissionList 
-                    files={myFiles}
-                    myReadings={myReadings}
-                    domain={domain}
-                    variant="READINGS"
-                    fileListProperties={mySubmissionsListProperties}
-                    onUploadVersion={onBeginUploadVersion}
-                />
-              )}
-            
-            </CardContent>
-            </Card>
-          )} 
-        </CardContent>
-      </Card>
+          {tab === 1 && (
+            isLoading ? (
+              <Box className="workspace-loading" sx={{ minHeight: 280 }}>
+                <CircularProgress size={25} />
+                <Typography>Loading reading submissions…</Typography>
+              </Box>
+            ) : (
+              <ReadingSubmissionList
+                files={myFiles}
+                myReadings={myReadings}
+                domain={domain}
+                variant="READINGS"
+                fileListProperties={mySubmissionsListProperties}
+                onUploadVersion={onBeginUploadVersion}
+              />
+            )
+          )}
+        </Box>
+      </Box>
 
 {/* DIALOGS */}
       {/* Edit File Metadata dialog */}
-        <Dialog open={ui.editDialogOpen} fullWidth maxWidth="sm" onClose={ui.closeDialogs}>
+        <Dialog className="workspace-dialog" open={ui.editDialogOpen} fullWidth maxWidth="sm" onClose={ui.closeDialogs}>
             <DialogTitle>
                 Edit File Metadata
                 <IconButton
@@ -309,7 +322,7 @@ const FileManager = () => {
         </Dialog>
 
       {/* Upload manuscript dialog */}
-      <Dialog open={ui.uploadDialogOpen} onClose={() => ui.closeDialogs()}>
+      <Dialog className="workspace-dialog" open={ui.uploadDialogOpen} onClose={() => ui.closeDialogs()} fullWidth maxWidth="sm">
         <DialogTitle>
           Upload manuscript
           <IconButton
@@ -330,7 +343,7 @@ const FileManager = () => {
       </Dialog>
 
       {/* Upload version dialog */}
-      <Dialog open={ui.versionDialogOpen} onClose={() => ui.closeDialogs()}>
+      <Dialog className="workspace-dialog" open={ui.versionDialogOpen} onClose={() => ui.closeDialogs()} fullWidth maxWidth="sm">
         <DialogTitle>
           Upload new version
           <IconButton
@@ -351,15 +364,15 @@ const FileManager = () => {
       </Dialog>
 
       {/* Delete confirmation */}
-      <Dialog open={ui.deleteDialogOpen} onClose={() => ui.closeDialogs()}>
+      <Dialog className="workspace-dialog" open={ui.deleteDialogOpen} onClose={() => ui.closeDialogs()}>
         <DialogContent sx={{ textAlign: "center", p: 4 }}>
           <Typography mb={2}>
             Are you sure you want to delete this file?
           </Typography>
-          <Button onClick={(event) => domain.deleteFile(ui.targetFileMetaId!)} sx={{ mr: 2 }}>
+          <Button onClick={() => domain.deleteFile(ui.targetFileMetaId!)} sx={{ mr: 2 }}>
             OK
           </Button>
-          <Button onClick={() => ui.closeDialogs}>Cancel</Button>
+          <Button onClick={ui.closeDialogs}>Cancel</Button>
         </DialogContent>
       </Dialog>
     </Box>

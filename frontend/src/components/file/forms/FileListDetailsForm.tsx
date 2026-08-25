@@ -1,10 +1,8 @@
 "use client";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FileListProperties } from "../../../types/FileTypes";
 import { AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands } from "../../../types/FileTypes";
-import { useBillingUI } from "../../../hooks/billing/useBillingUI";
 import {
     Button,
     Box,
@@ -31,17 +29,16 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
   onEdit,
   fileListProperties,
 }) => {
-    const { isPro} = useBillingUI();
     const navigate = useNavigate();
     const currentVersion = fileMeta.appFile.find(
         (f) => f.version === fileMeta.currentVersionId
     );
 
   return (
-    <Box>
+    <Box className="manuscript-details">
       <Grid container spacing={2}>
         <Stack spacing={2} sx={{ width: "500px" }}>
-          <Stack direction="row" alignItems="center" gap={1}>
+          <Stack className="manuscript-title-row" direction="row" alignItems="center" gap={1}>
             <FileIcon file={currentVersion} />
             <Typography fontWeight="bold" sx={{ fontSize: 14 }}>
               {fileMeta.title}
@@ -65,7 +62,7 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
             {new Date(fileMeta.updatedAt).toLocaleDateString()}
           </Typography>
 
-          <Box>
+          <Box className="manuscript-icon-actions">
             {currentVersion && (
               <>
               <IconButton 
@@ -95,8 +92,7 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
             )}
           </Box>
           {fileListProperties.showDeleteButton && (
-            <>
-            <Box>
+            <Box className="manuscript-secondary-actions">
                 <Button
                     variant="outlined"
                     component="a"
@@ -106,8 +102,6 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
                   >
                 View Feedback
               </Button>
-              </Box>
-              <Box>
               <Button
                     variant="outlined"
                     component="a"
@@ -117,11 +111,8 @@ const FileListDetailsForm: React.FC<FileListDetailsFormProps> = ({
                   >
                 View Revision Trends
               </Button>
-              </Box>
-              <Box>
             </Box>
-            </>
-            )}
+          )}
         </Stack>
       </Grid>
     </Box>

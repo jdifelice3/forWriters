@@ -105,7 +105,7 @@ export const ReadingFormDialog: React.FC<ReadingFormDialogProps> = ({
 
   
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog className="workspace-dialog" open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ pb: 0 }}>
         {reading ? "Edit Reading" : "Create Reading"}
       </DialogTitle>

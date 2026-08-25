@@ -6,16 +6,13 @@ import {
   Typography,
   Alert,
   CircularProgress,
-  Card,
-  CardContent
+  Chip
 } from "@mui/material";
 import GroupSearchBox from "../components/group/GroupSearchBox";
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import GroupAddRoundedIcon from "@mui/icons-material/GroupAddRounded";
 import GroupDescription from "../components/group/GroupDescription";
-
-const styles = {
-    marginLeft: '75px' // or a responsive value
-};
+import "../assets/css/workspace-pages.css";
 
 export default function GroupSearch() {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -55,51 +52,44 @@ export default function GroupSearch() {
   };
 
   return (
-    <Box 
-        style={styles}  
-        sx={{ 
-        maxWidth: 900, 
-        mx: "auto", 
-        p: 4,
-        marginLeft: "100px",
-        }}>
-        <Typography variant="h4" mb={3}>
-            <CheckBoxIcon 
-                sx={{ 
-                    fontSize: '40px',
-                    verticalAlign: "bottom", 
-                }}
-                />&nbsp;
-            Join a Group
-        </Typography>
-        <Typography variant="h6" sx={{}}>
-            Find a Writing Group
-        </Typography>
+    <Box className="workspace-page directory-workspace">
+      <Box className="workspace-page-header">
+        <Box>
+          <Typography className="workspace-eyebrow">Community directory</Typography>
+          <Typography component="h1">Join a group</Typography>
+          <Typography className="workspace-page-lede">
+            Find a writing community, learn how it works, and ask its administrators
+            for membership.
+          </Typography>
+        </Box>
+      </Box>
 
-      <GroupSearchBox onSelectGroup={setSelectedGroup} />
+      <Box className="workspace-surface directory-search-panel">
+        <Box className="workspace-section-heading">
+          <Box>
+            <Typography component="h2">Find a writing group</Typography>
+            <Typography>Start typing a group name to search the directory.</Typography>
+          </Box>
+          <SearchRoundedIcon />
+        </Box>
+        <GroupSearchBox onSelectGroup={setSelectedGroup} />
         
       {selectedGroup && (
-        <Box mt={3}>
-          <Typography sx={{mb: 2 }}>
-            Selected group: <strong>{selectedGroup.name}</strong>
-          </Typography>
-          <Card>
-            <CardContent>
-                <Typography sx={{fontWeight:"bold"}}>
-                    Description
-                </Typography>
-                <GroupDescription groupId={selectedGroup.id}/>
-            </CardContent>
-          </Card>
-          <Button
-            variant="contained"
-            sx={{ mt: 2 }}
-            disabled={loading || !selectedGroup}
-            onClick={handleJoin}
-          >
-            {loading ? <CircularProgress size={22} /> : "Request to Join"}
+        <Box className="directory-result-card">
+          <Box className="directory-result-heading">
+            <Box>
+              <Typography component="h3">{selectedGroup.name}</Typography>
+              <Chip size="small" label="Writing group" />
+            </Box>
+            <GroupAddRoundedIcon />
+          </Box>
+          <Box className="directory-result-description">
+            <Typography className="workspace-eyebrow">About this group</Typography>
+            <GroupDescription groupId={selectedGroup.id}/>
+          </Box>
+          <Button variant="contained" disabled={loading} onClick={handleJoin}>
+            {loading ? <CircularProgress size={22} color="inherit" /> : "Request to join"}
           </Button>
-          
         </Box>
       )}
 
@@ -114,6 +104,7 @@ export default function GroupSearch() {
           {confirmation}
         </Alert>
       )}
+      </Box>
     </Box>
   );
 }

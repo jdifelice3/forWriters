@@ -45,7 +45,7 @@ const searchUrl = `${import.meta.env.VITE_API_HOST}/api/groups/search?query=`;
       renderInput={(params) => (
         <TextField
           {...params}
-        //   label="Search for writing groups"
+          placeholder="Search by group name"
           InputProps={{
             ...params.InputProps,
             endAdornment: (

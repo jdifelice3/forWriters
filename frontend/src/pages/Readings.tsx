@@ -1,140 +1,111 @@
-import { useUserContext } from "../context/UserContext";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Group, Reading
-} from "../types/domain-types";
-import {
   Box,
-  Typography,
+  Chip,
   CircularProgress,
-  Card,
-  CardContent,
-  Stack,
+  Typography,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { ReadingFormInput } from "../schemas/reading.schema";
-
-import { useGroupDetails, useGroupGetCount } from "../hooks/useGroup";
-
+import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import { Group, Reading } from "../types/domain-types";
+import { useUserContext } from "../context/UserContext";
+import { useGroupDetails } from "../hooks/useGroup";
 import { useReadings } from "../hooks/reading/useReadings";
 import { useReadingDomain } from "../hooks/reading/useReadingDomain";
-import { useReadingsData } from "../hooks/reading/useReadingsData";
 import { useReadingsUI } from "../hooks/reading/useReadingsUI";
 import { useNotificationDomain } from "../hooks/notification/useNotificationDomain";
-
-import { useFileUI } from "../hooks/file/useFileUI";
-
 import ReadingCalendar from "../components/reading/ReadingCalendar";
-import FileManagerList from "../components/file/lists/FileManagerList";
-import { FileListProperties } from "../types/FileTypes";
-import { CreateReadingInput } from "../types/ReadingTypes";
+import "../assets/css/workspace-pages.css";
 
 const Readings = () => {
-    const { groupId } = useParams();
+  const { groupId } = useParams();
   const navigate = useNavigate();
-  const { user, isLoading: isUserLoading } = useUserContext();
-  const uiFile = useFileUI();
-  const { data: group, isLoading: isGroupLoading } = useGroupDetails<Group>(groupId);
-  const { readings, isLoading: isReadingLoading, refresh } = useReadings();
-  const { createNotification } = useNotificationDomain(group?.id, user)
-
+  const { user, isLoading: userLoading } = useUserContext();
+  const { data: group, isLoading: groupLoading } = useGroupDetails<Group>(groupId);
+  const { readings, isLoading: readingsLoading, refresh } = useReadings();
+  const { createNotification } = useNotificationDomain(group?.id, user);
   const ui = useReadingsUI();
-  const domain = useReadingDomain(group?.id ?? undefined, user, readings, refresh);
-  
-  if ( isUserLoading || isGroupLoading || !group) {
+  const domain = useReadingDomain(group?.id, user, readings, refresh);
+
+  if (userLoading || groupLoading || readingsLoading || !group || !user) {
     return (
-      <Box display="flex" justifyContent="center" p={6}>
-        <CircularProgress size={24} />
+      <Box className="workspace-loading">
+        <CircularProgress size={26} />
+        <Typography>Loading readings…</Typography>
       </Box>
     );
   }
 
-  if (isReadingLoading) {
-    return (
-      <Box display="flex" justifyContent="center" p={6}>
-        <CircularProgress size={24} />
-      </Box>
-    );
-  }
-
-  const membership = group?.groupUser.find(
-    (m) => m.userId === user.id
+  const membership = group.groupUser.find((member) => member.userId === user.id);
+  const isAdmin = membership?.role === "ADMIN" || membership?.role === "OWNER";
+  const submissionCount = readings.reduce(
+    (total, reading) => total + reading.readingSubmission.length,
+    0
   );
-  const isAdmin = membership?.role === "ADMIN";
 
-  const fileListProperties: FileListProperties = {
-    noFilesMessage: "",
-    showPreviewButton: false,
-    buttonDownloadText: "DOWNLOAD",
-    showDeleteButton: false,
-    showEditButton: false,
-    showVersionHistory: false,
-    showDescription: true
+  const openFeedback = async (selectedReadingId: string) => {
+    const reading: Reading | undefined = readings.find(
+      (item) => item.id === selectedReadingId
+    );
+    if (!reading) return;
+
+    const href = `/filefeedback/${selectedReadingId}`;
+    for (const participant of reading.readingParticipant) {
+      const profile = participant.user.userProfile;
+      const name = profile?.firstName
+        ? `${profile.firstName} ${profile.lastName}`
+        : participant.user.email;
+      createNotification(
+        `${name} is reviewing your reading`,
+        "READING_FEEDBACK",
+        participant.user.id,
+        href
+      );
+    }
+    navigate(href);
   };
 
-    const onCreateReading = async (form: ReadingFormInput) => {
-        const input: ReadingFormInput = {
-            ...form,
-        };
-        await domain.createReading(input);
-    };
-
-    const onFeedback = async(readingId: string) => {
-        const reading: Reading | undefined = readings.find(r => r.id === readingId);
-        if(!reading) return;
-
-        const href = `/filefeedback/${readingId}`;
-        if(reading?.readingParticipant.length > 0){
-            for(let i = 0; i < reading?.readingParticipant.length; i++){
-                const name = 
-                    reading.readingParticipant[i].user.userProfile?.firstName
-                    ? `${reading.readingParticipant[i].user.userProfile?.firstName} ${reading.readingParticipant[i].user.userProfile?.lastName}`
-                    : reading.readingParticipant[i].user.email;
-
-                const message = `${name} is reviewing your reading`;
-                createNotification(
-                    message, 
-                    "READING_FEEDBACK", 
-                    reading.readingParticipant[i].user.id, 
-                    href
-                )
-            }
-        }
-        navigate(href);
-    }
-
   return (
-    <Card elevation={0} className="mainComponentPanel">
-      <CardContent>
-        <Typography variant="h4" mb={2}>
-          <MenuBookIcon
-            sx={{ fontSize: "44px", verticalAlign: "bottom" }}
-          />{" "}
-          Readings
-        </Typography>
+    <Box className="workspace-page readings-workspace">
+      <Box className="workspace-page-header">
+        <Box>
+          <Typography className="workspace-eyebrow">{group.name}</Typography>
+          <Typography component="h1">Readings</Typography>
+          <Typography className="workspace-page-lede">
+            {group.groupType === "WRITING"
+              ? "Schedule critique sessions, collect exact manuscript versions, and move every reading into the feedback workflow."
+              : "Create focused review spaces for your manuscripts and invite the right readers when you are ready."}
+          </Typography>
+        </Box>
+      </Box>
 
-        <Card>
-          <CardContent>
-            <Stack className="readingSubPanel">
-              {/* Reading calendar */}
-                <Typography variant="h6" mb={2} fontWeight="bold">
-                  {group.groupType === "WRITING" ? "Group Reading Calendar" : "Review My Manuscripts"}
-                </Typography>
+      <Box className="workspace-summary-strip">
+        <Chip icon={<CalendarMonthRoundedIcon />} label={`${readings.length} readings`} />
+        <Chip icon={<DescriptionRoundedIcon />} label={`${submissionCount} submissions`} />
+        <Chip icon={<GroupsRoundedIcon />} label={isAdmin ? "Reading manager" : "Group participant"} />
+      </Box>
 
-                <ReadingCalendar
-                  readings={readings}
-                  isAdmin={isAdmin}
-                  domain={domain}
-                  ui={ui}
-                  onFeedback={onFeedback}
-                  onCreateReading={onCreateReading}
-                />
-            </Stack>
-          </CardContent>
-        </Card>
-      </CardContent>
-    </Card>
+      <Box className="workspace-surface">
+        <Box className="workspace-section-heading">
+          <Box>
+            <Typography component="h2">
+              {group.groupType === "WRITING" ? "Reading calendar" : "Review queue"}
+            </Typography>
+            <Typography>
+              Open a reading to submit, assign reviewers, or continue a critique.
+            </Typography>
+          </Box>
+        </Box>
+        <ReadingCalendar
+          readings={readings}
+          isAdmin={isAdmin}
+          domain={domain}
+          ui={ui}
+          onFeedback={openFeedback}
+        />
+      </Box>
+    </Box>
   );
 };
 

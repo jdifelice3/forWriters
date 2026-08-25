@@ -32,7 +32,7 @@ const ReadingSubmissionListSummaryForm: React.FC<ReadingSubmissionListSummaryFor
 }) => {
     
   return (
-    <Box key={key}>
+    <Box key={key} className="reading-submission-card">
       <Stack spacing={1}>
         <Stack direction="row" alignItems="center" gap={1}>
           {/* <FileIcon file={currentVersion} /> */}

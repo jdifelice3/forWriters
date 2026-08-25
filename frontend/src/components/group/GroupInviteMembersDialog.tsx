@@ -170,7 +170,7 @@ const GroupInviteMembersDialog = ({
   }
 
   return (
-    <Dialog open={open} onClose={handleOnClose} fullWidth maxWidth="sm">
+    <Dialog className="workspace-dialog" open={open} onClose={handleOnClose} fullWidth maxWidth="sm">
       <DialogTitle>Invite to Group</DialogTitle>
 
       <DialogContent dividers>
