@@ -1,10 +1,13 @@
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
   Stack,
   Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
+import { mutate } from "swr";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CloudDoneRoundedIcon from "@mui/icons-material/CloudDoneRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
@@ -14,11 +17,83 @@ import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useGroupContext } from "../context/GroupContextProvider";
+import { useGroupInvite } from "../hooks/useGroup";
 import "../assets/css/studio-shell.css";
 
 export default function StudioHome() {
   const navigate = useNavigate();
-  const { activeGroup, groups, isLoading } = useGroupContext();
+  const { activeGroup, groups, isLoading, setActiveGroup } = useGroupContext();
+  const { completeInvite } = useGroupInvite();
+  const [pendingInvite] = useState(() => ({
+    groupId: sessionStorage.getItem("groupInviteGroupId"),
+    pendingId: sessionStorage.getItem("groupInvitePendingId"),
+  }));
+  const [inviteCompletion, setInviteCompletion] = useState<
+    "idle" | "completing" | "error"
+  >(
+    pendingInvite.groupId && pendingInvite.pendingId
+      ? "completing"
+      : pendingInvite.groupId || pendingInvite.pendingId
+        ? "error"
+        : "idle"
+  );
+  const [inviteError, setInviteError] = useState("");
+
+  useEffect(() => {
+    if (!pendingInvite.groupId || !pendingInvite.pendingId) return;
+
+    async function finishPendingInvitation() {
+      try {
+        const completed = await completeInvite(pendingInvite.pendingId!);
+        sessionStorage.removeItem("groupInviteGroupId");
+        sessionStorage.removeItem("groupInvitePendingId");
+        await mutate("/me/groups");
+        setActiveGroup({
+          id: completed.groupId,
+          name: completed.name,
+          role: completed.role,
+          groupType: completed.groupType,
+        });
+        navigate(`/groups/${completed.groupId}`, { replace: true });
+      } catch (error) {
+        setInviteError(
+          error instanceof Error ? error.message : "The invitation could not be completed."
+        );
+        setInviteCompletion("error");
+      }
+    }
+
+    finishPendingInvitation();
+  }, [completeInvite, navigate, pendingInvite.groupId, pendingInvite.pendingId, setActiveGroup]);
+
+  if (inviteCompletion === "completing") {
+    return (
+      <Box className="studio-home-loading">
+        <CircularProgress size={28} />
+        <Typography>Adding you to the writing group…</Typography>
+      </Box>
+    );
+  }
+
+  if (inviteCompletion === "error") {
+    return (
+      <Box className="studio-home-page">
+        <Alert severity="error">
+          {inviteError || "The invitation session is incomplete. Open the invitation link again."}
+        </Alert>
+        <Button
+          sx={{ mt: 2 }}
+          onClick={() => {
+            sessionStorage.removeItem("groupInviteGroupId");
+            sessionStorage.removeItem("groupInvitePendingId");
+            setInviteCompletion("idle");
+          }}
+        >
+          Continue to forWriters
+        </Button>
+      </Box>
+    );
+  }
 
   if (isLoading) {
     return (

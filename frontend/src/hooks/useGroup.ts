@@ -34,7 +34,7 @@ export const useGroupInvite = () => {
         await GroupAPI.sendInvite(activeGroup?.id, input, role, inputType);
         return true;
     
-    }, []);
+    }, [activeGroup?.id]);
 
     const validate = useCallback(async (token: string | undefined) => {
         if (!token) return;
@@ -42,13 +42,13 @@ export const useGroupInvite = () => {
             return result;
         }, []);
 
-    const completeInvite = useCallback(async() => {
-        const result: CompleteResponse = await GroupAPI.completeInvite();
+    const completeInvite = useCallback(async(pendingId?: string) => {
+        const result: CompleteResponse = await GroupAPI.completeInvite(pendingId);
         return result;
     }, []);
 
-    const declineInvite = useCallback(async() => {
-        const result = await GroupAPI.declineInvite();
+    const declineInvite = useCallback(async(pendingId?: string) => {
+        const result = await GroupAPI.declineInvite(pendingId);
         return result;
     }, []);
 

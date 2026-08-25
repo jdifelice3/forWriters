@@ -1,121 +1,158 @@
-import { 
-    Button,
-    Typography 
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
-import { useEffect, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Session from "supertokens-auth-react/recipe/session";
 import { mutate } from "swr";
-import { useNavigate, useParams } from "react-router";
 import { useGroupContext } from "../context/GroupContextProvider";
-import { useGroupDetails } from "../hooks/useGroup";
-import { GroupSummary } from '../types/ContextTypes';
-import { Group } from "../types/domain-types";
-import { tokenValidationResponse } from "../types/InviteTypes";
-import { CompleteResponse } from '../types/GroupInviteTypes';
-import { useInviteDomain } from "../hooks/invite/useInviteDomain";
-import { useSearchParams } from "react-router-dom";
 import { useGroupInvite } from "../hooks/useGroup";
-import { Box } from "@mui/material";
+import { GroupSummary } from "../types/ContextTypes";
+import { tokenValidationResponse } from "../types/InviteTypes";
 
-const GroupInvite = () => {
-    const [validate, setValidate] = useState<tokenValidationResponse | undefined>(undefined);
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [declined, setDeclined] = useState(false);
-    const [groupInviteGroupId, setgroupInviteGroupId] = useState("");
-    const { setActiveGroup } = useGroupContext();
-    const groupInvite = useGroupInvite(); 
-    const navigate = useNavigate();
-    const groupId: string | undefined = useParams().groupId;
-    const { data: group } = useGroupDetails<Group>(groupId);
-    const token: string | null = searchParams.get("token");
-    
-    let completeResponse: CompleteResponse;
+const pendingGroupKey = "groupInviteGroupId";
+const pendingSessionKey = "groupInvitePendingId";
 
-    if(!token) {
-        return "Ivalid Token";
+export default function GroupInvite() {
+  const { groupId } = useParams<{ groupId: string }>();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+  const navigate = useNavigate();
+  const { setActiveGroup } = useGroupContext();
+  const { validate, completeInvite, declineInvite } = useGroupInvite();
+
+  const [invitation, setInvitation] = useState<tokenValidationResponse>();
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [declined, setDeclined] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadInvitation() {
+      if (!token || !groupId) {
+        setErrorMessage("This invitation link is incomplete.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await validate(token);
+        if (active) setInvitation(response);
+      } catch (error) {
+        if (active) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "The invitation could not be validated."
+          );
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
     }
 
-    const invite = useInviteDomain();
+    loadInvitation();
+    return () => {
+      active = false;
+    };
+  }, [groupId, token, validate]);
 
-    useEffect(() => {
-        console.log('groupId in useEffect', groupId);
-        if(groupId){
-            setgroupInviteGroupId(groupId);
-        } else {
-            throw new Error("GroupId not found");
-        }
-        const fetchData = async () => {
-            const response: tokenValidationResponse | undefined = await groupInvite.validate(token);
-            console.log('response in GroupInvite', response);
-            setValidate(response);
-        }
-        fetchData().catch(console.error);
-    }, []);
+  async function finishInvitation(pendingId: string) {
+    const completeResponse = await completeInvite(pendingId);
+    const groupSummary: GroupSummary = {
+      id: completeResponse.groupId,
+      name: completeResponse.name,
+      role: completeResponse.role,
+      groupType: completeResponse.groupType,
+    };
 
-    const onAccept = async() => {
-        if(!Session.doesSessionExist){
-            //Session exists
-            completeResponse = await groupInvite.completeInvite();
-            mutate(
-                key => typeof key === "string" && key.includes("/api/groups/"),
-                undefined,
-                { revalidate: false }
-            );
+    sessionStorage.removeItem(pendingGroupKey);
+    sessionStorage.removeItem(pendingSessionKey);
+    await mutate("/me/groups");
+    setActiveGroup(groupSummary);
+    navigate(`/groups/${completeResponse.groupId}`, { replace: true });
+  }
 
-            const groupSummary: GroupSummary = {  
-                id: completeResponse.groupId,
-                name: completeResponse.name,
-                role: completeResponse.role,
-                groupType: completeResponse.groupType
-            }
-            setActiveGroup(groupSummary);
-            navigate(`/groups/${groupId}`);
-        } else {
-            if(validate){
-                sessionStorage.setItem("groupInviteGroupId", groupInviteGroupId);
-                navigate("/auth");          
-            }
-        }
+  async function onAccept() {
+    if (!invitation || !groupId) return;
+    setSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      if (await Session.doesSessionExist()) {
+        await finishInvitation(invitation.pendingId);
+        return;
+      }
+
+      sessionStorage.setItem(pendingGroupKey, groupId);
+      sessionStorage.setItem(pendingSessionKey, invitation.pendingId);
+      navigate(`/auth?redirectToPath=${encodeURIComponent("/studio")}`);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "The invitation could not be accepted."
+      );
+      setSubmitting(false);
     }
+  }
 
-    const onDecline = async() => {
-        console.log('in onDecline');
-        console.log('groupId', groupId);
-        const success = await groupInvite.declineInvite();
-        console.log('decline success', success);
-        setDeclined(true);
+  async function onDecline() {
+    if (!invitation) return;
+    setSubmitting(true);
+    setErrorMessage("");
+    try {
+      await declineInvite(invitation.pendingId);
+      setDeclined(true);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "The invitation could not be declined."
+      );
+    } finally {
+      setSubmitting(false);
     }
+  }
 
+  if (loading) {
     return (
-        <>
-        {!declined ? (
-            <Box ml={2}>
-            <Typography variant="h6" mb={1} mt={3}>
-                You’ve been invited to join <span style={{color: "blue"}}>{validate?.groupName}</span>
-            </Typography>
-            <Typography variant="body1" mb={1} mt={3}>
-                Invited by <b>{validate?.invitedBy}</b>
-            </Typography>
-            <Typography variant="body1" mb={1} mt={3}>
-                Your Role: <b>Member</b>
-            </Typography>
-            <Typography variant="body1" mb={1} mt={3}>
-                Invitation sent to: <b>{validate?.email}</b>
-            </Typography>
-            <Button variant="contained" sx={{mr: 1, mt: 2}} onClick={onAccept}>
-                Accept
-            </Button>
-            <Button variant="contained" sx={{mt: 2}} onClick={onDecline}>
-                Decline
-            </Button>
-            </Box>
-        ) : (
-            <Typography variant="h6" mb={1} mt={3}>
-                You’ve declined the invitation to join <span style={{color: "blue"}}>{validate?.groupName}</span>
-            </Typography>
-        )}
-        </>
-    )
-}
+      <Box display="flex" alignItems="center" gap={1.5} p={3}>
+        <CircularProgress size={22} />
+        <Typography>Opening invitation…</Typography>
+      </Box>
+    );
+  }
 
-export default GroupInvite;
+  if (errorMessage && !invitation) {
+    return <Alert severity="error" sx={{ m: 3 }}>{errorMessage}</Alert>;
+  }
+
+  if (declined) {
+    return (
+      <Typography variant="h6" m={3}>
+        You’ve declined the invitation to join {invitation?.groupName}.
+      </Typography>
+    );
+  }
+
+  return (
+    <Box m={3} maxWidth={620}>
+      <Typography variant="h5" mb={2}>
+        You’ve been invited to join {invitation?.groupName}
+      </Typography>
+      <Typography mb={1}>Invited by <b>{invitation?.invitedBy || "a group administrator"}</b></Typography>
+      <Typography mb={1}>Your role: <b>{invitation?.role.toLowerCase()}</b></Typography>
+      <Typography mb={2}>Invitation sent to: <b>{invitation?.email}</b></Typography>
+
+      {errorMessage && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage}</Alert>}
+
+      <Button variant="contained" sx={{ mr: 1 }} onClick={onAccept} disabled={submitting}>
+        {submitting ? "Accepting…" : "Accept"}
+      </Button>
+      <Button variant="outlined" onClick={onDecline} disabled={submitting}>
+        Decline
+      </Button>
+    </Box>
+  );
+}

@@ -18,15 +18,17 @@ export const GroupAPI = {
         });
     },
 
-    completeInvite(){
+    completeInvite(pendingId?: string){
         return apiFetch<CompleteResponse>(`/invites/complete`, {
             method: "POST",
+            body: JSON.stringify({ pendingId }),
         });
     },
 
-    declineInvite(){
+    declineInvite(pendingId?: string){
         return apiFetch(`/invites/decline`, {
             method: "POST",
+            body: JSON.stringify({ pendingId }),
         });
     },
 

@@ -4,4 +4,5 @@ export type tokenValidationResponse = {
     groupName: string;
     email: string;
     invitedBy: string;
+    role: "MEMBER" | "READER" | "ADMIN";
 }
