@@ -155,6 +155,20 @@ export default function CritiqueWorkflow() {
     [user?.id, workflow?.submissions]
   );
 
+  const feedbackReceived = useMemo(
+    () =>
+      (workflow?.submissions ?? [])
+        .filter((submission) => submission.author.userId === user?.id)
+        .map((submission) => ({
+          submission,
+          completedAssignments: submission.assignments.filter(
+            (assignment) => assignment.status === "COMPLETED"
+          ),
+        }))
+        .filter(({ completedAssignments }) => completedAssignments.length > 0),
+    [user?.id, workflow?.submissions]
+  );
+
   if (error) {
     return (
       <Alert severity="error" sx={{ m: 4 }}>
@@ -583,9 +597,11 @@ export default function CritiqueWorkflow() {
 
           {myAssignments.length === 0 ? (
             <Alert severity="info">
-              You do not currently have a manuscript assigned for review in this reading.
+              You do not currently have a manuscript assigned to review in this reading.
               {workflow.canManageAssignments &&
-                " Assign yourself or another member in the previous stage."}
+                " Use the Assign stage to manage reviewer assignments."}
+              {feedbackReceived.length > 0 &&
+                " Completed feedback on your manuscript is available below."}
             </Alert>
           ) : (
             <Box className="review-assignment-list">
@@ -625,6 +641,61 @@ export default function CritiqueWorkflow() {
                   )}
                 </Box>
               ))}
+            </Box>
+          )}
+
+          {feedbackReceived.length > 0 && (
+            <Box className="critique-received-feedback">
+              <Box className="review-stage-heading">
+                <Box>
+                  <Typography variant="h5">Feedback received</Typography>
+                  <Typography color="text.secondary">
+                    Completed reviews of manuscripts you submitted to this reading.
+                  </Typography>
+                </Box>
+                <Chip
+                  icon={<CheckRoundedIcon />}
+                  color="success"
+                  label={`${feedbackReceived.reduce(
+                    (total, item) => total + item.completedAssignments.length,
+                    0
+                  )} completed`}
+                />
+              </Box>
+              <Box className="review-assignment-list">
+                {feedbackReceived.map(({ submission, completedAssignments }) => (
+                  <Box
+                    className="critique-panel review-assignment-card"
+                    key={submission.id}
+                  >
+                    <Box className="manuscript-symbol">W</Box>
+                    <Box>
+                      <Typography variant="h6">{submission.manuscript.title}</Typography>
+                      <Typography variant="body2">
+                        version {submission.manuscript.version} · reviewed by{" "}
+                        {completedAssignments
+                          .map((assignment) => assignment.reviewer.name)
+                          .join(", ")}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {completedAssignments.length} completed{" "}
+                        {completedAssignments.length === 1 ? "review" : "reviews"}
+                      </Typography>
+                    </Box>
+                    <Chip label="feedback ready" color="success" />
+                    <Button
+                      variant="contained"
+                      onClick={() =>
+                        navigate(
+                          `/filefeedbackdetail/${submission.manuscript.appFileId}`
+                        )
+                      }
+                    >
+                      View feedback
+                    </Button>
+                  </Box>
+                ))}
+              </Box>
             </Box>
           )}
 

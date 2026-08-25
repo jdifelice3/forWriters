@@ -308,6 +308,13 @@
 
 .review-stage-heading { margin-top: 5px; }
 
+.critique-received-feedback { margin-top: 26px; }
+.critique-received-feedback .review-stage-heading { margin-bottom: 14px; }
+.critique-received-feedback h5 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+}
+
 .review-assignment-list { display: grid; gap: 12px; }
 
 .review-assignment-card {
