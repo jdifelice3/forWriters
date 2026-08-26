@@ -9,11 +9,11 @@ export interface User {
 
 export interface UserProfile {
   id: string;
-  userId: string;
   firstName: string;
   lastName: string;
-  phone: string;
-  bio: string;
+  phone?: string;
+  bio?: string;
+  avatarUrl?: string;
 }
 
 export interface UserSearch {
@@ -31,5 +31,5 @@ export type ProfileFormInputs = {
     bio: string,
     title: string,
     description: string,
-    avatar: File,
+    avatar?: File,
 }

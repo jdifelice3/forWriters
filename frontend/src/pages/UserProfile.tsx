@@ -1,73 +1,63 @@
-"use client";
-
-import { useState } from "react";
-import { User } from "../types/UserTypes";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { mutate as mutateCache } from "swr";
 import {
+  Alert,
   Box,
   Button,
+  CircularProgress,
+  Divider,
+  Stack,
   TextField,
   Typography,
-  Stack,
-  Divider,
-  CircularProgress,
 } from "@mui/material";
-import FileUploadField from "./FileUploadField";
-import { useForm, Controller } from "react-hook-form";
-import { updateUserProfile, getUserProfile } from "../services/srvUserProfiles";
-import { useEffect } from 'react';
-import Session from "supertokens-auth-react/recipe/session";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
+import FileUploadField from "./FileUploadField";
+import { useUserContext } from "../context/UserContext";
+import { updateUserProfile, uploadUserAvatar } from "../services/srvUserProfiles";
 import { ProfileFormInputs } from "../types/UserTypes";
 
 import "../assets/css/workspace-pages.css";
 
+const formValues = (
+  email = "",
+  firstName = "",
+  lastName = "",
+  bio = ""
+): ProfileFormInputs => ({
+  firstName,
+  lastName,
+  email,
+  bio,
+  title: "",
+  description: "",
+  avatar: undefined,
+});
+
 const UserProfile = () => {
-    const [userId, setUserId] = useState<string>("");
-    const [loading, setLoading] = useState(true);
+  const { user, isLoading, error: userError, refreshUser } = useUserContext();
+  const [avatarUrl, setAvatarUrl] = useState<string>();
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saved, setSaved] = useState(false);
 
-    const {
-        control,
-        handleSubmit,
-        formState: { errors }, 
-        reset
-    } = useForm<ProfileFormInputs>({
-        defaultValues: {
-            firstName: "",
-            lastName: "",
-            email: "",
-            bio: "",
-            title: "",
-            description: "",
-            avatar: undefined,
-        },
-    });
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ProfileFormInputs>({
+    defaultValues: formValues(),
+  });
 
-    useEffect(() => {
-        const fetchUserId = async() => {
-        const exists = await Session.doesSessionExist();
+  useEffect(() => {
+    if (!user) return;
+    const profile = user.userProfile;
+    reset(formValues(user.email, profile?.firstName, profile?.lastName, profile?.bio));
+    setAvatarUrl(profile?.avatarUrl);
+  }, [reset, user]);
 
-        if (!exists) {
-            console.log('session does not exist');
-            setUserId("");
-            setLoading(false);
-            return;
-        }
-
-        const authId = await Session.getUserId();
-        const user: User = await getUserProfile(authId);
-        setUserId(user.id);
-        reset({ 
-            firstName: user.userProfile.firstName, 
-            lastName: user.userProfile.lastName,
-            email: user.email,
-            bio: user.userProfile.bio
-        });
-        setLoading(false);
-    }
-    fetchUserId();
-  }, [reset]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Box className="workspace-loading">
         <CircularProgress size={24} />
@@ -76,32 +66,71 @@ const UserProfile = () => {
     );
   }
 
-  if (!userId) {
-    return <Box className="workspace-empty-state"><Typography>No active session.</Typography></Box>;
+  if (userError || !user) {
+    return (
+      <Box className="workspace-empty-state">
+        <Typography>We could not load your profile. Please refresh and try again.</Typography>
+      </Box>
+    );
   }
 
+  const displayName = [user.userProfile?.firstName, user.userProfile?.lastName]
+    .filter(Boolean)
+    .join(" ");
+  const initials = displayName
+    ? displayName
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase()
+    : user.email.slice(0, 1).toUpperCase();
 
-  const onSubmit = async(data: ProfileFormInputs) => {
-    //const userId: string = userId;
-    const firstName: string = data.firstName;
-    const lastName: string = data.lastName;
-    const bio: string = data.bio ? data.bio : '';
-    const results: Response = await updateUserProfile(userId, firstName, lastName, bio);
+  const refreshGroupDetails = async () => {
+    const groupPrefix = `${import.meta.env.VITE_API_HOST}/api/groups/`;
+    await mutateCache(
+      (key) =>
+        typeof key === "string" &&
+        key.startsWith(groupPrefix) &&
+        !key.slice(groupPrefix.length).includes("/"),
+      undefined,
+      { revalidate: true }
+    );
+  };
 
-    if(results.status !== 500){
-      alert("Profile saved successfully!");
-    } else if (results.status === 500){
-      alert("The profile was not saved due to an error");
+  const onSubmit = async (data: ProfileFormInputs) => {
+    setSaving(true);
+    setSaveError("");
+    setSaved(false);
+
+    try {
+      const profile = await updateUserProfile(
+        data.firstName,
+        data.lastName,
+        data.bio ?? ""
+      );
+      let savedAvatarUrl = profile.avatarUrl ?? avatarUrl;
+
+      if (data.avatar) {
+        const avatarResult = await uploadUserAvatar(data.avatar);
+        savedAvatarUrl = avatarResult.avatarUrl;
+        setAvatarUrl(savedAvatarUrl);
+      }
+
+      await refreshUser();
+      await refreshGroupDetails();
+      reset(formValues(user.email, profile.firstName, profile.lastName, profile.bio));
+      setAvatarUrl(savedAvatarUrl);
+      setSaved(true);
+    } catch (profileError) {
+      setSaveError(
+        profileError instanceof Error
+          ? profileError.message
+          : "We could not save your profile. Please try again."
+      );
+    } finally {
+      setSaving(false);
     }
-    // reset({
-    //     firstName: "",
-    //     lastName: "",
-    //     email: "",
-    //     bio: "",
-    //     title: "",
-    //     description: "",
-    //     avatar: undefined,
-    // });
   };
 
   return (
@@ -128,92 +157,91 @@ const UserProfile = () => {
           <AccountCircleRoundedIcon />
         </Box>
         <Stack spacing={2.25}>
-        {/* Avatar upload */}
-        <Controller
+          {saveError && <Alert severity="error">{saveError}</Alert>}
+          {saved && <Alert severity="success">Your profile has been saved.</Alert>}
+          <Controller
             name="avatar"
             control={control}
-            render={({ field: { onChange } }) => (
-                <FileUploadField onChange={onChange} />
+            render={({ field: { onChange, value } }) => (
+              <FileUploadField
+                value={value}
+                currentImageUrl={avatarUrl}
+                initials={initials}
+                disabled={saving}
+                onChange={(file) => {
+                  setSaved(false);
+                  onChange(file);
+                }}
+                onError={setSaveError}
+              />
             )}
-        />
-        <Divider />
-        {/* Basic info */}
-        <Controller
+          />
+          <Divider />
+          <Controller
             name="firstName"
             control={control}
+            rules={{ required: "Enter your first name." }}
             render={({ field }) => (
-                <TextField
-                    label="First Name"
-                    {...field}
-                    value={field.value ?? ""}
-                    error={!!errors.firstName}
-                    helperText={errors.firstName?.message}
-                    fullWidth
-                />
+              <TextField
+                label="First Name"
+                {...field}
+                value={field.value ?? ""}
+                error={!!errors.firstName}
+                helperText={errors.firstName?.message}
+                fullWidth
+              />
             )}
-        />
-
-        <Controller
-          name="lastName"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              label="Last Name"
-              {...field}
-              value={field.value ?? ""}
-              error={!!errors.lastName}
-              helperText={errors.lastName?.message}
-              fullWidth
-            />
-          )}
-        />
-
-        <Controller
+          />
+          <Controller
+            name="lastName"
+            control={control}
+            rules={{ required: "Enter your last name." }}
+            render={({ field }) => (
+              <TextField
+                label="Last Name"
+                {...field}
+                value={field.value ?? ""}
+                error={!!errors.lastName}
+                helperText={errors.lastName?.message}
+                fullWidth
+              />
+            )}
+          />
+          <Controller
             name="email"
             control={control}
             render={({ field }) => (
-                <TextField
-                    label="Email"
-                    {...field}
-                    value={field.value ?? ""}
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                    fullWidth
-                    disabled
-                />
+              <TextField label="Email" {...field} value={field.value ?? ""} fullWidth disabled />
             )}
-        />
-
-        <Controller
+          />
+          <Controller
             name="bio"
             control={control}
             render={({ field }) => (
-                <TextField
+              <TextField
                 label="Bio"
                 {...field}
                 value={field.value ?? ""}
-                error={!!errors.bio}
-                helperText={errors.bio?.message}
                 fullWidth
                 multiline
                 rows={7}
-                />
+              />
             )}
-        />
-
-        <Button
+          />
+          <Button
             variant="contained"
-            color="primary"
             type="submit"
             className="workspace-primary-action"
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={16} color="inherit" /> : undefined}
             sx={{ mt: 2, alignSelf: "flex-end" }}
-        >
-            Save Changes
-        </Button>
-      </Stack>
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </Button>
+        </Stack>
       </Box>
     </Box>
   );
-}
+};
 
 export default UserProfile;

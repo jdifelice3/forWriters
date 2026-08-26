@@ -449,6 +449,67 @@
 .profile-form-panel > .workspace-section-heading > svg { color: #829087; font-size: 30px; }
 .profile-form-panel .MuiTextField-root .MuiInputBase-root { background: #fbfcfb; }
 
+.profile-avatar-control {
+  align-items: center;
+  padding: 17px;
+  border: 1px solid #e0e7e2;
+  border-radius: 14px;
+  background: #f8faf8;
+}
+
+.profile-avatar-preview.MuiAvatar-root {
+  width: 96px;
+  height: 96px;
+  flex: 0 0 96px;
+  border: 4px solid white;
+  background: #dce9df;
+  color: var(--workspace-green);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  font-weight: 700;
+  box-shadow: 0 0 0 1px #d5dfd7, 0 8px 24px rgba(34, 49, 38, .09);
+}
+
+.profile-avatar-copy { min-width: 0; }
+.profile-avatar-copy h3 {
+  color: var(--workspace-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.profile-avatar-copy > p {
+  max-width: 500px;
+  color: var(--workspace-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.profile-avatar-actions {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 11px;
+}
+
+.profile-avatar-actions .MuiButton-root {
+  min-height: 38px;
+  border-color: #b9c9bd;
+  border-radius: 9px;
+  color: var(--workspace-green);
+  text-transform: none;
+}
+
+.profile-avatar-actions > span {
+  max-width: 320px;
+  overflow: hidden;
+  color: var(--workspace-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .billing-plan-card { max-width: 720px; padding: 26px; }
 .billing-plan-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; }
 .billing-plan-heading h2 { font-family: Georgia, serif; font-size: 28px; font-weight: 700; }
@@ -800,4 +861,5 @@
   .manuscript-versions-heading .MuiButton-root { align-self: flex-start; }
   .manuscript-version-row { grid-template-columns: 38px minmax(0, 1fr); }
   .manuscript-version-controls { grid-column: 1 / -1; justify-content: flex-end; }
+  .profile-avatar-control { align-items: flex-start; flex-direction: column !important; }
 }

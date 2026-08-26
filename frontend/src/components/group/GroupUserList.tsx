@@ -27,7 +27,7 @@ const GroupUserList: React.FC<Props> = ({ groupUsers }) => (
       return (
         <Card className="group-member-card" key={member.id}>
           <CardContent>
-            <Avatar src={member.user.userProfile?.avatarUrl ?? undefined}>
+            <Avatar alt={name} src={member.user.userProfile?.avatarUrl ?? undefined}>
               {initials(name)}
             </Avatar>
             <span>

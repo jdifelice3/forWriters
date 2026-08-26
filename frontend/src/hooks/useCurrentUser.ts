@@ -30,7 +30,7 @@ export function useCurrentUser() {
   }
 
   return {
-    user: data ?? null,
+    user: data,
     isLoading,
     error,
     refreshUser: mutate,

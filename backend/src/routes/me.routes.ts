@@ -24,6 +24,7 @@ router.get("/", verifySession(), async (req: SessionRequest, res) => {
             username: true,
             createdAt: true,
             updatedAt: true,
+            userProfile: true,
             },
         });
 
