@@ -79,7 +79,7 @@ export const GroupPersonalDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }
 
         {!editing && (
           <Button
-            variant="contained"
+            variant="outlined"
             size="small"
             startIcon={<EditIcon />}
             onClick={() => setEditing(true)}
@@ -147,7 +147,7 @@ export const GroupPersonalDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }
                     </Button>
                     &nbsp;&nbsp;
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         size="small"
                         startIcon={<CancelIcon />}
                         onClick={() => setEditing(false)}

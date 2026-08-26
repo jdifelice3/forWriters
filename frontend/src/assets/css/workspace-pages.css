@@ -1,6 +1,7 @@
 .workspace-page {
   --workspace-ink: #17221b;
   --workspace-green: #315b42;
+  --workspace-green-dark: #234631;
   --workspace-green-soft: #e8f1eb;
   --workspace-line: #dce4dd;
   --workspace-muted: #6d7870;
@@ -9,6 +10,161 @@
   padding: 24px clamp(18px, 4vw, 54px) 70px;
   color: var(--workspace-ink);
 }
+
+/* Shared Critique Studio controls */
+.workspace-page .MuiButton-root,
+.workspace-dialog .MuiButton-root {
+  min-height: 38px;
+  padding: 7px 14px;
+  border-radius: 10px !important;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none !important;
+  box-shadow: none !important;
+}
+
+.workspace-page .MuiButton-contained:not(.MuiButton-colorError),
+.workspace-dialog .MuiButton-contained:not(.MuiButton-colorError) {
+  background: var(--workspace-green, #315b42) !important;
+  color: #fff !important;
+}
+
+.workspace-page .MuiButton-contained:not(.MuiButton-colorError):hover,
+.workspace-dialog .MuiButton-contained:not(.MuiButton-colorError):hover {
+  background: var(--workspace-green-dark, #234631) !important;
+}
+
+.workspace-page .MuiButton-outlined:not(.MuiButton-colorError),
+.workspace-dialog .MuiButton-outlined:not(.MuiButton-colorError) {
+  border-color: #a9b9ad !important;
+  background: #fff !important;
+  color: var(--workspace-green, #315b42) !important;
+}
+
+.workspace-page .MuiButton-outlined:not(.MuiButton-colorError):hover,
+.workspace-dialog .MuiButton-outlined:not(.MuiButton-colorError):hover {
+  border-color: #819887 !important;
+  background: #f1f6f2 !important;
+}
+
+.workspace-page .MuiButton-text:not(.MuiButton-colorError),
+.workspace-dialog .MuiButton-text:not(.MuiButton-colorError) {
+  color: var(--workspace-green, #315b42) !important;
+}
+
+.workspace-page .MuiButton-text:not(.MuiButton-colorError):hover,
+.workspace-dialog .MuiButton-text:not(.MuiButton-colorError):hover {
+  background: var(--workspace-green-soft, #e8f1eb) !important;
+}
+
+.workspace-page .MuiButton-containedError,
+.workspace-page .MuiButton-colorError.MuiButton-contained,
+.workspace-dialog .MuiButton-containedError,
+.workspace-dialog .MuiButton-colorError.MuiButton-contained {
+  background: #b33a32 !important;
+  color: #fff !important;
+}
+
+.workspace-page .MuiButton-containedError:hover,
+.workspace-page .MuiButton-colorError.MuiButton-contained:hover,
+.workspace-dialog .MuiButton-containedError:hover,
+.workspace-dialog .MuiButton-colorError.MuiButton-contained:hover {
+  background: #922d27 !important;
+}
+
+.workspace-page .MuiButton-outlinedError,
+.workspace-page .MuiButton-colorError.MuiButton-outlined,
+.workspace-dialog .MuiButton-outlinedError,
+.workspace-dialog .MuiButton-colorError.MuiButton-outlined {
+  border-color: #d69b96 !important;
+  background: #fff !important;
+  color: #a9342d !important;
+}
+
+.workspace-page .MuiButton-outlinedError:hover,
+.workspace-page .MuiButton-colorError.MuiButton-outlined:hover,
+.workspace-dialog .MuiButton-outlinedError:hover,
+.workspace-dialog .MuiButton-colorError.MuiButton-outlined:hover {
+  border-color: #b33a32 !important;
+  background: #fff5f4 !important;
+}
+
+.workspace-page .MuiButton-root.Mui-disabled,
+.workspace-dialog .MuiButton-root.Mui-disabled {
+  border-color: #dde3de !important;
+  background: #e8ece9 !important;
+  color: #9aa39c !important;
+}
+
+.workspace-page .MuiButton-root:focus-visible,
+.workspace-page .MuiIconButton-root:focus-visible,
+.workspace-dialog .MuiButton-root:focus-visible,
+.workspace-dialog .MuiIconButton-root:focus-visible {
+  outline: 3px solid rgba(49, 91, 66, .2);
+  outline-offset: 2px;
+}
+
+.workspace-page .MuiIconButton-root,
+.workspace-dialog .MuiIconButton-root {
+  border: 1px solid #d7e0d9;
+  border-radius: 10px;
+  color: #56645b;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.workspace-page .MuiIconButton-root:not(.MuiIconButton-colorError):hover,
+.workspace-dialog .MuiIconButton-root:not(.MuiIconButton-colorError):hover {
+  border-color: #a9b9ad;
+  background: var(--workspace-green-soft, #e8f1eb);
+  color: var(--workspace-green, #315b42);
+}
+
+.workspace-page .MuiInputBase-root,
+.workspace-dialog .MuiInputBase-root {
+  border-radius: 10px;
+  background: #fbfcfb;
+}
+
+.workspace-page .MuiOutlinedInput-notchedOutline,
+.workspace-dialog .MuiOutlinedInput-notchedOutline { border-color: #ccd7cf; }
+
+.workspace-page .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
+.workspace-dialog .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #91a496;
+}
+
+.workspace-page .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.workspace-dialog .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--workspace-green, #315b42) !important;
+  border-width: 1.5px;
+}
+
+.workspace-page .MuiInputLabel-root.Mui-focused,
+.workspace-dialog .MuiInputLabel-root.Mui-focused {
+  color: var(--workspace-green, #315b42) !important;
+}
+
+.workspace-page .MuiRadio-root.Mui-checked,
+.workspace-page .MuiCheckbox-root.Mui-checked,
+.workspace-page .MuiSwitch-switchBase.Mui-checked,
+.workspace-dialog .MuiRadio-root.Mui-checked,
+.workspace-dialog .MuiCheckbox-root.Mui-checked,
+.workspace-dialog .MuiSwitch-switchBase.Mui-checked {
+  color: var(--workspace-green, #315b42) !important;
+}
+
+.workspace-page .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track,
+.workspace-dialog .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background: var(--workspace-green, #315b42) !important;
+}
+
+.workspace-page .MuiTabs-indicator,
+.workspace-dialog .MuiTabs-indicator { background: var(--workspace-green, #315b42) !important; }
+.workspace-page .MuiTab-root,
+.workspace-dialog .MuiTab-root { text-transform: none; }
+.workspace-page .MuiTab-root.Mui-selected,
+.workspace-dialog .MuiTab-root.Mui-selected { color: var(--workspace-green, #315b42) !important; }
 
 .workspace-loading {
   min-height: 58vh;
@@ -458,7 +614,7 @@
 
 .workspace-dialog .MuiDialogContent-root { padding: 18px 24px 24px; }
 .workspace-dialog .MuiDialogActions-root { padding: 12px 24px 20px; }
-.workspace-dialog .MuiButton-contained { background: var(--workspace-green, #315b42); }
+.workspace-dialog .MuiDialogActions-root { gap: 8px; }
 
 @media (max-width: 950px) {
   .workspace-page-header { align-items: flex-start; flex-direction: column; }

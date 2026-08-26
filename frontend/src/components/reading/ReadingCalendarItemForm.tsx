@@ -416,8 +416,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         {loading ? <CircularProgress size={22} /> : "Submit"}
                     </Button>
                     <Button
-                    href=""
-                    variant="contained"
+                    variant="outlined"
                     sx={{ mt: 2, ml: 2 }}
                     onClick={() => setSubmitManuscriptOpen(false) }
                     >
@@ -477,8 +476,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         {loading ? <CircularProgress size={22} /> : "Submit"}
                     </Button>
                     <Button
-                        href=""
-                        variant="contained"
+                        variant="outlined"
                         sx={{ mt: 2, ml: 2 }}
                         onClick={() => setUpdateManuscriptVersionOpen(false)}
                     >
@@ -552,7 +550,7 @@ export const ReadingCalendarItemForm: React.FC<ReadingCalendarItemFormProps> = (
                         }}
                     >
                         <Button 
-                            variant="contained"
+                            variant="outlined"
                             onClick={handleInformMembersOnClose}
                             sx={{
                                 mb: 2

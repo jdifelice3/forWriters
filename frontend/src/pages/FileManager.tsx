@@ -315,7 +315,7 @@ const FileManager = () => {
             </DialogContent>
 
             <DialogActions>
-                <Button startIcon={<SaveIcon />} onClick={handleSave}>
+                <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSave}>
                 Save
                 </Button>
             </DialogActions>
@@ -369,10 +369,15 @@ const FileManager = () => {
           <Typography mb={2}>
             Are you sure you want to delete this file?
           </Typography>
-          <Button onClick={() => domain.deleteFile(ui.targetFileMetaId!)} sx={{ mr: 2 }}>
-            OK
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => domain.deleteFile(ui.targetFileMetaId!)}
+            sx={{ mr: 2 }}
+          >
+            Delete
           </Button>
-          <Button onClick={ui.closeDialogs}>Cancel</Button>
+          <Button variant="outlined" onClick={ui.closeDialogs}>Cancel</Button>
         </DialogContent>
       </Dialog>
     </Box>

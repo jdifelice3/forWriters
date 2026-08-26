@@ -261,7 +261,7 @@ const GroupInviteMembersDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleOnClose} disabled={submitting} variant="contained">
+        <Button onClick={handleOnClose} disabled={submitting} variant="outlined">
           {successMessage.length === 0 ? "Cancel" : "Close"}
         </Button>
 

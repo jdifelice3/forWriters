@@ -165,7 +165,7 @@ export const GroupDetailsAdmin: React.FC<GroupDetailsProps> = ({ group }) => {
                     </Button>
                     &nbsp;&nbsp;
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         startIcon={<CancelIcon />}
                         onClick={() => setEditing(false)}
                     >
