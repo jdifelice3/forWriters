@@ -12,7 +12,7 @@
         "docx-extractor": "ts-node src/services/runDocxExtractor.ts",
         "generate:dtos": "node src/scripts/generate-dtos.mjs",
         "build": "tsc",
-        "test:staging": "npm run build && node --test test/s3ObjectKey.test.js"
+        "test:staging": "npm run build && node --test test/*.test.js"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.948.0",

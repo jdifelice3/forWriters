@@ -10,6 +10,7 @@ export type GroupSummary = {
   name: string;
   role: GroupRole;
   groupType: GroupType;
+  creatorUserId?: string;
 };
 
 export type GroupContextValue = {

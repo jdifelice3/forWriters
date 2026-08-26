@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Alert,
@@ -13,7 +13,6 @@ import {
   Select,
   Snackbar,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
@@ -21,7 +20,7 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import CloudDoneRoundedIcon from "@mui/icons-material/CloudDoneRounded";
-import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
+import CollectionsBookmarkRoundedIcon from "@mui/icons-material/CollectionsBookmarkRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
@@ -30,7 +29,6 @@ import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
 import { ReadingsAPI } from "../api/readingsApi";
 import { useGroupContext } from "../context/GroupContextProvider";
 import { useUserContext } from "../context/UserContext";
-import { useFileDomain } from "../hooks/file/useFileDomain";
 import { useFiles } from "../hooks/file/useFiles";
 import { useCritiqueWorkflow } from "../hooks/reading/useCritiqueWorkflow";
 import { useReadings } from "../hooks/reading/useReadings";
@@ -43,8 +41,8 @@ const stageMeta = [
   {
     id: 1 as Stage,
     label: "Submit",
-    detail: "Upload to S3 and submit a version",
-    icon: CloudUploadRoundedIcon,
+    detail: "Select a saved manuscript version",
+    icon: CollectionsBookmarkRoundedIcon,
   },
   {
     id: 2 as Stage,
@@ -80,8 +78,7 @@ export default function CritiqueWorkflow() {
   const { activeGroup } = useGroupContext();
   const { readings, isLoading: readingsLoading, refresh: refreshReadings } =
     useReadings();
-  const { files, isLoading: filesLoading, mutate: refreshFiles } = useFiles();
-  const fileDomain = useFileDomain();
+  const { files, isLoading: filesLoading } = useFiles();
   const {
     workflow,
     isLoading: workflowLoading,
@@ -98,9 +95,6 @@ export default function CritiqueWorkflow() {
   const [stage, setStage] = useState<Stage>(initialStage);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState("");
   const [selectedAppFileId, setSelectedAppFileId] = useState("");
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadTitle, setUploadTitle] = useState("");
-  const [uploadDescription, setUploadDescription] = useState("");
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState("");
 
@@ -108,6 +102,28 @@ export default function CritiqueWorkflow() {
   const ownSubmission = workflow?.submissions.find(
     (submission) => submission.author.userId === user?.id
   );
+  const availableStages = useMemo(
+    () =>
+      stageMeta.filter((item) => {
+        if (item.id === 1) return workflow?.canSubmit;
+        if (item.id === 2) return workflow?.canManageAssignments;
+        return true;
+      }),
+    [workflow?.canManageAssignments, workflow?.canSubmit]
+  );
+
+  useEffect(() => {
+    if (!workflow || availableStages.some((item) => item.id === stage)) return;
+    setStage(
+      workflow.canSubmit ? 1 : workflow.canManageAssignments ? 2 : 3
+    );
+  }, [availableStages, stage, workflow]);
+
+  useEffect(() => {
+    if (ownSubmission && !selectedAppFileId) {
+      setSelectedAppFileId(ownSubmission.manuscript.appFileId);
+    }
+  }, [ownSubmission, selectedAppFileId]);
 
   useEffect(() => {
     const requestedSubmissionId = searchParams.get("submission");
@@ -142,10 +158,7 @@ export default function CritiqueWorkflow() {
   const selectedSubmission = workflow?.submissions.find(
     (submission) => submission.id === selectedSubmissionId
   );
-  const canManageSelectedSubmission = Boolean(
-    workflow?.canManageAssignments ||
-    selectedSubmission?.author.userId === workflow?.currentUserId
-  );
+  const canManageSelectedSubmission = Boolean(workflow?.canManageAssignments);
 
   const myAssignments = useMemo(
     () =>
@@ -197,45 +210,10 @@ export default function CritiqueWorkflow() {
     );
   }
 
-  const handleUpload = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!uploadFile || !uploadTitle.trim()) return;
-
-    setBusy(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", uploadFile);
-      formData.append("title", uploadTitle.trim());
-      formData.append("description", uploadDescription.trim());
-      await fileDomain.uploadManuscript(formData);
-      const updatedFiles = await refreshFiles();
-      const newest = updatedFiles
-        ?.flatMap((meta) => meta.appFile)
-        .sort(
-          (a, b) =>
-            new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-        )[0];
-      if (newest) setSelectedAppFileId(newest.id);
-      setToast("The manuscript is stored in Amazon S3 and its metadata is in PostgreSQL.");
-    } catch (uploadError) {
-      setToast(
-        uploadError instanceof Error ? uploadError.message : "Upload failed"
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const submitVersion = async () => {
     if (!selectedAppFileId) return;
     setBusy(true);
     try {
-      const isParticipant = reading.readingParticipant.some(
-        (participant) => participant.userId === user.id
-      );
-      if (!isParticipant) {
-        await ReadingsAPI.signup(groupId!, reading.id, user.id);
-      }
       if (ownSubmission) {
         await ReadingsAPI.updateVersion(groupId!, reading.id, selectedAppFileId);
       } else {
@@ -243,7 +221,7 @@ export default function CritiqueWorkflow() {
       }
       await Promise.all([refreshReadings(), refreshWorkflow()]);
       setToast("Submission saved to the staging database.");
-      setStage(2);
+      setStage(workflow.canManageAssignments ? 2 : 3);
     } catch (submissionError) {
       setToast(
         submissionError instanceof Error
@@ -309,7 +287,7 @@ export default function CritiqueWorkflow() {
           </Typography>
           <Typography component="h1">Critique workflow</Typography>
           <Typography color="text.secondary">
-            One authenticated path from manuscript upload through attributed feedback.
+            One authenticated path from a saved manuscript version through attributed feedback.
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} className="persistence-badges">
@@ -319,8 +297,11 @@ export default function CritiqueWorkflow() {
         </Stack>
       </Box>
 
-      <Box className="critique-stage-bar">
-        {stageMeta.map((item) => {
+      <Box
+        className="critique-stage-bar"
+        sx={{ gridTemplateColumns: `repeat(${availableStages.length}, minmax(0, 1fr))` }}
+      >
+        {availableStages.map((item) => {
           const Icon = item.icon;
           return (
             <button
@@ -346,66 +327,15 @@ export default function CritiqueWorkflow() {
       />
 
       {stage === 1 && (
-        <Box className="critique-stage-grid">
-          <Box className="critique-panel upload-panel">
+        <Box className="critique-stage-grid single-stage">
+          <Box className="critique-panel submit-panel">
             <Box className="critique-panel-title">
               <span>1</span>
               <Box>
-                <Typography variant="h6">Upload a manuscript</Typography>
+                <Typography variant="h6">Select an exact manuscript version</Typography>
                 <Typography variant="body2">
-                  This uses the application’s real S3 upload route.
-                </Typography>
-              </Box>
-            </Box>
-            <Box component="form" onSubmit={handleUpload} className="real-upload-form">
-              <Button
-                component="label"
-                className="real-dropzone"
-                startIcon={<CloudUploadRoundedIcon />}
-              >
-                {uploadFile ? uploadFile.name : "Choose a DOCX manuscript"}
-                <input
-                  hidden
-                  type="file"
-                  accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  onChange={(event) =>
-                    setUploadFile(event.target.files?.[0] ?? null)
-                  }
-                />
-              </Button>
-              <TextField
-                label="Manuscript title"
-                value={uploadTitle}
-                onChange={(event) => setUploadTitle(event.target.value)}
-                required
-                fullWidth
-              />
-              <TextField
-                label="What feedback would help most?"
-                value={uploadDescription}
-                onChange={(event) => setUploadDescription(event.target.value)}
-                multiline
-                minRows={3}
-                fullWidth
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={busy || !uploadFile || !uploadTitle.trim()}
-                startIcon={<CloudUploadRoundedIcon />}
-              >
-                Upload to S3
-              </Button>
-            </Box>
-          </Box>
-
-          <Box className="critique-panel submit-panel">
-            <Box className="critique-panel-title">
-              <span>2</span>
-              <Box>
-                <Typography variant="h6">Submit an exact version</Typography>
-                <Typography variant="body2">
-                  The selected version becomes a persisted ReadingSubmission.
+                  Manuscripts and new versions are managed once on the Manuscripts page.
+                  Your selection here becomes the persisted reading submission.
                 </Typography>
               </Box>
             </Box>
@@ -415,6 +345,13 @@ export default function CritiqueWorkflow() {
                 You already submitted <strong>{ownSubmission.manuscript.title}</strong>,
                 version {ownSubmission.manuscript.version}. Selecting another version will
                 update that submission.
+              </Alert>
+            )}
+
+            {versionOptions.length === 0 && (
+              <Alert severity="info" sx={{ mb: 2 }}>
+                You do not have a saved manuscript version yet. Open Manuscripts to
+                upload one, then return to this workflow.
               </Alert>
             )}
 
@@ -451,20 +388,26 @@ export default function CritiqueWorkflow() {
 
             <Divider />
             <Box className="critique-actions">
-              {workflow.canManageAssignments && !selectedAppFileId ? (
-                <Button endIcon={<ArrowForwardRoundedIcon />} onClick={() => setStage(2)}>
-                  Manage assignments
-                </Button>
-              ) : (
-                <Button
-                  variant="contained"
-                  disabled={!selectedAppFileId || busy}
-                  endIcon={<ArrowForwardRoundedIcon />}
-                  onClick={submitVersion}
-                >
-                  {ownSubmission ? "Update submission" : "Submit to reading"}
-                </Button>
-              )}
+              <Button
+                startIcon={<CollectionsBookmarkRoundedIcon />}
+                onClick={() =>
+                  navigate(
+                    `/files?returnTo=${encodeURIComponent(
+                      `/groups/${groupId}/readings/${readingId}/workflow`
+                    )}`
+                  )
+                }
+              >
+                Manage manuscripts
+              </Button>
+              <Button
+                variant="contained"
+                disabled={!selectedAppFileId || busy}
+                endIcon={<ArrowForwardRoundedIcon />}
+                onClick={submitVersion}
+              >
+                {ownSubmission ? "Update submission" : "Submit to reading"}
+              </Button>
             </Box>
           </Box>
         </Box>
@@ -511,9 +454,7 @@ export default function CritiqueWorkflow() {
                         Assignments are isolated to {activeGroup.name} and saved immediately.
                       </Typography>
                     </Box>
-                    {!canManageSelectedSubmission && (
-                      <Chip icon={<LockRoundedIcon />} label="Author or admin managed" />
-                    )}
+                    <Chip icon={<LockRoundedIcon />} label="Admin managed" />
                   </Box>
 
                   {workflow.eligibleReviewers.filter(
@@ -572,7 +513,9 @@ export default function CritiqueWorkflow() {
             </>
           )}
           <Box className="critique-bottom-actions">
-            <Button onClick={() => setStage(1)}>Back to submission</Button>
+            {workflow.canSubmit && (
+              <Button onClick={() => setStage(1)}>Back to submission</Button>
+            )}
             <Button
               variant="contained"
               endIcon={<ArrowForwardRoundedIcon />}

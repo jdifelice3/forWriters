@@ -8,6 +8,7 @@ import multer from "multer";
 import { uploadFile } from "../../files/uploadFile";
 import { mapMimeToEnum } from "../../util/Enum";
 import { loadAppFileMetaById } from "../files/fileMeta.middleware";
+import { canSubmitToReading } from "../../workflow/groupBusinessRules";
 
 const router = Router({ mergeParams: true });
 
@@ -92,14 +93,28 @@ router.post(
   "/submissions",
   loadReadingParticipantById,
   async (req: SessionRequest, res: Response) => {
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
-    const actingUser: any = await prisma.user.findUnique({where: {superTokensId: authId}});
-    const actingUserId = actingUser.id;
     const { appFileId } = req.body;
 
-    if (req.readingParticipant.userId !== actingUserId) {
+    if (
+      req.readingParticipant.userId !== req.user.id ||
+      !canSubmitToReading(
+        req.group.groupType,
+        req.group.creatorUserId === req.user.id,
+        true
+      )
+    ) {
       return res.status(403).json({ error: "Cannot submit for another participant" });
+    }
+
+    const appFile = await prisma.appFile.findFirst({
+      where: {
+        id: appFileId,
+        userId: req.user.id,
+        documentType: "MANUSCRIPT",
+      },
+    });
+    if (!appFile) {
+      return res.status(404).json({ error: "Manuscript version not found" });
     }
 
     const submission = await prisma.readingSubmission.create({

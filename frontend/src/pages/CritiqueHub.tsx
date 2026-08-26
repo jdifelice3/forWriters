@@ -17,6 +17,7 @@ import StorageRoundedIcon from "@mui/icons-material/StorageRounded";
 import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGroupContext } from "../context/GroupContextProvider";
+import { useUserContext } from "../context/UserContext";
 import { useReadings } from "../hooks/reading/useReadings";
 import { Reading } from "../types/domain-types";
 import "../assets/css/critique-hub.css";
@@ -43,9 +44,10 @@ export default function CritiqueHub() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { activeGroup } = useGroupContext();
+  const { user, isLoading: userLoading } = useUserContext();
   const { readings, isLoading, isError } = useReadings();
 
-  if (!activeGroup || activeGroup.id !== groupId || isLoading) {
+  if (!activeGroup || activeGroup.id !== groupId || isLoading || userLoading || !user) {
     return (
       <Box className="critique-hub-loading">
         <CircularProgress size={28} />
@@ -59,6 +61,13 @@ export default function CritiqueHub() {
     if (!b.readingDate) return -1;
     return new Date(a.readingDate).getTime() - new Date(b.readingDate).getTime();
   });
+  const hasAdminRole =
+    activeGroup.role === "ADMIN" || activeGroup.role === "OWNER";
+  const canManageReadings =
+    hasAdminRole &&
+    (activeGroup.groupType === "WRITING" ||
+      (activeGroup.groupType === "PERSONAL" &&
+        activeGroup.creatorUserId === user.id));
 
   return (
     <Box className="critique-hub-page">
@@ -83,7 +92,7 @@ export default function CritiqueHub() {
           <Box>
             <span><UploadFileRoundedIcon /></span>
             <strong>Submit</strong>
-            <small>Choose or upload a manuscript</small>
+            <small>Select an existing manuscript version</small>
           </Box>
           <ArrowForwardRoundedIcon />
           <Box>
@@ -112,7 +121,7 @@ export default function CritiqueHub() {
           variant="outlined"
           onClick={() => navigate(`/groups/${activeGroup.id}/readings`)}
         >
-          Manage readings
+          {canManageReadings ? "Manage readings" : "View readings"}
         </Button>
       </Box>
 
@@ -126,17 +135,26 @@ export default function CritiqueHub() {
       {!isError && orderedReadings.length === 0 && (
         <Box className="critique-hub-empty">
           <span><CalendarMonthRoundedIcon /></span>
-          <Typography component="h3">Begin with a reading</Typography>
-          <Typography>
-            Create a reading for this group, then return here to submit a manuscript
-            and assign its reviewers.
+          <Typography component="h3">
+            {canManageReadings ? "Begin with a reading" : "No reading is available yet"}
           </Typography>
-          <Button
-            variant="contained"
-            onClick={() => navigate(`/groups/${activeGroup.id}/readings`)}
-          >
-            Create a reading
-          </Button>
+          <Typography>
+            {canManageReadings
+              ? activeGroup.groupType === "WRITING"
+                ? "Create a scheduled reading and add its authors. They can then select manuscript versions while you manage reviewer assignments."
+                : "Create an ad-hoc reading for one of your manuscripts, then assign its reviewers."
+              : "A group admin must create the reading and add its authors before the critique workflow can begin."}
+          </Typography>
+          {canManageReadings && (
+            <Button
+              variant="contained"
+              onClick={() =>
+                navigate(`/groups/${activeGroup.id}/readings?returnTo=critique`)
+              }
+            >
+              Create a reading
+            </Button>
+          )}
         </Box>
       )}
 

@@ -77,6 +77,7 @@ router.post("/", async( req, res, next) => {
                 id: true,
                 name: true, 
                 groupType: true,
+                creatorUserId: true,
             },
         });
 

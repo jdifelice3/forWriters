@@ -1,8 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { GroupType } from "../../types/domain-types";
 import prisma from "../../database/prisma";
-import Session from "supertokens-node/recipe/session";
-import { ReadingScheduleType } from "@prisma/client";
+import { GroupType } from "@prisma/client";
+import { canCreateReading } from "../../workflow/groupBusinessRules";
 
 const router = Router({mergeParams: true});
 
@@ -51,19 +50,14 @@ router.get("/", asyncHandler(async (req: Request, res: Response) => {
 }));
 
 router.post("/", async (req: Request, res: Response) => {
-  if (req.groupRole !== "ADMIN") {
-    return res.status(403).json({ error: "Admins only" });
-  }
-
-  const session = await Session.getSession(req, res);
-  const authId = session.getUserId();
-
-  const user = await prisma.user.findUnique({
-    where: { superTokensId: authId },
-  });
-
-  if (!user) {
-    return res.status(401).json({ error: "User not found" });
+  if (
+    !canCreateReading(
+      req.group.groupType,
+      req.groupRole,
+      req.group.creatorUserId === req.user.id
+    )
+  ) {
+    return res.status(403).json({ error: "Only the group admin can create readings" });
   }
 
   const {
@@ -73,49 +67,88 @@ router.post("/", async (req: Request, res: Response) => {
     readingStartTime,
     readingEndTime,
     description,
+    participants = [],
   } = req.body;
 
   try {
-    const reading = await prisma.$transaction(async (tx) => {
-      const group = await tx.group.findUnique({
-        where: { id: req.group.id },
-      });
+    let participantUserIds: string[];
 
-      if (!group) {
-        throw new Error("Group not found");
+    if (req.group.groupType === GroupType.WRITING) {
+      const scheduledDate = new Date(readingDate);
+      const deadline = new Date(submissionDeadline);
+      if (
+        !readingDate ||
+        !submissionDeadline ||
+        Number.isNaN(scheduledDate.getTime()) ||
+        Number.isNaN(deadline.getTime())
+      ) {
+        return res.status(400).json({
+          error: "Writing-group readings require a reading date and submission deadline",
+        });
       }
 
+      participantUserIds = [
+        ...new Set(
+          (Array.isArray(participants) ? participants : [])
+            .map((participant: { userId?: unknown }) => participant.userId)
+            .filter((userId: unknown): userId is string =>
+              typeof userId === "string" && userId.length > 0
+            )
+        ),
+      ];
+
+      const memberCount = participantUserIds.length
+        ? await prisma.groupUser.count({
+            where: {
+              groupId: req.group.id,
+              userId: { in: participantUserIds },
+            },
+          })
+        : 0;
+      if (memberCount !== participantUserIds.length) {
+        return res.status(400).json({
+          error: "Every reading author must already be a member of the writing group",
+        });
+      }
+    } else if (req.group.groupType === GroupType.PERSONAL) {
+      participantUserIds = [req.user.id];
+    } else {
+      return res.status(400).json({ error: "This group type does not support readings" });
+    }
+
+    const reading = await prisma.$transaction(async (tx) => {
       const reading = await tx.reading.create({
         data: {
           groupId: req.group.id,
           name,
           readingStartTime:
-            group.groupType === "WRITING"
+            req.group.groupType === GroupType.WRITING
                 ? readingStartTime
                 : null,
           readingEndTime:
-          group.groupType === "WRITING"
+          req.group.groupType === GroupType.WRITING
                 ? readingEndTime
                 : null,
           description,
-          createdUserId: user.id,
+          createdUserId: req.user.id,
           readingDate:
-            group.groupType === "WRITING"
+            req.group.groupType === GroupType.WRITING
                 ? new Date(readingDate)
                 : null,
           submissionDeadline: 
-            group.groupType === "WRITING"
+            req.group.groupType === GroupType.WRITING
                 ? new Date(submissionDeadline)
                 : null,
         },
       });
 
-      if (group.groupType === "PERSONAL") {
-        await tx.readingParticipant.create({
-          data: {
+      if (participantUserIds.length) {
+        await tx.readingParticipant.createMany({
+          data: participantUserIds.map((userId) => ({
             readingId: reading.id,
-            userId: user.id,
-          },
+            userId,
+            role: "AUTHOR",
+          })),
         });
       }
 

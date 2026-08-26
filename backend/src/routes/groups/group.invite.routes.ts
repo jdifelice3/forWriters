@@ -4,6 +4,7 @@ import { Resend } from "resend";
 import { z } from "zod";
 import prisma from "../../database/prisma";
 import { loadGroupById, loadGroupMembership } from "../groups/group.middleware";
+import { isGroupAdmin } from "../../workflow/groupBusinessRules";
 
 const router = Router({ mergeParams: true });
 
@@ -34,6 +35,10 @@ router.get("/", async (_req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try {
+    if (!isGroupAdmin(req.groupRole)) {
+      return res.status(403).json({ error: "Only the group admin can invite members" });
+    }
+
     const parsed = inviteInput.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({ error: "Enter a valid invitee and role" });

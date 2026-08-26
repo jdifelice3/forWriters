@@ -132,8 +132,8 @@ const GroupsCreate = () => {
             `/me/groups`,
             (prev: GroupSummary[] | undefined) =>
                 prev
-                ? [...prev, { id: group.id, name: group.name, groupType: group.groupType, role: admin }]
-                : [{ id: group.id, name: group.name, groupType: group.groupType, role: admin }],
+                ? [...prev, { id: group.id, name: group.name, groupType: group.groupType, role: admin, creatorUserId: group.creatorUserId }]
+                : [{ id: group.id, name: group.name, groupType: group.groupType, role: admin, creatorUserId: group.creatorUserId }],
             false // 👈 do NOT revalidate yet
         );
         navigate(`/groups/${group.id}`);
@@ -364,7 +364,8 @@ const getGroupSummary = (group: Group): GroupSummary => {
         id: group.id,
         name: group.name,
         role: "ADMIN",
-        groupType: group.groupType
+        groupType: group.groupType,
+        creatorUserId: group.creatorUserId
     }
 }
 

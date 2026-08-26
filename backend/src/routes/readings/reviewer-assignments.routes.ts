@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { GroupRole, ReviewerAssignmentStatus } from "@prisma/client";
+import { ReviewerAssignmentStatus } from "@prisma/client";
 import { z } from "zod";
 import prisma from "../../database/prisma";
+import {
+  canManageReviewerAssignments,
+  canSubmitToReading,
+} from "../../workflow/groupBusinessRules";
 
 const router = Router({ mergeParams: true });
 
@@ -19,10 +23,6 @@ const asyncHandler = (
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-function canManageAssignments(role: GroupRole) {
-  return role === GroupRole.ADMIN || role === GroupRole.OWNER;
-}
-
 function displayName(user: {
   email: string;
   userProfile: { firstName: string; lastName: string } | null;
@@ -36,7 +36,7 @@ function displayName(user: {
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const [submissions, memberships, workload] = await Promise.all([
+    const [submissions, memberships, workload, currentParticipant] = await Promise.all([
       prisma.readingSubmission.findMany({
         where: { readingId: req.reading.id },
         include: {
@@ -68,6 +68,14 @@ router.get(
         },
         _count: { _all: true },
       }),
+      prisma.readingParticipant.findUnique({
+        where: {
+          readingId_userId: {
+            readingId: req.reading.id,
+            userId: req.user.id,
+          },
+        },
+      }),
     ]);
 
     const workloadByUserId = new Map(
@@ -76,8 +84,19 @@ router.get(
 
     return res.json({
       readingId: req.reading.id,
+      groupType: req.group.groupType,
       currentUserId: req.user.id,
-      canManageAssignments: canManageAssignments(req.groupRole),
+      currentGroupRole: req.groupRole,
+      canSubmit: canSubmitToReading(
+        req.group.groupType,
+        req.group.creatorUserId === req.user.id,
+        Boolean(currentParticipant)
+      ),
+      canManageAssignments: canManageReviewerAssignments(
+        req.group.groupType,
+        req.groupRole,
+        req.group.creatorUserId === req.user.id
+      ),
       eligibleReviewers: memberships.map(({ user, role }) => ({
         userId: user.id,
         email: user.email,
@@ -138,11 +157,12 @@ router.post(
       return res.status(404).json({ error: "Submission not found" });
     }
 
-    const canManageSubmission =
-      canManageAssignments(req.groupRole) ||
-      submission.participant.userId === req.user.id;
-    if (!canManageSubmission) {
-      return res.status(403).json({ error: "Only group managers or the author can assign reviewers" });
+    if (!canManageReviewerAssignments(
+      req.group.groupType,
+      req.groupRole,
+      req.group.creatorUserId === req.user.id
+    )) {
+      return res.status(403).json({ error: "Only the group admin can assign reviewers" });
     }
 
     const membership = await prisma.groupUser.findUnique({
@@ -204,7 +224,12 @@ router.patch(
     }
 
     const canUpdate =
-      canManageAssignments(req.groupRole) || assignment.reviewerUserId === req.user.id;
+      canManageReviewerAssignments(
+        req.group.groupType,
+        req.groupRole,
+        req.group.creatorUserId === req.user.id
+      ) ||
+      assignment.reviewerUserId === req.user.id;
     if (!canUpdate) {
       return res.status(403).json({ error: "Not allowed to update this assignment" });
     }
@@ -238,11 +263,12 @@ router.delete(
       return res.status(404).json({ error: "Reviewer assignment not found" });
     }
 
-    const canDelete =
-      canManageAssignments(req.groupRole) ||
-      assignment.submission.participant.userId === req.user.id;
-    if (!canDelete) {
-      return res.status(403).json({ error: "Only group managers or the author can remove reviewers" });
+    if (!canManageReviewerAssignments(
+      req.group.groupType,
+      req.groupRole,
+      req.group.creatorUserId === req.user.id
+    )) {
+      return res.status(403).json({ error: "Only the group admin can remove reviewers" });
     }
 
     await prisma.readingReviewerAssignment.delete({

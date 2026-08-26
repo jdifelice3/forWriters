@@ -107,7 +107,8 @@ export default function Dashboard() {
                         id: group.id,
                         name: group.name,
                         role: group.groupUser[0].role,
-                        groupType: group.groupType
+                        groupType: group.groupType,
+                        creatorUserId: group.creatorUserId
                     }
                     setActiveGroup(groupSummary);
                     sessionStorage.removeItem("readingNotificationReadingId");

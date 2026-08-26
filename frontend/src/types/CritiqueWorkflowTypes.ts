@@ -47,7 +47,10 @@ export type EligibleReviewer = WorkflowReviewer & {
 
 export type CritiqueWorkflowData = {
   readingId: string;
+  groupType: "WRITING" | "PERSONAL" | "STUDIO";
   currentUserId: string;
+  currentGroupRole: "OWNER" | "MEMBER" | "ADMIN" | "READER";
+  canSubmit: boolean;
   canManageAssignments: boolean;
   eligibleReviewers: EligibleReviewer[];
   submissions: WorkflowSubmission[];

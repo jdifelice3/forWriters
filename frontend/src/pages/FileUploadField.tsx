@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Avatar, Button, Stack, Typography } from "@mui/material";
 import UploadIcon from "@mui/icons-material/Upload";
 
@@ -27,18 +27,16 @@ const FileUploadField = ({
   onChange,
   onError,
 }: FileUploadFieldProps) => {
-  const [previewUrl, setPreviewUrl] = useState<string>();
+  const previewUrl = useMemo(
+    () => (value ? URL.createObjectURL(value) : undefined),
+    [value]
+  );
 
   useEffect(() => {
-    if (!value) {
-      setPreviewUrl(undefined);
-      return;
-    }
-
-    const objectUrl = URL.createObjectURL(value);
-    setPreviewUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [value]);
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const handleFile = (file?: File) => {
     if (!file) return;

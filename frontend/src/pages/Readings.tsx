@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
+  Button,
   Chip,
   CircularProgress,
   Typography,
@@ -8,6 +9,7 @@ import {
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { Group, Reading } from "../types/domain-types";
 import { useUserContext } from "../context/UserContext";
 import { useGroupDetails } from "../hooks/useGroup";
@@ -38,7 +40,12 @@ const Readings = () => {
   }
 
   const membership = group.groupUser.find((member) => member.userId === user.id);
-  const isAdmin = membership?.role === "ADMIN" || membership?.role === "OWNER";
+  const hasAdminRole = membership?.role === "ADMIN" || membership?.role === "OWNER";
+  const isAdmin = Boolean(
+    hasAdminRole &&
+    (group.groupType === "WRITING" ||
+      (group.groupType === "PERSONAL" && group.creatorUserId === user.id))
+  );
   const submissionCount = readings.reduce(
     (total, reading) => total + reading.readingSubmission.length,
     0
@@ -77,6 +84,15 @@ const Readings = () => {
               ? "Schedule critique sessions, collect exact manuscript versions, and move every reading into the feedback workflow."
               : "Create focused review spaces for your manuscripts and invite the right readers when you are ready."}
           </Typography>
+        </Box>
+        <Box className="workspace-header-actions">
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackRoundedIcon />}
+            onClick={() => navigate(`/groups/${group.id}/critique`)}
+          >
+            Back to Critique Studio
+          </Button>
         </Box>
       </Box>
 

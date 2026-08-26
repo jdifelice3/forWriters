@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import { z } from "zod";
 import prisma from "../../database/prisma";
 import { loadGroupById, loadGroupMembership } from "../groups/group.middleware";
+import { canCreateAdHocReview } from "../../workflow/groupBusinessRules";
 
 const router = Router({ mergeParams: true });
 
@@ -21,6 +22,21 @@ router.use(loadGroupMembership);
 router.post(
   "/",
   asyncHandler(async (req, res) => {
+    if (
+      !canCreateAdHocReview(
+        req.group.groupType,
+        req.groupRole,
+        req.group.creatorUserId === req.user.id
+      )
+    ) {
+      return res.status(403).json({
+        error:
+          req.group.groupType === "WRITING"
+            ? "Writing groups use scheduled readings. Open a scheduled reading to submit and assign reviewers."
+            : "Only the personal-group author can start an ad-hoc review.",
+      });
+    }
+
     const { appFileId } = requestInput.parse(req.body);
     const appFile = await prisma.appFile.findFirst({
       where: {

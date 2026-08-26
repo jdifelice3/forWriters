@@ -12,6 +12,7 @@ router.get("/", async (req, res) => {
 
         const groups = await prisma.group.findMany({
             where: {
+                groupType: "WRITING",
                 name: {
                 contains: query,
                 mode: "insensitive",

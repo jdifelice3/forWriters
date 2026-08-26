@@ -102,6 +102,7 @@ router.get("/groups", verifySession(), async (req, res) => {
                 id: true,
                 name: true,
                 groupType: true,
+                creatorUserId: true,
                 },
             },
             // user: {
@@ -117,7 +118,8 @@ router.get("/groups", verifySession(), async (req, res) => {
             id: g.group.id,
             name: g.group.name,
             role: g.role,
-            groupType: g.group.groupType
+            groupType: g.group.groupType,
+            creatorUserId: g.group.creatorUserId
         }))
     );
 });

@@ -23,6 +23,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CollectionsBookmarkRoundedIcon from "@mui/icons-material/CollectionsBookmarkRounded";
 import CloudDoneRoundedIcon from "@mui/icons-material/CloudDoneRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
 import { AppFile } from "../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../types/FileTypes";
@@ -39,7 +40,7 @@ import UploadFileForm from "../components/file/forms/UploadFileForm";
 import ConfirmDialog from "../components/dialogs/ConfirmDialog";
 import ReadingSubmissionList from "../components/reading/ReadingSubmissionList";
 import { useGroupContext } from "../context/GroupContextProvider";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ReviewRequestsAPI } from "../api/reviewerAssignmentsApi";
 import "../assets/css/workspace-pages.css";
 
@@ -65,6 +66,7 @@ const mySubmissionsListProperties: FileListProperties = {
 
 const FileManager = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { activeGroup } = useGroupContext();
     const { user } = useUserContext();
     const [open, setOpen] = useState(false);
@@ -90,6 +92,17 @@ const FileManager = () => {
     const { myManuscripts } = useFilesData(files);
     const { readings } = useReadings();
     const { myFiles, myReadings } = useReadingsData(readings, user);
+    const requestedReturnTo = searchParams.get("returnTo");
+    const returnToWorkflow =
+        requestedReturnTo?.startsWith("/groups/") &&
+        requestedReturnTo.includes("/workflow")
+            ? requestedReturnTo
+            : null;
+    const canStartAdHocReview = Boolean(
+        activeGroup?.groupType === "PERSONAL" &&
+        activeGroup.creatorUserId === user?.id &&
+        (activeGroup.role === "ADMIN" || activeGroup.role === "OWNER")
+    );
     
     const [tab, setTab] = useState(0);
     
@@ -195,11 +208,22 @@ const FileManager = () => {
           </Typography>
           <Typography component="h1">Manuscripts</Typography>
           <Typography className="workspace-page-lede">
-            Keep every draft and version together, choose the active manuscript, and
-            send an exact version into a critique workflow.
+            Keep every draft and version together and choose the active manuscript.
+            {activeGroup?.groupType === "WRITING"
+              ? " Select an exact version from a scheduled reading’s critique workflow."
+              : " Send an exact version into an ad-hoc critique when you are ready."}
           </Typography>
         </Box>
         <Box className="workspace-header-actions">
+          {returnToWorkflow && (
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackRoundedIcon />}
+              onClick={() => navigate(returnToWorkflow)}
+            >
+              Back to critique workflow
+            </Button>
+          )}
           <Button
             variant="contained"
             startIcon={<UploadIcon />}
@@ -256,7 +280,7 @@ const FileManager = () => {
                 variant="FILES"
                 fileListProperties={manuscriptListProperties}
                 onUploadVersion={onBeginUploadVersion}
-                onAssignReviewers={onAssignReviewers}
+                onAssignReviewers={canStartAdHocReview ? onAssignReviewers : undefined}
                 assigningVersionId={assigningVersionId}
               />
             )

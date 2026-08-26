@@ -38,7 +38,8 @@ const ReadingNotification = () => {
                     id: groupId,
                     name: group.name,
                     role: group.groupUser[0].role,
-                    groupType: group.groupType
+                    groupType: group.groupType,
+                    creatorUserId: group.creatorUserId
                 }
             setActiveGroup(groupSummary);
             navigate(`/filefeedback/${readingId}`);

@@ -7,8 +7,13 @@ import { SessionRequest } from "supertokens-node/framework/express";
 import Session from "supertokens-node/recipe/session";
 import { loadDocxFromS3AsHtml, addParagraphIds } from "../../services/streamFromS3";
 import { loadReadingById } from "./readings.middleware";
-import { ReadingParticipant } from "@prisma/client";
+import { loadReadingParticipantById } from "./participant.middleware";
+import { GroupType, ReadingParticipant } from "@prisma/client";
 import { Resend } from "resend";
+import {
+    canCreateReading,
+    canSubmitToReading,
+} from "../../workflow/groupBusinessRules";
 
 const router = Router({ mergeParams: true });
 
@@ -39,6 +44,16 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 router.put("/", async (req: Request, res: Response) => {
+    if (
+        !canCreateReading(
+            req.group.groupType,
+            req.groupRole,
+            req.group.creatorUserId === req.user.id
+        )
+    ) {
+        return res.status(403).json({ error: "Only the group admin can edit readings" });
+    }
+
     const readingId = req.reading.id;
 
     const {
@@ -50,54 +65,98 @@ router.put("/", async (req: Request, res: Response) => {
         description,
         participants
     } = req.body;
-    let reading;
-
-    if(req.group.groupType === "WRITING"){
-        reading = await prisma.reading.update({
-            data: {
-                name,
-                readingDate: new Date(readingDate).toISOString(),
-                readingStartTime,
-                readingEndTime,
-                submissionDeadline: new Date(submissionDeadline).toISOString(),
-                description
-            },
-            where: {
-                id: readingId
-            }
-        });
-
-        //ADD ReadingParticipants - We check for reading submissions at the UI
-        const deletedParticipants = await prisma.readingParticipant.deleteMany({
-            where: {
-                readingId: readingId
-            }
-        });
-        console.log('deleteParticipants', deletedParticipants);
-
-        const addedParticipants = await prisma.readingParticipant.createMany({
-            data: participants.map((p: ReadingParticipant) => ({
-                userId: p.userId,
-                readingId: readingId,
-                role: p.role
-            })),
-        })
-    } else if (req.group.groupType === "PERSONAL"){
-        reading = await prisma.reading.update({
-            data: {
-                name,
-                description
-            },
-            where: {
-                id: readingId
-            }
+    const submissionCount = await prisma.readingSubmission.count({
+        where: { readingId },
+    });
+    if (submissionCount > 0) {
+        return res.status(409).json({
+            error: "A reading with submissions cannot be edited",
         });
     }
 
-    res.json(reading);
+    if(req.group.groupType === GroupType.WRITING){
+        const participantUserIds = [
+            ...new Set(
+                (Array.isArray(participants) ? participants : [])
+                    .map((participant: ReadingParticipant) => participant.userId)
+                    .filter(Boolean)
+            ),
+        ];
+        const memberCount = participantUserIds.length
+            ? await prisma.groupUser.count({
+                where: {
+                    groupId: req.group.id,
+                    userId: { in: participantUserIds },
+                },
+            })
+            : 0;
+        if (memberCount !== participantUserIds.length) {
+            return res.status(400).json({
+                error: "Every reading author must already be a member of the writing group",
+            });
+        }
+
+        const scheduledDate = new Date(readingDate);
+        const deadline = new Date(submissionDeadline);
+        if (Number.isNaN(scheduledDate.getTime()) || Number.isNaN(deadline.getTime())) {
+            return res.status(400).json({
+                error: "Writing-group readings require valid schedule dates",
+            });
+        }
+
+        const reading = await prisma.$transaction(async (tx) => {
+            const updated = await tx.reading.update({
+                data: {
+                    name,
+                    readingDate: scheduledDate,
+                    readingStartTime,
+                    readingEndTime,
+                    submissionDeadline: deadline,
+                    description
+                },
+                where: { id: readingId }
+            });
+            await tx.readingParticipant.deleteMany({ where: { readingId } });
+            if (participantUserIds.length) {
+                await tx.readingParticipant.createMany({
+                    data: participantUserIds.map((userId) => ({
+                        userId,
+                        readingId,
+                        role: "AUTHOR",
+                    })),
+                });
+            }
+            return updated;
+        });
+        return res.json(reading);
+    }
+
+    if (req.group.groupType === GroupType.PERSONAL){
+        const reading = await prisma.reading.update({
+            data: {
+                name,
+                description
+            },
+            where: {
+                id: readingId
+            }
+        });
+        return res.json(reading);
+    }
+
+    return res.status(400).json({ error: "This group type does not support readings" });
 });
 
 router.delete("/", loadReadingById, async (req, res) => {
+    if (
+        !canCreateReading(
+            req.group.groupType,
+            req.groupRole,
+            req.group.creatorUserId === req.user.id
+        )
+    ) {
+        return res.status(403).json({ error: "Only the group admin can delete readings" });
+    }
     
     const readingId = req.reading.id;
     const { count: submissionCount } = await prisma.readingSubmission.deleteMany({
@@ -123,17 +182,29 @@ router.delete("/", loadReadingById, async (req, res) => {
 
 // /api/groups/:groupId/readings/:readingId/signup
 router.post("/signup", async (req, res) => {
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
-    const user: any = await prisma.user.findUnique({where: {superTokensId: authId,},});
-    const readingId = req.reading.id;
+    if (
+        req.group.groupType !== GroupType.PERSONAL ||
+        req.group.creatorUserId !== req.user.id
+    ) {
+        return res.status(403).json({
+            error: "Writing-group participants can only be added by the group admin",
+        });
+    }
 
-    const readingParticipant = await prisma.readingParticipant.create({
-        data: {
-          readingId: readingId,
-          userId: user.id,
-        }
-      });
+    const readingParticipant = await prisma.readingParticipant.upsert({
+        where: {
+            readingId_userId: {
+                readingId: req.reading.id,
+                userId: req.user.id,
+            },
+        },
+        update: {},
+        create: {
+          readingId: req.reading.id,
+          userId: req.user.id,
+          role: "AUTHOR",
+        },
+    });
     res.json(readingParticipant);
 });
 
@@ -145,15 +216,12 @@ router.get("/participants", async (req, res) => {
     res.json(participants);
 });
 
-router.post("/participants/:participantId/withdraw",
+router.post("/participants/:participantId/withdraw", loadReadingParticipantById,
   async (req: SessionRequest, res) => {
-
-
-    const actingUserId = req.session!.getUserId();
     const participant = req.readingParticipant;
 
-    const isSelf = participant.userId === actingUserId;
-    const isAdmin = req.groupRole === "ADMIN";
+    const isSelf = participant.userId === req.user.id;
+    const isAdmin = req.groupRole === "ADMIN" || req.groupRole === "OWNER";
 
     if (!isSelf && !isAdmin) {
       return res.status(403).json({ error: "Not allowed to withdraw participant" });
@@ -167,16 +235,32 @@ router.post("/participants/:participantId/withdraw",
   }
 );
 
-router.post("/participants/:participantId/submit",
+router.post("/participants/:participantId/submit", loadReadingParticipantById,
   async (req: SessionRequest, res) => {
-    const actingUserId = req.session!.getUserId();
     const participant = req.readingParticipant;
 
-    if (participant.userId !== actingUserId) {
+    if (
+      participant.userId !== req.user.id ||
+      !canSubmitToReading(
+        req.group.groupType,
+        req.group.creatorUserId === req.user.id,
+        true
+      )
+    ) {
       return res.status(403).json({ error: "Cannot submit for another participant" });
     }
 
     const { appFileId } = req.body;
+    const appFile = await prisma.appFile.findFirst({
+      where: {
+        id: appFileId,
+        userId: req.user.id,
+        documentType: "MANUSCRIPT",
+      },
+    });
+    if (!appFile) {
+      return res.status(404).json({ error: "Manuscript version not found" });
+    }
 
     const submission = await prisma.readingSubmission.upsert({
       where: {
@@ -307,66 +391,97 @@ const getSubmission = async(submissionId: string) => {
 }
 
 router.post("/submissions/:appFileId/version", async (req: Request, res: Response) => {
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
-    const user: any = await prisma.user.findUnique({where: {superTokensId: authId,},});
     const appFileId: string = req.params.appFileId;
 
-    const readingsParticipant = await prisma.readingParticipant.findUnique({
-        where: {
-             readingId_userId: {
+    const [readingsParticipant, appFile] = await Promise.all([
+        prisma.readingParticipant.findUnique({
+            where: {
+              readingId_userId: {
                 readingId: req.reading.id,
-                userId: user.id,
+                userId: req.user.id,
+              },
             },
+        }),
+        prisma.appFile.findFirst({
+            where: {
+                id: appFileId,
+                userId: req.user.id,
+                documentType: "MANUSCRIPT",
+            },
+        }),
+    ]);
+
+    if (!appFile) {
+        return res.status(404).json({ error: "Manuscript version not found" });
+    }
+
+    if (
+        !canSubmitToReading(
+            req.group.groupType,
+            req.group.creatorUserId === req.user.id,
+            Boolean(readingsParticipant)
+        ) ||
+        !readingsParticipant
+    ) {
+        return res.status(403).json({
+            error: "You must be added to this reading before submitting a manuscript",
+        });
+    }
+
+    const readingSubmission = await prisma.readingSubmission.create({
+        data: {
+            readingId: req.reading.id,
+            participantId: readingsParticipant.id,
+            appFileId,
         }
     });
 
-    if(readingsParticipant){
-        const readingSubmission = await prisma.readingSubmission.create({
-            data: {
-                readingId: req.reading.id,
-                participantId: readingsParticipant.id,
-                appFileId: appFileId,
-            }
-        });
-
-        res.json(readingSubmission);
-    } else {
-        res.json([]);
-    }
-
+    return res.status(201).json(readingSubmission);
 });
 
 router.put("/submissions/:appFileId/version", async (req: Request, res: Response) => {
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
-    const user: any = await prisma.user.findUnique({where: {superTokensId: authId,},});
     const appFileId: string = req.params.appFileId;
 
-    const readingsParticipant = await prisma.readingParticipant.findUnique({
-        where: {
-             readingId_userId: {
-                readingId: req.reading.id,
-                userId: user.id,
-            },
-        }
-    });
-
-    if(readingsParticipant){
-        const readingSubmission = await prisma.readingSubmission.update({
+    const [readingsParticipant, appFile] = await Promise.all([
+        prisma.readingParticipant.findUnique({
             where: {
+              readingId_userId: {
                 readingId: req.reading.id,
-                participantId: readingsParticipant.id,
+                userId: req.user.id,
+              },
             },
-            data: {
-                appFileId: appFileId,
-            }
-        });
+        }),
+        prisma.appFile.findFirst({
+            where: {
+                id: appFileId,
+                userId: req.user.id,
+                documentType: "MANUSCRIPT",
+            },
+        }),
+    ]);
 
-        res.json(readingSubmission);
-    } else {
-        res.json([]);
+    if (!appFile) {
+        return res.status(404).json({ error: "Manuscript version not found" });
     }
 
+    if (
+        !canSubmitToReading(
+            req.group.groupType,
+            req.group.creatorUserId === req.user.id,
+            Boolean(readingsParticipant)
+        ) ||
+        !readingsParticipant
+    ) {
+        return res.status(403).json({
+            error: "You must be added to this reading before changing its manuscript version",
+        });
+    }
+
+    const readingSubmission = await prisma.readingSubmission.update({
+        where: { participantId: readingsParticipant.id },
+        data: { appFileId },
+    });
+
+    return res.json(readingSubmission);
 });
 export default router;

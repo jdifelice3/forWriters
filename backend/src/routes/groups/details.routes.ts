@@ -5,6 +5,7 @@ import { loadGroupById, loadGroupMembership } from "./group.middleware";
 import Session from "supertokens-node/recipe/session";
 import { JoinRequestError } from "../../database/types/Error";
 import { PrismaClient, Prisma, JoinRequestStatus, GroupType } from "@prisma/client";
+import { isGroupAdmin } from "../../workflow/groupBusinessRules";
 
 const router = Router({ mergeParams: true });
 
@@ -105,14 +106,9 @@ router.get("/members", async (req: Request, res: Response) => {
 });
 
 router.get("/join-requests", async (req: Request, res: Response) => {
-    const session = await Session.getSession(req, res);
-    const authId = session.getUserId();
-    
-    const user: any = await prisma.user.findUnique({
-        where: {
-            superTokensId: authId,
-        },
-    }); 
+    if (!isGroupAdmin(req.groupRole)) {
+        return res.status(403).json({ error: "Only the group admin can view join requests" });
+    }
 
     const requests = await prisma.joinRequest.findMany({
         where: {
@@ -157,6 +153,9 @@ router.get("/news", async (req: Request, res: Response) => {
 });
 
 router.post("/news", async (req: Request, res: Response) => {
+    if (!isGroupAdmin(req.groupRole)) {
+        return res.status(403).json({ error: "Only the group admin can publish news" });
+    }
     const { content } = req.body;
     const newsItem = await prisma.groupNews.create({
         data: {
@@ -168,6 +167,9 @@ router.post("/news", async (req: Request, res: Response) => {
 });
 
 router.put("/news/:newsId/archive", async (req: Request, res: Response) => {
+    if (!isGroupAdmin(req.groupRole)) {
+        return res.status(403).json({ error: "Only the group admin can archive news" });
+    }
     const newsItemId = req.params.newsId;
     const archivedNewsItem = await prisma.groupNews.update({
         where: {

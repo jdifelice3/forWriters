@@ -8,22 +8,19 @@ export async function loadReadingParticipantById(
   next: NextFunction
 ) {
   const { participantId } = req.params;
-  const participant = await prisma.readingParticipant.findMany({
+  const participant = await prisma.readingParticipant.findUnique({
     where: {
-        userId: participantId
-    }
+      readingId_userId: {
+        readingId: req.reading.id,
+        userId: participantId,
+      },
+    },
   });
 
   if (!participant) {
     return res.status(404).json({ error: "Participant not found" });
   }
 
-  // 🔐 Enforce reading ownership
-  if (participant[0].readingId !== req.reading.id) {
-    // Intentionally 404 to avoid leaking existence
-    return res.status(404).json({ error: "Participant not found" });
-  }
-
-  req.readingParticipant = participant[0];
+  req.readingParticipant = participant;
   next();
 }

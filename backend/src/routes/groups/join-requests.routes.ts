@@ -1,139 +1,94 @@
-import { Request, Response, NextFunction, Router } from "express";
+import { Request, Response, Router } from "express";
+import { JoinRequestStatus } from "@prisma/client";
 import prisma from "../../database/prisma";
-import Session from "supertokens-node/recipe/session";
-import { JoinRequestError } from "../../database/types/Error";
-import { JoinRequestStatus, GroupRole } from "@prisma/client";
-import { SessionRequest } from "supertokens-node/framework/express";
-import { loadGroupMembership, loadGroupById } from "./group.middleware";
+import { loadGroupById, loadGroupMembership } from "./group.middleware";
+import { isGroupAdmin } from "../../workflow/groupBusinessRules";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
-router.put("/join-requests/:id/approve", async(req: SessionRequest, res: Response) => {
-    console.log('in join-requests approve')
-    const { id } = req.params;
-    
-    try {
-        const session = await Session.getSession(req, res);
-        const authId = session.getUserId();
-        
-        const user: any = await prisma.user.findUnique({
-            where: {
-                superTokensId: authId,
-            },
-        });
-    
-        const joinReq = await prisma.joinRequest.findUnique({
-            where: { 
-                id: id 
-            },
-            include: {
-                group: {
-                    include: {
-                        groupUser: true
-                    }
-                }
-            },
-        });
+router.use(loadGroupById);
+router.use(loadGroupMembership);
 
-        if (!joinReq) {
-            throw new JoinRequestError("Join request not found.", 404);
-        }
+function requireAdmin(req: Request, res: Response) {
+  if (isGroupAdmin(req.groupRole)) return true;
+  res.status(403).json({ error: "Only the group admin can manage join requests" });
+  return false;
+}
 
-        if (joinReq.status !== JoinRequestStatus.PENDING) {
-            throw new JoinRequestError("This request is no longer pending.", 400);
-        }
-        if (joinReq.group.groupUser[0].role !== GroupRole.ADMIN) {
-            throw new JoinRequestError("You are not an admin for this group.", 403);
-        }
+router.put("/join-requests/:id/approve", async (req: Request, res: Response) => {
+  if (!requireAdmin(req, res)) return;
 
-        // Approve + add membership in a transaction
-        await prisma.$transaction([
-            prisma.joinRequest.update({
-                where: { id: joinReq.id },
-                data: { status: JoinRequestStatus.APPROVED },
-            }),
-            prisma.groupUser.upsert({
-                where: {
-                    groupId_userId: {
-                        userId: joinReq.userId,
-                        groupId: joinReq.groupId,
-                    }
-                },
-                create: {
-                    userId: joinReq.userId,
-                    groupId: joinReq.groupId,
-                    role: "MEMBER",
-                },
-            update: {}, // membership already exists -> nothing to change
-            }),
-        ]);
+  try {
+    const joinRequest = await prisma.joinRequest.findFirst({
+      where: {
+        id: req.params.id,
+        groupId: req.group.id,
+      },
+    });
 
-        res.status(200).json({
-            message: "User approved and added to the group.",
-        });
-    } catch (err) {
-        console.error("Error approving join request:", err);
-        if(err instanceof JoinRequestError){
-            res.status(err.statusCode).json({error: err.message});
-        } else {
-            res.status(500).json({ error: "Failed to approve join request." });
-        }
-    }     
-});
-
-router.put("/join-requests/:id/reject", async(req: SessionRequest, res: Response) => {
-    const { id } = req.params;
-
-    try {
-        const session = await Session.getSession(req, res);
-        const authId = session.getUserId();
-        //const result = await rejectJoinRequest(id, authId);
-        const user: any = await prisma.user.findUnique({
-            where: {
-                superTokensId: authId,
-            },
-        });
-
-        const joinReq = await prisma.joinRequest.findUnique({
-            where: { id: id },
-        });
-
-        if (!joinReq) {
-            throw new JoinRequestError("Join request not found.", 404);
-        }
-
-        if (joinReq.status !== JoinRequestStatus.PENDING) {
-            throw new JoinRequestError("This request is no longer pending.", 400);
-        }
-
-        // Verify current user is admin for this group
-        const adminMembership = await prisma.groupUser.findUnique({
-            where: {
-                groupId_userId: {
-                userId: user.id,
-                groupId: joinReq.groupId,
-                },
-            },
-        });
-        console.log('req.groupRole', req.groupRole);
-        if (req.groupRole !== GroupRole.ADMIN) {
-            throw new JoinRequestError("You are not an admin for this group.", 403);
-        }
-
-        await prisma.joinRequest.update({
-            where: { id: id },
-            data: { status: JoinRequestStatus.REJECTED },
-        });
-
-        res.status(200).json({
-            message: "User join request has been rejected.",
-        });
-    } catch (err) {
-        console.error("Error rejecting join request:", err);
-        if(err instanceof JoinRequestError){
-         res.status(err.statusCode).json({error: err.message});
-        }
-        res.status(500).json({ error: "Failed to reject join request." });
+    if (!joinRequest) {
+      return res.status(404).json({ error: "Join request not found" });
     }
+    if (joinRequest.status !== JoinRequestStatus.PENDING) {
+      return res.status(400).json({ error: "This request is no longer pending" });
+    }
+
+    await prisma.$transaction([
+      prisma.joinRequest.update({
+        where: { id: joinRequest.id },
+        data: { status: JoinRequestStatus.APPROVED },
+      }),
+      prisma.groupUser.upsert({
+        where: {
+          groupId_userId: {
+            userId: joinRequest.userId,
+            groupId: joinRequest.groupId,
+          },
+        },
+        create: {
+          userId: joinRequest.userId,
+          groupId: joinRequest.groupId,
+          role: "MEMBER",
+        },
+        update: {},
+      }),
+    ]);
+
+    return res.json({ message: "User approved and added to the group." });
+  } catch (error) {
+    console.error("Error approving join request", error);
+    return res.status(500).json({ error: "Failed to approve join request" });
+  }
 });
+
+router.put("/join-requests/:id/reject", async (req: Request, res: Response) => {
+  if (!requireAdmin(req, res)) return;
+
+  try {
+    const joinRequest = await prisma.joinRequest.findFirst({
+      where: {
+        id: req.params.id,
+        groupId: req.group.id,
+      },
+    });
+
+    if (!joinRequest) {
+      return res.status(404).json({ error: "Join request not found" });
+    }
+    if (joinRequest.status !== JoinRequestStatus.PENDING) {
+      return res.status(400).json({ error: "This request is no longer pending" });
+    }
+
+    await prisma.joinRequest.update({
+      where: { id: joinRequest.id },
+      data: { status: JoinRequestStatus.REJECTED },
+    });
+
+    return res.json({ message: "User join request has been rejected." });
+  } catch (error) {
+    console.error("Error rejecting join request", error);
+    return res.status(500).json({ error: "Failed to reject join request" });
+  }
+});
+
 export default router;
