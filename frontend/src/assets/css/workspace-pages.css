@@ -541,22 +541,99 @@
 .manuscripts-workspace .filesCardManuscripts {
   margin-bottom: 14px;
   border: 1px solid var(--workspace-line);
-  border-radius: 15px;
-  box-shadow: 0 9px 28px rgba(34, 49, 38, .045);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 14px 42px rgba(34, 49, 38, .06);
 }
 
-.manuscripts-workspace .filesCardManuscripts > .MuiCardContent-root { padding: 20px !important; }
-.manuscripts-workspace .filesCardManuscripts .MuiGrid-root { min-width: 0; }
-.manuscripts-workspace .filesCardManuscripts .MuiStack-root { width: auto !important; }
+.manuscripts-workspace .filesCardManuscripts > .MuiCardContent-root { padding: 0 !important; }
 
-.manuscripts-workspace .filesCardManuscripts .MuiTypography-root[font-weight="bold"] {
+.manuscript-card-layout {
+  display: grid;
+  grid-template-columns: minmax(0, .86fr) minmax(440px, 1.14fr);
+}
+
+.manuscript-card-layout-summary { grid-template-columns: 1fr; }
+.manuscript-overview-pane,
+.manuscript-versions-pane { min-width: 0; padding: 24px; }
+.manuscript-versions-pane { border-left: 1px solid var(--workspace-line); background: #fafcfb; }
+
+.manuscript-card-heading {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.manuscript-file-symbol {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6eee8;
+}
+
+.manuscript-file-symbol .icon { width: 29px; }
+.manuscript-title-copy h2 {
+  margin: 3px 0 7px;
+  overflow-wrap: anywhere;
   font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.12;
 }
+
+.manuscript-title-copy .MuiChip-root {
+  height: 24px;
+  border: 1px solid #cfddd2;
+  background: var(--workspace-green-soft);
+  color: var(--workspace-green);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.manuscript-description {
+  min-height: 64px;
+  margin: 20px 0 !important;
+  padding: 14px 16px;
+  border-left: 3px solid #a8bdad;
+  border-radius: 0 10px 10px 0;
+  background: #f5f8f6;
+  color: #59665d;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: 12px !important;
+  font-style: italic;
+  line-height: 1.6 !important;
+}
+
+.manuscript-date-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.manuscript-date-grid > div {
+  padding: 11px 12px;
+  border: 1px solid #e0e7e2;
+  border-radius: 11px;
+  background: #fbfcfb;
+  display: grid;
+  grid-template-columns: 27px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.manuscript-date-grid svg { color: #78877d; font-size: 17px; }
+.manuscript-date-grid small,
+.manuscript-date-grid strong { display: block; }
+.manuscript-date-grid small { color: var(--workspace-muted); font-size: 8px; font-weight: 800; letter-spacing: .45px; text-transform: uppercase; }
+.manuscript-date-grid strong { margin-top: 2px; color: var(--workspace-ink); font-size: 10px; }
 
 .manuscripts-workspace .filesCardManuscripts .MuiIconButton-root {
-  border: 1px solid #dbe3dd;
-  border-radius: 9px;
-  color: #56645b;
+  width: 38px;
+  height: 38px;
 }
 
 .manuscripts-workspace .filesCardManuscripts .MuiButton-root {
@@ -564,27 +641,107 @@
   text-transform: none;
 }
 
+.manuscript-icon-actions { display: flex; gap: 7px; }
+.manuscript-secondary-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+.manuscript-versions-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.manuscript-versions-heading h3 {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.manuscript-versions-heading h3 svg { color: #718078; font-size: 18px; }
+.manuscript-active-version-help {
+  max-width: 590px;
+  margin: 14px 0 17px !important;
+  color: var(--workspace-muted);
+  font-size: 10px !important;
+  line-height: 1.55 !important;
+}
+
+.manuscript-version-label {
+  margin: 0 0 6px 2px !important;
+  color: #748078;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: .7px !important;
+  text-transform: uppercase;
+}
+
 .manuscripts-workspace .filesCardManuscripts .MuiList-root {
-  margin-top: 7px;
+  margin-top: 0;
+  padding: 0;
   overflow: hidden;
   border: 1px solid #e1e7e2;
-  border-radius: 11px;
+  border-radius: 13px;
+  background: white;
 }
 
-.manuscripts-workspace .filesCardManuscripts .MuiListItem-root {
-  min-height: 63px;
+.manuscript-version-row {
+  min-height: 72px;
+  padding: 11px 12px !important;
   border-bottom: 1px solid #edf1ee;
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
 }
 
-.manuscripts-workspace .filesCardManuscripts .MuiListItem-root:last-child { border-bottom: 0; }
+.manuscript-version-row.active { background: #f0f6f2; }
+.manuscript-version-row:last-child { border-bottom: 0; }
+
+.manuscript-version-number {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8eeea;
+  color: #526159;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.manuscript-version-row.active .manuscript-version-number { background: var(--workspace-green); color: white; }
+.manuscript-version-row .MuiListItemText-root { min-width: 0; margin: 0; }
+.manuscript-version-row .MuiListItemText-primary {
+  overflow: hidden;
+  color: var(--workspace-ink);
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manuscript-version-row .MuiListItemText-secondary { margin-top: 3px; font-size: 9px; }
+.manuscript-version-controls { display: flex; align-items: center; gap: 7px; }
+.manuscript-version-controls .MuiChip-root {
+  height: 23px;
+  background: var(--workspace-green-soft);
+  color: var(--workspace-green);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.manuscript-version-controls .MuiRadio-root { padding: 6px; }
 
 .manuscript-title-row .MuiTypography-root {
   font-family: Georgia, "Times New Roman", serif;
   font-size: 20px !important;
 }
-
-.manuscript-icon-actions { display: flex; gap: 7px; }
-.manuscript-secondary-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .reading-submissions-panel {
   width: 100%;
@@ -621,6 +778,8 @@
   .group-workspace-grid { grid-template-columns: 1fr; }
   .group-details-zone { grid-column: auto; }
   .group-member-grid { grid-template-columns: 1fr; }
+  .manuscript-card-layout { grid-template-columns: 1fr; }
+  .manuscript-versions-pane { border-top: 1px solid var(--workspace-line); border-left: 0; }
 }
 
 @media (max-width: 700px) {
@@ -631,5 +790,14 @@
   .workspace-summary-strip { align-items: flex-start; }
   .manuscript-library-content,
   .readings-workspace .workspace-surface { padding: 13px; }
-  .manuscripts-workspace .filesCardManuscripts .MuiGrid-root { flex-basis: 100%; max-width: 100%; }
+  .manuscript-overview-pane,
+  .manuscript-versions-pane { padding: 17px; }
+  .manuscript-card-heading { grid-template-columns: 44px minmax(0, 1fr); }
+  .manuscript-file-symbol { width: 44px; height: 44px; }
+  .manuscript-icon-actions { grid-column: 1 / -1; }
+  .manuscript-date-grid { grid-template-columns: 1fr; }
+  .manuscript-versions-heading { align-items: stretch; flex-direction: column; }
+  .manuscript-versions-heading .MuiButton-root { align-self: flex-start; }
+  .manuscript-version-row { grid-template-columns: 38px minmax(0, 1fr); }
+  .manuscript-version-controls { grid-column: 1 / -1; justify-content: flex-end; }
 }

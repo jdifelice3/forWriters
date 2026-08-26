@@ -6,8 +6,10 @@ import {
   ListItem,
   ListItemText,
   Radio,
-  Stack,
   Button,
+  Box,
+  Chip,
+  Tooltip,
 } from "@mui/material";
 import GroupAddRoundedIcon from "@mui/icons-material/GroupAddRounded";
 
@@ -32,8 +34,24 @@ const FileVersionList: React.FC<FileVersionListProps> = ({
       {versions.map((version) => (
         <ListItem
           key={version.id}
-          secondaryAction={
-            <Stack direction="row" spacing={1} alignItems="center">
+          className={version.version === currentVersionId ? "manuscript-version-row active" : "manuscript-version-row"}
+        >
+          <Box className="manuscript-version-number">v{version.version}</Box>
+          <ListItemText
+            primary={version.filename.replace(/^\d+-/, '')}
+            secondary={
+              [
+                version.versionComment,
+                new Date(version.uploadedAt).toLocaleDateString(),
+              ]
+                .filter(Boolean)
+                .join(" • ")
+            }
+          />
+          <Box className="manuscript-version-controls">
+              {version.version === currentVersionId && (
+                <Chip size="small" label="Active" />
+              )}
               {onAssignReviewers && (
                 <Button
                   size="small"
@@ -46,25 +64,14 @@ const FileVersionList: React.FC<FileVersionListProps> = ({
                   {assigningVersionId === version.id ? "Opening…" : "Assign reviewers"}
                 </Button>
               )}
-              <Radio
-                checked={version.version === currentVersionId}
-                onChange={() => onVersionChange(version.version)}
-              />
-            </Stack>
-          }
-        >
-        <ListItemText
-            primary={`v${version.version} — ${version.filename.replace(/^\d+-/, '')}`}
-            secondary={
-                [
-                version.versionComment,
-                new Date(version.uploadedAt).toLocaleDateString(),
-                ]
-                .filter(Boolean)
-                .join(" • ")
-            }
-        />
-
+              <Tooltip title={version.version === currentVersionId ? "Active version" : "Make this the active version"}>
+                <Radio
+                  inputProps={{ "aria-label": `Make version ${version.version} active` }}
+                  checked={version.version === currentVersionId}
+                  onChange={() => onVersionChange(version.version)}
+                />
+              </Tooltip>
+          </Box>
         </ListItem>
       ))}
     </List>
