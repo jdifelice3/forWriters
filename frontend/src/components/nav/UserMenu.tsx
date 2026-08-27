@@ -9,11 +9,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "supertokens-auth-react/recipe/session";
 import { useUserContext } from "../../context/UserContext";
+import { suspendSessionRequests } from "../../auth/sessionScope";
 
 export default function UserMenu() {
   const navigate = useNavigate();
   const { user } = useUserContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [signingOut, setSigningOut] = useState(false);
   const profile = user?.userProfile;
   const displayName = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ");
   const initials = displayName
@@ -24,6 +26,7 @@ export default function UserMenu() {
     <>
       <IconButton
         aria-label="Open profile menu"
+        disabled={signingOut}
         onClick={(e) => setAnchorEl(e.currentTarget)}
       >
         <Avatar
@@ -53,11 +56,17 @@ export default function UserMenu() {
 
         <MenuItem
           onClick={async () => {
-            await signOut();
-            navigate("/auth");
+            setAnchorEl(null);
+            setSigningOut(true);
+            suspendSessionRequests();
+            try {
+              await signOut();
+            } finally {
+              window.location.replace("/auth");
+            }
           }}
         >
-          Sign out
+          {signingOut ? "Signing out…" : "Sign out"}
         </MenuItem>
       </Menu>
     </>

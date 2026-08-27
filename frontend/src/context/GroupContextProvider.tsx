@@ -1,5 +1,6 @@
 // src/context/GroupContext.tsx
 import React, {
+  useCallback,
   createContext,
   useContext,
   useEffect,
@@ -8,12 +9,12 @@ import React, {
 } from "react";
 import { useLocation, matchPath } from "react-router-dom";
 import useSWR from "swr";
+import { useSessionContext } from "supertokens-auth-react/recipe/session";
 import { apiFetch } from "../api/client";
+import { getActiveGroupStorageKey } from "../auth/sessionScope";
 import { GroupContextValue, GroupSummary } from "../types/ContextTypes";
 
 const GroupContext = createContext<GroupContextValue | undefined>(undefined);
-
-const GROUP_STORAGE_KEY = "fw:activeGroupId";
 
 /**
  * Extracts groupId ONLY if the route is explicitly group-scoped.
@@ -28,9 +29,13 @@ function extractGroupIdFromPath(pathname: string): string | null {
 
 export const GroupContextProvider = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const session = useSessionContext();
+  const userId =
+    session.loading || !session.doesSessionExist ? null : session.userId;
+  const groupStorageKey = userId ? getActiveGroupStorageKey(userId) : null;
 
   const { data, isLoading } = useSWR<GroupSummary[]>(
-    `/me/groups`,
+    userId ? `/me/groups` : null,
     apiFetch,
      {
         revalidateOnFocus: false,
@@ -39,28 +44,29 @@ export const GroupContextProvider = ({ children }: { children: React.ReactNode }
     }
   );
 
-  const groups = data ?? [];
-  const [activeGroup, setActiveGroup] = useState<GroupSummary | null>(null);
-
-  useEffect(() => {
-    if (!groups.length) return;
-
+  const groups = useMemo(() => data ?? [], [data]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const activeGroup = useMemo(() => {
+    if (!groupStorageKey || !groups.length) return null;
     const urlGroupId = extractGroupIdFromPath(location.pathname);
-    const storedGroupId = localStorage.getItem(GROUP_STORAGE_KEY);
-    const candidateId = urlGroupId ?? storedGroupId;
+    const storedGroupId = localStorage.getItem(groupStorageKey);
+    const candidateId = urlGroupId ?? selectedGroupId ?? storedGroupId;
 
-    const found =
+    return (
       groups.find(g => g.id === candidateId) ??
-      groups[0];
+      groups[0]
+    );
+  }, [groupStorageKey, groups, location.pathname, selectedGroupId]);
 
-    setActiveGroup(found);
-  }, [groups, location.pathname]);
+  const setActiveGroup = useCallback((group: GroupSummary) => {
+    setSelectedGroupId(group.id);
+  }, []);
 
   useEffect(() => {
-    if (activeGroup) {
-      localStorage.setItem(GROUP_STORAGE_KEY, activeGroup.id);
+    if (activeGroup && groupStorageKey) {
+      localStorage.setItem(groupStorageKey, activeGroup.id);
     }
-  }, [activeGroup]);
+  }, [activeGroup, groupStorageKey]);
 
   const value = useMemo(
     () => ({
@@ -69,7 +75,7 @@ export const GroupContextProvider = ({ children }: { children: React.ReactNode }
       setActiveGroup,
       isLoading,
     }),
-    [groups, activeGroup, isLoading]
+    [groups, activeGroup, isLoading, setActiveGroup]
   );
 
   return (

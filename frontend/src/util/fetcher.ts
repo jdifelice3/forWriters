@@ -1,7 +1,10 @@
-export async function typedFetcher<T>(url: string): Promise<T> {
-  const res = await fetch(url, { credentials: "include" });
+import { getSessionRequestSignal } from "../auth/sessionScope";
 
-  const json = await res.json();
+export async function typedFetcher<T>(url: string): Promise<T> {
+  const res = await fetch(url, {
+    credentials: "include",
+    signal: getSessionRequestSignal(),
+  });
 
   if (res.status === 401) {
     const err = new Error("Unauthorized");
@@ -15,5 +18,5 @@ export async function typedFetcher<T>(url: string): Promise<T> {
     throw err;
   }
 
-  return json as T;
+  return res.json() as Promise<T>;
 }

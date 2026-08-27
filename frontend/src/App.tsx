@@ -1,5 +1,6 @@
 import { SessionAuth, useSessionContext } from "supertokens-auth-react/recipe/session";
 import { BrowserRouter, Routes, Route  } from "react-router-dom";
+import { useEffect, useMemo } from "react";
 import * as ReactRouter from "react-router-dom";
 import { Box, CircularProgress, ThemeProvider, Typography, createTheme } from "@mui/material";
 import Layout from "./components/Layout";
@@ -14,6 +15,10 @@ import { GroupContextProvider } from "./context/GroupContextProvider";
 import EmailVerification from "supertokens-auth-react/recipe/emailverification";
 import GroupInvite from "./pages/GroupInvite";
 import ReadingNotification from "./pages/ReadingNotification";
+import {
+    activateSessionRequestScope,
+    suspendSessionRequests,
+} from "./auth/sessionScope";
 
 const requireEmailVerification =
     import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false" &&
@@ -57,6 +62,45 @@ function SessionStartupScreen() {
                 </Typography>
             </Box>
         </Box>
+    );
+}
+
+function SessionScopedWorkspace({ userId }: { userId: string }) {
+    const cache = useMemo(() => {
+        activateSessionRequestScope(userId);
+        return new Map();
+    }, [userId]);
+
+    useEffect(
+        () => () => {
+            suspendSessionRequests(userId);
+        },
+        [userId],
+    );
+
+    return (
+        <SWRConfig
+            value={{
+                fetcher: typedFetcher,
+                provider: () => cache,
+            }}
+        >
+            <UserProvider>
+                <GroupContextProvider>
+                    <Layout />
+                </GroupContextProvider>
+            </UserProvider>
+        </SWRConfig>
+    );
+}
+
+function AuthenticatedWorkspace() {
+    const session = useSessionContext();
+
+    if (session.loading || !session.doesSessionExist) return null;
+
+    return (
+        <SessionScopedWorkspace key={session.userId} userId={session.userId} />
     );
 }
 
@@ -116,11 +160,7 @@ export default function App() {
                                             )
                                     }
                                 >
-                                    <UserProvider>
-                                        <GroupContextProvider>
-                                            <Layout />
-                                        </GroupContextProvider>
-                                    </UserProvider>
+                                    <AuthenticatedWorkspace />
                                 </SessionAuth>
                             }
                         />

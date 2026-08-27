@@ -1,4 +1,5 @@
 import useSWR from "swr";
+import { useEffect } from "react";
 import Session from "supertokens-auth-react/recipe/session";
 import { useNavigate } from "react-router-dom";
 import { typedFetcher } from "../util/fetcher";
@@ -16,18 +17,24 @@ export function useCurrentUser() {
   } = useSWR<User>(`${apiHost}/api/me`, typedFetcher, {
     revalidateOnFocus: true,
     shouldRetryOnError: false,
-    fetcher: (url: string) => fetch(url, { credentials: "include" }).then(r => r.json())
-});
+  });
 
 
   // Handle unauthorized redirects
-  if (error && error.status === 401) {
-    Session.doesSessionExist().then((exists) => {
-      if (!exists) {
-        navigate("/auth");
+  useEffect(() => {
+    if (!error || error.status !== 401) return;
+
+    let cancelled = false;
+    void Session.doesSessionExist().then((exists) => {
+      if (!cancelled && !exists) {
+        navigate("/auth", { replace: true });
       }
     });
-  }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [error, navigate]);
 
   return {
     user: data,

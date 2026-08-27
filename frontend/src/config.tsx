@@ -5,7 +5,10 @@ import EmailPassword from "supertokens-auth-react/recipe/emailpassword";
 import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpassword/prebuiltui";
 import Session from "supertokens-auth-react/recipe/session";
 import EmailVerification from "supertokens-auth-react/recipe/emailverification";
-import { mutate } from "swr";
+import {
+    clearLegacyActiveGroupStorage,
+    suspendSessionRequests,
+} from "./auth/sessionScope";
 
 const tokenTransferMethod =
   import.meta.env.VITE_WEB_HOST === "https://app.forwriters.ink"
@@ -27,10 +30,12 @@ export const SuperTokensConfig = {
         EmailVerification.init(),
         Session.init({
             tokenTransferMethod,
-            onHandleEvent: async (event) => {
+            onHandleEvent: (event) => {
                 if (event.action === "SESSION_CREATED") {
-                console.log("SESSION_CREATED → revalidating user...");
-                await mutate(`${import.meta.env.VITE_API_HOST}/api/me`);
+                    clearLegacyActiveGroupStorage();
+                }
+                if (event.action === "SIGN_OUT" || event.action === "UNAUTHORISED") {
+                    suspendSessionRequests();
                 }
             }
         })

@@ -1,3 +1,5 @@
+import { getSessionRequestSignal } from "../auth/sessionScope";
+
 const API_BASE_URL = import.meta.env.VITE_API_HOST
   ? `${import.meta.env.VITE_API_HOST}/api`
   : "/api"; // fallback for dev / proxy setups
@@ -21,6 +23,7 @@ export async function apiFetch<T>(
     credentials: "include",
     ...options,
     headers,
+    signal: options.signal ?? getSessionRequestSignal(),
   });
   
   if (!res.ok) {
@@ -57,6 +60,7 @@ export async function pdfFetch<T>(
     credentials: "include",
     ...options,
     headers,
+    signal: options.signal ?? getSessionRequestSignal(),
   });
   
   if (!res.ok) {
