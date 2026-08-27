@@ -6,6 +6,11 @@ import { EmailPasswordPreBuiltUI } from "supertokens-auth-react/recipe/emailpass
 import Session from "supertokens-auth-react/recipe/session";
 import EmailVerification from "supertokens-auth-react/recipe/emailverification";
 import { mutate } from "swr";
+
+const tokenTransferMethod =
+  import.meta.env.VITE_WEB_HOST === "https://app.forwriters.ink"
+    ? "cookie"
+    : "header";
 import { EmailVerificationPreBuiltUI } from "supertokens-auth-react/recipe/emailverification/prebuiltui";
 
 export const SuperTokensConfig = {
@@ -20,8 +25,8 @@ export const SuperTokensConfig = {
     recipeList: [
         EmailPassword.init(),
         EmailVerification.init(),
-        Session.init({  
-            tokenTransferMethod: "cookie",
+        Session.init({
+            tokenTransferMethod,
             onHandleEvent: async (event) => {
                 if (event.action === "SESSION_CREATED") {
                 console.log("SESSION_CREATED → revalidating user...");

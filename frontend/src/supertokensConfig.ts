@@ -12,6 +12,11 @@ const requireEmailVerification =
   import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false" &&
   import.meta.env.VITE_WEB_HOST === "https://app.forwriters.ink";
 
+const tokenTransferMethod =
+  import.meta.env.VITE_WEB_HOST === "https://app.forwriters.ink"
+    ? "cookie"
+    : "header";
+
 export const SuperTokensConfig = {
   appInfo: {
     appName: "forWriters",
@@ -62,7 +67,7 @@ EmailVerification.init({
 }),
 
     Session.init({
-      tokenTransferMethod: "cookie",
+      tokenTransferMethod,
       onHandleEvent: async (event) => {
         if (event.action === "SESSION_CREATED") {
           console.log("SESSION_CREATED → revalidating user...");
