@@ -4,9 +4,18 @@ const {
   canCreateAdHocReview,
   canCreateReading,
   canManageReviewerAssignments,
+  canRemoveGroupMember,
   canSubmitToReading,
   isSearchableGroup,
 } = require("../dist/workflow/groupBusinessRules");
+
+test("group admins can remove other members but not owners or themselves", () => {
+  assert.equal(canRemoveGroupMember("ADMIN", "admin-1", "MEMBER", "member-1"), true);
+  assert.equal(canRemoveGroupMember("OWNER", "owner-1", "ADMIN", "admin-1"), true);
+  assert.equal(canRemoveGroupMember("MEMBER", "member-1", "MEMBER", "member-2"), false);
+  assert.equal(canRemoveGroupMember("ADMIN", "admin-1", "MEMBER", "admin-1"), false);
+  assert.equal(canRemoveGroupMember("ADMIN", "admin-1", "OWNER", "owner-1"), false);
+});
 
 test("writing-group readings and reviewer assignments are admin managed", () => {
   assert.equal(canCreateReading("WRITING", "ADMIN", false), true);

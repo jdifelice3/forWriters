@@ -349,6 +349,12 @@
   box-shadow: none !important;
 }
 
+.group-member-card .MuiCardActionArea-root { border-radius: 13px; }
+.group-member-card.removable .MuiCardActionArea-root:hover .MuiCardContent-root {
+  background: #edf4ef;
+}
+.group-member-card.removable .MuiCardActionArea-focusHighlight { background: var(--workspace-green); }
+
 .group-member-card .MuiCardContent-root {
   padding: 13px !important;
   display: grid;

@@ -6,28 +6,22 @@ import {
   ListItem,
   ListItemText,
   Radio,
-  Button,
   Box,
   Chip,
   Tooltip,
 } from "@mui/material";
-import GroupAddRoundedIcon from "@mui/icons-material/GroupAddRounded";
 
 interface FileVersionListProps {
   fileMeta: AppFileMeta;
   versions: AppFile[];
   currentVersionId: number;
   onVersionChange(versionId: number): void;
-  onAssignReviewers?(version: AppFile): void;
-  assigningVersionId?: string;
 }
 
 const FileVersionList: React.FC<FileVersionListProps> = ({
   versions,
   currentVersionId,
   onVersionChange,
-  onAssignReviewers,
-  assigningVersionId,
 }) => {
   return (
     <List dense>
@@ -51,18 +45,6 @@ const FileVersionList: React.FC<FileVersionListProps> = ({
           <Box className="manuscript-version-controls">
               {version.version === currentVersionId && (
                 <Chip size="small" label="Active" />
-              )}
-              {onAssignReviewers && (
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<GroupAddRoundedIcon />}
-                  disabled={assigningVersionId === version.id}
-                  onClick={() => onAssignReviewers(version)}
-                  sx={{ textTransform: "none", whiteSpace: "nowrap" }}
-                >
-                  {assigningVersionId === version.id ? "Opening…" : "Assign reviewers"}
-                </Button>
               )}
               <Tooltip title={version.version === currentVersionId ? "Active version" : "Make this the active version"}>
                 <Radio

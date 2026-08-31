@@ -4,8 +4,8 @@ import prisma from "../../database/prisma";
 import { loadGroupById, loadGroupMembership } from "./group.middleware";
 import Session from "supertokens-node/recipe/session";
 import { JoinRequestError } from "../../database/types/Error";
-import { PrismaClient, Prisma, JoinRequestStatus, GroupType } from "@prisma/client";
-import { isGroupAdmin } from "../../workflow/groupBusinessRules";
+import { PrismaClient, Prisma, JoinRequestStatus, GroupType, GroupRole } from "@prisma/client";
+import { canRemoveGroupMember, isGroupAdmin } from "../../workflow/groupBusinessRules";
 
 const router = Router({ mergeParams: true });
 
@@ -103,6 +103,44 @@ router.get("/members", async (req: Request, res: Response) => {
   });
 
   res.json(groupUsers);
+});
+
+router.delete("/members/:membershipId", async (req: Request, res: Response) => {
+    if (!isGroupAdmin(req.groupRole)) {
+        return res.status(403).json({ error: "Only a group admin can remove members" });
+    }
+
+    const membership = await prisma.groupUser.findFirst({
+        where: {
+            id: req.params.membershipId,
+            groupId: req.group.id,
+        },
+    });
+
+    if (!membership) {
+        return res.status(404).json({ error: "Group member not found" });
+    }
+
+    if (membership.userId === req.user.id) {
+        return res.status(409).json({ error: "You cannot remove your own group membership" });
+    }
+
+    if (membership.role === GroupRole.OWNER) {
+        return res.status(409).json({ error: "The group owner cannot be removed" });
+    }
+
+    if (!canRemoveGroupMember(
+        req.groupRole,
+        req.user.id,
+        membership.role,
+        membership.userId
+    )) {
+        return res.status(403).json({ error: "You cannot remove this group member" });
+    }
+
+    await prisma.groupUser.delete({ where: { id: membership.id } });
+
+    return res.json({ success: true });
 });
 
 router.get("/join-requests", async (req: Request, res: Response) => {

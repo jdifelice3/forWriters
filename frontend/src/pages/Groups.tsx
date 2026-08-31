@@ -15,23 +15,29 @@ import NewspaperRoundedIcon from "@mui/icons-material/NewspaperRounded";
 import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
 import { useUserContext } from "../context/UserContext";
 import { useGroupDetails, useGroupInvite } from "../hooks/useGroup";
-import { Group, GroupRole } from "../types/domain-types";
+import { Group, GroupRole, GroupUser } from "../types/domain-types";
 import GroupUserList from "../components/group/GroupUserList";
+import { groupMemberName } from "../utils/groupMember";
 import { NewsFeed } from "../components/news/NewsFeed";
 import { GroupDetailsAdmin } from "../components/group/GroupDetailsAdmin";
 import { GroupPersonalDetailsAdmin } from "../components/group/GroupPersonalDetailsAdmin";
 import { GroupDetails } from "../components/group/GroupDetails";
 import { GroupPersonalDetails } from "../components/group/GroupPersonalDetails";
 import GroupInviteMembersDialog from "../components/group/GroupInviteMembersDialog";
+import ConfirmDialog from "../components/dialogs/ConfirmDialog";
+import { GroupAPI } from "../api/groupApi";
 import "../assets/css/workspace-pages.css";
 
 const Groups = () => {
   const navigate = useNavigate();
   const { groupId } = useParams();
   const { user } = useUserContext();
-  const { data: group, isLoading } = useGroupDetails<Group>(groupId);
+  const { data: group, isLoading, mutate } = useGroupDetails<Group>(groupId);
   const groupInvite = useGroupInvite();
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<GroupUser | null>(null);
+  const [removingMember, setRemovingMember] = useState(false);
+  const [memberRemovalError, setMemberRemovalError] = useState("");
 
   if (isLoading || !user) {
     return (
@@ -53,6 +59,26 @@ const Groups = () => {
   const membership = group.groupUser.find((member) => member.userId === user.id);
   const role = membership?.role;
   const isAdmin = role === "ADMIN" || role === "OWNER";
+  const canRemoveMember = (member: GroupUser) =>
+    isAdmin && member.userId !== user.id && member.role !== "OWNER";
+
+  const confirmMemberRemoval = async () => {
+    if (!memberToRemove) return;
+
+    setRemovingMember(true);
+    setMemberRemovalError("");
+    try {
+      await GroupAPI.removeMember(group.id, memberToRemove.id);
+      await mutate();
+      setMemberToRemove(null);
+    } catch (error) {
+      setMemberRemovalError(
+        error instanceof Error ? error.message : "Could not remove this member"
+      );
+    } finally {
+      setRemovingMember(false);
+    }
+  };
 
   const sendExistingInvite = async (input: {
     userId: string;
@@ -129,13 +155,27 @@ const Groups = () => {
             <Box>
               <Typography component="h2">Members</Typography>
               <Typography variant="body2" color="text.secondary">
-                People who can participate in this group’s readings.
+                {isAdmin
+                  ? "Select a member to remove them from this group."
+                  : "People who can participate in this group’s readings."}
               </Typography>
             </Box>
             <NewspaperRoundedIcon sx={{ color: "#738078" }} />
           </Box>
           <Box className="group-members-body">
-            <GroupUserList groupUsers={group.groupUser} />
+            {memberRemovalError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {memberRemovalError}
+              </Alert>
+            )}
+            <GroupUserList
+              groupUsers={group.groupUser}
+              canRemoveMember={canRemoveMember}
+              onRemoveMember={(member) => {
+                setMemberRemovalError("");
+                setMemberToRemove(member);
+              }}
+            />
           </Box>
         </Box>
       </Box>
@@ -148,6 +188,21 @@ const Groups = () => {
         memberOptions={[]}
         loadingMembers
         groupId={groupId}
+      />
+      <ConfirmDialog
+        open={Boolean(memberToRemove)}
+        title={
+          memberToRemove
+            ? `Remove ${groupMemberName(memberToRemove)} from ${group.name}?`
+            : "Remove member?"
+        }
+        message="This person will lose access to the group. Their existing manuscript submissions and feedback will remain in the reading history."
+        confirmLabel={removingMember ? "Removing…" : "Remove member"}
+        confirmDisabled={removingMember}
+        onConfirm={confirmMemberRemoval}
+        onClose={() => {
+          if (!removingMember) setMemberToRemove(null);
+        }}
       />
     </Box>
   );

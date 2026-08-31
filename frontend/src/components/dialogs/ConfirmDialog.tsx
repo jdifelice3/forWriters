@@ -5,6 +5,8 @@ interface ConfirmDialogProps {
   open: boolean;
   title?: string;
   message?: string;
+  confirmLabel?: string;
+  confirmDisabled?: boolean;
   onConfirm: () => void;
   onClose: () => void;
 }
@@ -13,6 +15,8 @@ const ConfirmDialog = ({
   open,
   title = "",
   message = "",
+  confirmLabel = "Confirm",
+  confirmDisabled = false,
   onConfirm,
   onClose,
 }: ConfirmDialogProps) => {
@@ -24,8 +28,13 @@ const ConfirmDialog = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={onConfirm} variant="contained" color="error">
-          Confirm
+        <Button
+          onClick={onConfirm}
+          variant="contained"
+          color="error"
+          disabled={confirmDisabled}
+        >
+          {confirmLabel}
         </Button>
       </DialogActions>
     </Dialog>

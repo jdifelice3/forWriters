@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import CollectionsBookmarkRoundedIcon from "@mui/icons-material/CollectionsBookmarkRounded";
-import { AppFile, AppFileMeta } from "../../../types/domain-types";
+import { AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../../../types/FileTypes";
 import FileListItem from "./FileListItem";
 import EditFileDialog from "./EditFileDialog";
@@ -14,8 +14,6 @@ interface FileManagerListProps {
   fileListProperties: FileListProperties;
   domain?: FileDomainCommands;
   onUploadVersion(fileMetaId: string): void;
-  onAssignReviewers?(version: AppFile): void;
-  assigningVersionId?: string;
 }
 
 const FileManagerList: React.FC<FileManagerListProps> = ({
@@ -24,8 +22,6 @@ const FileManagerList: React.FC<FileManagerListProps> = ({
   fileListProperties,
   variant,
   onUploadVersion,
-  onAssignReviewers,
-  assigningVersionId,
 }) => {
   const [editingFile, setEditingFile] = useState<AppFileMeta | null>(null);
 
@@ -56,8 +52,6 @@ const FileManagerList: React.FC<FileManagerListProps> = ({
                 fileListProperties={fileListProperties}
                 onEdit={setEditingFile}
                 onUploadVersion={onUploadVersion}
-                onAssignReviewers={onAssignReviewers}
-                assigningVersionId={assigningVersionId}
           />
         ))}
       </Box>

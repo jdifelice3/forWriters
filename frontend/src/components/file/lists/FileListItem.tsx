@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import UploadRoundedIcon from "@mui/icons-material/UploadRounded";
-import { AppFile, AppFileMeta } from "../../../types/domain-types";
+import { AppFileMeta } from "../../../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../../../types/FileTypes";
 import FileListForm from "../forms/FileListDetailsForm";
 import FileListSummaryForm from "../forms/FileListSummaryForm";
@@ -20,8 +20,6 @@ interface FileListItemProps {
   onEdit(file: AppFileMeta): void;
   domain?: FileDomainCommands;
   onUploadVersion(fileMetaId: string): void;
-  onAssignReviewers?(version: AppFile): void;
-  assigningVersionId?: string;
 }
 
 const FileListItem: React.FC<FileListItemProps> = ({
@@ -31,8 +29,6 @@ const FileListItem: React.FC<FileListItemProps> = ({
   fileListProperties,
   onEdit,
   onUploadVersion,
-  onAssignReviewers,
-  assigningVersionId,
 }) => {
   // Enforce invariant early
   if (variant === "FILES" && !domain) {
@@ -86,8 +82,7 @@ const FileListItem: React.FC<FileListItemProps> = ({
                 </Box>
 
                 <Typography className="manuscript-active-version-help">
-                  Select the version used for future reading submissions. Reviewer assignments
-                  remain attached to the exact version chosen.
+                  Select the version used for future reading submissions.
                 </Typography>
                 <Typography className="manuscript-version-label">
                   Active draft
@@ -99,8 +94,6 @@ const FileListItem: React.FC<FileListItemProps> = ({
                   onVersionChange={(versionId) =>
                     domain.setActiveVersion(fileMeta.id, versionId)
                   }
-                  onAssignReviewers={onAssignReviewers}
-                  assigningVersionId={assigningVersionId}
                 />
               </Box>
             )}

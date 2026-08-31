@@ -4,6 +4,19 @@ export function isGroupAdmin(role: GroupRole) {
   return role === GroupRole.ADMIN || role === GroupRole.OWNER;
 }
 
+export function canRemoveGroupMember(
+  actorRole: GroupRole,
+  actorUserId: string,
+  targetRole: GroupRole,
+  targetUserId: string
+) {
+  return (
+    isGroupAdmin(actorRole) &&
+    actorUserId !== targetUserId &&
+    targetRole !== GroupRole.OWNER
+  );
+}
+
 export function canCreateReading(
   groupType: GroupType,
   role: GroupRole,

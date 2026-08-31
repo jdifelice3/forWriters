@@ -32,4 +32,11 @@ export const GroupAPI = {
         });
     },
 
+    removeMember(groupId: string, membershipId: string) {
+        return apiFetch<{ success: boolean }>(
+            `/groups/${groupId}/members/${membershipId}`,
+            { method: "DELETE" }
+        );
+    },
+
 }

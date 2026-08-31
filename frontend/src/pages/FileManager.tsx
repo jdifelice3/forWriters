@@ -15,7 +15,6 @@ import {
   Tabs,
   TextField,
   Typography,
-  Alert,
 } from "@mui/material";
 import UploadIcon from "@mui/icons-material/Upload";
 import CloseIcon from "@mui/icons-material/Close";
@@ -25,7 +24,6 @@ import CloudDoneRoundedIcon from "@mui/icons-material/CloudDoneRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
-import { AppFile } from "../types/domain-types";
 import { FileDomainCommands, FileListProperties } from "../types/FileTypes";
 import FileManagerList from "../components/file/lists/FileManagerList";
 import UploadFileDataVersion from "../components/file/data/UploadFileDataVersion";
@@ -41,7 +39,6 @@ import ConfirmDialog from "../components/dialogs/ConfirmDialog";
 import ReadingSubmissionList from "../components/reading/ReadingSubmissionList";
 import { useGroupContext } from "../context/GroupContextProvider";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ReviewRequestsAPI } from "../api/reviewerAssignmentsApi";
 import "../assets/css/workspace-pages.css";
 
 const manuscriptListProperties: FileListProperties = {
@@ -72,8 +69,6 @@ const FileManager = () => {
     const [open, setOpen] = useState(false);
     const [appFileMetaIdToDelete, setAppFileMetaIdToDelete] = useState("");
     const [deletionDialogMessage, setDeletionDialogMessage] = useState("");
-    const [assigningVersionId, setAssigningVersionId] = useState("");
-    const [reviewSetupError, setReviewSetupError] = useState("");
     const { 
         saveMetadata, 
         deleteFile, 
@@ -98,11 +93,6 @@ const FileManager = () => {
         requestedReturnTo.includes("/workflow")
             ? requestedReturnTo
             : null;
-    const canStartAdHocReview = Boolean(
-        activeGroup?.groupType === "PERSONAL" &&
-        activeGroup.creatorUserId === user?.id &&
-        (activeGroup.role === "ADMIN" || activeGroup.role === "OWNER")
-    );
     
     const [tab, setTab] = useState(0);
     
@@ -152,30 +142,6 @@ const FileManager = () => {
         setOpen(false);
         await deleteFile(appFileMetaId)
     }
-
-    const onAssignReviewers = async (version: AppFile) => {
-        if (!activeGroup) {
-            setReviewSetupError(
-                "Choose or create a group first. Reviewers must belong to the group where the review takes place."
-            );
-            return;
-        }
-
-        setAssigningVersionId(version.id);
-        setReviewSetupError("");
-        try {
-            const setup = await ReviewRequestsAPI.start(activeGroup.id, version.id);
-            navigate(
-                `/groups/${setup.groupId}/readings/${setup.readingId}/workflow?stage=assign&submission=${setup.submissionId}`
-            );
-        } catch (error) {
-            setReviewSetupError(
-                error instanceof Error ? error.message : "Could not open reviewer assignment"
-            );
-        } finally {
-            setAssigningVersionId("");
-        }
-    };
 
     const domain: FileDomainCommands = {
         saveMetadata: saveMetadata,
@@ -246,16 +212,6 @@ const FileManager = () => {
         <Chip icon={<CloudDoneRoundedIcon />} label="Stored in Amazon S3" />
       </Box>
 
-      {reviewSetupError && (
-        <Alert
-          severity="info"
-          onClose={() => setReviewSetupError("")}
-          sx={{ mb: 2 }}
-        >
-          {reviewSetupError}
-        </Alert>
-      )}
-
       <Box className="workspace-surface manuscript-library-panel">
         <Tabs
           className="manuscript-library-tabs"
@@ -280,8 +236,6 @@ const FileManager = () => {
                 variant="FILES"
                 fileListProperties={manuscriptListProperties}
                 onUploadVersion={onBeginUploadVersion}
-                onAssignReviewers={canStartAdHocReview ? onAssignReviewers : undefined}
-                assigningVersionId={assigningVersionId}
               />
             )
           )}
